@@ -1,0 +1,610 @@
+﻿@{
+    ViewBag.Title = "PurchaseProduce";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<script src="~/js/jquery.min.js"></script>
+
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+    //$(document).ready(function () {
+
+    //    $('#tbl_allProduct').DataTable({
+    //        responsive: true
+    //    });
+
+    //});
+
+
+    $(document).ready(function (e) {
+        //$('#lblcartItemcount').text("Add Asset");
+        $("#ddl_Produce").bind("change", function () {            
+            $('#ddl_Product').empty();
+            var values = {
+                produceTypeID: $("#ddl_Produce").val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'PurchaseProduce/BindProduct',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddl_Product").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+        $("#ddl_Product").bind("change", function () {
+            $("#lbl_NurVil").text('');
+            $("#lbl_NurDepot").text('');
+            var producefor;
+            if (document.getElementById('rbl_Depot').checked) {
+
+                producefor = "Depot";
+                $("#lbl_NurVil").text('Range Name');
+                $("#lbl_NurDepot").text('Depot');
+            }
+            else {
+                producefor = "Nursery";
+                $("#lbl_NurVil").text('Village Name');
+                $("#lbl_NurDepot").text('Nursery');
+            }
+            var values = {
+                ProduceTypeID: $("#ddl_Produce").val(),
+                ProductID: $("#ddl_Product").val(),
+                ProduceFor: producefor,
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'PurchaseProduce/GetProducts',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    $("#ProductDetail").empty();
+                    for (var i = 0; i < data.length; i++) {
+                        var ProductData = "";
+                        if ('@Convert.ToString(Session["NurseryIncharge"])' == 'True') {
+                            var valuess = parseInt(data[i].BeforeDiscount) + parseInt(data[i].ReservedQty)
+                            ProductData = "<tr class='rowid'><td>" + data[i].ProductName + "</td><td><img src=" + data[i].ProductFullImage + "></td><td>" + valuess + "</td><td> <input type='hidden' id='ProductID' name='ProductID'  value=" + data[i].ProductID + " /> <a class='ViewReservedDetails'  title='View Detail(s)' href='javascript:void(0)' data-toggle='modal' data-target='#myModalViewReserved'>" + data[i].ReservedQty + "</a></td><td>" + data[i].QuantityByUnit + "</td><td>" + data[i].RatePerUnit + "</td>" + "</td><td><input type='text' class='cart' id='Qtytext_" + data[i].StockID + "' onkeypress='return isNumberKey(event);' /></td><td> <button type='button' class='btn btn-success' onclick='AddToCart(" + data[i].StockID + " ," + data[i].Quantity + ")'><i class='fa fa-check'></i> Add to cart</button></td></tr>";
+                        }
+                        else {
+                            ProductData = "<tr class='rowid'><td>" + data[i].ProductName + "</td><td><img src=" + data[i].ProductFullImage + "></td><td>" + data[i].QuantityByUnit + "</td><td>" + data[i].RatePerUnit + "</td>" + "</td><td><input type='text' class='cart' id='Qtytext_" + data[i].StockID + "' onkeypress='return isNumberKey(event);' /></td><td> <button type='button' class='btn btn-success' onclick='AddToCart(" + data[i].StockID + " ," + data[i].Quantity + ")'><i class='fa fa-check'></i> Add to cart</button></td></tr>";
+                        }
+                        $("#ProductDetail").append(ProductData);
+                        //$("#lbl_AmountToBePaid").text("Item in Cart: " + data[i].StockQuantity);
+                        // $("#hdn_cartQty").val(data[i].StockQuantity);
+                    }
+
+                    $('#tbl').css("display", "block");
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+        $('#lnk_shopingCart').click(function (e) {
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'PurchaseProduce/Get_UserShopingCartItems',
+                success: function (data) {
+                    $("#tbl_ItemInCart").empty();
+                    for (var i = 0; i < data.length; i++) {
+                        var ProductData = "<tr class='rowid'><td>" + data[i].RowID + "</td><td>" + data[i].ProductName + "</td><td>" + data[i].QuantityByUnit + "</td><td>" + data[i].TotalAmount + "</td><td>" + data[i].BeforeDiscount + "</td><td>" + data[i].Discount + "</td><td>" + data[i].AmountToBePaid + "</td><td>" + data[i].AvailStatus + "</td><td style='display:none'>" + data[i].StockID + "</td><td><button type='button' title='Delete' class='deleteCart btn btn-danger btn-circle'><i class='fa fa-times'></i></button></td></tr>";
+                        $("#tbl_ItemInCart").append(ProductData);
+                    }
+
+                    if (data.length > 0) {
+                        $("#lbl_AmountToBePaid").text(data[0].FinalAmount);
+                    }
+                    else {
+                        var ProductData1 = "<tr class='rowid'><td colspan='8'>No Record Exist!!!</td></tr>";
+                        $("#tbl_ItemInCart").append(ProductData1);
+                        $("#lbl_AmountToBePaid").text('0');
+                    }
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+
+
+        $(document).on('click', '.ViewReservedDetails', function (e) {
+            var ProductID = $(this).parents('tr').find('input[name=ProductID]').val();
+
+            $.ajax({
+                type: 'GET',
+                url: "../PurchaseProduce/GetViewReservedDetails?ProductID=" + ProductID + "&NurseryCode=" + $("#ddl_Product").val(),
+                dataType: 'html',
+                success: function (data) {
+                    $('#modelViewReserved').html(data);
+                },
+                error: function (ex) {
+                    alert(ex.error);
+                }
+            });
+
+        });
+
+
+
+
+
+        $('#btn_cancel').click(function (e) {
+            location.reload();
+        });
+        $('#btn_ProceedPay').click(function (e) {
+            if ($("#lbl_AmountToBePaid").text() == '0') {
+                alert('You can not proceed for payment as amount is 0.');
+                return false;
+            }
+        });
+        $('#btn_submitproceed').click(function (e) {
+            $('#lnk_shopingCart').trigger("click");
+        });
+
+    });
+
+    $(document).on('click', '.deleteCart', function (e) {
+        var $row = jQuery(this).closest('tr');
+        var $columns = $row.find('td');
+        var cartID = $.trim($columns[8].innerHTML);
+
+        var values = {
+            CartID: cartID,
+        };
+        jQuery(this).closest('tr').remove();
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            url: RootUrl + 'PurchaseProduce/DeleteItemFromCart',
+            data: JSON.stringify(values),
+            success: function (data) {
+                $("#tbl_ItemInCart").empty();
+
+                for (var i = 0; i < data.length; i++) {
+                    var ProductData = "<tr class='rowid'><td>" + data[i].RowID + "</td><td>" + data[i].ProductName + "</td><td>" + data[i].QuantityByUnit + "</td><td>" + data[i].TotalAmount + "</td><td>" + data[i].BeforeDiscount + "</td><td>" + data[i].Discount + "</td><td>" + data[i].AmountToBePaid + "</td><td>" + data[i].AvailStatus + "</td><td style='display:none'>" + data[i].StockID + "</td><td><button type='button' title='Delete' class='deleteCart btn btn-danger btn-circle'><i class='fa fa-times'></i></button></td></tr>";
+                    $("#tbl_ItemInCart").append(ProductData);
+                }
+
+                if (data.length > 0) {
+                    $("#lbl_AmountToBePaid").text(data[0].FinalAmount);
+                }
+                else {
+                    var ProductData1 = "<tr class='rowid'><td colspan='8'>No Record Exist!!!</td></tr>";
+                    $("#tbl_ItemInCart").append(ProductData1);
+                    $("#lbl_AmountToBePaid").text('0');
+                }
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+    });
+    function compareQty(totalQty) {
+        var curQty = $('[id^=Qtytext_]').val();
+        if (parseInt(curQty) == 0) {
+            alert("Zero Quantity Can not be added to cart!");
+            $('[id^=Qtytext_]').val('')
+
+        }
+        else {
+            if (parseInt(curQty) > parseInt(totalQty)) {
+                alert("you can not purchase more than to Available Quantity!");
+                $('[id^=Qtytext_]').val('')
+
+            }
+        }
+    }
+    function AddToCart(stkID, totalQty) {
+
+        //var curQty = $('[id^=Qtytext_]').val();
+        var curQty = $('#Qtytext_' + stkID).val();
+        if (curQty == null || curQty == '' || parseInt(curQty) == 0) {
+            alert("Zero Quantity Can not be added to cart!");
+            $('[id^=Qtytext_]').val('')
+            return;
+        }
+        else {
+            if (parseInt(curQty) > parseInt(totalQty)) {
+                alert("you can not purchase more than to Available Quantity!");
+                $('[id^=Qtytext_]').val('')
+                return;
+            }
+        }
+
+
+        $('#btn').css("display", "block");
+
+        var values = {
+            StockID: stkID,
+            Quantity: curQty,
+        };
+
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            url: RootUrl + 'PurchaseProduce/AddToCart',
+            data: JSON.stringify(values),
+            success: function (data) {
+                $('#Qtytext_' + stkID).val('');
+                for (var i = 0; i < data.length; i++) {
+
+                    $("#lblcartItemcount").text(data[i].VillageName);
+                    if (data[i].NurseryName == "")
+                    { }
+                    else
+                    { alert(data[i].NurseryName); }
+
+                }
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+    }
+
+    function BindProduceType() {
+        $("#ddl_Produce").empty();
+        $("#ddl_Product").empty();
+        $("#ProductDetail").empty();
+        var producefor;
+        if (document.getElementById('rbl_Depot').checked) {
+            producefor = "Depot";
+
+        }
+        else {
+            producefor = "Nursery";
+
+        }
+        var values = {
+            ProduceFor: producefor,
+        };
+
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            url: RootUrl + 'PurchaseProduce/BindProduceType',
+            data: JSON.stringify(values),
+            success: function (data) {
+                $.each(data, function (i, items) {
+                    $("#ddl_Produce").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                });
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+    }
+    function isNumberKey(evt) {
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode == 46 || charCode > 31 && (charCode < 48 || charCode > 57)) {
+        }
+        else {
+            e.preventDefault();
+        }
+        return false
+    }
+
+
+    function GetOrderDetails(IDs) {
+
+        var id = IDs.substring(0, 18);
+        alert(id);
+        var ticket;
+        $.ajax({
+            type: 'POST',
+            url: 'PurchaseProduce/PrintOrder',
+            data: { RequestID: id },
+            success: function (data) {
+
+                $("#dvContainer").html(data);
+
+                var contents = $("#dvContainer").html();
+                var frame1 = $('<iframe />');
+                frame1[0].name = "frame1";
+                //frame1.css({ "position": "absolute", "top": "-1000000px" });
+                $("body").append(frame1);
+                var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+                frameDoc.document.open();
+                //Create a new HTML document.
+                frameDoc.document.write('<html><head><title> Order Confirmation Slip </title>');
+                //Append the external CSS file.
+                frameDoc.document.write('<link href="../css/bootstrap.min.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="../css/mobile.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="../css/dashboard/main.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="../css/dashboard/dashboard.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="../css/dashboard/font-awesome.min.css" rel="stylesheet" />');
+                frameDoc.document.write('</head><body>');
+                //Append the DIV contents.
+                frameDoc.document.write(contents);
+                frameDoc.document.write('</body></html>');
+                frameDoc.document.close();
+                setTimeout(function () {
+                    window.frames["frame1"].focus();
+                    window.frames["frame1"].print();
+                    frame1.remove();
+                }, 500);
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+        //var aa = "<div class='wrapper'><section class='print-invoice'> <div class='row border-divider'><div class='col-sm-2'>" +
+        //           "<a href='#' id='myLogo'><img src='../images/logo.png' width='100' alt='Forest Department, Government of Rajasthan' title='Logo' class=''></a></div>" +
+        //          "<div class='col-sm-4 centr'><span class='pdate'>E-Ticket - Rajasthan Wildlife</span></div>" +
+        //    	  "<div class='col-sm-4'><span class='pull-right pdate'>Space of QR BAR Code</span></div>" +
+        //          "<div class='divider'></div></div> </section></div>";
+        e.preventDefault();
+
+    }
+
+</script>
+<script type="text/javascript">
+
+    function searchs() {
+
+        var val = $("#searchval").val();
+        $('#tbl_allProduct tbody tr').each(function (i) {
+            if ($(this).find('td').text().toLowerCase().trim().indexOf(val) > -1) {
+                $(this).show();
+            }
+            else {
+                $(this).hide();
+            }
+            if (val == '') {
+                $(this).show();
+            }
+        });
+    }
+</script>
+
+<style>
+    .cbone, .cbone:hover {
+        background: #2995c9;
+        margin-right: 5px;
+    }
+
+    .cbtwo, .cbtwo:hover {
+        background: #e29221;
+        margin-right: 5px;
+    }
+</style>
+
+<div style="display:none" id="dvContainer"></div>
+
+<div class="modal fade" id="myModalViewReserved" role="dialog">
+    <div class="modal-dialog modal-lg" id="modelViewReserved">
+        <!-- Modal content-->
+
+    </div>
+</div>
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Online Purchase of Produce</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!-- <div class="panel-heading">Online Purchase</div>-->
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+
+                    <div class="col-lg-12">
+
+                        <div class="form-group cart-bg" id="lnk_shopingCart" title="My  Cart" data-toggle="modal" data-target="#myModal">
+                            <i class="fa fa-shopping-cart add2cart"></i>
+                            <label class="cart-items" id="lblcartItemcount">@ViewBag.ItemCount</label>
+
+                        </div>
+                        @if (Convert.ToBoolean(Session["NurseryIncharge"]) == false && (Convert.ToInt32(Session["CurrentRoleID"]) == 8 || Convert.ToInt32(Session["CurrentRoleID"]) == 12))
+                        {
+                            <div class="form-group cart-bg cbone" title="My Purchase History">
+                                <a target="_blank" href="UserPurchaseHistory"><i class="fa fa-history add2cart"></i><label class="cart-items" id="lblcartItemcount">@ViewBag.PurchaseHistory</label></a>
+                            </div>
+                        }
+
+                    </div>
+
+                    <div class="col-lg-12 " style="display:none;">
+                        <label class="form-group"> Produce From :</label>
+                        <form>
+                            &nbsp;&nbsp;&nbsp; <input style="display:none" type="radio" id="rbl_Depot" name="Types" value="Depot" onclick="BindProduceType();">
+                            <input type="radio" id="rbl_Nursery" name="Types" value="Nursery" checked="checked" onclick="BindProduceType();">Nursery
+                            &nbsp;&nbsp;&nbsp; <input style="display:none" type="radio" id="rbl_VFPMC" name="Types" value="VFPMC" checked onclick="BindProduceType();">
+                        </form>
+                    </div>
+
+                    @*<div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Select District: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("ddl_District", (IEnumerable<SelectListItem>)ViewBag.District, new { @class = "form-control", id = "ddl_District" })
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Select Nursery: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("ddl_Nursery", (IEnumerable<SelectListItem>)ViewBag.Nursery, new { @class = "form-control", id = "ddl_Nursery" })
+                            </div>
+                        </div>*@
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            @*Forest Produce*@
+                            <label>Select District : <span class="mandatory">*</span></label>
+                            @Html.DropDownList("ProduceType", (IEnumerable<SelectListItem>)ViewBag.Produce, new { @class = "form-control", id = "ddl_Produce" })
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            @*Product Type*@
+                            <label>Select Nursery : <span class="mandatory">*</span></label>
+                            @Html.DropDownList("Product", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddl_Product" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-9">
+                        <div class="form-group">
+
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Search" id="searchval" onkeyup="searchs();">
+
+                        </div>
+                    </div>
+
+                    <div id="tbl" class="table-responsive" style="display:none">
+                        <table class="table table-striped table-bordered table-hover" id="tbl_allProduct">
+                            <thead>
+                                <tr>
+                                    @*<th>
+                                            Product Type
+                                        </th>*@
+                                    <th>
+                                        Product Name
+                                    </th>
+                                      <th>
+                                        Product Image
+                                    </th>
+                                    @if (Convert.ToBoolean(Session["NurseryIncharge"]) == true && Convert.ToInt32(Session["CurrentRoleID"]) != 8)
+                                    {
+                                        <th>
+                                            Total (Qty.)
+                                        </th>
+                                        <th>
+                                            Sale of Plants (Qty.)
+                                        </th>
+                                    }
+
+                                    <th>
+                                        Available  (Qty.)
+                                    </th>
+                                    <th>
+                                        Rate / Unit
+                                    </th>
+                                    @*<th>
+                                            Discount (In %)
+                                        </th>*@
+                                    <th>
+                                        Quantity
+                                    </th>
+                                    <th>
+                                        Action
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="ProductDetail"></tbody>
+                        </table>
+                        <table id="tbl_tkt">
+                            <tbody></tbody>
+                        </table>
+
+                    </div>
+
+                    <!-- Btn Groping -->
+                    <div class="btn-padd">
+                        <div id="btn" class="col-lg-12" style="display:none">
+                            <input type="hidden" id="hdn_cartQty" />
+                            <button type="button" class="btn btn-success" name="Command" value="Submit" id="btn_submitproceed">
+                                <i class="fa fa-check"></i> Proceed To Pay
+                            </button>
+                            <label id="lbl_cartQuantity"></label>
+                        </div>
+                    </div>
+                    <!-- /.Btn Groping -->
+
+                </div>
+                <!-- /.panel-body -->
+                <div class="modal fade" id="myModal" role="dialog">
+                    <div class="modal-dialog modal-lg">
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">
+                                    &times;
+                                </button>
+                                <h4 class="modal-title">
+                                    <label id="lbl_dpt">Items In Cart</label>
+                                </h4>
+                            </div>
+
+
+                            @using (Html.BeginForm("ApplyNurseryDiscount", "PurchaseProduce", FormMethod.Post, new { id = "submitForm" }))
+                            {
+                                <div class="modal-body">
+                                    <div class="col-lg-12">
+                                        <table class="table table-striped table-bordered table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>S.No.</th>
+                                                    <th>Product Name</th>
+                                                    <th>Quantity</th>
+                                                    <th>Rate Per Item</th>
+                                                    <th>Amount</th>
+
+                                                    <th>Discount </th>
+                                                    <th>After Discount Payable Amount</th>
+                                                    <th>Enter By</th>
+                                                    <th style="display:none">Status</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tbl_ItemInCart"></tbody>
+                                        </table>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <label class="form-group"> Amount To Be Paid (INR): </label><label id="lbl_AmountToBePaid" class="ammount_paid"></label>
+                                    </div>
+                                </div>
+                                <div class="modal-footer" style="clear:both">
+                                    <div id="btn" class="col-lg-12">
+                                        <button type="button" id="btn_continue" name="Command" value="Cancel" class="btn btn-success" data-dismiss="modal">
+                                            <i class="fa fa-check"></i> Continue Shoping
+                                        </button>
+                                        <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_ProceedPay">
+                                            <i class="fa fa-check"></i> Proceed To Pay
+                                        </button>
+                                        <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                                            <i class="fa fa-times fa-fw"></i> Close
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                            }
+
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+
+
+
+            </div>
+            <!-- /.panel -->
+
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>}
+
+

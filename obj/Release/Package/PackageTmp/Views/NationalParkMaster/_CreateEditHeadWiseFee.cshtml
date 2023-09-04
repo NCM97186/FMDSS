@@ -1,0 +1,97 @@
+﻿@using FMDSS
+@model FMDSS.Models.NationalPark.HeadWiseItemFeeModel
+<script src="~/Scripts/jquery-1.10.2.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js" type="text/javascript"></script>
+@using (Html.BeginForm("CreateEditHeadWiseFee", "NationalParkMaster", FormMethod.Post))
+{ 
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">
+            &times;
+        </button>
+        <h4 class="modal-title">
+            @(Model.Id == 0 ? "Add Head Wise Fee" : "Edit Head Wise Fee")
+        </h4>
+    </div>
+
+    <div class="modal-body">
+        @Html.HiddenFor(model => model.Id)
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>Place: <span class="mandatory">*</span></label>
+                @Html.DropDownListFor(model => model.PlaceId, (IEnumerable<SelectListItem>)ViewBag.Places, "--Select--", new { @class = "form-control common" })
+                <div class="alert-danger1">@Html.ValidationMessageFor(model => model.PlaceId)</div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>Head: <span class="mandatory">*</span></label>
+                @Html.DropDownListFor(model => model.HeadId, (IEnumerable<SelectListItem>)ViewBag.Heads, "--Select--", new { @class = "form-control common" })
+                <div class="alert-danger1">@Html.ValidationMessageFor(model => model.HeadId)</div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>Visitor Type </label>
+                @Html.DropDownListFor(model => model.VisitorTypeId, (IEnumerable<SelectListItem>)ViewBag.Visitors, "--All--", new { @class = "form-control common" })
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>Vehicle Type: </label>
+                @Html.DropDownListFor(model => model.VehicleId, (IEnumerable<SelectListItem>)ViewBag.Vehicles, "--Select--", new { @class = "form-control common" })
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>Fees Charge On <strong style="color:red;">(Don't change the IDs for all  the items in this dropdown.)</strong></label>
+                @Html.DropDownListFor(model => model.ItemId, (IEnumerable<SelectListItem>)ViewBag.Items, "--Select--", new { @class = "form-control common" })
+                <div class="alert-danger1">@Html.ValidationMessageFor(model => model.ItemId)</div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>Parent Fees: </label>
+                @Html.EnumDropDownListFor(model => model.ItemParent, Model.ItemParent, "--Select--", new { @class = "form-control common" })
+                <div class="alert-danger1">@Html.ValidationMessageFor(model => model.ItemParent)</div>
+            </div>
+        </div>
+       
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>Fee Amount: <span class="mandatory">*</span></label>
+                @Html.TextBoxFor(model => model.Amount, new { @class = "form-control common", @maxlength = "6" })
+                <div class="alert-danger1">@Html.ValidationMessageFor(model => model.Amount)</div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>GST Applicable:</label>
+                @Html.CheckBoxFor(model => model.GSTApplicable)
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>Active:</label>
+                @Html.CheckBoxFor(model => model.IsActive)
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer" style="clear:both">
+        <div id="btn" class="col-lg-12">
+
+            <button type="submit" class="btn btn-success" value="Save" id="btn_submit1">
+                <i class="fa fa-check"></i> Save
+            </button>
+
+            <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                <i class="fa fa-times fa-fw"></i> Close
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+}

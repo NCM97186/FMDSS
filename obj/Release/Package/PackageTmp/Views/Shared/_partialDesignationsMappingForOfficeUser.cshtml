@@ -1,0 +1,89 @@
+﻿@model FMDSS.Models.Master.Designations
+
+<link href="~/css/timepicki.css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+      
+        $('#btn_submit1').click(function (e) {
+
+            if ($('option:selected', $('#DesigId')).index() == 0) {
+                $("#errPlaceID").css("display", "block");
+                $('#errPlaceID').focus();
+                return false;
+            }
+            else {
+                $("#errPlaceID").css("display", "none");
+            }
+
+
+
+        });
+
+
+
+
+    });
+
+
+
+
+</script>
+
+
+@using (Html.BeginForm("AddUpdateDesignationsMappingForOfficeUser", "UserManagementMaster", FormMethod.Post))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @*<label id="lbl_dpt">Add/Edit Place</label>*@
+                @ViewBag.OpType
+            </h4>
+        </div>
+
+        <div class="modal-body">
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>SSO ID  : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(Model => Model.SSOID, new { @class = "form-control common", id = "SSOID" })
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Designation : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.DesigId, (IEnumerable<SelectListItem>)ViewBag.lstDesignation, "--Select--", new { @class = "form-control common", id = "DesigId" })
+                    <div id="errPlaceID" style="display:none" class="alert-danger1">Designation is Required.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success" value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+}

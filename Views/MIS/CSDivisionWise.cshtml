@@ -1,0 +1,322 @@
+﻿@{
+    ViewBag.Title = "CSDivisionWise";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+
+
+
+<script src="~/js/jquery.min.js"></script>
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        // date validation ========================================================================
+        var currentYear = (new Date).getFullYear();
+
+        var Range = '2008:' + (currentYear + 1)
+        $(".datefield").datepicker({maxDate: new Date(), yearRange: Range, dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, maxDate: new Date(), onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        var currentDate = new Date();
+        //$("#txt_fromdate").datepicker("setDate", currentDate);
+        //$("#txt_todate").datepicker("setDate", currentDate);
+
+        $("#txt_fromdate").change(function () {
+            $("#txt_todate").val('');
+        });
+
+        $(document).on('keypress', '#txt_fromdate,#txt_todate', function (event) {
+
+            event.preventDefault();
+            return false;
+
+        });
+
+        $('#txt_fromdate,#txt_todate').keydown(function (event)
+        { return cancelBackspace(event) });
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+        $("#txt_todate").change(function () {
+            var str1 = $("#txt_fromdate").val();
+            var str2 = $("#txt_todate").val();
+
+            var L = 3, d1 = $("#txt_fromdate").val().split('/'), d2 = $("#txt_todate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#txt_todate").val('');
+                alert('Date Must be GreaterThen From Date');
+            }
+        });
+
+        // date validation ========================================================================
+
+
+
+
+
+        $('#DDL_Duration').change(function (e) {
+            debugger;
+            if ($('option:selected', $('#DDL_Duration')).index() == 1) {
+                $("#divdate").css("display", "block");
+            }
+            else {               
+                $("#divdate").css("display", "none");
+            }
+
+            $('#PermissionType_Text').val($("#DDL_PermissionType option:selected").text());
+        });
+
+
+
+        $('#DDL_Circle').change(function (e) {
+
+            $('#Circle_Text').val($("#DDL_Circle option:selected").text());
+
+
+            $("#DDL_Division").empty();
+            $("#DDL_Range").empty();
+            $("#DDL_Range").append('<option value="' + "0" + '">' + "--Select--" + '</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MIS/DivisionData', // we are calling json method
+                dataType: 'json',
+                data: { circleCode: $("#DDL_Circle").val() },
+                success: function (circle) {
+                    $.each(circle, function (i, items) {
+                        $("#DDL_Division").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#DDL_Division').change(function (e) {
+            $("#DDL_Range").empty();
+            $('#Division_Text').val($("#DDL_Division option:selected").text());
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MIS/RangeData', // we are calling json method
+                dataType: 'json',
+                data: { DivisionCode: $("#DDL_Division").val() },
+                success: function (divCode) {
+                    $.each(divCode, function (i, items) {
+                        $("#DDL_Range").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#DDL_Range').change(function (e) {
+            $('#Range_Text').val($("#DDL_Range option:selected").text());
+        });
+
+        $('#DDL_PermissionType').change(function (e) {
+            $('#PermissionType_Text').val($("#DDL_PermissionType option:selected").text());
+        });
+
+
+        $('#btn_submit1').click(function (e) {
+
+            if ($('option:selected', $('#DDL_Duration')).index() == 0) {
+                $("#errDuration").css("display", "block");
+                $('#errDuration').focus();
+                return false;
+            }
+            else {
+                $("#errDuration").css("display", "none");
+                $("#errFromDate").css("display", "none");
+                $("#errToDate").css("display", "none");
+            }
+
+            if ($('option:selected', $('#DDL_Duration')).index() == 1) {
+
+                if ($('#txt_fromdate').val() == '') {
+                    $("#errFromDate").css("display", "block");
+                    $('#errFromDate').focus();
+                    return false;
+                }
+                else {
+                    $("#errFromDate").css("display", "none");
+                }
+
+                if ($('#txt_todate').val() == '') {
+                    $("#errToDate").css("display", "block");
+                    $('#errToDate').focus();
+                    return false;
+                }
+                else {
+                    $("#errToDate").css("display", "none");
+                }
+            }
+
+
+
+
+
+            if ($('option:selected', $('#DDL_Circle')).index() == 0) {
+                $("#errCircle").css("display", "block");
+                $('#errCircle').focus();
+                return false;
+            }
+            else {
+                $("#errCircle").css("display", "none");
+            }
+
+            if ($('option:selected', $('#DDL_Division')).index() == 0) {
+                $("#errDivision").css("display", "block");
+                $('#errDivision').focus();
+                return false;
+            }
+            else {
+                $("#errDivision").css("display", "none");
+            }
+
+
+
+            if ($('option:selected', $('#DDL_Range')).index() == 0) {
+                $("#errRange").css("display", "block");
+                $('#errRange').focus();
+                return false;
+            }
+            else {
+                $("#errRange").css("display", "none");
+            }
+
+            if ($('option:selected', $('#DDL_PermissionType')).index() == 0) {
+                $("#errPermissionType").css("display", "block");
+                $('#errPermissionType').focus();
+                return false;
+            }
+            else {
+                $("#errPermissionType").css("display", "none");
+            }
+
+
+        });
+
+    });
+
+
+</script>
+
+<div class="row">
+    <div class="col-lg-9 pad">
+        <h1 class="page-header"><span>Report : Division Wise Citizen Service Permission Status</span></h1>
+    </div>
+
+    @using (Html.BeginForm("CSDivisionWise", "MIS", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <label>Duration:<span class="mandatory">*</span></label>
+                            @Html.DropDownList("Duration", (IEnumerable<SelectListItem>)ViewBag.Duration, new { @class = "form-control", id = "DDL_Duration" })
+                            <div id="errDuration" class="alert-danger1" style="display:none"> Duration is Required. </div>
+
+
+                        </div>
+                    </div>
+                    <div id="divdate">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>From Date:<span class="mandatory">*</span></label>
+
+                                <input class="form-control datefield" type="text" id="txt_fromdate" name="FromDate" />
+                                <span id="errFromDate" style="display: none" class="alert-danger1">From Date is Required.</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>To Date:<span class="mandatory">*</span></label>
+                                <input class="form-control datefield" type="text" id="txt_todate" name="ToDate" />
+
+                                <span id="errToDate" style="display: none" class="alert-danger1">To Date is Required.</span>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Circle:<span class="mandatory">*</span></label>
+                            @Html.DropDownList("Circle", (IEnumerable<SelectListItem>)ViewBag.CIRCLE, new { @class = "form-control", id = "DDL_Circle" })
+                            <div id="errCircle" style="display:none" class="alert-danger1">Circle is Required.</div>
+                            @Html.Hidden("Circle_Text", new { @class = "form-control", id = "Circle_Text" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Division:<span class="mandatory">*</span></label>
+                            @Html.DropDownList("Division", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "DDL_Division" })
+                            <div id="errDivision" style="display:none" class="alert-danger1">Division is Required.</div>
+                            @Html.Hidden("Division_Text", new { @class = "form-control", id = "Division_Text" })
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Range:<span class="mandatory">*</span></label>
+                            @Html.DropDownList("Range", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "DDL_Range" })
+                            <div id="errRange" style="display:none" class="alert-danger1">Range is Required.</div>
+                            @Html.Hidden("Range_Text", new { @class = "form-control", id = "Range_Text" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Permission Status:<span class="mandatory">*</span></label>
+                            @Html.DropDownList("PermissionType", (IEnumerable<SelectListItem>)ViewBag.PermissionStatus, new { @class = "form-control", id = "DDL_PermissionType" })
+                            <div id="errPermissionType" style="display:none" class="alert-danger1">Permission Status is Required.</div>
+                            @Html.Hidden("PermissionType_Text", new { @class = "form-control", id = "PermissionType_Text" })
+                        </div>
+                    </div>
+
+
+                    <div id="btn" class="col-lg-12">
+
+                        <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit1">
+                            <i class="fa fa-check"></i> Submit
+                        </button>
+                        <button type="button" class="btn btn-warning" id="btn_reset">
+                            <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                        </button>
+
+                    </div>
+
+
+
+
+                </div>
+            </div>
+
+
+            @using ReportViewerForMvc;
+            @if (ViewBag.ReportViewer != null)
+            {
+                @Html.ReportViewer(ViewBag.ReportViewer as Microsoft.Reporting.WebForms.ReportViewer, new { border = "0", height = "500", width = "80%" })
+            }
+
+
+        </div>
+    }
+</div>

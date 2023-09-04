@@ -1,0 +1,92 @@
+﻿@{
+    int currentIndex = ViewBag.CurrentIndex;
+}
+<tr id="rowId_@currentIndex">
+    @if (ViewBag.RowType == FMDSS.RowType.SurveyDetails)
+    {
+        <td><input type="text" id="txtKhasraNumber_@currentIndex" name="SurveyDetails.KhasraDetailsList[@currentIndex].KhasraNumber" size="15" /></td>
+        <td><input type="text" name="SurveyDetails.KhasraDetailsList[@currentIndex].CompartmentNumber" size="15" /></td>
+        <td><input type="text" name="SurveyDetails.KhasraDetailsList[@currentIndex].TotalAreaAgainstKhasra" size="15" onkeypress="AllowNumberOnly(event)" /></td>
+        <td><input id="txtTotalAreaFL_@currentIndex" type="text" name="SurveyDetails.KhasraDetailsList[@currentIndex].TotalAreaAgainstOccupiedForestLand" size="15" onkeypress="AllowNumberOnly(event)" onchange="UpdateApprovedArea(@currentIndex)" /></td>
+        <td><input type="text" name="SurveyDetails.KhasraDetailsList[@currentIndex].OccupancyType" size="15" /></td>
+        <td><input type="text" name="SurveyDetails.KhasraDetailsList[@currentIndex].ForestSectionName" size="15" /></td>
+        <td>
+            <input type="text" name="SurveyDetails.KhasraDetailsList[@currentIndex].SpecialRemarks" size="15" />
+            <input type="hidden" name="SurveyDetails.KhasraDetailsList[@currentIndex].SurveyDetailsID" value="@Model.SurveyDetails.SurveyDetailsID" />
+            <input type="hidden" name="SurveyDetails.KhasraDetailsList[@currentIndex].KhasraDetailsID" value="0" />
+            <input type="hidden" id="hdnTotalAreaAFL_@currentIndex" name="SurveyDetails.KhasraDetailsList[@currentIndex].TotalAreaApprovedAgainstOccupiedForestLand" />
+        </td>
+    }
+    else if (ViewBag.RowType == FMDSS.RowType.ItemSeizedDetails)
+    {
+        <td>
+            <select id="ddlItemType_@currentIndex" name="SeizedItemsList[@currentIndex].ItemTypeID" class="previewMode">
+                <option value="1">Equipment</option>
+                <option value="2">Vehicle</option>
+                <option value="3">Forest Produce</option>
+                <option value="4">WildLife Article</option>
+                <option value="5">None</option>
+            </select>
+        </td>
+        <td><input type="text" name="SeizedItemsList[@currentIndex].ItemName" id="txtItemName_@currentIndex" class="class = "form-control previewMode StopPaste",  size="15" onchange = "return RestrictSpecialChar2(event);" onkeypress = "return RestrictSpecialChar2(event);" /></td>
+        <td><input type="text" name="SeizedItemsList[@currentIndex].Qty" id="txtQty_@currentIndex" size="15" class="class = "form-control previewMode StopPaste", onkeypress="return AllowNumericOnly(event)" onchange="return AllowNumericOnly(event)"/></td>
+        <td><input type="text" name="SeizedItemsList[@currentIndex].VehicleNumber" id="txtVehicleNo_@currentIndex" class="class = "form-control previewMode hide StopPaste" hidden="hidden" size="15" onchange = "return RestrictSpecialChar2(event);" onkeypress = "return RestrictSpecialChar2(event);" /></td>
+        <td style="width:5%"><button type=button class='btn btn-danger btn-circle ' id="delId_@currentIndex" style=cursor:pointer><i class='fa fa-times'></i></button></td>
+    }
+    else if (ViewBag.RowType == FMDSS.RowType.Research_SampleDetails)
+    {
+        <td><input type="text" name="SampleDetailsList[@currentIndex].Location" id="txtLocation_@currentIndex" placeholder="Location" size="15" /></td>
+        <td><input type="text" name="SampleDetailsList[@currentIndex].Latitude" id="txtLocation_@currentIndex" placeholder="Latitude" size="15" onkeypress="AllowNumberOnly(event)" /></td>
+        <td><input type="text" name="SampleDetailsList[@currentIndex].Longitude" id="txtLocation_@currentIndex" placeholder="Longitude" size="15" onkeypress="AllowNumberOnly(event)" /></td>
+        <td><input type="text" name="SampleDetailsList[@currentIndex].MaterialName" id="txtMaterialName_@currentIndex" placeholder="Material" size="15" /></td>
+        <td><input type="text" name="SampleDetailsList[@currentIndex].Qty" id="txtQty_@currentIndex" size="15" placeholder="Qty" ,onkeypress = "AllowNumericOnly(event)" /></td>
+    }
+    else if (ViewBag.RowType == FMDSS.RowType.Research_SpecimenDetails)
+    {
+        <td>
+            <select id="ddlMemberType_@currentIndex" name="SpecimenDetailsList[@currentIndex].MemberType">
+                <option value="Team Staff">Team Staff</option>
+                <option value="Volunteer">Volunteer</option>
+                <option value="Forest Staff">Forest Staff</option>
+            </select>
+        </td>
+        <td><input type="text" name="SpecimenDetailsList[@currentIndex].MemberName" id="txtMemberName_@currentIndex" placeholder="Name" size="15" /></td>
+        <td>
+            <select id="ddlGender_@currentIndex" name="SpecimenDetailsList[@currentIndex].Gender">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+        </td>
+    }
+    else if (ViewBag.RowType == FMDSS.RowType.DOD_ProductDetails)
+    {
+        <td>
+            @Html.DropDownList("DODProductList[" + currentIndex + "].ProductTypeID", new SelectList(ViewBag.ProduceType_List, "Value", "Text"), "--Select--", new { id = "ddlProduceType_" + currentIndex, onchange = "OnChange_ProductType(this)", @class = "form-control required", data_rowindex = currentIndex })
+        </td>
+        <td>
+            <select id="ddlProductName_@currentIndex" class="form-control required" name="DODProductList[@currentIndex].ProductID" data-rowindex="@currentIndex" onchange="OnChange_Product(this)">
+                <option value="">--Select--</option>
+            </select>
+        </td>
+        <td>
+            <input type="text" id="txtPUnit_@currentIndex" class="form-control" readonly="" value="N/A" />
+            @*<label id="lblUnit">N/A</label>*@
+        </td>
+        <td>
+            @Html.DropDownList("DODProductList[" + currentIndex + "].IsExistingLot", FMDSS.Entity.ViewModel.CommonListVM.YesNo, "--Select--", new { id = "ddlIsExistingLot_" + currentIndex, @class = "form-control product productType", data_rowindex = currentIndex, onchange = "OnChange_IsExistingLot(this)" })
+        </td>
+        <td>
+            @Html.DropDownList("DODProductList[" + currentIndex + "].TargetInventoryID", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "ddlDisplayLotNumber_" + currentIndex, @class = "form-control product productType", data_rowindex = currentIndex })
+        </td>
+        <td>@Html.TextBox("DODProductList[" + currentIndex + "].Qty", "", new { id = "txtQty_" + currentIndex, size = "15", onkeypress = "AllowNumberOnly(event)", placeholder = "Lot Size", @class = "form-control product productType required" })</td>
+        <td>@Html.TextBox("DODProductList[" + currentIndex + "].NoOfLot", "", new { id = "txtNoOfLot_" + currentIndex, size = "15", onkeypress = "AllowNumericOnly(event)", placeholder = "No of Lot", @class = "form-control product productType required" })</td>
+    }
+    else if (ViewBag.RowType == FMDSS.RowType.Rescue_Staff)
+    { 
+        <td><input type="text" name="StaffList[@currentIndex].Name" id="txtName_@currentIndex" placeholder="Name" size="15" /></td>
+        <td><input type="text" name="StaffList[@currentIndex].Mobile" id="txtMobile_@currentIndex" placeholder="Mobile" size="15" onkeypress = "AllowNumberOnly(event)" maxlength="10"  /></td>
+        <td><input type="text" name="StaffList[@currentIndex].Age" id="txtAge_@currentIndex" placeholder="Age" size="15" onkeypress = "AllowNumberOnly(event)" maxlength="2" /></td>
+        <td><input type="file" name="StaffList[@currentIndex].PhotoURL" id="txtPhotoURL_@currentIndex" placeholder="Photo" size="15" /></td>
+
+    }
+</tr>

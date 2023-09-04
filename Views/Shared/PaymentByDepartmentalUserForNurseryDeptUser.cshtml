@@ -1,0 +1,338 @@
+﻿@{
+    ViewBag.Title = "PaymentByDepartmentalKioskUserDetailsForZoo";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+
+@model FMDSS.Models.PaymentByDepartmentalKioskUserDetails
+
+
+<script src="~/js/jquery.min.js"></script>
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+
+        $("#ChequeDate").datepicker({ yearRange: '1947:', dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, maxDate: new Date(), onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+
+        var currentDate = new Date();
+
+        $(document).on('keypress', '#ChequeDate', function (event) {
+            event.preventDefault();
+            return false;
+
+        });
+
+        $('#ChequeDate').keydown(function (event)
+        { return cancelBackspace(event) });
+
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+
+
+
+        $('#PaymentMode').change(function () {
+
+            if ($('#PaymentMode').val() == 'CASH') {
+
+                //$('#BankName').prop("disabled", true);
+                //$('#IFSCCode').prop("disabled", true);
+                //$('#ChequeNumber').prop("disabled", true);
+                //$('#ChequeDate').prop("disabled", true);
+                $('.cash').hide();
+            }
+            else {
+
+                //$('#BankName').prop("disabled", false);
+                //$('#IFSCCode').prop("disabled", false);
+                //$('#ChequeNumber').prop("disabled", false);
+                //$('#ChequeDate').prop("disabled", false);
+                $('.cash').show();
+            }
+        });
+
+
+
+
+        $('#btn_submit1').click(function (e) {
+            SSODocuements();
+            //if ($("#UserName").val() == null || $("#UserName").val() == '' || $("#UserName").val() == 'undefined') {
+            //    $("#errUserName").css("display", "block");
+            //    $('#UserName').focus();
+                
+            //    return false;
+            //}
+            //else
+            //{
+            //    $("#errUserName").css("display", "none");
+            //}
+            ////else if ($("#UserEmailAddress").val() == null || $("#UserEmailAddress").val() == '') {
+            ////    $("#errUserEmailAddress").css("display", "block");
+            ////    $('#UserEmailAddress').focus();
+            ////}
+            //if ($("#OfficeName").val() == null || $("#OfficeName").val() == '' || $("#OfficeName").val() == '0') {
+            //    $("#errOfficeName").css("display", "block");
+            //    $('#OfficeName').focus();
+            //}
+
+            //else {
+            //    $("#errOfficeName").css("display", "none");
+            //}
+
+            //if ($("#DesignationName").val() == null || $("#DesignationName").val() == '' || $("#DesignationName").val() == '0') {
+            //    $("#errDesignationName").css("display", "block");
+            //    $('#DesignationName').focus();
+            //}
+
+            //else {
+            //    $("#errDesignationName").css("display", "none");
+            //}
+
+            //if ($("#UserAddress").val() == null || $("#UserAddress").val() == '') {
+            //    $("#errUserAddress").css("display", "block");
+            //    $('#UserAddress').focus();
+            //}
+
+            //else {
+            //    $("#errUserAddress").css("display", "none");
+            //    SSODocuements();
+            //}
+
+        });
+
+
+
+        $('#GetSSODetails').click(function (e) {
+
+            if ($("#UserName").val() == null || $("#UserName").val() == '' || $("#UserName").val() == 'undefined') {
+                $("#errUserName").css("display", "block");
+                $('#UserName').focus();
+                $("#btn_submit1").attr("disabled", "disabled");
+                return false;
+            }
+            else {
+
+
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'PurchaseProduce/GetSSOIDDetails', // we are calling json method designation
+                    dataType: 'json',
+                    data: { SSOID: $('#UserName').val() },
+                    success: function (result) {
+                        if (result.OfficeName == "0" || result.Designation == "0" || result.DesigId == "10") {
+                            console.log(result);
+                            alert($("#UserName").val() + " is not department user");
+                        }
+                        else {
+                            $("#DESIGNATIONs").val(result.designation);
+                            $("#errUserName").css("display", "none");
+                            
+
+                            $("#UserMobileNo").val(result.Mobile);
+                            $("#OfficeName").val(result.OfficeName);
+                            $("#DesignationName").val(result.Designation);
+                        }
+
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve SSO Details.' + ex);
+                    }
+
+
+                });
+            }
+
+        });
+
+        function SSODocuements() {
+            if ($("#DocumentsSSOUsers")[0].files.length > 0) {
+                var iSize = ($("#DocumentsSSOUsers")[0].files[0].size / 1048576);
+                if (iSize > 2) {
+                    $("#DocumentsSSOUsers").val('');
+                    $('#errordiv21').show();
+                    $('#errordiv21').html("file size should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#DocumentsSSOUsers').focus();
+                    return false;
+
+                }
+                else { $('#errordiv21').hide(); }
+
+                var file = $("#DocumentsSSOUsers").val();
+                var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+
+                if (file) {
+                    // split file name at dot
+                    var get_ext = file.split('.');
+                    // reverse name to check extension
+                    get_ext = get_ext.reverse();
+                    // check file type is valid as given in 'exts' array
+
+                    if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                        $("#DocumentsSSOUsers").val('');
+                        $('#errordiv21').show();
+                        $('#errordiv21').html("Please upload only jpeg or jpg or pdf or png or gif file format  !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                        $('#DocumentsSSOUsers').focus();
+                        return false;
+                    } else {
+                        $('#errordiv21').hide();
+                        $("#form").submit();
+                    }
+                }
+                else { $('#errordiv21').hide(); }
+            }
+            else
+            {
+                $("#form").submit();
+            }
+            //else {
+            //    $('#errordiv21').show();
+            //    $('#errordiv21').html("Please upload only jpeg or jpg or pdf or png or gif file format !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            //    $('#DocumentsSSOUsers').focus();
+            //    return false;
+            //}
+        }
+
+
+
+
+        $("#Revenue_Map").change(function (e) {
+            SSODocuements();
+        });
+
+    });
+
+
+
+</script>
+
+@using (Html.BeginForm("ADDNurseryPaymentByDepartmentalUserDetailsDeptUser", "KioskPayment", FormMethod.Post, new { @id = "form", enctype = "multipart/form-data" }))
+{
+    <div id="page-wrapper-inn">
+
+        <div class="col-lg-12 pad">
+            <h1 class="page-header">Nursery Transaction </h1>
+        </div>
+
+        <div class="row">
+
+            <div class="modal-body">
+                @Html.HiddenFor(model => model.ModuleId)
+                @Html.HiddenFor(model => model.ServiceTypeId)
+                @Html.HiddenFor(model => model.PermissionId)
+                @Html.HiddenFor(model => model.SubPermissionId)
+                @Html.HiddenFor(model => model.RequestedIdEn)
+                @Html.HiddenFor(model => model.PaidBy)
+                @Html.HiddenFor(model => model.PaidForCitizen)
+
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>SSO ID: <span class="mandatory"></span></label>
+                        @Html.TextBoxFor(model => model.UserName, new { @class = "form-control common", @id = "UserName" })
+                        @*<div id="errUserName" style="display:none" class="alert-danger1">User Name is Required.</div>*@
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <div class="form-group">
+                        <label> <span class="mandatory"></span></label>
+                        <button class="btn btn-success" type="button" id="GetSSODetails">
+                            Search
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Offce Name: <span class="mandatory"></span></label>
+                        @Html.TextBoxFor(s=>s.OfficeName, new { @class = "form-control", @id = "OfficeName"})
+                        @*<div id="errOfficeName" style="display:none" class="alert-danger1">Office Name is Required.</div>*@
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Designation Name: <span class="mandatory"></span></label>
+                        @Html.TextBoxFor(s => s.DesignationName, new { @class = "form-control", @id = "DesignationName" })
+                        @*<div id="errDesignationName" style="display:none" class="alert-danger1">Designation Name is Required.</div>*@
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Mobile No: <span class="mandatory"></span></label>
+                        @Html.TextBoxFor(model => model.UserMobileNo, new { @class = "form-control common", @id = "UserMobileNo" })
+                        @*<div id="errUserNumber" style="display:none" class="alert-danger1">Mobile No is Required.</div>*@
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Email Id: <span class="mandatory"></span></label>
+                        @Html.TextBoxFor(model => model.UserEmailAddress, new { @class = "form-control common" })
+                        @*<div id="errUserEmailAddress" style="display:none" class="alert-danger1">Email is Required.</div>*@
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Address: <span class="mandatory"></span></label>
+                        @Html.TextAreaFor(model => model.UserAddress, new { @class = "form-control common" })
+                        @*<div id="errUserAddress" style="display:none" class="alert-danger1">Address is Required.</div>*@
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Request ID: <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.RequestedId, new { @class = "form-control common", @readonly = "True" })
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Paid Amount: <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.PaidAmount, new { @class = "form-control common", @readonly = "True" })
+                    </div>
+                </div>
+
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Payment Mode: <span class="mandatory">*</span></label>
+                        @Html.DropDownListFor(Model => Model.PaymentMode, new List<SelectListItem>
+                                                                           {
+                                                                             new SelectListItem { Text = "NA", Value = "NA"} }, new { @class = "form-control" })
+                        <div id="errPaymentMode" style="display:none" class="alert-danger1">Payment Mode is Required.</div>
+
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Upload Documents: <span class="mandatory">*</span></label>
+                        <input type="file" class="form-control common" id="DocumentsSSOUsers" title="Enter the SSO User ID" name="fileUpload" />
+                        <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                        <div id="errordiv21" style="display:none" class="alert-danger1"></div>
+
+
+                    </div>
+                </div>
+
+
+                <div id="btn" class="col-lg-12">
+
+                    <button class="btn btn-success" type="button" value="submit" name="btn_submit1" id="btn_submit1" >
+                        <i class="fa fa-check"></i> Submit
+                    </button>
+
+                    <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                        <a href="/PurchaseProduce/PurchaseProduceDeptUser/">  <i class="fa fa-times fa-fw"></i> Close</a>
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+}

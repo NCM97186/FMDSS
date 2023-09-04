@@ -1,0 +1,2229 @@
+﻿@{
+    ViewBag.Title = "FilmShooting";
+    //if (HttpContext.Current.Session["IsKioskUser"].ToString().ToUpperInvariant() == "TRUE")
+    //{
+    //    Layout = "~/Views/Shared/_kiosklayout.cshtml";
+    //}
+    //else
+    //{
+    //    Layout = "~/Views/Shared/_Layout.cshtml";
+    //}
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString());
+}
+<script src="~/js/jquery.min.js"></script>
+<style>
+    #txtuploadGOI {
+        width: 80%;
+        float: left;
+        margin-right: 10px;
+    }
+</style>
+<style type="text/css">
+    .ui-autocomplete {
+        position: absolute;
+        cursor: default;
+        left: 319px;
+        top: 331px;
+    }
+
+    .ui-autocomplete-loading {
+        background-color: white;
+    }
+
+    .ui-autocomplete li {
+        list-style-type: none;
+        margin-left: -43px;
+        padding: 0;
+        background-color: rgb(187, 207, 243);
+    }
+
+    .ui-autocomplete ul {
+        margin: 0;
+        padding: 0;
+        background-color: White;
+    }
+
+    #overlay {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        background: LightGray;
+        opacity: 0.1;
+        filter: alpha(opacity=80);
+        z-index: 5000;
+    }
+
+    #loading {
+        width: 50px;
+        height: 57px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin: -28px 0 0 -25px;
+    }
+
+    .p {
+        margin-top: 0%;
+    }
+</style>
+<script type="text/javascript">
+    var RootURl = '@Url.Content("~/")';
+    window.history.forward();
+    function noBack() { window.history.forward(); }
+    $(document).ready(function (e) {
+
+        autoPlacesuggest();
+        var $memberType = $('select[name=ddl_MemberType]');
+        var $idType = $('select[name=ddl_cIDType]');
+
+        var $IDList = $idType.find('option').clone();
+
+        var MemberandIDs = {
+            Child: ["Select", "Aadhar", "Student ID Card"],
+            Adult: ["Select", "Passport", "Aadhar", "Driving Licence", "Voter ID", "PAN Card", "Student ID Card"],
+            Student: ["Select", "Passport", "Aadhar", "Driving Licence", "Voter ID", "PAN Card", "Student ID Card"]
+        }
+
+        $memberType.change(function () {
+            var Nation = $("#ddl_Nation").val();
+            if (Nation != '2') {
+                var $selectedIDS = $(this).find('option:selected').text();
+                $idType.html($IDList.filter(function () {
+                    return $.inArray($(this).text(), MemberandIDs[$selectedIDS]) >= 0;
+
+                }));
+                $('#ddl_cIDType').val('0');
+            }
+            else {
+                var MemberandID = {
+                    Child: ["Passport"],
+                    Adult: ["Passport"],
+                    Student: ["Passport"]
+                }
+                var $selectedIDS = $(this).find('option:selected').text();
+                $idType.html($IDList.filter(function () {
+                    return $.inArray($(this).text(), MemberandID[$selectedIDS]) >= 0;
+
+                }));
+            }
+        });
+
+        $("#ddl_MemberType").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+
+        $(".datefield").datepicker({ minDate: new Date(), maxDate: '+1M', dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        var currentDate = new Date();
+
+        $("#txt_fromdate").datepicker("setDate", currentDate);
+        $('#txt_DepositeAmount').keypress(function (event) {
+
+            return isNumber(event, this)
+
+        });
+
+        $('#txt_Indmember').keypress(function (event) {
+
+            return isNumber(event, this)
+
+        });
+
+        $('#txt_NonIndMember').keypress(function (event) {
+
+            return isNumber(event, this)
+
+        });
+
+        $('#txt_Stundent').keypress(function (event) {
+
+            return isNumber(event, this)
+
+        });
+
+        $('#txt_Stundent').keypress(function (event) {
+
+            return isNumber(event, this)
+
+        });
+
+
+        $("#applicantType").change(function () {
+            var applicant = $("#applicantType option:selected").text();
+            $('#appLicant').val(applicant);
+        });
+
+        $("#applicantType").change(function () {
+            var applicant = $("#applicantType option:selected").text();
+            $('#appLicant').val(applicant);
+        });
+
+        $("#ddl_Districts").bind("change", function () {
+
+            var district = $("#ddl_Districts option:selected").text();
+            $('#disId').val(district);
+            var districtID = $("#ddl_Districts").val();
+            $('#Place').empty();
+            var values = {
+                DistrictID: districtID
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                headers: {
+                    __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+                },
+                data: JSON.stringify(values),
+                url: RootURl + 'FilmShooting/PlaceByDistrict',
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#Place").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+        $("#Place").blur("change", function () {
+
+            var plc = $("#Place option:selected").text();
+            $('#plcId').val(plc);
+            //alert(plc);
+            $('#lbl_IndmemberFee').html('');
+            $('#lbl_NonIndmemberFee').html('');
+            $('#lbl_IndStudentFee').html('');
+
+            // var districtID = $("#ddl_Districts").val();
+            var placeID = $("#hdPlaceId").val();
+            var values = {
+                // DistrictID: districtID,
+                PlaceID: placeID
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                headers: {
+                    __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+                },
+                data: JSON.stringify(values),
+                url: RootURl + 'FilmShooting/feesByDistrictPlace',
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $('#lbl_IndmemberFee').text("Fees per member: " + items.IndianMemberFees);
+                        $('#lbl_NonIndmemberFee').text("Fees per member: " + items.NonIndianMemberFees);
+                        $('#lbl_IndStudentFee').text("Fees per student: " + items.StudentFees);
+                    });
+                    $('#txt_Indmember').trigger('change');
+                    $('#txt_NonIndMember').trigger('change');
+                    $('#txt_Stundent').trigger('change');
+                },
+
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+            FilmCategory();
+        });
+
+        $("#txt_Indmember").change(function () {
+            var allmembers = $("#txt_totalCrewmember").val();
+            var Indmembers = $("#txt_Indmember").val();
+            if (!Indmembers) { Indmembers = 0; }
+            var NonIndmembers = $("#txt_NonIndMember").val();
+            if (!NonIndmembers) { NonIndmembers = 0; }
+            var Student = $("#txt_Stundent").val();
+            if (!Student) { Student = 0; }
+
+
+            var members = (parseInt(Indmembers, 10) + parseInt(NonIndmembers, 10) + parseInt(Student, 10));
+
+            if (members <= allmembers) {
+                //  CalculatememberFees();
+            }
+            else {
+                alert('Value must be less then total members');
+                $(this).val(0);
+                //  CalculatememberFees();
+            }
+        });
+
+        //$("#txt_totalCrewmember").change(function () {
+
+        //    if ($("#txt_totalCrewmember").val() != '') {
+        //        $("#txt_Indmember,#txt_NonIndMember,#txt_Stundent,#txt_totalfees").val('');
+        //        $("#applyTable").empty();
+        //    }
+        //    if ($("#txt_totalCrewmember").val() > 5) {
+        //        alert('You can add only 5 member!');
+        //        $("#txt_totalCrewmember").val('');
+        //    }
+        //});
+
+
+        var MemberChange;
+        $("#txt_totalCrewmember").bind("click", function (e) {
+            MemberChange = $("#txt_totalCrewmember").val();
+        }).bind("change", function (e) {
+
+            var rowCount = $('#temp tr').not('thead tr').length;
+            if (!rowCount) { rowCount == 0; }
+            if (parseInt(rowCount, 10) == 0) {
+                if ($("#txt_totalCrewmember").val() > 5) {
+                    alert('You can add only 5 member!');
+                    $("#txt_totalCrewmember").val('');
+                }
+            }
+            else {
+                $('#txt_totalCrewmember').val(MemberChange);
+                alert('You can not change the no. of member. Please delete your member entry.');
+                return false;
+            }
+        });
+
+
+        $("#txt_NonIndMember").change(function () {
+            var allmembers = $("#txt_totalCrewmember").val();
+            var Indmembers = $("#txt_Indmember").val();
+            if (!Indmembers) { Indmembers = 0; }
+            var NonIndmembers = $("#txt_NonIndMember").val();
+            if (!NonIndmembers) { NonIndmembers = 0; }
+            var Student = $("#txt_Stundent").val();
+            if (!Student) { Student = 0; }
+
+
+            var members = (parseInt(Indmembers, 10) + parseInt(NonIndmembers, 10) + parseInt(Student, 10));
+
+            if (members <= allmembers) {
+                //CalculatememberFees();
+            }
+            else {
+                alert('Value must be less then total members');
+                $(this).val(0);
+                //  CalculatememberFees();
+            }
+        });
+
+
+
+        $("#txt_Stundent").change(function () {
+            var allmembers = $("#txt_totalCrewmember").val();
+            var Indmembers = $("#txt_Indmember").val();
+            if (!Indmembers) { Indmembers = 0; }
+            var NonIndmembers = $("#txt_NonIndMember").val();
+            if (!NonIndmembers) { NonIndmembers = 0; }
+            var Student = $("#txt_Stundent").val();
+            if (!Student) { Student = 0; }
+
+
+            var members = (parseInt(Indmembers, 10) + parseInt(NonIndmembers, 10) + parseInt(Student, 10));
+
+            if (members <= allmembers) {
+                //  CalculatememberFees();
+            }
+            else {
+                alert('Value must be less then total members');
+                $(this).val(0);
+                //   CalculatememberFees();
+            }
+        });
+        $("#txt_fromdate").change(function () {
+            $("#txt_todate").val('');
+        });
+
+        $(document).on('keypress', '#txt_fromdate,#txt_todate', function (event) {
+
+            event.preventDefault();
+            return false;
+
+        });
+
+        $('#txt_fromdate,#txt_todate').keydown(function (event)
+        { return cancelBackspace(event) });
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+        $("#txtUploadtranscript").change(function (e) {
+            //var iSize = ($("#UploadId")[0].files[0].size / 1048576);
+            var iSize = parseFloat($("#txtUploadtranscript")[0].files[0].size / 1024).toFixed(2);
+            if (iSize > 100) {
+                $('#txtUploadtranscript').val('');
+                $('#errordivtranscript').show();
+                $('#errordivtranscript').html("Upload ID should not be larger than 100kb!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txtUploadtranscript').focus();
+                return false;
+            }
+            var file = $("#txtUploadtranscript").val();
+
+            var exts = ['jpg', 'jpeg', 'png', 'gif', 'pdf'];
+            if (file) {
+                var get_ext = file.split('.');
+                get_ext = get_ext.reverse();
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#txtUploadtranscript').val('');
+                   
+                    alert('Please upload only jpeg or jpg or pdf or png or gif file format in Upload ID Field !');
+                    $('#txtUploadtranscript').focus();
+                    return false;
+                } else {
+                    $('#errordivtranscript').hide();
+                }
+            }
+            else {
+
+                
+
+                $('#errordivtranscript').hide();
+            }
+        });
+
+        $("#txtuploadGOI").change(function (e) {
+            //var iSize = ($("#UploadId")[0].files[0].size / 1048576);
+            var iSize = parseFloat($("#txtuploadGOI")[0].files[0].size / 1024).toFixed(2);
+            if (iSize > 100) {
+                $('#txtuploadGOI').val('');
+                $('#errordivGOI').show();
+                $('#errordivGOI').html("Upload ID should not be <br/> larger than 100kb!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txtuploadGOI').focus();
+                return false;
+            }
+            var file = $("#txtUploadId").val();
+            var exts = ['jpg', 'jpeg', 'png', 'gif', 'pdf'];
+            if (file) {
+                var get_ext = file.split('.');
+                get_ext = get_ext.reverse();
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#txtuploadGOI').val('');
+                    $('#errordivGOI').show();
+                    alert('Please upload only jpeg or jpg or pdf or png or gif file format in Upload ID Field !');
+                    ///$('#errordivGOI').html("Please upload only <br/> jpeg/jpg/pdf/png/gif file format in Upload ID Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#txtuploadGOI').focus();
+                    return false;
+                } else {
+                    $('#errordivGOI').hide();
+                }
+            }
+            else { $('#errordivGOI').hide(); }
+        });
+
+        $('#btnUploadId').click(function () {
+
+            //Checking whether FormData is available in browser
+            if (window.FormData !== undefined) {
+
+                var fileUpload = $("#txtuploadGOI").get(0);
+                var files = fileUpload.files;
+
+                // Create FormData object
+                var fileData = new FormData();
+
+                // Looping over all files and add it to FormData object
+                for (var i = 0; i < files.length; i++) {
+                    fileData.append(files[i].name, files[i]);
+                }
+                if ($('#txtuploadGOI').val() != '') {
+                    $.ajax({
+                        url: RootURl + 'OffenseRegistrationfinal/UploadFiles',
+                        headers: {
+                            __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+                        },
+                        type: "POST",
+                        contentType: false, // Not to set any content header
+                        processData: false, // Not to process data
+                        data: fileData,
+                        success: function (result) {
+                            alert(result.list1);
+                            $("#hdUploadDoc").val(result.list2);
+                            //  $('#txtuploadGOI').val('');
+                        },
+                        error: function (err) {
+                            alert(err.statusText);
+                        }
+                    });
+                }
+                else {
+                    alert("Select file to upload");
+                }
+
+            } else {
+                alert("FormData is not supported.");
+            }
+        });
+
+
+
+        $("#txtUploadId").change(function (e) {
+            //var iSize = ($("#UploadId")[0].files[0].size / 1048576);
+            var iSize = parseFloat($("#txtUploadId")[0].files[0].size / 1024).toFixed(2);
+            if (iSize > 100) {
+                $('#txtUploadId').val('');
+                $('#errordivUpload').show();
+                $('#errordivUpload').html("Upload ID should not be larger than 100kb!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txtUploadId').focus();
+                return false;
+            }
+            var file = $("#txtUploadId").val();
+            var exts = ['jpg', 'jpeg', 'png', 'gif', 'pdf'];
+            if (file) {
+                var get_ext = file.split('.');
+                get_ext = get_ext.reverse();
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#txtUploadId').val('');
+                    $('#errordivUpload').show();
+                    alert('Please upload only jpeg or jpg or pdf or png or gif file format in Upload ID Field !');
+                   //// $('#errordivUpload').html("Please upload only jpeg or jpg or pdf or png or gif file format in Upload ID Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#txtUploadId').focus();
+                    return false;
+                } else {
+                    $('#errordivUpload').hide();
+                }
+            }
+            else { $('#errordivUpload').hide(); }
+        });
+
+        $('#btnUploadPhotoId').click(function () {
+
+            //Checking whether FormData is available in browser
+            if (window.FormData !== undefined) {
+
+                var fileUpload = $("#txtUploadId").get(0);
+                var files = fileUpload.files;
+
+                // Create FormData object
+                var fileData = new FormData();
+
+                // Looping over all files and add it to FormData object
+                for (var i = 0; i < files.length; i++) {
+                    fileData.append(files[i].name, files[i]);
+                }
+
+                //    // Adding one more key to FormData object
+                //    //fileData.append('username', ‘Manas’);
+                if ($('#txtUploadId').val() != '') {
+                    $.ajax({
+                        url: RootURl + 'FilmShooting/UploadFiles',
+                        headers: {
+                            __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+                        },
+                        type: "POST",
+                        contentType: false, // Not to set any content header
+                        processData: false, // Not to process data
+                        data: fileData,
+                        success: function (result) {
+                            alert(result.list1);
+
+                            $("#hdUploadIdDoc").val(result.list2);
+                            // $('#txtUploadId').val('');
+                        },
+                        error: function (err) {
+                            alert(err.statusText);
+                        }
+                    });
+                }
+                else {
+                    alert("Select file to upload");
+                }
+
+            } else {
+                alert("FormData is not supported.");
+            }
+        });
+
+        $('#txt_crewmemberName').keypress(function (e) {
+            var kc = e.which;
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        })
+        $('#FilmTitle, #txt_crewmemberName, #Purpose_of_shooting, #txt_IDno, #descriptionoffilmscript, #txt_crewAddress1, #txt_crewAddress2, #txt_crewLandMark').keypress(function (e) {
+
+            var kc = e.which;
+
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95) || (kc >= 44 && kc <= 57) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+        $("#txt_todate").change(function () {
+            var str1 = $("#txt_fromdate").val();
+            var str2 = $("#txt_todate").val();
+
+            var L = 3, d1 = $("#txt_fromdate").val().split('/'), d2 = $("#txt_todate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#txt_todate").val('');
+                alert('Date Must be GreaterThen From Date');
+            }
+        });
+        $("#txt_Totalvehicle").change(function () {
+            var str1 = $("#txt_totalCrewmember").val();
+            var str2 = $("#txt_Totalvehicle").val();
+
+            if (parseInt(str2) > parseInt(str1)) {
+                $("#txt_Totalvehicle").val('');
+                alert('You can book only ' + str1 + ' ticket');
+            }
+        });
+        $("#btn_addCrewMember").bind("click", function () {
+
+            if ($('#txt_crewmemberName').val() == '') {
+                $('#errordiv13').show();
+                $('#errordiv13').html("Please Enter Name!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $("#txt_crewmemberName").focus();
+                return false;
+            }
+            else { $('#errordiv13').hide(); }
+
+            if ($('#txt_crewAddress1').val() == '') {
+                $('#errordiv14').show();
+                $('#errordiv14').html("Please Enter Address1!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $("#txt_crewAddress1").focus();
+                return false;
+            }
+            else { $('#errordiv14').hide(); }
+
+            if ($('#txt_crewPostal').val() == '') {
+                $('#errorPostCode').show();
+                $('#errorPostCode').html("Please Enter Postal Code!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $("#txt_crewPostal").focus();
+                return false;
+            }
+            else { $('#errorPostCode').hide(); }
+
+            if ($('#ddl_Gender').val() == '' || $('#ddl_Gender').val() == '0') {
+                document.getElementById("errorGender").style.display = 'block';
+                $("#ddl_Gender").focus();
+                return false;
+            }
+            else { document.getElementById("errorGender").style.display = 'none'; }
+
+            if ($('#ddl_cIDType').val() == '' || $('#ddl_cIDType').val() == '0') {
+                document.getElementById("errorIDtype").style.display = 'block';
+                $("#ddl_cIDType").focus();
+                return false;
+            }
+            else { document.getElementById("errorIDtype").style.display = 'none'; }
+
+            if ($('#txt_cIDno').val() == '') {
+                document.getElementById("errorIDNo").style.display = 'block';
+                $("#txt_cIDno").focus();
+                return false;
+            }
+            else { document.getElementById("errorIDNo").style.display = 'none'; }
+
+            if ($('#ddl_Nation').val() == '' || $('#ddl_Nation').val() == '0') {
+                document.getElementById("errorNationality").style.display = 'block';
+                $("#ddl_Nation").focus();
+                return false;
+            }
+            else {
+                document.getElementById("errorNationality").style.display = 'none';
+            }
+            if ($('#ddl_Nation').val() == '2' && $('#txtuploadGOI').val() == '') {
+                $('#errordivGOI').show();
+                $('#errordivGOI').html("Kindly upload GOI first!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $("#txtuploadGOI").focus();
+                return false;
+            }
+            else { document.getElementById("errordivGOI").style.display = 'none'; }
+
+            if ($('#ddl_MemberType').val() == '' || $('#ddl_MemberType').val() == '0') {
+                document.getElementById("errorMemberType").style.display = 'block';
+                $("#ddl_MemberType").focus();
+                return false;
+            }
+            else { document.getElementById("errorMemberType").style.display = 'none'; }
+
+            if ($('#txtUploadId').val() == '') {
+                document.getElementById("errordivUpload").style.display = 'block';
+                $("#txtUploadId").focus();
+                return false;
+            }
+            else { document.getElementById("errordivUpload").style.display = 'none'; }
+
+
+            var rowCount = $('#temp tr').not('thead tr').length;
+            var existRow = $('#txt_totalCrewmember').val();
+            if (!existRow)
+            { existRow = 0 }
+
+            if (rowCount > 4) {
+                alert('You can add only 5 members');
+                return false;
+            }
+            if (rowCount < existRow) {
+                PostCrewInfo(rowCount + 1);
+            }
+            else {
+                alert('You can not add more members');
+                return false;
+            }
+
+            // CalculatememberFees();
+
+        });
+
+        $("#ddl_Vehiclecat").bind("change", function () {
+
+            if ($("#ddl_Vehiclecat option:selected").text() != 'Others') {
+                $("#divddlvechile").show();
+                $('#divtxtvechile').hide();
+                var vehicleCat = $("#ddl_Vehiclecat option:selected").text();
+                $('#vehiclecatId').val(vehicleCat);
+                var catID = $("#ddl_Vehiclecat").val();
+                $('#ddl_vehicle').empty();
+                var values = {
+                    VehicleCatID: catID
+                };
+                $.ajax({
+                    type: 'POST',
+                    headers: {
+                        __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+                    },
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(values),
+                    url: RootURl + 'FilmShooting/vehicleByCategory',
+                    success: function (data) {
+                        $.each(data, function (i, items) {
+                            $("#ddl_vehicle").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                        });
+                    },
+                    traditional: true,
+                    error: function (data) { console.log(data) }
+                });
+            }
+            else {
+
+
+
+                $("#divddlvechile").hide();
+                $('#divtxtvechile').show();
+                $('#txtVehicle').focus();
+            }
+
+        });
+
+        $("#ddl_vehicle").bind("change", function () {
+            var vehicle = $("#ddl_vehicle option:selected").text();
+            $('#vehicleId').val(vehicle);
+
+
+            $('#lbl_PerVehicleFee').html('');
+
+            var catID = $("#ddl_Vehiclecat").val();
+            var vehicleID = $("#ddl_vehicle").val();
+            var values = {
+                VehicleCatID: catID,
+                VehicleID: vehicleID
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                headers: {
+                    __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+                },
+                data: JSON.stringify(values),
+                url: RootURl + 'FilmShooting/feesByVehicle',
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $('#lbl_PerVehicleFee').text("Fee per vehicle/Equp.: " + items.VehicleFees);
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+        $("#ddl_filmCategory").bind("change", function () {
+            var catID = $("#ddl_filmCategory").val();
+            var values = {
+                FilmCategoryID: catID
+            };
+            SecurityDepositeFee();
+        });
+
+        $("#btn_addvehicle").bind("click", function () {
+
+            if ($('#ddl_Vehiclecat').val() == '') {
+                $('#errordiv15').show();
+                $('#errordiv15').html("Please Select Vehicle /Equipment Type!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $("#ddl_Vehiclecat").focus();
+                return false;
+            }
+            else { $('#errordiv15').hide(); }
+
+            if (($('#ddl_vehicle').val() == '' || $('#ddl_vehicle').val() == '0') && $('#txtVehicle').val() == '') {
+                $('#errorddl_vehicle').show();
+                $('#errorddl_vehicle').html("Please Select Vehicle /Equipment!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $("#ddl_vehicle").focus();
+                return false
+            }
+            else { $('#errorddl_vehicle').hide(); }
+
+            if ($('#txt_Totalvehicle').val() == '') {
+                $('#errorTotalvehicle').show();
+                $('#errorTotalvehicle').html("Please Enter Total Vehicle /Equipment!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $("#txt_Totalvehicle").focus();
+                document.getElementById("errorVehicleNum").style.display = 'none';
+                return false;
+            }
+            else { $('#errorTotalvehicle').hide(); }
+
+
+            if (parseInt($('#txt_Totalvehicle').val()) <= 0) {
+                $('#errorTotalvehicle').show();
+                $('#errorTotalvehicle').css('display', 'block');
+                $('#errorTotalvehicle').html("Value must be greater then zero!");
+                $("#txt_Totalvehicle").focus();
+                return false;
+            }
+            else { $('#errorTotalvehicle').hide(); }
+
+            AddVehicles();
+        });
+
+        $("#btn_preview").bind("click", function () {
+            var clonetext = $('#mainDiv').clone(true);
+            $('#previewDiv').html(clonetext);
+            $('#previewDiv input').attr('readonly', 'readonly');
+            $("#previewDiv").dialog("open");
+            return false;
+        });
+        $("#previewDiv").dialog({
+            autoOpen: false,
+            open: function () {
+            },
+            show: "blind",
+            hide: "explode"
+        });
+
+        $('#btnproced').click(function (e) {
+
+
+            if ($('#applicantType').val() == '' || $('#applicantType').val() == null || $('#applicantType').val() == '0') {
+                $('#errordiv').show();
+                $('#errordiv').html("Please fill the Applicant Type!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#applicantType").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv').hide(); }
+
+            if ($('#ddl_Districts').val() == '') {
+                $('#errordiv10').show();
+                $('#errordiv10').html("Please Select District Name" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                $('html, body').animate({
+                    scrollTop: $("#ddl_Districts").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv10').hide(); }
+
+            if ($('#Place').val() == '0') {
+                $('#Place').focus();
+                $('html, body').animate({
+                    scrollTop: $("#Place").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv10').hide(); }
+
+            if ($('#Purpose_of_shooting').val() == '') {
+                $('#errordiv6').show();
+                $('#errordiv6').html("Please Enter Purpose of Shooting!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#Purpose_of_shooting").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv6').hide(); }
+
+            if ($('#FilmTitle').val() == '') {
+                $('#errordiv31').show();
+                $('#errordiv31').html("Please Enter Film Title!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#FilmTitle").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv31').hide(); }
+
+            if ($('#descriptionoffilmscript').val() == '') {
+                $('#errordiv2').show();
+                $('#errordiv2').html("Please Enter Short Description of Film Script!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#descriptionoffilmscript").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv2').hide(); }
+
+            if ($('#txt_fromdate').val() == '') {
+                $('#errordiv4').show();
+                $('#errordiv4').html("Please Select From Date!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#txt_fromdate").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv4').hide(); }
+
+            if ($('#txt_todate').val() == '') {
+                $('#errordiv5').show();
+                $('#errordiv5').html("Please Select To Date!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#txt_todate").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv5').hide(); }
+
+            if ($('#txtUploadtranscript').val() == '') {
+                $('#errordivtranscript').show();
+                $('#errordivtranscript').html("Please upload valid file!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#txtUploadtranscript").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordivtranscript').hide(); }
+
+            if ($('#txt_totalCrewmember').val() == '') {
+                $('#errordiv3').show();
+                $('#errordiv3').html("Please Enter No. of Guest/Visitor!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#txt_totalCrewmember").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv3').hide(); }
+
+            if (parseInt($('#txt_totalCrewmember').val()) <= 0) {
+                $('#errordiv3').show();
+                $('#errordiv3').html("Please Enter value greater than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#txt_totalCrewmember").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv3').hide(); }
+
+            if ($('#IdentityProofId').val() == '') {
+
+                $('#errordiv7').show();
+                $('#errordiv7').html("Please Select ID Type!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                $('html, body').animate({
+                    scrollTop: $("#IdentityProofId").offset().top
+                }, 600);
+                return false;
+            }
+
+            else { $('#errordiv7').hide(); }
+
+            if ($('#txt_IDno').val() == '') {
+
+                $('#errordiv8').show();
+                $('#errordiv8').html("Please Enter Id Proof Number!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                $('html, body').animate({
+                    scrollTop: $("#txt_IDno").offset().top
+                }, 600);
+                return false;
+            }
+
+            else { $('#errordiv8').hide(); }
+
+
+            if ($('#IDProofUrl').val() == '') {
+
+                $('#errordiv9').show();
+                $('#errordiv9').html("Please Select ID Proof of Applicant!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                $('html, body').animate({
+                    scrollTop: $("#IDProofUrl").offset().top
+                }, 600);
+                return false;
+            }
+
+            else { $('#errordiv9').hide(); }
+
+            if ($('#ddl_filmCategory').val() == '') {
+                $('#errordiv11').show();
+                $('#errordiv11').html("Please Select Film Category!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#ddl_filmCategory").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv11').hide(); }
+
+            if ($('#txt_DepositeAmount').val() == '') {
+                $('#errordiv12').show();
+                $('#errordiv12').html("Please Enter Deposite!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#txt_DepositeAmount").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv12').hide(); }
+
+            var rowCount = $('#temp tr').not('thead tr').length;
+            var existRow = $('#txt_totalCrewmember').val();
+            if (!existRow)
+            { existRow = 0 }
+            if (rowCount != existRow) {
+                alert('Please fill all members details.');
+                return false;
+            }
+
+            var childCount = 0;
+            $('#temp tr').each(function (i) {
+                var $tds = $(this).find('td');
+                var memType = $tds.eq(6).text();
+                if (memType == "Child") {
+                    childCount = childCount + 1;
+                }
+            });
+            if (parseInt(childCount) == parseInt(existRow)) {
+                alert('Only child can not go for visit.');
+                return false;
+            }
+
+        });
+
+        $('#btnReset').click(function (e) {
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                headers: {
+                    __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+                },
+                data: JSON.stringify(),
+                url: RootURl + 'FilmShooting/ClearFilmShootingData',
+                success: function (data) {
+                    $("#applyTable").empty();
+                    $("#VehicleTable").empty();
+                    $('html, body').animate({ scrollTop: $("#applicantType").offset().top }, 600);
+                },
+            });
+
+
+        });
+
+        $("#ddl_Nation").bind("change", function () {
+            var val = $("#ddl_Nation").val();
+            $('#ddl_MemberType').empty();
+            if (val == '1') {
+                $("#ddl_MemberType").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                $("#ddl_MemberType").append('<option value="' + 1 + '">' + "Child" + '</option>');
+                $("#ddl_MemberType").append('<option value="' + 2 + '">' + "Adult" + '</option>');
+                $("#ddl_MemberType").append('<option value="' + 3 + '">' + "Student" + '</option>');
+                $('#GOI').hide();
+                $("#ddl_cIDType").val('0');
+                $("#ddl_cIDType").prop("disabled", false);
+            }
+            else if (val == '2') {
+                $("#ddl_MemberType").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                $("#ddl_MemberType").append('<option value="' + 1 + '">' + "Child" + '</option>');
+                $("#ddl_MemberType").append('<option value="' + 2 + '">' + "Adult" + '</option>');
+                $('#GOI').show();
+                $("#ddl_cIDType").val('1');
+                $("#ddl_cIDType").prop("disabled", true);
+            }
+            else {
+                $("#ddl_MemberType").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            }
+        });
+        $('#txt_crewPostal, #txt_cIDno').keypress(function (e) {
+
+            var kc = e.which;
+
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95) || (kc >= 44 && kc <= 57) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+        $('#txt_cIDno').change(function () {
+            var idNo;
+            var newid = $('#txt_cIDno').val();
+
+            var filter = /(?!.*\.{2})(?!-*\-{2})^[a-zA-Z0-9-_./]+$/
+            if (filter.test(newid)) {
+
+                var decimal = /^\d+(\.\d+|e)(e?-\d+)?$/;
+                if (decimal.test(newid)) {
+                    $('#txt_cIDno').val('');
+                    document.getElementById("errorIDNo").style.display = 'block';
+                    return false;
+                }
+                else {
+                    document.getElementById("errorIDNo").style.display = 'none';
+
+                    $('#temp tr').each(function (i) {
+                        var $tds = $(this).find('td');
+                        idNo = $tds.eq(4).text();
+                        if (newid != '') {
+                            if (idNo == newid) {
+                                alert('This ID number already exist. Please enter another ID number.');
+                                $('#txt_cIDno').val('');
+                                { return false; }
+                            }
+                            else { return true; }
+                        }
+                    });
+
+                }
+            }
+            else {
+                document.getElementById("errorIDNo").style.display = 'block';
+                $('#txt_cIDno').val('');
+                return false;
+            }
+        });
+
+        $('#txt_IDno').change(function () {
+            var idNo;
+            var newid = $('#txt_IDno').val();
+
+            var filter = /(?!.*\.{2})(?!-*\-{2})^[a-zA-Z0-9-_./]+$/
+            if (filter.test(newid)) {
+
+                var decimal = /^\d+(\.\d+|e)(e?-\d+)?$/;
+                if (decimal.test(newid)) {
+                    $('#txt_IDno').val('');
+                    $('#errordiv8').html("Please Enter Valid ID No. !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    document.getElementById("errordiv8").style.display = 'block';
+                    return false;
+                }
+                else {
+                    $('#errordiv8').html("");
+                    return true;
+                }
+            }
+            else {
+                $('#errordiv8').html("Please Enter Valid ID No. !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                document.getElementById("errordiv8").style.display = 'block';
+                $('#txt_IDno').val('');
+                return false;
+            }
+        });
+
+        $("#IDProofUrl").change(function (e) {
+            //var iSize = ($("#UploadId")[0].files[0].size / 1048576);
+            var iSize = parseFloat($("#IDProofUrl")[0].files[0].size / 1024).toFixed(2);
+            if (iSize > 100) {
+                $('#IDProofUrl').val('');
+                $('#errordiv9').show();
+                $('#errordiv9').html("Upload ID should not be larger than 100kb!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#IDProofUrl').focus();
+                return false;
+            }
+            var file = $("#IDProofUrl").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+            if (file) {
+                var get_ext = file.split('.');
+                get_ext = get_ext.reverse();
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#IDProofUrl').val('');
+                    $('#errordiv9').show();
+                    $('#errordiv9').html("Please upload only jpeg or jpg or pdf or png or gif file format in Upload ID Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#IDProofUrl').focus();
+                    return false;
+                } else {
+                    $('#errordiv9').hide();
+                }
+            }
+            else { $('#errordiv9').hide(); }
+        });
+
+
+
+
+    });
+
+    function FilmCategory() {
+        $("#ddl_filmCategory").empty();
+        var placeID = $("#hdPlaceId").val();
+
+        var values = {
+            PlaceID: placeID
+        };
+
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(values),
+            headers: {
+                __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+            },
+            url: RootURl + 'FilmShooting/FilmCategoryByPlace',
+            success: function (data) {
+                $.each(data, function (i, items) {
+                    $("#ddl_filmCategory").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                });
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+    }
+
+    function SecurityDepositeFee() {
+        $.ajax({
+            type: "POST",
+            url: RootURl + 'FilmShooting/FeesByFilmCategory',
+            data: '{FilmCatID: "' + $("#ddl_filmCategory").val() + '" }',
+            contentType: "application/json; charset=utf-8",
+            headers: {
+                __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+            },
+            dataType: "json",
+            success: function (data) {
+                $.each(data, function (i, items) {
+                    $('#txt_DepositeAmount').val(items.DepositeAmount);
+                });
+                $('#tbPrice').empty();
+                var TotalMemberFees = $('#txt_totalfees').val();
+                var TotalVechileFees = $('#txt_VehFees').val();
+                var DepositeAmount = $('#txt_DepositeAmount').val();
+                var TotalFees = parseInt(TotalMemberFees, 10) + parseInt(TotalVechileFees, 10) + parseInt(DepositeAmount, 10);
+                var bardata = "<tr class='rowid'><td>" + TotalMemberFees + "</td><td>" + TotalVechileFees + "</td><td>" + DepositeAmount + "</td><td>" + TotalFees + "</td></tr>";
+                $('#tbPrice').append(bardata);
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+    }
+
+    function CalculatememberFees() {
+
+        var Indmembers = $("#txt_Indmember").val();
+        if (!Indmembers) { Indmembers = 0; }
+
+        var NonIndmembers = $("#txt_NonIndMember").val();
+        if (!NonIndmembers) { NonIndmembers = 0; }
+        var Student = $("#txt_Stundent").val();
+        if (!Student) { Student = 0; }
+
+        var IndMemberFees = document.getElementById("lbl_IndmemberFee").textContent;
+        if (!IndMemberFees) { IndMemberFees = "0:0"; }
+        var IndPermemberFees = IndMemberFees.split(":");
+        var NonIndMemberFees = document.getElementById("lbl_NonIndmemberFee").textContent;
+        if (!NonIndMemberFees) { NonIndMemberFees = "0:0"; }
+        var NonIndPermemberFees = NonIndMemberFees.split(":");
+        var StudentFees = document.getElementById("lbl_IndStudentFee").textContent;
+        if (!StudentFees) { StudentFees = "0:0"; }
+        var PerStudentFee = StudentFees.split(":");
+
+
+
+        var TotalFees = (parseInt(Indmembers, 10) * parseInt(IndPermemberFees[1], 10) + parseInt(NonIndmembers, 10) * parseInt(NonIndPermemberFees[1], 10) + parseInt(Student, 10) * parseInt(PerStudentFee[1], 10));
+
+        document.getElementById("txt_totalfees").value = TotalFees;
+    }
+
+    function AddVehicles() {
+
+        // fetch values from input
+        var catID = $("#ddl_Vehiclecat").val();
+        var category = $("#ddl_Vehiclecat option:selected").text();
+
+        if (catID == 4) {
+
+            var vehicle = $("#txtVehicle").val();
+            var vehicleID = $("#txtVehicle").val();
+        }
+        else {
+            var vehicle = $("#ddl_vehicle option:selected").text();
+            var vehicleID = $("#ddl_vehicle").val();
+        }
+        var TotalVehicle = $("#txt_Totalvehicle").val();
+        var vehicleFees = document.getElementById("lbl_PerVehicleFee").textContent;
+        if (!vehicleFees) {
+            vehicleFees = 0;
+        }
+        else {
+            var feePerVehicle = vehicleFees.split(":");
+        }
+        if (!feePerVehicle) { feePerVehicle = 0; }
+        var Totalfee = parseInt(TotalVehicle, 10) * parseInt(feePerVehicle[1], 10);
+        if (!Totalfee) { Totalfee = 0; }
+        var aa = document.getElementById("txt_VehFees").value;
+        if (!aa) {
+            aa = 0;
+        }
+        document.getElementById("txt_VehFees").value = (parseInt(aa, 10) + parseInt(Totalfee, 10));
+
+        if ($('#ddl_Vehiclecat option:selected').text() == '' || $('#ddl_Vehiclecat option:selected').text() == '--Select--') {
+            $('#lblerr').text('Select Type');
+            $('#ddl_Vehiclecat').focus();
+            return false;
+        }
+        if (($('#ddl_vehicle option:selected').text() == '' || $('#ddl_vehicle option:selected').text() == '--Select--') && $("#txtVehicle").val() == '') {
+            $('#lblerr').text('Select vehicle');
+            $('#ddl_vehicle').focus();
+            return false;
+        }
+        if ($('#txt_Totalvehicle').val() == '') {
+            $('#lblerr').text('Enter No of vehicle');
+            $('#txt_Totalvehicle').focus();
+            return false;
+        }
+        else {
+
+            $('#lblerr').text('');
+            var vehicleInfo = {
+                VehicleCatID: catID,
+                VehicleCategory: category,
+                VehicleID: vehicleID,
+                Vehicle: vehicle,
+                TotalVehicle: TotalVehicle,
+                VehicleFees: Totalfee
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                headers: {
+                    __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+                },
+                data: JSON.stringify(vehicleInfo),
+                url: RootURl + "FilmShooting/PostVehicleData",
+                success: function (data) {
+                    var bardata = "<tr class='rowid'><td>" + data.VehicleCategory + "</td><td>" + data.Vehicle + "</td><td>" + data.VehicleFees + "</td><td>" + "<button class=deleteSeat>Delete</button>" + "</td></tr>";
+                    $("#VehicleTable").append(bardata);
+                },
+
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+
+            $("#ddl_Vehiclecat").val("0");
+            $("#ddl_vehicle").val("0");
+            document.getElementById("txt_Totalvehicle").value = "";
+        }
+    }
+
+    $(document).on('click', '.deleteSeat', function (e) {
+        var $row = jQuery(this).closest('tr');
+        var $columns = $row.find('td');
+        var ID = $.trim($columns[0].innerHTML);
+        var amount = $.trim($columns[2].innerHTML);
+        var CurrntAmount = $("#txt_VehFees").val();
+        var rowID = $(this).index() + 1;
+        jQuery(this).closest('tr').remove();
+        var i = 0;
+        var RowInfo = {
+            Id: rowID
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            headers: {
+                __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+            },
+            data: JSON.stringify(RowInfo),
+            url: RootURl + 'FilmShooting/deletesafariData',
+            success: function (data) {
+                var Amt = parseInt(CurrntAmount) - parseInt(amount);
+                $("#txt_VehFees").val(Amt);
+                // CalculatememberFees();
+            },
+            error: function (ex) { alert(ex); }
+
+        });
+        e.preventDefault();
+    });
+
+    function PostCrewInfo(Count) {
+
+        var cname = $("#txt_crewmemberName").val();
+        var caddress1 = $("#txt_crewAddress1").val();
+        var caddress2 = $("#txt_crewAddress2").val();
+        var clandmark = $("#txt_crewLandMark").val();
+        var cpostalCode = $("#txt_crewPostal").val();
+
+        var crewInfo = {
+            CrewMemberid: $('#Hdn_Id').val(),
+            Name: cname,
+            Address1: caddress1,
+            Address2: caddress2,
+            Landmark: clandmark,
+            PostalCode: cpostalCode,
+            Gender: $("#ddl_Gender  option:selected").text(),
+            CrewIDType: $("#ddl_cIDType  option:selected").text(),
+            CrewIDNo: $("#txt_cIDno").val(),
+            Nationality: $("#ddl_Nation  option:selected").text(),
+            GOIFile: $('#hdUploadDoc').val(),
+            MemberType: $("#ddl_MemberType  option:selected").text(),
+            UploadPhotoId: $('#hdUploadIdDoc').val()
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            headers: {
+                __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+            },
+            data: JSON.stringify(crewInfo),
+            url: RootURl + "FilmShooting/PostData",
+            success: function (data) {
+
+                var bardata = "<tr class='rowid'><td>" + data.Name + "</td><td>" + data.Address1 + "</td><td>" + data.Landmark + "</td><td>" + data.PostalCode + "</td><td>" + data.CrewIDNo + "</td><td>" + data.Nationality + "</td><td>" + data.MemberType + "</td><td>" + "<button class=get-delete>Delete</button>" + "</td></tr>";
+                $("#applyTable").append(bardata);
+
+                if ($('#ddl_Nation').val() == '1' && $('#ddl_MemberType').val() == '3') {
+                    var student = $("#txt_Stundent").val();
+                    if (!student) { student = 0; }
+                    var totalStudent = parseInt(student) + 1;
+                    $("#txt_Stundent").val(totalStudent);
+                    if (Count > 3) {
+                        var Student = 1;
+                        if (!Student) { Student = 0; }
+                        var StudentFees = document.getElementById("lbl_IndStudentFee").textContent;
+                        if (!StudentFees) { StudentFees = "0:0"; }
+                        var PerStudentFee = StudentFees.split(":");
+                        var TotalFees = (parseInt(Student, 10) * parseInt(PerStudentFee[1], 10));
+                        var TotalFees1 = $('#txt_totalfees').val();
+                        if (!TotalFees1) { TotalFees1 = 0; }
+                        var finalFees = (parseInt(TotalFees, 10) + parseInt(TotalFees1, 10));
+                        if (!finalFees) { finalFees = 0; }
+                        $('#txt_totalfees').val(finalFees);
+                    }
+                    else {
+                        $('#txt_totalfees').val(0);
+                    }
+                }
+                else if ($('#ddl_Nation').val() == '1' && $('#ddl_MemberType').val() != '3') {
+                    var member = $("#txt_Indmember").val();
+                    if (!member) { member = 0; }
+                    var totalmember = parseInt(member) + 1;
+                    $("#txt_Indmember").val(totalmember);
+                    if (Count > 3) {
+                        var Indmembers = 1;
+                        if (!Indmembers) { Indmembers = 0; }
+                        var IndMemberFees = document.getElementById("lbl_IndmemberFee").textContent;
+                        if (!IndMemberFees) { IndMemberFees = "0:0"; }
+                        var IndPermemberFees = IndMemberFees.split(":");
+                        var TotalFees = (parseInt(Indmembers, 10) * parseInt(IndPermemberFees[1], 10));
+                        var TotalFees1 = $('#txt_totalfees').val();
+                        if (!TotalFees1) { TotalFees1 = 0; }
+                        var finalFees = (parseInt(TotalFees, 10) + parseInt(TotalFees1, 10));
+                        if (!finalFees) { finalFees = 0; }
+                        $('#txt_totalfees').val(finalFees);
+                    }
+                    else {
+                        $('#txt_totalfees').val(0);
+                    }
+
+                }
+                else if ($('#ddl_Nation').val() == '2') {
+                    var member = $("#txt_NonIndMember").val();
+                    if (!member) { member = 0; }
+                    var totalmember = parseInt(member) + 1;
+                    $("#txt_NonIndMember").val(totalmember);
+                    if (Count > 3) {
+                        var NonIndmembers = 1;
+                        if (!NonIndmembers) { NonIndmembers = 0; }
+                        var NonIndMemberFees = document.getElementById("lbl_NonIndmemberFee").textContent;
+                        if (!NonIndMemberFees) { NonIndMemberFees = "0:0"; }
+                        var NonIndPermemberFees = NonIndMemberFees.split(":");
+                        var TotalFees = (parseInt(NonIndmembers, 10) * parseInt(NonIndPermemberFees[1], 10));
+                        var TotalFees1 = $('#txt_totalfees').val();
+                        if (!TotalFees1) { TotalFees1 = 0; }
+                        var finalFees = (parseInt(TotalFees, 10) + parseInt(TotalFees1, 10));
+                        if (!finalFees) { finalFees = 0; }
+                        $('#txt_totalfees').val(finalFees);
+                    }
+                    else {
+                        $('#txt_totalfees').val(0);
+                    }
+                }
+                $("#txt_crewmemberName").val('');
+                $("#txt_crewAddress1").val('');
+                $("#txt_crewAddress2").val('');
+                $("#txt_crewLandMark").val('');
+                $("#txt_crewPostal").val('');
+                $("#ddl_Gender").val('0');
+                $("#ddl_cIDType").val('0');
+                $("#txt_cIDno").val('');
+                $("#ddl_Nation").val('0');
+                $("#ddl_MemberType").empty();
+                $("#ddl_MemberType").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                $("#ddl_MemberType").val('0');
+            },
+
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+        //document.getElementById("txt_crewmemberName").value = "";
+
+        // }
+    }
+
+    $(document).on('click', '.get-delete', function (e) {
+        var $row = jQuery(this).closest('tr');
+        var $columns = $row.find('td');
+        var ID = $.trim($columns[4].innerHTML);
+        var nationality = $.trim($columns[5].innerHTML);
+        var mType = $.trim($columns[6].innerHTML);
+        jQuery(this).closest('tr').remove();
+
+
+
+        var i = 0;
+        var RowInfo = {
+            Id: ID
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            headers: {
+                __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+            },
+            data: JSON.stringify(RowInfo),
+            url: RootURl + 'FilmShooting/deleteMemberData',
+            success: function (data) {
+                if (nationality == 'Indian' && mType == 'Student') {
+                    var student = $("#txt_Stundent").val();
+                    if (!student) { student = 0; }
+                    var totalStudent = parseInt(student) - 1;
+                    $("#txt_Stundent").val(totalStudent);
+                    $('#txt_Stundent').trigger('change');
+                }
+                if (nationality == 'Indian' && mType != 'Student') {
+                    var member = $("#txt_Indmember").val();
+                    if (!member) { member = 0; }
+                    var totalmember = parseInt(member) - 1;
+                    $("#txt_Indmember").val(totalmember);
+                    $('#txt_Indmember').trigger('change');
+
+                }
+                else if (nationality == 'Foreigner' && mType != 'Student') {
+                    var member = $("#txt_NonIndMember").val();
+                    if (!member) { member = 0; }
+                    var totalmember = parseInt(member) - 1;
+                    $("#txt_NonIndMember").val(totalmember);
+                    $('#txt_NonIndMember').trigger('change');
+                }
+
+
+
+                var RowCount = $("#temp tr").length;
+                RowCount = RowCount - 1;
+
+
+
+                var $row1 = $("#temp").find("tr").last();
+                var $columns1 = $row1.find('td');
+                var $columns1 = $row1.find('td');
+                var nationality1 = $columns1[5].innerHTML;
+                var mType1 = $columns1[6].innerHTML;
+
+
+
+
+                if (RowCount == 3) {
+                    $("#txt_totalfees").val(0);
+                    $('#txt_totalfees').trigger('change');
+                }
+                else if (RowCount > 3) {
+
+                    if (nationality1 == 'Indian' && mType1 == 'Student') {
+
+
+                        var IndStudentFee = document.getElementById("lbl_IndStudentFee").textContent;
+                        if (!IndStudentFee) { IndStudentFee = "0:0"; }
+                        var IndStudentFeePermember = IndStudentFee.split(":");
+
+                        $("#txt_totalfees").val(IndStudentFeePermember[1]);
+                        $('#txt_totalfees').trigger('change');
+
+                    }
+                    if (nationality1 == 'Indian' && mType1 != 'Student') {
+
+                        var IndMemberFees = document.getElementById("lbl_IndmemberFee").textContent;
+                        if (!IndMemberFees) { IndMemberFees = "0:0"; }
+                        var IndPermemberFees = IndMemberFees.split(":");
+
+
+
+                        $("#txt_totalfees").val(IndPermemberFees[1]);
+                        $('#txt_totalfees').trigger('change');
+
+                    }
+                    else if (nationality1 == 'Foreigner' && mType1 != 'Student') {
+
+                        var NonIndmemberFee = document.getElementById("lbl_NonIndmemberFee").textContent;
+                        if (!NonIndmemberFee) { NonIndmemberFee = "0:0"; }
+                        var NonIndPermemberFee = NonIndmemberFee.split(":");
+
+                        $("#txt_totalfees").val(NonIndPermemberFee[1]);
+                        $('#txt_totalfees').trigger('change');
+
+                    }
+
+
+                }
+
+            },
+            error: function (ex) { alert(ex); }
+
+        });
+        e.preventDefault();
+    });
+
+    function reload() {
+        var r = confirm("Do you want to leave page!");
+        if (r) {
+            window.location = RootURl + "Dashboard/dashboard";
+        }
+        else {
+            //do nothing
+        }
+    }
+
+    function isNumber(evt, element) {
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+
+        if (
+
+            (charCode < 48 || charCode > 57))
+            return false;
+
+        return true;
+    }
+
+    function checkZero(txt) {
+        // alert(txt);
+        if ($('#txt_totalCrewmember').val() == 0) {
+            // $('#errordiv3').style.display = 'block';
+            $('#txt_totalCrewmember').val('');
+            return true;
+        }
+
+    }
+
+    function isNumberKey(evt) {
+        var id = $(evt.target).attr("id");
+        if (id == 'txt_totalCrewmember') {
+            document.getElementById("error").style.display = 'none';
+        }
+        else if (id == 'txt_Totalvehicle') {
+            document.getElementById("errorVehicleNum").style.display = 'none';
+        }
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode == 46 || charCode > 31 && (charCode < 48 || charCode > 57)) {
+            if (id == 'txt_totalCrewmember') {
+                document.getElementById("error").style.display = 'block';
+            }
+            else if (id == 'txt_Totalvehicle') {
+                document.getElementById("errorVehicleNum").style.display = 'block';
+                document.getElementById("errorTotalvehicle").style.display = 'none';
+            }
+            return false;
+        }
+        else
+            return true;
+    }
+
+    function autoPlacesuggest() {
+        $(".autoPlacesuggest").autocomplete({
+            source: function (request, response) {
+                if (document.getElementById('Place').value.length >= 2) {
+                    $.ajax({
+                        type: "POST",
+                        url: RootURl + 'FilmShooting/getDistrict',
+                        headers: {
+                            __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+                        },
+                        data: { Place: $.trim($("#Place").val()), disttype: "isFilmShootong" },
+                        success: function (data) {
+                            source: data.d;
+                            response($.map(data, function (item) {
+                                $('#hdPlaceId').val(item.Value);
+                                return { label: item.Text, value: item.Text };
+
+                            }))
+                        },
+                        error: function (result) {
+
+                        }
+                    });
+                }
+                else {
+                    response('');
+                }
+            }
+        });
+    }
+
+
+</script>
+<input type="hidden" id="Hdn_Id" value="0" />
+@using (Html.BeginForm("SubmitFilmshootingPermission", "FilmShooting", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    <div id="page-wrapper-inn">
+        <div class="col-lg-12 pad">
+            <h1 class="page-header">Film Shooting Permission</h1>
+        </div>
+        <!-- /.col-lg-12 -->
+        <!-- Row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <!--<div class="panel-heading"></div>
+                    <!-- /.panel-heading -->
+
+                    <div class="panel-body">
+                        <div id="mainDiv">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label> Applicant Type: <span class="mandatory">*</span></label>
+                                    <select class="form-control" name="ApplicantType" id="applicantType">
+                                        <option value="">---Please Select Application Type---</option>
+                                        <option value="1">Individual</option>
+                                        <option value="2">Organization</option>
+                                    </select>
+                                    <input type="hidden" id="appLicant" name="AppLicant">
+                                </div>
+                                <div id="errordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                            <div></div>
+                            <div class="col-lg-12">
+                                <label>Film Shooting Information</label>
+                                <div class="divider"></div>
+                            </div>
+                            <div class="col-lg-6 un-bold">
+                                <div class="form-group">
+                                    <label>Select place <span class="mandatory">*</span></label>
+                                    @*@Html.DropDownList("Place", (IEnumerable<SelectListItem>)ViewBag.Place, "--Select--", new { @class = "form-control", id = "Place" })*@
+                                    <input type="text" class="form-control autoPlacesuggest" id="Place" name="Place">
+                                    <input type="hidden" id="hdPlaceId" name="hdPlaceId">
+                                    <input type="hidden" id="plcId" name="PlcName">
+                                </div>
+                                <div id="errordiv10" style="display:none" class="alert-danger1"></div>
+                            </div>
+
+                            <div class="col-lg-6 un-bold">
+                                <div class="form-group">
+                                    <label>Film Title: <span class="mandatory">*</span></label>
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="FilmTitle"
+                                               title="Enter the Title of the film for which shooting permission is required. E.G. Hum Saath Saath Hain" name="Title" />
+                                    </div>
+                                    <div id="errordiv31" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 un-bold">
+                                <div class="form-group">
+                                    <label>Purpose of shooting: <span class="mandatory">*</span></label>
+                                    @*<input type="text" class="form-control" id="Purpose_of_shooting" name="ShootingPurpose"
+                                        title="Enter the purpose of shooting. E.G. Film Making" />*@
+
+                                    @Html.DropDownList("ShootingPurpose", new List<SelectListItem>
+                                    {
+                                        new SelectListItem { Text = "--Select--", Value = ""},
+                                        new SelectListItem { Text = "Documentary", Value = "Documentary"},
+                                        new SelectListItem { Text = "Commercial", Value = "Commercial"},
+                                    }, new { id = "Purpose_of_shooting", @class = "form-control" })
+
+
+                                </div>
+                                <div id="errordiv6" style="display:none" class="alert-danger1"></div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Shooting Duration (From Date): <span class="mandatory">*</span></label>
+                                    <input class="form-control datefield" type="text" id="txt_fromdate" name="DurationFrom"
+                                           title="Select the shooting START date from the date picker" />
+                                </div>
+                                <div id="errordiv4" style="display:none" class="alert-danger1"></div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Shooting Duration (To Date): <span class="mandatory">*</span></label>
+                                    <input class="form-control datefield" type="text" id="txt_todate" name="DurationTo"
+                                           title="Select the shooting END date from the date picker" />
+                                </div>
+                                <div id="errordiv5" style="display:none" class="alert-danger1"></div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label> Short Description of Film Script:<span class="mandatory">*</span></label>
+                                    <textarea class="form-control" id="descriptionoffilmscript" name="Description" rows="4"
+                                              title="Enter brief description of the film. E.G. It is a family drama, having high profile cast" maxlength="1000"></textarea>
+                                </div>
+                                <div id="errordiv2" style="display:none" class="alert-danger1"></div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Transcript Upload: <span class="mandatory">*</span><span> (Only jpg', 'jpeg', 'png', 'gif', 'pdf allowed with max size 100kb)</span></label>
+                                    <input class="form-control" type="file" id="txtUploadtranscript" name="txtUploadtranscript" />
+                                </div>
+                                <div id="errordivtranscript" style="display:none" class="alert-danger1"></div>
+                            </div>
+
+                            <div class="col-lg-12">
+                                <label>&nbsp;</label>
+                                <div class="divider"></div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Number of Crew Member:<span class="mandatory">*</span></label>
+                                    <input type="text" class="form-control" id="txt_totalCrewmember" maxlength="4" title="Enter the total number of Crew Member visiting for the shoot. E.G. 18"
+                                           name="NoOfCrewMember" onkeypress="return isNumberKey(event);" onblur="return checkZero(this);">
+                                    <span id="error" style="display: none">* Input digits (0 - 9)</span>
+                                </div>
+                                <div id="errordiv3" style="display:none" class="alert-danger1"></div>
+                            </div>
+
+                            <div class="col-lg-12">
+                                <label>Name & Address of Crew Member</label>
+                                <div class="divider"></div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group un-bold">
+                                    <label>Name: <span class="mandatory">*</span></label>
+                                    <input type="text" class="form-control" maxlength="50" id="txt_crewmemberName"
+                                           title="Enter name of the Crew Member. E.G. Raja Ram" />
+                                </div>
+                                <div id="errordiv13" style="display:none" class="alert-danger1"></div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group un-bold">
+                                    <label>Address Line 1: <span class="mandatory">*</span></label>
+                                    <input type="text" maxlength="100" class="form-control" id="txt_crewAddress1" title="Enter first line of address of the Crew Member. E.G. 2A/36 Deep chandra bhartiya marg">
+                                </div>
+                                <div id="errordiv14" style="display:none" class="alert-danger1"></div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group un-bold">
+                                    <label>Address Line 2: </label>
+                                    <input type="text" maxlength="100" class="form-control" id="txt_crewAddress2" title="Enter second line of address of the Crew Member. E.G. New industrial town, Rajasthan" />
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group un-bold">
+                                    <label>Landmark Address: </label>
+                                    <input type="text" maxlength="100" class="form-control" id="txt_crewLandMark" title="Enter nearest fixed Land Mark Description E.G. Near Maruti Industries" />
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group un-bold">
+                                    <label>Postal Code: <span class="mandatory">*</span></label>
+                                    <input type="text" class="form-control" id="txt_crewPostal" maxlength="10" title="Enter the PIN code. 302001" />
+                                </div>
+                                <div id="errorPostCode" style="display:none" class="alert-danger1"></div>
+                            </div>
+
+
+                            <div class="col-lg-6">
+                                <div class="form-group un-bold">
+                                    <label>Gender: <span class="mandatory">*</span></label>
+                                    <select class="form-control" id="ddl_Gender" name="ddl_Gender">
+                                        <option value="0">---Select---</option>
+                                        <option value="1">Male</option>
+                                        <option value="2">Female</option>
+                                        <option value="3">Transgender</option>
+                                    </select>
+                                    <span id="errorGender" style="display: none" class="alert-danger1">* Please Select Gender</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group un-bold">
+                                    <label>Select Nationality:<span class="mandatory">*</span></label>
+                                    <select class="form-control" name="ddl_Nation" id="ddl_Nation">
+                                        <option value="0">Select</option>
+                                        <option value="1">Indian</option>
+                                        <option value="2">Foreigner</option>
+                                    </select>
+                                    <span id="errorNationality" style="display: none" class="alert-danger1">* Please Select Nationality.</span>
+                                </div>
+                            </div>
+
+                            <div id="GOI" class="col-lg-6" style="display:none">
+                                <div class="form-group">
+                                    <label>GOI Upload:<span class="mandatory"> (Only.jpg/.pdf/.png/.gif allowed with max size 100kb)</span></label>
+                                    <input class="form-control" type="file" id="txtuploadGOI" name="txtuploadGOI" />
+                                    <button type="button" id="btnUploadId" name="Command" value="Cancel" class="btn btn-danger" style="width:auto" title="Cancel">
+                                        <i class="fa fa-times fa-fw"></i>Upload
+                                    </button>
+                                    <input type="hidden" id="hdUploadDoc" value="" name="hdUploadDoc" />
+
+
+                                </div>
+                                <div id="errordivGOI" style="display:none" class="alert-danger1"></div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group un-bold">
+                                    <label>Select Member Type:<span class="mandatory">*</span></label>
+                                    <select class="form-control" name="ddl_MemberType" id="ddl_MemberType"></select>
+                                    <span id="errorMemberType" style="display: none" class="alert-danger1">* Please Select Member Type.</span>
+                                    <label id="lbl_feePerMember" for="email"></label>
+                                    <input type="hidden" id="hdn_memberfee" />
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group un-bold">
+                                    <label>Select ID Type: <span class="mandatory">*</span></label>
+                                    <select class="form-control" name="ddl_cIDType" id="ddl_cIDType">
+                                        <option value="0">Select</option>
+                                        <option value="1">Passport</option>
+                                        <option value="2">Aadhar</option>
+                                        <option value="3">Driving Licence</option>
+                                        <option value="4">Voter ID</option>
+                                        <option value="5">PAN Card</option>
+                                        <option value="6">Student ID Card</option>
+                                    </select>
+                                    <span id="errorIDtype" style="display: none" class="alert-danger1">* Please Select ID Type</span>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group un-bold">
+                                    <label>ID proof No: <span class="mandatory">*</span></label>
+                                    <input type="text" class="form-control" id="txt_cIDno" name="txt_cIDno" maxlength="25" title="Enter the ID proof number of the selected ID" />
+                                    <span id="errorIDNo" style="display: none" class="alert-danger1">* Please Enter Valid ID No.</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group un-bold">
+                                    <label>Upload ID <span> (Only.jpg/.pdf/.png/.gif allowed with max size 100kb)</span></label>
+                                    <input type="file" class="form-control" id="txtUploadId" name="txtUploadId" title="Upload valid photo Id" />
+                                    <input type="hidden" id="hdUploadIdDoc" value="" name="hdUploadIdDoc" />
+                                    <div id="errordivUpload" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-group un-bold">
+                                    <button type="button" id="btnUploadPhotoId" name="Command" value="Cancel" style="width:10%" class="btn btn-danger" title="Cancel">
+                                        <i class="fa fa-times fa-fw"></i>Upload
+                                    </button>
+                                </div>
+                            </div>
+
+
+                            <div class="col-lg-6 un-bold">
+                                <div class="form-group" id="btn-cont1">
+                                    <label> &nbsp;</label>
+                                    <button type="button" class="btn btn-success" id="btn_addCrewMember">
+                                        Add
+                                    </button>
+                                    <button type="button" id="btnView" class="btn btn-success" data-toggle="modal" data-target="#myModal">View</button>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12">
+                                <label>&nbsp;</label>
+                                <div class="divider"></div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Select Photo ID Type: <span class="mandatory">*</span></label>
+                                    <select class="form-control" name="IdentityProof" id="IdentityProofId">
+                                        <option value="">Select</option>
+                                        <option value="1">Passport</option>
+                                        <option value="2">Aadhar</option>
+                                        <option value="3">Driving Licence</option>
+                                        <option value="4">Voter ID</option>
+                                        <option value="5">PAN Card</option>
+                                    </select>
+                                    <input type="hidden" id="identityProofId" name="IdentityProofType">
+                                </div>
+                                <div id="errordiv7" style="display:none" class="alert-danger1"></div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Photo ID proof No: <span class="mandatory">*</span></label>
+                                    <input type="text" class="form-control" id="txt_IDno" maxlength="25" name="IdentityProofNo"
+                                           title="Enter the ID proof number of the selected ID. E.G. AA125698" />
+                                </div>
+                                <div id="errordiv8" style="display:none" class="alert-danger1"></div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group ">
+                                    <label>Photo ID proof of applicant: <span class="mandatory">*</span></label>
+                                    <input type="file" class="form-control" id="IDProofUrl" name="IDProofUrl" title="Click on Choose File button and upload the selected ID." />
+                                </div>
+                                <div id="errordiv9" style="display:none" class="alert-danger1"></div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <br />
+                                    <label><span class="mandatory">* Please carry original photo ID at the time of Entry</span></label>
+                                    <label><span class="mandatory">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size:100 kb.</span></label>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <label>&nbsp;</label>
+                                <div class="divider"></div>
+                            </div>
+
+                            <div class="form-group  un-bold">
+                                <label class="control-label col-sm-2" for="email">
+                                    @*Select Citizen Type:*@
+                                </label>
+                                <div class="col-sm-3">
+                                    <label class="control-label" for="email">
+                                        Indian Citizen
+                                    </label>
+                                </div>
+
+                                <div class="col-sm-3">
+                                    <label class="control-label " for="email">
+                                        Non-Indian Citizen
+                                    </label>
+                                </div>
+
+                                <div class="col-sm-3">
+                                    <label class="control-label " for="email">
+                                        Indian Students
+                                    </label>
+                                </div>
+                                <div class="col-sm-1">
+                                    &nbsp;
+                                </div>
+                            </div>
+                            <div class="form-group un-bold">
+                                <label class="control-label col-sm-2" for="email">
+                                    No of Members:
+                                </label>
+                                <div class="col-sm-3">
+                                    <input type="text" class="form-control" id="txt_Indmember" readonly name="IndianCitizen" title="Enter the number of Indian Citizen visiting for shooting. E.G. 10" />
+                                    <label id="lbl_IndmemberFee" for="email"></label>
+                                </div>
+                                <div class="col-sm-3">
+                                    <input type="text" class="form-control" id="txt_NonIndMember" readonly name="NonIndianCitizen" title="Enter the number of Non-Indian Citizen visiting for shooting. E.G. 5" />
+                                    <label id="lbl_NonIndmemberFee" for="email"></label>
+                                </div>
+                                <div class="col-sm-3">
+                                    <input type="text" class="form-control" id="txt_Stundent" readonly name="Student" title="Enter the number of Indian Students visiting for shooting. E.G. 3" />
+                                    <label id="lbl_IndStudentFee" for="email"></label>
+                                </div>
+
+                                <div class="col-sm-1">
+                                    &nbsp;
+                                </div>
+                            </div>
+                            <div class="col-lg-6 un-bold">
+                                <div class="form-group">
+                                    <label> Total Fee(In INR):</label>
+                                    <input type="text" class="form-control" id="txt_totalfees" name="TotalFees" readonly="readonly">
+                                </div>
+                            </div>
+                            <div class="col-lg-6 un-bold">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <input type="text" class="form-control" style="visibility:hidden" />
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <label>Equipment & Material</label>
+                                <div class="divider"></div>
+                            </div>
+
+                            <div class="col-lg-6 un-bold">
+                                <div class="form-group">
+                                    <label>Select Vehicle /Equipment Type: <span class="mandatory">*</span></label>
+                                    @Html.DropDownList("Vehiclecat", (IEnumerable<SelectListItem>)ViewBag.PriorityID, "--Select--", new { @class = "form-control", id = "ddl_Vehiclecat" })
+                                    <input type="hidden" id="vehiclecatId" name="VehiclecatName">
+                                </div>
+                                <div id="errordiv15" style="display:none" class="alert-danger1"></div>
+
+                            </div>
+                            <div id="divddlvechile" class="col-lg-6 un-bold">
+                                <div class="form-group">
+                                    <label>Select Vehicle /Equipment: <span class="mandatory">*</span></label>
+                                    @Html.DropDownList("ddl_vehicle", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control" })
+                                    <input type="hidden" id="vehicleId" name="VehicleName" />
+                                </div>
+                                <div id="errorddl_vehicle" style="display:none" class="alert-danger1"></div>
+                            </div>
+                            <div id="divtxtvechile" class="col-lg-6 un-bold" style="display:none">
+                                <div class="form-group">
+                                    <label>Select Vehicle /Equipment: <span class="mandatory">*</span></label>
+                                    <input type="text" class="form-control" id="txtVehicle" name="txtVehicle" title="Enter name of vehicles" />
+                                </div>
+                                <div id="errortxt_vehicle" style="display:none" class="alert-danger1"></div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group un-bold">
+                                    <label>Total vehicle / Equipment: <span class="mandatory">*</span></label>
+                                    <input type="text" class="form-control" id="txt_Totalvehicle" title="Enter the total number of vehicles required" onkeypress="return isNumberKey(event);" />
+                                    <span id="errorTotalvehicle" style="display: none" class="alert-danger1">* Please Enter Total vehicle / Equipment.</span>
+                                    <span id="errorVehicleNum" style="display: none" class="alert-danger1">* Input digits (0 - 9)</span>
+                                    <label id="lbl_PerVehicleFee" for="email"></label>
+
+                                </div>
+
+                            </div>
+                            <div class="col-lg-6 un-bold">
+                                <div class="form-group" id="btn-cont1">
+                                    <label> &nbsp;</label>
+                                    <button type="button" class="btn btn-success" id="btn_addvehicle">
+                                        Add
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <table id="temp1" class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            @*<th>Id</th>*@
+                                            <th>Category</th>
+                                            <th>Vehicle / Eqpt.</th>
+                                            <th>Vehicle Fees</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="VehicleTable"></tbody>
+                                </table>
+                            </div>
+                            <div class="col-lg-6 un-bold">
+                                <div class="form-group">
+                                    <label>Total Vehicle Fees:</label>
+                                    <input type="text" class="form-control" id="txt_VehFees" name="VehicleFees" readonly>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <label>Security Deposit</label>
+                                <div class="divider"></div>
+                            </div>
+                            <div class="col-lg-6 un-bold">
+                                <div class="form-group">
+                                    <label> Film category: <span class="mandatory">*</span></label>
+                                    @Html.DropDownList("ddl_filmCategory", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control" })
+                                    @*<select class="form-control" id="ddl_filmCategory" name="FilmCategory" >
+                                            <option value="">---Select---</option>
+                                            <option value="Feature Film">Feature Film</option>
+                                            <option value="Film by Indian Company/Agency">Film by Indian Company/Agency</option>
+                                            <option value="Film by Foreign Company/Agency">Film by Foreign Company/Agency</option>
+
+                                        </select>*@
+                                </div>
+                                <div id="errordiv11" style="display:none" class="alert-danger1"></div>
+                            </div>
+                            <div class="col-lg-6 un-bold">
+                                <div class="form-group">
+                                    <label> Total Security Deposit: <span class="mandatory">*</span></label>
+                                    <input type="text" class="form-control" id="txt_DepositeAmount" name="DepositeAmount" readonly />
+                                </div>
+                                <div id="errordiv12" style="display:none" class="alert-danger1"></div>
+                            </div>
+                            <div class="col-lg-12 un-bold">
+                                <table id="tblPrice" class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Member Fees</th>
+                                            <th>Vechile Fees</th>
+                                            <th>Security Deposit</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbPrice"></tbody>
+                                </table>
+                            </div>
+                            <div class="modal fade" id="myModal" role="dialog">
+                                <div class="modal-dialog modal-lg">
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal">
+                                                &times;
+                                            </button>
+                                            <h4 class="modal-title">
+                                                Crew Members List
+                                            </h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="form-horizontal" role="form">
+                                                <table id="temp" class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            @*<th>Id</th>*@
+                                                            <th>Name</th>
+                                                            <th>Address1</th>
+                                                            <th>LandMark</th>
+                                                            <th>Postal Code</th>
+                                                            <th>ID No</th>
+                                                            <th>Nationality</th>
+                                                            <th>Member Type</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="applyTable"></tbody>
+                                                </table>
+
+
+
+                                                <div class="form-group" id="btn-cont1">
+                                                    <div class="col-sm-10">
+                                                        <button type="button" class="btn btn-success" id="procedId" style="display:none">
+                                                            Proceed
+                                                        </button>
+
+                                                        <button type="button" class="btn btn-danger" data-dismiss="modal">
+                                                            Close
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Btn Groping -->
+                        <div class="btn-padd">
+                            <div id="btn-film" class="col-lg-12">
+                                <button type="submit" class="btn btn-success" name="Command" value="Payment" id="btnproced">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+                                <button type="reset" id="btnReset" class="btn btn-warning">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+                                <button type="button" name="Command" value="Cancel" class="btn btn-danger" onclick=" reload(); return false;">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+
+                            </div>
+                        </div>
+                        <!-- /.Btn Groping -->
+
+                    </div>
+                    <!-- /.panel-body -->
+
+                </div>
+                <!-- /.panel -->
+
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+    </div>
+    <div id='previewDiv' style="width:500px;">
+        &nbsp;
+    </div>
+}

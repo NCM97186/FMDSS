@@ -1,0 +1,779 @@
+﻿@model FMDSS.Models.ForesterDevelopment.DefineModel
+@{
+    ViewBag.Title = "fdmModel";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //  "~/Views/Shared/Forestlayout.cshtml";
+}
+@*<script type="text/javascript" src="~/js/jquery.min.js"></script>
+    <script src="~/js/bootstrap.min.js"></script>*@
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
+
+
+
+<!-- Form design -->
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Defining Model</h1>
+        @if (@TempData["ViewMessage"] != null)
+        {
+            <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["ViewMessage"]</div>
+        }
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!--<div class="panel-heading">Processing Fees</div>-->
+                <!-- /.panel-heading -->
+
+                <div class="panel-body">
+
+                    <!--Add New Btn-->
+
+                    <div class="col-lg-3 rgt pull-right">
+                        <button type="button" class="btn btn-success pull-right btn_pp" id="btnAddModel" data-toggle="modal" data-target="#myModal" title="Add Define Model">
+                            <i class="fa fa-plus"></i> Create Model
+                        </button>
+                    </div>
+                    <!--./Add New Btn-->
+                    <!--Table-->
+                    <div class="dataTable_wrapper ">
+                        <table class="table table-striped table-bordered table-hover table-responsive gridtable">
+                            <thead>
+                                <tr>
+                                    <th>S. No</th>
+                                    <th>Model Name</th>
+                                    <th>Created Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                @foreach (var item in ViewData["ModelList"] as IEnumerable<FMDSS.Models.ForesterDevelopment.DefineModel>)
+                                {
+
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(model => item.Index)
+                                        </td>
+                                        <td class="name">
+                                            @Html.DisplayFor(model => item.Model_Name)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.CreatedDate)
+                                        </td>
+
+                                        <td>
+
+
+                                            @*<button type="button" class="btn btn-success btn-circle" id="btnview_@item.ID" title="View" name="command" value="@item.ID" data-toggle="modal" data-target="#myModelManagement">
+                                                    <i class="fa fa-eye"></i>
+                                                </button>*@
+
+
+                                            <button type="button" class="btn btn-warning btn-circle" onclick="EditModel('@item.ID')" id="btnedit_@item.ID" title="Edit" value="@item.ID" data-toggle="modal" data-target="#myModal">
+                                                <i class="fa fa-edit"></i>
+                                            </button>
+
+                                            @*<button type="button" class="btn btn-danger btn-circle" id="btndel_@item.ID" title="Delete" value="@item.ID">
+                                                    <i class="fa fa-times"></i>
+                                                </button>*@
+
+
+                                        </td>
+
+                                    </tr>
+                                }
+
+
+                            </tbody>
+
+
+                        </table>
+
+
+
+                        <!-- /.panel-body -->
+
+                    </div>
+                    <!-- /.panel -->
+
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+
+            <div class="modal fade" id="myModal" role="dialog">
+                <div class="modal-dialog modal-lg">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">
+                                &times;
+                            </button>
+                            <h4 class="modal-title" id="myModalLabel">Create Model</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-horizontal" role="form">
+
+                                @using (Html.BeginForm("SaveModelData", "fdmModel", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data" }))
+                                {
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Model Name: <span class="mandatory">*</span></label>
+                                            @Html.TextBoxFor(x => x.Model_Name, new { @class = "form-control", @placeholder = "Enter Model Name", @maxlength = 50, @id = "Model_Name" })
+                                            <div id="errordivMName" style="display:none" class="alert-danger1"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Reference No.: <span class="mandatory"></span></label>
+                                            @Html.TextBoxFor(x => x.Model_RefNo, new { @class = "form-control", @placeholder = "Enter Reference Document No.", @maxlength = 50, @id = "Model_RefNo" })
+                                            <div id="errordivRefNo." style="display:none" class="alert-danger1"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12" id="RefFileEditMode" style="display:none">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label for="Document">
+                                                    Ref Document:<span class="mandatory">*</span>
+                                                </label>
+
+                                                <input type="file" class="form-control common" id="Model_DocumentPath" style="width:49%" title="Upload the Document" value="" name="Model_DocumentPath" />
+                                                @Html.Hidden("hdRefDocument", @Model.Model_DocumentPath)
+                                                <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                                                <div id="errordivdocument" style="display:none" class="alert-danger1"></div>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2">
+                                            <button type="button" class="btn btn-default btn-block mar-btn" name="" value="" id="btnViewFile">
+                                                <i class="fa fa-check"></i> View
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-12" id="RefFileCommonMode">
+                                        <div class="form-group">
+                                            <label for="Document">
+                                                Ref Document:<span class="mandatory"></span>
+                                            </label>
+
+                                            <input type="file" class="form-control common" id="Model_DocumentPath1" style="width:49%" title="Upload the Document" name="Model_DocumentPath" />
+                                            <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                                            <div id="errordivdocument" style="display:none" class="alert-danger1"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-group">
+                                            <label>
+                                                If required Activity is not there, then please refer this link URL!!
+                                            </label>
+
+                                            <a href='@Url.Action("fdmActivity", "fdmActivity")'>
+                                                Go to Activity
+                                            </a>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-bordered table-hover scroll-ad" id="tblSubActivityList">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Activity Group</th>
+                                                        <th>Activity Name</th>
+                                                        <th>Activity Type</th>
+                                                        <th>Activity Desc.</th>
+                                                        <th>Attach Activity</th>
+
+
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody id="datatable">
+                                                    @foreach (var item in ViewData["ActivityList"] as IEnumerable<FMDSS.Models.ForesterDevelopment.Activity>)
+                                                    {
+
+                                                        <tr>
+                                                            <td class="name">
+                                                                @Html.DisplayFor(model => item.Activity_Year_Name)
+                                                            </td>
+                                                            <td class="name">
+                                                                @Html.DisplayFor(model => item.Activity_Name)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(model => item.Activity_Type)
+                                                            </td>
+                                                            <td class="name">
+                                                                @Html.DisplayFor(model => item.Activity_Desc)
+                                                            </td>
+
+                                                            <td>
+                                                                <input type="checkbox" class="chkactvity" id="chkAct_@item.ID" checked="@item.IsChkSubActivity" value="@item.ID" />
+
+                                                            </td>
+
+                                                        </tr>
+                                                    }
+
+
+                                                </tbody>
+
+                                                <tbody style="display:none" id="datatable1"></tbody>
+
+                                            </table>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-12 padn-rem" style="display:none">
+                                        <label>Duration:</label>
+                                        <div id="errordivDuration" style="display:none" class="alert-danger1"></div>
+                                        <div class="divider"></div>
+                                    </div>
+                                    <div class="col-lg-6 un-bold" style="display:none">
+                                        <div class="form-group">
+                                            <label>From:</label>
+
+                                            <div id="datepicker" class="input-group date input-width" data-date-format="dd-mm-yyyy">
+                                                @Html.TextBoxFor(x => x.Model_FromDate, new { @class = "form-control datefield", @id = "txt_Dfrom" })
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                <div id="errordivFdate" style="display:none" class="alert-danger1"></div>
+                                            </div>
+
+
+
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 un-bold" style="display:none">
+                                        <div class="form-group">
+                                            <label>To:</label>
+                                            <div id="datepicker" class="input-group date input-width" data-date-format="dd-mm-yyyy">
+                                                @Html.TextBoxFor(x => x.Model_ToDate, new { @class = "form-control datefield", @id = "txt_Dto" })
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                <div id="errordivTDate" style="display:none" class="alert-danger1"></div>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+
+                                        <!-- Btn Groping -->
+                                    <div class="btn-padd">
+                                        <div id="btn" class="col-lg-12">
+
+                                            <button type="submit" class="btn btn-success" name="Command" value="" id="btn_SaveModel">
+                                                <i class="fa fa-check"></i> Submit
+                                            </button>
+                                            <button type="button" name="Command" value="Cancel" data-dismiss="modal" class="btn btn-danger" title="Cancel">
+                                                <i class="fa fa-times fa-fw"></i> Cancel
+                                            </button>
+
+                                        </div>
+                                    </div>
+                                        <!-- /.Btn Groping -->
+                                }
+
+                                <div class="form-group" id="btn-cont1">
+                                    <div class="col-sm-offset-2 col-sm-10">
+
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <!--Popup Model-->
+            <div class="modal fade" id="myModelManagement" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+                <div class="modal-dialog mdw">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                            <h4 class="modal-title" id="myModalLabel">View Model</h4>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- From URL Get -->
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Model Name: </label>
+                                    <div id="divModelName" class="un-bold"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Duration From: </label>
+                                    <div id="divDurationFrom" class="un-bold"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Duration To: </label>
+                                    <div id="divDurationTo" class="un-bold"></div>
+                                </div>
+                            </div>
+
+                            <!-- /. From URL Get -->
+                        </div>
+
+                        <!-- /.modal-body -->
+
+                        <div class="modal-footer" style="clear:both">
+
+                            <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal">
+                                <i class="fa fa-times fa-fw"></i> Close
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.modal-content -->
+                </div>
+                <!-- /.modal-dialog -->
+            </div>
+            <!--./Popup Model-->
+
+        </div>
+    </div>
+    <!-- /.Row -->
+</div>
+
+<script src="~/js/jquery.min.js"></script>
+
+<style type="text/css">
+    
+    #page-wrapper-inn .table>thead>tr>th {
+    width: 13%;
+}
+    .scroll-ad {
+        overflow-y: scroll !important;
+        height: 218px !important;
+        border: 2px solid;
+        display: table-caption;
+        width: 850px;
+    }
+    /*#Activity_BSR_Per_Unit {
+        border-radius: 4px;
+    }*/
+</style>
+<script type="text/javascript">
+
+
+    var RootUrl = '@Url.Content("~/")';
+    $(function () {
+        $(".datefield").datepicker({ minDate: new Date(1999, 10 - 1, 25), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+    });
+
+    $(document).ready(function () {
+
+        $('.gridtable').DataTable({
+            responsive: true
+        });
+
+        $(document).on('change', '#txt_Dfrom', function () {
+
+            $("txt_Dto").val('');
+        })
+        $("#btnViewFile").click(function () {
+
+            var path = RootUrl + $("#hdRefDocument").val();
+
+            var pathurl = path.replace('~/', '');
+            window.open(pathurl, '_blank');
+
+        });
+
+        $("#Model_DocumentPath").change(function (e) {
+
+            var iSize = ($("#Model_DocumentPath")[0].files[0].size / 1048576);
+
+            if (iSize > 2) {
+                $("#Model_DocumentPath").val('');
+                $('#errordivdocument').show();
+                $('#errordivdocument').html("Ref. Document file size should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Model_DocumentPath').focus();
+                return false;
+
+            }
+            else { $('#errordivdocument').hide(); }
+
+
+            var file = $("#Model_DocumentPath").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $("#Model_DocumentPath").val('');
+                    $('#errordivdocument').show();
+                    $('#errordivdocument').html("Please upload only jpeg or jpg or pdf or png or gif file format Ref Document Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Model_DocumentPath').focus();
+                    return false;
+                } else {
+                    $('#errordivdocument').hide();
+                }
+            }
+
+            else { $('#errordivdocument').hide(); }
+
+
+
+
+        });
+
+        $("#txt_Dto").change(function () {
+            var str1 = $("#txt_Dfrom").val();
+            var str2 = $("#txt_Dto").val();
+
+            var L = 3, d1 = $("#txt_Dfrom").val().split('/'), d2 = $("#txt_Dto").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#txt_Dto").val('');
+                $('#errordivDuration').show();
+                $('#errordivDuration').html("Date Must be Greater then From Date" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $("#txt_Dto").focus();
+                return false;
+
+            }
+        });
+
+        $('#btnAddModel').click(function () {
+            $("#myModalLabel").text("Create Model");
+            $("#Model_Name").val('');
+            $("#txt_Dfrom").val('');
+            $("#txt_Dto").val('');
+            $("#btn_SaveModel").val('');
+            $("#hdRefDocument").val('');
+            $("#RefFileEditMode").hide();
+            $("#RefFileCommonMode").show();
+            $("#btn_SaveActivity").val('');
+            $("#Model_RefNo").val('');
+        })
+
+        $(document).on('change', '.chkactvity', function (e) {
+
+
+
+            if (this.checked) {
+
+                var id = $(this).val();
+
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'fdmModel/SaveActivityMapping', // we are calling json method
+                    dataType: 'json',
+                    data: { ID: id },
+                    success: function (data) {
+
+                    },
+                    //error: function (ex) {
+                    //    alert('Failed to retrieve states.' + ex);
+                    //}
+
+                });
+            }
+            else {
+
+                var id = $(this).val();
+
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'fdmModel/DeleteMapping', // we are calling json method
+                    dataType: 'json',
+                    data: { sid: id },
+                    success: function (data) {
+
+                    },
+                    //error: function (ex) {
+                    //    alert('Failed to retrieve states.' + ex);
+                    //}
+
+                });
+            }
+        })
+
+        $("#txt_Dfrom").change(function () {
+            $("#txt_Dto").val('');
+        });
+        $("#txt_Dto").change(function () {
+            var str1 = $("#txt_Dfrom").val();
+            var str2 = $("#txt_Dto").val();
+
+            var L = 3, d1 = $("#txt_Dfrom").val().split('/'), d2 = $("#txt_Dto").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                $('#errordivDuration').hide();
+
+            }
+            else {
+                $("#txt_Dto").val('');
+                $('#errordivDuration').show();
+                $('#errordivDuration').html("To Date Must be Greater then From Date" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#myModal').animate({
+                    scrollTop: $("#Model_Name").offset().top
+                }, 600);
+                return false;
+
+            }
+        });
+
+
+
+        $('#btn_SaveModel').click(function () {
+
+            if ($('#Model_Name').val() == '') {
+                $('#errordivMName').show();
+                $('#errordivMName').html("Please enter the Model Name!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Model_Name').focus();
+                return false;
+            }
+            else { $('#errordivMName').hide(); }
+
+            if ((parseInt($('#Model_RefNo').val())) != 0) {
+                $('#errordivRefNo.').show();
+                $('#errordivRefNo.').html("Please enter the valid Reference No.!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Model_RefNo').focus();
+                return false;
+            }
+            else { $('#errordivMName').hide(); }
+
+
+            //if ($('#txt_Dfrom').val() == '') {
+            //    $('#errordivFdate').show();
+            //    $('#errordivFdate').html("Please enter the From date!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            //    $('#myModal').animate({
+            //        scrollTop: $("#Model_Name").offset().top
+            //    }, 600);
+            //    return false;
+            //}
+            //else { $('#errordivFdate').hide(); }
+
+            //if ($('#txt_Dto').val() == '') {
+            //    $('#errordivTDate').show();
+            //    $('#errordivTDate').html("Please enter the To date!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            //    $('#myModal').animate({
+            //        scrollTop: $("#Model_Name").offset().top
+            //    }, 600);
+            //    return false;
+            //}
+            //else { $('#errordivTDate').hide(); }
+
+
+        })
+
+
+
+
+        $('[id^=btndel_]').click(function () {
+            var ID = { ID: $(this).val() };
+            var r = confirm("Are you sure you want to delete this model?");
+            if (r) {
+                $.ajax({
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(ID),
+                    url: RootUrl + "fdmModel/DeleteModelData",
+                    success: function (data) {
+                        if (parseInt(data.ID) > 0) {
+                            window.location.href = RootUrl + "fdmModel/fdmModel";
+                        }
+                    },
+
+                    traditional: true,
+                    error: function (data) { console.log(data) }
+                });
+            }
+            else {
+                //do nothing
+            }
+
+
+
+        });
+
+        $('[id^=btnview_]').click(function () {
+            var ID = { ID: $(this).val() };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(ID),
+                url: RootUrl + "fdmModel/EditModelData",
+                success: function (data) {
+                    $("#divModelName").html(data.Model_Name);
+                    $("#divDurationFrom").html(data.Model_FromDate);
+                    $("#divDurationTo").html(data.Model_ToDate);
+
+                },
+
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+
+        });
+
+        $('[data-toggle=modal]').on('click', function (e) {
+            var $target = $($(this).data('target'));
+            $target.data('triggered', true);
+            setTimeout(function () {
+                if ($target.data('triggered')) {
+                    $target.modal('show').data('triggered', false);
+                };
+            }, 600); // milliseconds
+            return false;
+        });
+
+    })
+
+    $(document).on('keypress', '#txt_Dfrom,#txt_Dto', function (event) {
+
+        event.preventDefault();
+        return false;
+
+    });
+
+    //$(document).on('keypress', '#Model_Name', function (event) {
+    //    var regex = new RegExp("^[a-zA-Z0-9 ]+$");
+    //    var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+    //    if (!regex.test(key)) {
+    //        event.preventDefault();
+    //        return false;
+    //    }
+    //});
+
+    $('#Model_Name').keypress(function (e) {
+        var kc = e.which;
+
+        if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 8 || kc == 13 || kc == 95 || kc == 37 || kc == 38) || (kc != 48 && kc >= 47 && kc <= 57) || (kc >= 44 && kc < 46) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+        }
+        else {
+            e.preventDefault();
+        }
+    });
+    $('#Model_RefNo').keypress(function (e) {
+        var kc = e.which;
+
+        if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95 || kc == 37 || kc == 38) || (kc >= 47 && kc <= 57) || (kc >= 44 && kc < 46) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+        }
+        else {
+            e.preventDefault();
+        }
+    });
+
+    function preventBackspace(e) {
+        var evt = e || window.event;
+        if (evt) {
+            var keyCode = evt.charCode || evt.keyCode;
+            if (keyCode === 8) {
+                if (evt.preventDefault) {
+                    evt.preventDefault();
+                } else {
+                    evt.returnValue = false;
+                }
+            }
+        }
+    }
+    function isNumber(evt, element) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (
+            (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+            (charCode < 48 || charCode > 57))
+            return false;
+    }
+
+    function EditModel(id) {
+        var RootUrl = '@Url.Content("~/")';
+        //$('[id^=btnedit_]').click(function () {
+        //    alert();
+        //var ID = { ID: $(this).val() };
+        var ID = { ID: id };
+        //alert('edit');
+        //alert(ID);
+
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(ID),
+            url: RootUrl + "fdmModel/EditModelData",
+            success: function (data) {
+
+                $("#Model_Name").val('');
+                $("#txt_Dfrom").val('');
+                $("#txt_Dto").val('');
+                $("#myModalLabel").text("Edit Model");
+                $("#Model_Name").val(data.Model_Name);
+                $("#txt_Dfrom").val(data.Model_FromDate);
+                $("#txt_Dto").val(data.Model_ToDate);
+                $("#Model_RefNo").val('');
+                $("#btn_SaveModel").val(data.ID);
+                $("#Model_RefNo").val(data.Model_RefNo);
+                $("#Activity_Type").val(data.ActvityType);
+                $("#RefFileEditMode").show();
+                $("#RefFileCommonMode").hide();
+                $("#hdRefDocument").val(data.DocumentPath);
+
+                $.ajax({
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(ID),
+                    url: RootUrl + 'fdmModel/GetListData',
+                    success: function (data) {
+
+                        var bardata = '';
+                        $("#datatable").html('');
+                        $("#datatable1").html('');
+
+                        for (var i = 0; i < data.length; i++) {
+
+                            bardata = "<tr><td>" + data[i].Activity_Year_Name + "</td><td>" + data[i].Activity_Name + "</td><td>" + data[i].Activity_Type + "</td>";
+
+                            bardata += "<td>" + data[i].Activity_Desc + "</td>";
+                            if (data[i].BitStaus == "1") {
+                                bardata += "<td><input type='checkbox' class='chkactvity' id='chkAct_" + data[i].ID + "' value='" + data[i].ID + "' checked='checked'";
+                            }
+                            else {
+                                bardata += "<td><input type='checkbox' class='chkactvity' value='" + data[i].ID + "' id='chkAct_" + data[i].ID + "'";
+                            }
+                            bardata += "</td><td style='display:none;'>" + data[i].ID + "</td></tr>";
+                            $("#datatable1").append(bardata);
+                        }
+
+
+                        $("#datatable1").show();
+                        $("#datatable").hide();
+                    }
+
+                });
+
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        })
+
+
+        //});
+    }
+</script>

@@ -1,0 +1,331 @@
+﻿@using FMDSS.Models
+@model FMDSS.Models.UserProfile
+
+@{
+    ViewBag.Title = "Profiling";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/js/jquery.min.js"></script>
+<script src="~/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#District2 option').filter(function () { return $(this).val() == '@Model.District2' }).attr('selected', true);
+        if ($('#District2 option:selected').val() != '--Select') {
+            $('#ddl_city2').empty();
+            $.ajax({
+                type: 'POST',
+                url: RootURl + 'Profile/getTehsils',
+                dataType: 'json',
+                data: { dist: $("#District2").val() },
+                success: function (states) {
+                    $.each(states, function (i, items) {
+                        $("#ddl_city2").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+
+                    });
+                    $('#ddl_city2 option').filter(function () { return $(this).val() == '@Model.City2' }).attr('selected', true);
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        }
+    });
+
+    function setSelectedValue(selectObj, valueToSet) {
+        setTimeout(function () {
+            for (var i = 0; i < selectObj.options.length; i++) {
+                
+                selectObj.options[2].val(valueToSet);
+                selectObj.options[2].selected = true;
+            }
+        }, 500);
+
+    }
+</script>
+
+
+<body>
+    @using (Html.BeginForm("UpdateUserDetails", "Profile", FormMethod.Post, new { id = "submitForm" }))
+    {
+        <div id="page-wrapper-inn">
+            <div class="col-lg-12 pad">
+                <h1 class="page-header">User Profiling</h1>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Update Your Profile</div>
+                        <div class="panel-body">
+                            @if (ViewData["i"] != null)
+                            {
+                                <script type="text/javascript">
+                                    $(function (e) {
+                                        alert("Profile updated successfully!").css({ 'color': 'green' });
+                                    })
+
+                                </script>
+
+                            }
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="">
+                                        Profile Type:
+                                    </label>
+                                    <select id="Applicant_type" class="form-control" name="Applicant_type">
+                                        <option value="1">As Individual</option>
+                                        <option value="2">As Govt.Agency</option>
+                                        <option value="3">As Private Agency</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <div class="border-add" id="dvAgency" style="display:none">
+                                        <div class="col-sm-6">
+                                            <div class="form-group" id="Name">
+                                                <label class="control-label col-sm-4" for="FatherName">
+                                                    Agency Name:
+                                                </label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control" name="AgencyName" id="" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group" id="Name">
+                                                <label class="control-label col-sm-4" for="FatherName">
+                                                    District:
+                                                </label>
+                                                <div class="col-sm-8">
+                                                    @Html.DropDownList("AgencyDistrict", (IEnumerable<SelectListItem>)ViewBag.PriorityID, "--Select--", new { @class = "form-control" })
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="f-spacer"></div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group" id="Name">
+                                                <label class="control-label col-sm-4" for="Designation">
+                                                    Block/City:
+                                                </label>
+                                                <div class="col-sm-8">
+                                                    @Html.DropDownList("AgencyCity", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group" id="Name">
+
+                                                <label class="control-label col-sm-4" for="Designation">
+                                                    Agency Address :
+                                                </label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control" id="AgencyAddress" name="AgencyAddress">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="f-spacer"></div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group" id="Name">
+                                                <label class="control-label col-sm-4" for="FatherName">
+                                                    Contact Person:
+                                                </label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control" name="AgencySPOC" id="AgencySPOC" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-6">
+                                            <div class="form-inline">
+                                                <div class="form-group" id="Name">
+                                                    <label class="control-label col-sm-4" for="Designation">
+                                                        Contact Number:
+                                                    </label>
+
+                                                    <div class="col-sm-8">
+                                                        <input type="text" style="width:20%" class="form-control" id="" name="">-
+                                                        <input type="text" style="width:75%" class="form-control" id="AgencyContact" name="AgencyContact" maxlength="10">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                            </div>
+                            <div class="f-spacer"></div>
+
+                            <div class="form-group">
+                                <div class="border-add" id="dvPersonalInfo" style="display:block">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="">
+                                                Full Name:
+                                            </label>
+                                            <input type="text" class="form-control" id="userName" name="FullName" readonly value="@Model.FullName" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6" id="designation">
+                                        <div class="form-group">
+                                            <label class="">
+                                                Designation:
+                                            </label>
+                                            <input type="text" class="form-control" id="userName" name="Designation" readonly value="@Model.Designation" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-inline">
+                                            <div class="form-group">
+                                                <label class="">
+                                                    Mobile No.:
+                                                </label>
+                                                <br />
+                                                <input type="text" style="width:20%" class="form-control" id="" name="" /> -
+                                                <input type="text" style="width:75%" class="form-control" id="" name="MobileNumber" value="@Model.MobileNumber" maxlength="10" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="">
+                                                Email Id:
+                                            </label>
+                                            <input type="text" class="form-control" id="" name="EmailId" value="@Model.EmailId" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="">
+                                                Address 1:
+                                            </label>
+                                            <input type="text" class="form-control" id="" name="Address1" readonly value="@Model.Address1" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="">
+                                                Postal Code:
+                                            </label>
+                                            <input type="text" class="form-control" id="" name="PINCode1" readonly value="@Model.PINCode1" />
+                                        </div>
+                                    </div>
+                                    @*<div>
+                                            <br />
+                                            &nbsp; <label>
+                                                Address 2:
+                                            </label>
+                                        </div>*@
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="">
+                                                District:
+                                            </label>
+                                            @Html.DropDownList("District2", (IEnumerable<SelectListItem>)ViewBag.PriorityID, "--Select--", new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="">
+                                                Block/City:
+                                            </label>
+                                            @Html.DropDownList("City2", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddl_city2" })
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="">
+                                                Address:
+                                            </label>
+                                            <input type="text" class="form-control" id="" name="Address2" value="@Model.Address2" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="">
+                                                Pin Code:
+                                            </label>
+                                            <input type="text" class="form-control" id="" name="PINCode2" maxlength="6" value="@Model.PINCode2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="btn-padd">
+                                <div class="col-lg-12" id="btn">
+                                    <button name="Command" class="btn btn-success" id="btn_submit1" type="submit" value="Submit">
+                                        <i class="fa fa-check"></i> Submit
+                                    </button>
+                                    <button class="btn btn-warning" type="reset">
+                                        <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                    </button>
+                                    <button name="Command" class="btn btn-danger" type="submit" value="Cancel">
+                                        <i class="fa fa-times fa-fw"></i> Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</body>
+
+<script type="text/javascript">
+
+    var RootURl = '@Url.Content("~/")';
+    $("#Applicant_type").change(function () {
+        if ($('#Applicant_type').val() == '2' || $('#Applicant_type').val() == '3') {
+            $('#dvAgency').css("display", "block");
+        }
+        else
+            $('#dvAgency').css("display", "none");
+    });
+    $("#District2").change(function () {
+        $('#ddl_city2').empty();
+        $.ajax({
+            type: 'POST',
+            url: RootURl + 'Profile/getTehsils',
+            dataType: 'json',
+            data: { dist: $("#District2").val() },
+            success: function (states) {
+                $.each(states, function (i, items) {
+                    $("#ddl_city2").append('<option value="' + items.Value + '">' +
+                     items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+        return false;
+    })
+
+    $("#AgencyDistrict").change(function () {
+        $('#AgencyCity').empty();
+        $.ajax({
+            type: 'POST',
+            url: RootURl + 'Profile/getTehsils',
+            dataType: 'json',
+            data: { dist: $("#AgencyDistrict").val() },
+            success: function (states) {
+                alert('hello1');
+                $.each(states, function (i, items) {
+                    $("#AgencyCity").append('<option value="' + items.Value + '">' +
+                     items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+        return false;
+    })
+</script>

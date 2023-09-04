@@ -1,0 +1,221 @@
+﻿@{
+    ViewBag.Title = "ZooTicketVerification";
+
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_SuperAdmin.cshtml";
+}
+@model FMDSS.Models.MIS.MISZooCommonModel
+
+<style>
+    #tbl {
+        overflow-x: auto;
+        overflow-y: auto;
+        padding: 15px;
+        width: 100%;
+        height: 200px;
+    }
+</style>
+<script src="~/js/jquery.min.js"></script>
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        $('#btn_submit1').click(function (e) {
+           
+          
+          
+          $.ajax({
+              type: 'POST',
+              url: RootUrl + 'MISZoo/TicketVerification',
+              dataType: 'json',
+              data: { RequestId: $('#RequestId').val(), PlaceID: $('#Place').val() },
+              success: function (Status) {
+
+                
+                  var arr = Status.split(',');
+                
+
+
+                  if (arr[0] == "Verified")
+                  {
+                      $('#btn_submit1').hide();
+                      
+                       $('#StatusTime').text(arr[1]);
+                  }
+                  $('#Status').text(arr[0]);
+                  $('#Status').text(arr[0]);
+
+              },
+              error: function (ex) {
+                  alert('Failed to retrieve states.' + ex);
+              }
+          });
+
+        });
+
+    });
+
+
+</script>
+
+
+<div class="row">
+
+    <div class="modal fade" id="myModal1" role="dialog">
+        <div class="modal-dialog modal-lg" id="modelPlace1">
+            <!-- Modal content-->
+        </div>
+    </div>
+
+    <div class="col-lg-9 pad">
+        <h1 class="page-header"><span>Zoo Ticket Verification</span></h1>
+    </div>
+
+    @using (Html.BeginForm("ZooTicketVerification", "MISZoo", FormMethod.Post))
+    {
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                   
+                    <div class="col-lg-2">
+                        <div class="form-group"> 
+                            <label> Place:  <span class="mandatory">*</span></label>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="form-group">
+                            @Html.DropDownListFor(model => Model.Place, (IEnumerable<SelectListItem>)ViewBag.Place, "--Select--", new { id = "Place", name = "Place", @class = "form-control" })
+
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label>Ticket ID :  <span class="mandatory">*</span></label>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="form-group">
+                            @Html.TextBoxFor(model => Model.RequestId, new { @class = "form-control common", id = "RequestId" })
+
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <input type="submit" class="btn btn-success" value="View" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (Convert.ToBoolean(ViewBag.Rstatus) == false)
+            {
+
+            }
+            else
+            {
+                <div class="panel panel-default">
+                    <div class="panel-body">
+
+                        <div class="col-lg-12">
+                            <div class="box box-default">
+                                <section class="panel" id="SkrollThis2">
+                                    <div class="panel-body">
+
+                                        <div class="task-thumb-details" style="float:right">
+                                            <h1> <label id="Status" style="color: #337ab7" > @ViewBag.ZooTicketBoardingVerificationStatus</label></h1>
+                                            <label id="StatusTime" style="color: #337ab7"> @ViewBag.BoardingVerificationDateTime</label>
+
+                                            <input type="hidden" id="hdStatus" value="@ViewBag.ZooTicketBoardingVerificationStatus" />
+
+
+
+                                            @if (ViewBag.ZooTicketBoardingVerificationStatus == "Pending")
+                                            {
+                                                <input type="button" id="btn_submit1" class="btn btn-success" value="Verify Ticket" />
+                                            }
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="panel panel-default">
+                                        <div class="panel-body">
+                                            <div class="dataTable_wrapper">
+                                                <div id="tbl" class="table-responsive">
+
+                                                    <table class="table table-striped table-bordered table-hover table-responsive gridtable">
+
+                                                        <thead>
+                                                            <tr>
+
+                                                                <th>RequestID</th>
+                                                                <th>BookingType</th>
+                                                                <th>Date of Booking</th>
+                                                                <th>Date of Visit</th>
+                                                                <th>Name of Institute And Organization </th>
+
+                                                                <th>Place Name </th>
+                                                                <th>No Of Member </th>
+                                                                <th>No Of Camera </th>
+                                                                <th>Vehicle Type</th>
+                                                                <th>Is Private Vehical</th>
+                                                                <th>Total Vehical Fees</th>
+                                                                <th>Total Member Fees</th>
+
+                                                                <th>Total Camera Fees</th>
+                                                                @*<th>Transaction Status</th>
+                                                                <th>Emitra Transaction ID</th>*@
+                                                                <th>Total Amount</th>
+                                                                @*<th>IP Address</th>
+                                                                <th>Mode Of Booking</th>*@
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach (var item in ViewData["ListZooTicketVerification"] as IEnumerable<FMDSS.Models.MIS.MISZooCommonModel>)
+                                                            {
+                                                                <tr>
+
+                                                                    <td>@Html.DisplayFor(model => item.RequestId)</td>
+                                                                    <td>@Html.DisplayFor(model => item.BookingType)</td>
+                                                                    <td>@Html.DisplayFor(model => item.DateOfBooking)</td>
+                                                                    <td>@Html.DisplayFor(model => item.DateOfVisit)</td>
+                                                                    <td>@Html.DisplayFor(model => item.NameofInstituteandOrganization)</td>
+
+                                                                    <td>@Html.DisplayFor(model => item.PLACE_NAME)</td>
+                                                                    <td>@Html.DisplayFor(model => item.TotalMember)</td>
+                                                                    <td>@Html.DisplayFor(model => item.TotalCamera)</td>
+                                                                    <td>@Html.DisplayFor(model => item.VehicleType)</td>
+                                                                    <td>@Html.DisplayFor(model => item.IsPrivateVehical)</td>
+                                                                    <td>@Html.DisplayFor(model => item.TotalVehicalFees)</td>
+                                                                    <td>@Html.DisplayFor(model => item.TotalMemberFees)</td>
+
+                                                                    <td>@Html.DisplayFor(model => item.TotalCameraFees)</td>
+                                                                    @*<td>@Html.DisplayFor(model => item.TransactionStatus)</td>
+                                                                    <td>@Html.DisplayFor(model => item.EmitraTransactionId)</td>*@
+                                                                    <td>@Html.DisplayFor(model => item.TotalAmount)</td>
+                                                                    @*<td>@Html.DisplayFor(model => item.IP_Address)</td>
+                                                                    <td>@Html.DisplayFor(model => item.ModeOfBooking)</td>*@
+                                                                </tr>
+                                                            }
+
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </section>
+                                <!-- /.panel-body -->
+                            </div>
+                            <!-- /.panel -->
+                        </div>
+
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

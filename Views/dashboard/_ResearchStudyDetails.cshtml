@@ -1,0 +1,134 @@
+﻿@model FMDSS.Models.CitizenService.ProductionServices.EducationService.Research
+@{
+    ViewBag.Title = "_ReserchStudyDetails";
+    var approvedFile = string.Empty;
+    if (Model.PermissionFile != null)
+    {
+        string strApprovedFile = Model.PermissionFile;
+        string[] strdocsplit = strApprovedFile.Split('/');
+        approvedFile = strdocsplit[strdocsplit.Length - 1];
+    }
+} 
+<tr><td>Module Name</td><td>@Model.CommonRequestData.ModuleName</td></tr>
+<tr><td>Service Type</td><td>@Model.CommonRequestData.ServiceType</td></tr>
+<tr><td>Permission Type</td><td>@Model.CommonRequestData.PermissionType</td></tr>
+<tr><td>Permission Name</td><td>@Model.CommonRequestData.PermissionName</td></tr>
+<tr><td>RequestId</td><td>@Model.RequestedId</td></tr>
+<tr><td>Requested On</td><td>@Model.CommonRequestData.RequestedOn</td></tr>
+<tr><td>Requested By</td><td>@Model.CommonRequestData.RequestedBy</td></tr>
+<tr><td>Duration</td><td>@Model.DurationFrom To @Model.DurationTo</td></tr> 
+<tr><td>ApplicationType</td><td>@string.Format("{0}", Model.ApplicationType==1?"Individual":"Organization") </td></tr>
+<tr><td>College</td><td>@Model.CollegeName</td></tr>
+<tr><td>Research Title</td><td>@Model.TitleOfResearch</td></tr>
+<tr><td>Research Procedure</td><td>@Model.Procedure</td></tr>
+<tr><td>Deliverables To Wildlife Department</td><td>@Model.DeliverablesToWildlifeDepartment</td></tr>
+@if (!string.IsNullOrWhiteSpace(Model.Synopsis_Path))
+{
+<tr><td>Synopsis Uploaded</td><td><a href="@Url.Content(Model.Synopsis_Path)" target="_blank"><img src="~/images/pdfimg.png" width="30"></a></td></tr>
+}
+@if (!string.IsNullOrWhiteSpace(Model.Presentation_Path))
+{
+<tr><td>Prsentation Uploaded</td><td><a href="@Url.Content(Model.Presentation_Path)" target="_blank"><img src="~/images/pptIcon.png" width="30"></a></td></tr>
+}
+
+<tr><td>CoordinatorId</td><td>@Model.CoordinatorName</td></tr>
+<tr><td>Coordinator Address</td><td>@Model.CoordinatorAddress</td></tr>  
+<tr><td>Approver/Reviwer Status</td><td>@Model.CommonRequestData.StatusDesc</td></tr>
+<tr><td>Approver/Reviwer Reason</td><td>@Model.CommonRequestData.Reason_Desc</td></tr>
+<tr><td>Approver/Reviwer Remarks</td><td>@Model.CommonRequestData.Remarks</td></tr>
+<tr>
+    <td>Approve Doc</td>
+    <td>
+        @if (string.IsNullOrEmpty(approvedFile))
+        {
+        <span>N/A</span>
+         }
+        else
+        {
+        <a href="@Url.Content("~/PermissionDocument/"+Model.PermissionFile)" target="_blank"><img src="../images/pdfimg.png" width="30"></a>
+        }
+
+    </td>
+</tr>
+@if (Model.SpecimenDetailsList != null && Model.SpecimenDetailsList.Count > 0)
+{
+    <tr>
+        <td colspan="2">
+            <div class="col-lg-12">
+                <label>Specimen / sample collection Details:</label>
+                <div class="form-group">
+                    <table id="tblSpecimenDetails" class="table table-striped table-bordered table-hover notranslate">
+                        <thead>
+                            <tr style="color:#999; background-color:#ddd;">
+                                <td colspan="3"><i>Member Details</i></td>
+                            </tr>
+                            <tr>
+                                <th>Member Type</th>
+                                <th>Name</th>
+                                <th>Gender</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbSpecimenDetails" class="tbviewdet">
+
+                            @if (Model.SpecimenDetailsList != null)
+                            {
+                                for (int i = 0; i < Model.SpecimenDetailsList.Count; i++)
+                                {
+                                    <tr>
+                                        <td>@Model.SpecimenDetailsList[i].MemberType</td>
+                                        <td>@Model.SpecimenDetailsList[i].MemberName</td>
+                                        <td>@Model.SpecimenDetailsList[i].Gender</td>
+                                    </tr>
+                                }
+                            } 
+                        </tbody> 
+                    </table>
+
+                </div>
+            </div>
+        </td>
+    </tr>
+}
+<tr class="@string.Format("{0}",Model.IsSampleCollection==true?"":"hide")">
+    <td colspan="2">
+        <div class="col-lg-12" id="divSCDetails">
+            <label>Sample collection Details:</label>
+            <div class="form-group">
+                <table id="tblSampleDetails" class="table table-striped table-bordered table-hover notranslate">
+                    <thead>
+                        <tr style="color:#999; background-color:#ddd;">
+                            <td colspan="3"><i>All Qty units are in Piece</i></td>
+                        </tr>
+                        <tr>
+                            <th>Location</th>
+                            <th>Material</th>
+                            <th>Qty</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbSampleDetails" class="tbviewdet">
+
+                        @if (Model != null && Model.SampleDetailsList != null)
+                        {
+                            for (int i = 0; i < Model.SampleDetailsList.Count; i++)
+                            {
+                                <tr> 
+                                    <td>@Model.SampleDetailsList[i].Location</td>
+                                    <td>@Model.SampleDetailsList[i].MaterialName</td>
+                                    <td>@Model.SampleDetailsList[i].Qty</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr class="rowSkip">
+                                <td colspan="3">No record found.</td>
+                            </tr>
+                        }
+                    </tbody> 
+                </table>
+
+            </div>
+        </div>
+
+    </td>
+</tr>

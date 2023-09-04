@@ -1,0 +1,104 @@
+﻿@model IEnumerable<FMDSS.Models.ForestFire.ForestFire_AddDetails>
+
+
+
+<div class="dataTable_wrapper">
+
+    <table class="table table-striped table-bordered table-sm" cellspacing="0"
+           width="100%" id="tbl_ForestFire">
+        <thead>
+            <tr>
+                <th style="width:5%">SNo</th>
+                @*<th width="5%">Division</th>*@
+                @*<th width="5%">District</th>*@
+                <th style="width:5%">Fire_Date</th>
+                <th style="width:5%">Fire_Time</th>
+                <th style="width:5%">Latitude</th>
+                <th style="width:5%">Longitude</th>
+                <th style="width:5%">Total Area Affected<br>(in hectare)</th>
+                <th style="width:5%">Quantification Of Loss<br>(in terms of Rupees)</th>
+                <th style="width:5%">Cause of Fire</th>
+                <th style="width:5%">Remarks</th>
+                <th style="width:5%">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in Model)
+            {
+            <tr>
+                <td>@item.SNo</td>
+                @*<td>@item.Division</td>*@
+                @*<td><a href="javascript:void(0)" onclick="GetFireData(@item.ID)" title="View" data-toggle="modal" data-target="#ForestFirePopup">@item.District</a></td>*@
+                <td><a href="javascript:void(0)" onclick="GetFireData(@item.ID)" title="View" data-toggle="modal" data-target="#ForestFirePopup">@item.Fire_Date</a></td>
+                <td>@item.Fire_Time</td>
+                <td>@item.Latitude</td>
+                <td>@item.Longitude</td>
+                @if (@item.TotalAreaAffected != null && @item.TotalAreaAffected != "")
+                    {
+                <td>@Html.TextBox("TA", @item.TotalAreaAffected, new { id = "TA_" + @item.ID, @class = "form form-control", @disabled = "disabled", onkeypress = "return isNumberKey(event)" })</td>
+
+                    }
+                    else
+                    {
+                <td>@Html.TextBox("TA", @item.TotalAreaAffected, new { id = "TA_" + @item.ID, @class = "form form-control", onkeypress = "return isNumberKey(event)" })</td>
+                    }
+                @if (@item.QuantificationOfLoss != null && @item.QuantificationOfLoss != "")
+                    {
+                <td>@Html.TextBox("QU", @item.QuantificationOfLoss, new { @id = "QU_" + @item.ID, @class = "form form-control", @disabled = "disabled", onkeypress = "return isNumberKey(event)" })</td>
+                    }
+                    else
+                    {
+                <td>@Html.TextBox("QU", @item.QuantificationOfLoss, new { @id = "QU_" + @item.ID, @class = "form form-control", onkeypress = "return isNumberKey(event)" })</td>
+                    }
+                @if (@item.CauseofFire != null && @item.CauseofFire != "")
+                    {
+                <td>@Html.TextBox("CF", @item.CauseofFire, new { @id = "CF_" + @item.ID, @class = "form-control", @disabled = "disabled", onkeypress = "return isNumberKey(event)" })</td>
+                    }
+                    else
+                    {
+                <td>@Html.TextBox("CF", @item.CauseofFire, new { @id = "CF_" + @item.ID, @class = "form-control" })</td>
+                    }
+                @if (@item.Remarks != null && @item.Remarks != "")
+                    {
+                <td>@Html.TextBox("R", @item.Remarks, new { @id = "R_" + @item.ID, @class = "form-control", @disabled = "disabled" })</td>
+                    }
+                    else
+                    {
+                <td>@Html.TextBox("R", @item.Remarks, new { @id = "R_" + @item.ID, @class = "form-control" })</td>
+                    }
+
+
+
+                @*<td><input type="text" id="TA_@item.ID" class="form-control" name="TA"></td>
+                    <td><input type="text" id="QU_@item.ID" class="form-control" name="QU"></td>
+                    <td><input type="text" id="CF_@item.ID" class="form-control" name="CF"></td>
+                    <td><input type="text" id="R_@item.ID" class="form-control" name="R"></td>*@
+                @if ((@item.Remarks != null && @item.Remarks != "") || (@item.TotalAreaAffected != null && @item.TotalAreaAffected != ""))
+                    {
+                <td><input type="submit" id="sbumt_action_@item.ID" class="btn btn-success" onclick="AddData(@item.ID)" name="Submit" disabled></td>
+                    }
+                    else
+                    {
+                <td><input type="submit" id="sbumt_action_@item.ID" class="btn btn-success" onclick="AddData(@item.ID)" name="Submit"></td>
+                    }
+            </tr>
+            }
+
+        </tbody>
+    </table>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#tbl_ForestFire').DataTable({
+
+            //dom: 'Bfrtip',
+            //buttons: [
+            // 'excel', 'pdf', 'print'
+            //],
+            "aaSorting": [],
+            "scrollX": true
+        });
+    });
+</script>

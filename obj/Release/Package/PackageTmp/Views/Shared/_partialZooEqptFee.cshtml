@@ -1,0 +1,234 @@
+﻿@model FMDSS.Models.Master.ZooEqptFee
+
+<link href="~/css/timepicki.css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+<script>
+    var $j = jQuery.noConflict();
+    $j('.timepicker').timepicki();
+
+</script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        $('#FeePerVehicle,#NumberofVehicle,#TotalFee').bind('keypress', function (evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode
+            // var charCode = evt.which;
+            if (charCode != 8) {
+
+                if ((charCode == 46) || (charCode >= 97 && charCode <= 122) || (charCode >= 65 && charCode <= 90)) {
+                    return false;
+                }
+                else {
+                    if (charCode >= 48 && charCode <= 57 || charCode == 46) {
+                        return true;
+                    }
+                    else {
+                        evt.preventDefault();
+                    }
+                }
+            }
+        });
+        
+       
+        $(function () {
+            $('#FeePerVehicle').keydown(function (event) {
+
+
+                if (event.shiftKey == true) {
+                    event.preventDefault();
+                }
+
+                if ((event.keyCode >= 48 && event.keyCode <= 57) || 
+                    (event.keyCode >= 96 && event.keyCode <= 105) || 
+                    event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 37 ||
+                    event.keyCode == 39 || event.keyCode == 46 || event.keyCode == 190) {
+
+                } else {
+                    event.preventDefault();
+                }
+
+                if($(this).val().indexOf('.') !== -1 && event.keyCode == 190)
+                    event.preventDefault(); 
+                //if a decimal has been added, disable the "."-button
+
+            });
+        });​ 
+
+        $('#NumberofVehicle').keyup(function (e) {
+            alert('hi');
+            debugger;
+            if ($('#NumberofVehicle').val().trim() != "") {
+
+                if ($('#FeePerVehicle').val().trim() != "") {
+                    $('#TotalFee').val(parseFloat($('#FeePerVehicle').val()) * parseFloat($('#NumberofVehicle').val()));
+                }
+                else {
+
+                    $('#TotalFee').val($('#NumberofVehicle').val());
+                }
+            }
+            else {
+                $('#TotalFee').val($('#FeePerVehicle').val());
+            }
+            alert (TotalFee);
+        });
+
+
+        $('#btn_submit1').click(function (e) {
+
+            if ($('option:selected', $('#PlaceID')).index() == 0) {
+                $("#errPlaceID").css("display", "block");
+                $('#errPlaceID').focus();
+                return false;
+            }
+            else {
+                $("#errPlaceID").css("display", "none");
+            }
+
+                       
+            if ($('option:selected', $('#ZooVehicleID')).index() == 0) {
+                $("#errZooVehicleID").css("display", "block");
+                $('#errZooVehicleID').focus();
+                return false;
+            }
+            else {
+                $("#errZooVehicleID").css("display", "none");
+            }
+
+           
+            if ($('#FeePerVehicle').val().trim() == "") {
+                $("#errFeePerVehicle").css("display", "block");
+                $('#errFeePerVehicle').focus();
+                return false;
+            }
+            else {
+                $('#errFeePerVehicle').css("display", "none");
+            }
+            
+            if ($('#NumberofVehicle').val().trim() == "") {
+                $("#errNumberofVehicle").css("display", "block");
+                $('#errNumberofVehicle').focus();
+                return false;
+            }
+            else {
+                $('#errNumberofVehicle').css("display", "none");
+            }
+
+                                   
+            if ($('option:selected', $('#Isactive')).index() == 0) {
+                 $("#errIsactive").css("display", "block");
+                 $('#errIsactive').focus();
+                return false;
+            }
+            else {
+                 $("#errIsactive").css("display", "none");
+            }
+
+        });
+
+        
+       
+         
+    });
+
+
+   
+
+</script>
+
+
+@using (Html.BeginForm("ADDUpdateZooEqptFee", "Master", FormMethod.Post))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @*<label id="lbl_dpt">Add/Edit Place</label>*@
+                @ViewBag.OpType
+            </h4>
+        </div>
+
+        <div class="modal-body">
+            @Html.HiddenFor(model => model.FeeId)
+            
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Place : <span class="mandatory">*</span></label>
+                        @Html.DropDownListFor(Model => Model.PlaceID, (IEnumerable<SelectListItem>)ViewBag.ddlLSTPlaceName, "--Select--", new { @class = "form-control common", id = "PlaceID" })
+                        <div id="errPlaceID" style="display:none" class="alert-danger1">Place is Required.</div>
+                    </div>
+                </div> 
+ 
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Vehicle Type : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.ZooVehicleID, (IEnumerable<SelectListItem>)ViewBag.ddlVehicalEqptName1, "--Select--", new { @class = "form-control common", id = "ZooVehicleID" })
+                    <div id="errZooVehicleID" style="display:none" class="alert-danger1">Vehicle Type is Required.</div>
+                </div>
+            </div> 
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Fees Per Vehicle: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.FeePerVehicle, new { @class = "form-control common", @maxlength = "50" })
+                    <div id="errFeePerVehicle" style="display:none" class="alert-danger1">Vehicle Fees is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Number of Vehicle Allowed: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.NumberofVehicle, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errNumberofVehicle" style="display:none" class="alert-danger1">Number of Vehicle Allowed is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Total Fees: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.TotalFee, new { @class = "form-control common", @maxlength = "8", @readonly = "True" })
+                    <div id="errSeatsPerEqpt" style="display:none" class="alert-danger1">Seats Per Eqpt is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Active / Deactive : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.IsActive, (IEnumerable<SelectListItem>)ViewBag.ISactivelst, "--Select--", new { @class = "form-control common", id = "IsActive" })
+                    <div id="errIsactive" style="display:none" class="alert-danger1">Active / Deactive  is Required.</div>
+
+                </div>
+            </div> 
+
+            <div class="col-lg-12"></div>
+
+
+            <!-- /.Btn Groping -->
+
+
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success"  value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+                
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+}

@@ -1,0 +1,144 @@
+﻿@{
+    ViewBag.Title = "Archeology MIS";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model FMDSS.Models.Archeology.ArcheologyMIS
+
+<h2>Archeology Booking History</h2>
+<style>
+    .col-lg-3, .col-lg-4 {
+        padding-left: 10px;
+        padding-right: 5px;
+    }
+
+    #UploadId {
+        width: auto;
+    }
+
+    table.imagetable {
+        font-family: verdana,arial,sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #999999;
+        border-collapse: collapse;
+    }
+
+        table.imagetable th {
+            background: #b5cfd2 url('cell-blue.jpg');
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #999999;
+        }
+
+        table.imagetable td {
+            background: #ccc;
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #999999;
+        }
+</style>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(".Fromdatefield").each(function () {
+
+            $(this).datepicker({
+                dateFormat: 'dd/mm/yy',
+            });
+        });
+        $(".datefield").each(function () {
+
+            $(this).datepicker({
+                dateFormat: 'dd/mm/yy', minDate: new Date()
+            });
+        });
+
+        $("input").attr("autocomplete", "off");
+
+         $('#District').on('change', function () {
+
+            $.ajax({
+                type: 'GET',
+                contentType: 'application/json; charset=utf-8',
+                url: '@Url.Action("GetPlacesByDistrictId", "MISArcheology")?Districtid=' + $(this).val(),
+                success: function (data) {
+                    debugger;
+                    $("#Place").empty();
+                    $.each(data, function () {
+                        $("#Place").append($("<option     />").val(this.Value).text(this.Text));
+                    });
+                }
+            });
+
+        });
+
+
+
+    });
+
+
+</script>
+
+<script src="~/js/jquery.min.js"></script>
+
+<div id="page-wrapper-inn">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span style="color:red;">* Mandatory field(s) to fill.</span>
+                </div>
+            </div>
+
+            @using (Html.BeginForm("FinalSubmit", "MISArcheology", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                <div style="display:none;">
+                    @*@Html.TextBoxFor(x => x.selectedPlaces)*@
+                </div>
+                @*@Html.HiddenFor(x => x.selectedPlaces)*@
+                <div class="panel-body">
+                    <div class="col-lg-3 un-bold">
+                        <div class="form-group">
+                            <label>District: <span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(X => X.District, (IEnumerable<SelectListItem>)ViewBag.District, "--Select--", new { id = "District", name = "District", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="col-lg-3 un-bold">
+                        <div class="form-group">
+                            <label>Places: <span class="mandatory">*</span></label>
+                            @*<select id="Place" class="form-control"></select>*@
+                            @Html.DropDownListFor(X => X.Place, (IEnumerable<SelectListItem>)ViewBag.Place, "--Select--", new { id = "Place", name = "Place", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="col-lg-3 un-bold">
+                        <div class="form-group">
+                            <label>Date of Visit From: <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(X => X.dateofvisitfrom, new { @class = "form-control Fromdatefield", @id = "dateofvisitfrom", name = "dateofvisitfrom" })
+                        </div>
+                    </div>
+                    <div class="col-lg-3 un-bold">
+                        <div class="form-group">
+                            <label>Date of Visit To: <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(X => X.dateofvisitto, new { @class = "form-control datefield", @id = "dateofvisitto", name = "dateofvisitto" })
+                        </div>
+                    </div>
+
+                    <div class="btn-padd col-lg-12">
+                        <div id="btn" class="col-lg-12">
+                            <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_submit1">
+                                <i class="fa fa-check"></i> Submit
+                            </button>
+                            <button type="reset" class="btn btn-warning">
+                                <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+
+            }
+        </div>
+    </div>
+</div>

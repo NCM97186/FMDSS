@@ -1,0 +1,419 @@
+﻿@{
+    ViewBag.Title = "DMExpenditureOnDevActivities";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+
+
+<script src="~/js/jquery.min.js"></script>
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+       
+        $('#DDL_Circle').change(function (e) {
+
+            $('#Circle_Text').val($("#DDL_Circle option:selected").text());
+
+            $("#DDL_Division").empty();
+            $("#DDL_Range").empty();
+            $("#DDL_Range").append('<option value="' + "0" + '">' + "--Select--" + '</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MIS/DivisionData', // we are calling json method
+                dataType: 'json',
+                data: { circleCode: $("#DDL_Circle").val() },
+                success: function (circle) {
+                    $.each(circle, function (i, items) {
+                        $("#DDL_Division").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#DDL_Division').change(function (e) {
+            $("#DDL_Range").empty();
+            $('#Division_Text').val($("#DDL_Division option:selected").text());
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MIS/RangeData', // we are calling json method
+                dataType: 'json',
+                data: { DivisionCode: $("#DDL_Division").val() },
+                success: function (divCode) {
+                    $.each(divCode, function (i, items) {
+                        $("#DDL_Range").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#DDL_Range').change(function (e) {
+            $('#Range_Text').val($("#DDL_Range option:selected").text());
+        });
+
+        $('#DDL_Program').change(function (e) {
+
+            $("#DDL_Scheme").empty();
+            $("#DDL_Project").empty();
+            $("#DDL_Model").empty();
+            $("#DDL_Activity").empty();
+
+            $('#Program_Text').val($("#DDL_Program option:selected").text());
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MIS/GetSchemeData', // we are calling json method
+                dataType: 'json',
+                data: { Program: $("#DDL_Program").val() },
+                success: function (divCode) {
+                    $.each(divCode, function (i, items) {
+                        $("#DDL_Scheme").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+
+        });
+
+        $('#DDL_Scheme').change(function (e) {
+
+            $("#DDL_Project").empty();
+            $("#DDL_Model").empty();
+            $("#DDL_Activity").empty();
+
+            $('#Scheme_Text').val($("#DDL_Scheme option:selected").text());
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MIS/GetProjectData', // we are calling json method
+                dataType: 'json',
+                data: { Scheme: $("#DDL_Scheme").val() },
+                success: function (divCode) {
+                    $.each(divCode, function (i, items) {
+                        $("#DDL_Project").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+
+        });
+
+        $('#DDL_Project').change(function (e) {
+
+          
+            $("#DDL_Model").empty();
+            $("#DDL_Activity").empty();
+
+            $('#Project_Text').val($("#DDL_Project option:selected").text());
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MIS/GetModelData', // we are calling json method
+                dataType: 'json',
+                data: { Project: $("#DDL_Project").val() },
+                success: function (divCode) {
+                    $.each(divCode, function (i, items) {
+                        $("#DDL_Model").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+
+        });
+
+        $('#DDL_Model').change(function (e) {
+
+            $("#DDL_Activity").empty();
+
+            $('#Model_Text').val($("#DDL_Model option:selected").text());
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MIS/GetActivityData', // we are calling json method
+                dataType: 'json',
+                data: { Models: $("#DDL_Model").val() },
+                success: function (divCode) {
+                    $.each(divCode, function (i, items) {
+                        $("#DDL_Activity").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+
+        });
+
+
+        $('#DDL_Activity').change(function (e) {
+            $('#Activity_Text').val($("#DDL_Activity option:selected").text());
+        });
+
+
+        $('#btn_submit1').click(function (e) {
+
+            if ($('option:selected', $('#DDL_Duration')).index() == 0) {
+                $("#errDuration").css("display", "block");
+                $('#errDuration').focus();
+                return false;
+            }
+            else {
+                $("#errDuration").css("display", "none");
+                $("#errFromDate").css("display", "none");
+                $("#errToDate").css("display", "none");
+            }
+
+
+            if ($('option:selected', $('#DDL_FY')).index() == 0) {
+                $("#errFY").css("display", "block");
+                $('#errFY').focus();
+                return false;
+            }
+            else {
+                $("#errFY").css("display", "none");
+                $("#errFY").css("display", "none");
+                $("#errFY").css("display", "none");
+            }
+
+
+
+           
+
+
+
+            if ($('option:selected', $('#DDL_Circle')).index() == 0) {
+                $("#errCircle").css("display", "block");
+                $('#errCircle').focus();
+                return false;
+            }
+            else {
+                $("#errCircle").css("display", "none");
+            }
+
+            if ($('option:selected', $('#DDL_Division')).index() == 0) {
+                $("#errDivision").css("display", "block");
+                $('#errDivision').focus();
+                return false;
+            }
+            else {
+                $("#errDivision").css("display", "none");
+            }
+
+
+
+            if ($('option:selected', $('#DDL_Range')).index() == 0) {
+                $("#errRange").css("display", "block");
+                $('#errRange').focus();
+                return false;
+            }
+            else {
+                $("#errRange").css("display", "none");
+            }
+
+            if ($('option:selected', $('#DDL_Program')).index() == 0) {
+                $("#errProgram").css("display", "block");
+                $('#errProgram').focus();
+                return false;
+            }
+            else {
+                $("#errProgram").css("display", "none");
+            }
+
+
+            if ($('option:selected', $('#DDL_Scheme')).index() == 0) {
+                $("#errScheme").css("display", "block");
+                $('#errScheme').focus();
+                return false;
+            }
+            else {
+                $("#errScheme").css("display", "none");
+            }
+
+            if ($('option:selected', $('#DDL_Project')).index() == 0) {
+                $("#errProject").css("display", "block");
+                $('#errProject').focus();
+                return false;
+            }
+            else {
+                $("#errProject").css("display", "none");
+            }
+
+            if ($('option:selected', $('#DDL_Model')).index() == 0) {
+                $("#errModel").css("display", "block");
+                $('#errModel').focus();
+                return false;
+            }
+            else {
+                $("#errModel").css("display", "none");
+            }
+
+            if ($('option:selected', $('#DDL_Activity')).index() == 0) {
+                $("#errActivity").css("display", "block");
+                $('#errActivity').focus();
+                return false;
+            }
+            else {
+                $("#errActivity").css("display", "none");
+            }
+        });
+
+    });
+
+
+</script>
+
+<div class="row">
+    <div class="col-lg-9 pad">
+        <h1 class="page-header"><span>Report : Expenditure On Development Activities</span></h1>
+    </div>
+
+    @using (Html.BeginForm("DMExpenditureOnDevActivities", "MIS", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Duration:<span class="mandatory">*</span></label>
+                            @Html.DropDownList("Duration", (IEnumerable<SelectListItem>)ViewBag.Duration, new { @class = "form-control", id = "DDL_Duration" })
+                            <div id="errDuration" class="alert-danger1" style="display:none"> Duration is Required. </div>
+
+
+                        </div>
+                    </div>
+                    
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Financial Year:<span class="mandatory">*</span></label>                                
+                                @Html.DropDownList("FY", (IEnumerable<SelectListItem>)ViewBag.FY, new { @class = "form-control", id = "DDL_FY" })
+                                <span id="errFY" style="display: none" class="alert-danger1">Financial Year is Required.</span>
+
+                            </div>
+                        </div>
+                       
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Circle:<span class="mandatory">*</span></label>
+                            @Html.DropDownList("Circle", (IEnumerable<SelectListItem>)ViewBag.CIRCLE, new { @class = "form-control", id = "DDL_Circle" })
+                            <div id="errCircle" style="display:none" class="alert-danger1">Circle is Required.</div>
+                            @Html.Hidden("Circle_Text", new { @class = "form-control", id = "Circle_Text" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Division:<span class="mandatory">*</span></label>
+                            @Html.DropDownList("Division", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "DDL_Division" })
+                            <div id="errDivision" style="display:none" class="alert-danger1">Division is Required.</div>
+                            @Html.Hidden("Division_Text", new { @class = "form-control", id = "Division_Text" })
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Range:<span class="mandatory">*</span></label>
+                            @Html.DropDownList("Range", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "DDL_Range" })
+                            <div id="errRange" style="display:none" class="alert-danger1">Range is Required.</div>
+                            @Html.Hidden("Range_Text", new { @class = "form-control", id = "Range_Text" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Program:<span class="mandatory">*</span></label>
+                            @Html.DropDownList("DDLProgram", (IEnumerable<SelectListItem>)ViewBag.Program, new { @class = "form-control", id = "DDL_Program" })
+                            <div id="errProgram" style="display:none" class="alert-danger1">Program is Required.</div>
+                            @Html.Hidden("Program_Text", new { @class = "form-control", id = "Program_Text" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Scheme:<span class="mandatory">*</span></label>
+                            @Html.DropDownList("DDLScheme", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "DDL_Scheme" })
+                            <div id="errScheme" style="display:none" class="alert-danger1">Scheme is Required.</div>
+                            @Html.Hidden("Scheme_Text", new { @class = "form-control", id = "Scheme_Text" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Project:<span class="mandatory">*</span></label>
+                            @Html.DropDownList("DDLProject", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "DDL_Project" })
+                            <div id="errProject" style="display:none" class="alert-danger1">Project is Required.</div>
+                            @Html.Hidden("Project_Text", new { @class = "form-control", id = "Project_Text" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Model:<span class="mandatory">*</span></label>
+                            @Html.DropDownList("DDLModel", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "DDL_Model" })
+                            <div id="errModel" style="display:none" class="alert-danger1">Model is Required.</div>
+                            @Html.Hidden("Model_Text", new { @class = "form-control", id = "Model_Text" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Activity:<span class="mandatory">*</span></label>
+                            @Html.DropDownList("DDLActivity", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "DDL_Activity" })
+                            <div id="errActivity" style="display:none" class="alert-danger1">Activity is Required.</div>
+                            @Html.Hidden("Activity_Text", new { @class = "form-control", id = "Activity_Text" })
+                        </div>
+                    </div>
+
+                    <div id="btn" class="col-lg-12">
+
+                        <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit1">
+                            <i class="fa fa-check"></i> Submit
+                        </button>
+                        <button type="button" class="btn btn-warning" id="btn_reset">
+                            <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+            @using ReportViewerForMvc;
+            @if (ViewBag.ReportViewer != null)
+            {
+                @Html.ReportViewer(ViewBag.ReportViewer as Microsoft.Reporting.WebForms.ReportViewer, new { border = "0", height = "500", width = "80%" })
+            }
+
+
+        </div>
+    }
+</div>
+
+

@@ -1,0 +1,1286 @@
+﻿@model FMDSS.Models.ForesterAction.ActionRequest
+@{
+    ViewBag.Title = "ForesterAction";
+    Layout = "~/Views/Shared/Forestlayout.cshtml";
+}
+@using FMDSS.Models
+
+@*@model IEnumerable<FMDSS.Models.ForesterAction.ActionRequest>*@
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+    </script>
+<script type="text/javascript">
+
+    $(document).on('click', '.reqid', function (e) {
+        var $item = $(this).closest("tr").find('td');
+        var i = 0;
+        var RequestId;      
+        var TableName;
+        $.each($item, function (key, value) {
+            if (i == 0) {
+                RequestId = $(value).text();                              
+            }
+            if (i == 1) {
+                TableName = $(value).text();             
+            }                   
+            i++;
+        });
+        var tblinfo = {
+            RequestId: $.trim(RequestId),
+            TableName: $.trim(TableName)
+        }
+        $("#tbdyScart").empty();
+        $.ajax({
+            type: 'POST',            
+            url: RootUrl + 'ForesterAction/ViewDetails',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(tblinfo),
+            success: function (data) {               
+                if (data.TableName == 'tbl_FilmShootingPermissions') {
+                    var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                    "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                    "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                    "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                    "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                    "</td></tr><tr><td>Requested On</td><td>" + data.RequestedOn +
+                    "</td></tr><tr><td>Requested By</td><td>" + data.RequestedBy +
+                    "</td></tr><tr><td>District</td><td>" + data.District +
+                    "</td></tr><tr><td>Place</td><td>" + data.Place +
+                    "</td></tr><tr><td>Duration</td><td>" + data.Duration +
+                    "</td></tr><tr><td>Number Of Person</td><td>" + data.NumberOfPerson +
+                    "</td></tr><tr><td>Indian Citizen</td><td>" + data.IndianCitizen +
+                    "</td></tr><tr><td>Non Indian Citizen</td><td>" + data.NonIndianCitizen +
+                    "</td></tr><tr><td>Students</td><td>" + data.Students +
+                    "</td></tr><tr><td>Application Type</td><td>" + data.ApplicationType +
+                    "</td></tr><tr><td>Film Title</td><td>" + data.FilmTitle + 
+                    "</td></tr><tr><td>Shooting Purpose</td><td>" + data.ShootingPurpose +
+                    "</td></tr><tr><td>OCM Purpose</td><td>" + data.Purpose_OCM +
+                    "</td></tr><tr><td>Description</td><td>" + data.Description +
+                    "</td></tr><tr><td>Payment Done</td><td>" + data.PaymentDone +
+                    "</td></tr><tr><td>Paid Amount</td><td>" + data.PaidAmount +
+                    "</td></tr><tr><td>Identity Proof Number</td><td>" + data.IdProofNo +
+                    "</td></tr><tr><td>Identity Proof</td><td><a href='../PermissionDocument/" + data.IdProofUrl + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                    "<tr><td>Approver/Reviwer Status</td><td>" + data.StatusDesc +
+                    "</td></tr><tr><td>Approver/Reviwer Reason</td><td>" + data.Reason_Desc +
+                    "</td></tr><tr><td>Approver/Reviwer Remarks</td><td>" + data.Remarks +
+                    "</td></tr>";
+                    $("#tbdyScart").append(bardata);
+                }
+                if (data.TableName == 'tbl_OrganisingCamp') {
+                    var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                    "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                    "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                    "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                    "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                    "</td></tr><tr><td>Requested On</td><td>" + data.RequestedOn +
+                    "</td></tr><tr><td>Requested By</td><td>" + data.RequestedBy +
+                    "</td></tr><tr><td>District</td><td>" + data.District +
+                    "</td></tr><tr><td>Place</td><td>" + data.Place +
+                    "</td></tr><tr><td>Duration</td><td>" + data.Duration +
+                    "</td></tr><tr><td>Number Of Person</td><td>" + data.NumberOfPerson +
+                    "</td></tr><tr><td>Application Type</td><td>" + data.ApplicationType +
+                     "</td></tr><tr><td>OCM Purpose</td><td>" + data.Purpose_OCM +
+                    "</td></tr><tr><td>Payment Done</td><td>" + data.PaymentDone +
+                    "</td></tr><tr><td>Paid Amount</td><td>" + data.PaidAmount +
+                    "</td></tr><tr><td>Identity Proof Number</td><td>" + data.IdProofNo +
+                    "</td></tr><tr><td>Identity Proof</td><td><a href='../PermissionDocument/" + data.IdProofUrl + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                    "<tr><td>Approver/Reviwer Status</td><td>" + data.StatusDesc +
+                    "</td></tr><tr><td>Approver/Reviwer Reason</td><td>" + data.Reason_Desc +
+                    "</td></tr><tr><td>Approver/Reviwer Remarks</td><td>" + data.Remarks +
+                    "</td></tr>";
+                    $("#tbdyScart").append(bardata);
+                }
+                if (data.TableName == 'tbl_ResearchStudyPermissions') {
+                    var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                    "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                    "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                    "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                    "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                    "</td></tr><tr><td>Requested On</td><td>" + data.RequestedOn +
+                    "</td></tr><tr><td>Requested By</td><td>" + data.RequestedBy +
+                    "</td></tr><tr><td>Duration</td><td>" + data.Duration +
+                    "</td></tr><tr><td>District</td><td>" + data.District +
+                    "</td></tr><tr><td>Place</td><td>" + data.Place +                   
+                    "</td></tr><tr><td>Qualification</td><td>" + data.Qualification +
+                    "</td></tr><tr><td>ApplicationType</td><td>" + data.ApplicationType +
+                    "</td></tr><tr><td>College</td><td>" + data.College +
+                    "</td></tr><tr><td>Research Subject</td><td>" + data.ResearchSubject +
+                    "</td></tr><tr><td>Research Procedure</td><td>" + data.ResearchProcedure +
+                    "</td></tr><tr><td>Animal Category</td><td>" + data.AnimalCategory +
+                    "</td></tr><tr><td>Animal Name</td><td>" + data.AnimalName +
+                    "</td></tr><tr><td>Animal Serial No</td><td>" + data.Animal_SerialNo +
+                    "</td></tr><tr><td>Species Category </td><td>" + data.SpeciesCategory +
+                    "</td></tr><tr><td>Species Name</td><td>" + data.SpeciesName +                   
+                    "</td></tr><tr><td>Species Serial No</td><td>" + data.Species_SerialNo +
+                    "</td></tr><tr><td>Benefits</td><td>" + data.Benefits +
+                    "</td></tr><tr><td>CoordinatorId</td><td>" + data.CoordinatorId +
+                    "</td></tr><tr><td>Approver/Reviwer Status</td><td>" + data.StatusDesc +
+                    "</td></tr><tr><td>Approver/Reviwer Reason</td><td>" + data.Reason_Desc +
+                    "</td></tr><tr><td>Approver/Reviwer Remarks</td><td>" + data.Remarks +
+                    "</td></tr>";
+                    $("#tbdyScart").append(bardata);
+                }
+                if (data.TableName == 'tbl_FixedPermissions') {
+                    if (data.PermissionName == "Mining Permission") {
+                        var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName + "</td></tr>" +
+                        "<tr><td>Service Type</td><td>" + data.ServiceType + "</td></tr>" +
+                        "<tr><td>Permission Type</td><td>" + data.PermissionType + "</td></tr>" +
+                        "<tr><td>Permission Name</td><td>" + data.PermissionName + "</td></tr>" +
+                        "<tr><td>RequestId</td><td>" + data.RequestId + "</td></tr>" +
+                        "<tr><td>Requested On</td><td>" + data.RequestedOn + "</td></tr>" +
+                        "<tr><td>Requested By</td><td>" + data.RequestedBy + "</td></tr>" +
+                        "<tr><td>Duration</td><td>" + data.Duration + "</td></tr>" +
+                        "<tr><td>Division Name</td><td>" + data.Division_Name + "</td></tr>" +
+                        "<tr><td>District</td><td>" + data.District + "</td></tr>" +
+                        "<tr><td>Place</td><td>" + data.Place + "</td></tr>" +
+                        "<tr><td>Block</td><td>" + data.Block + "</td></tr>" +
+                        "<tr><td>GramPanchayat</td><td>" + data.GramPanchayat + "</td></tr>" +
+                        "<tr><td>Village</td><td>" + data.Village + "</td></tr>" +
+                        "<tr><td>KhasraNo</td><td>" + data.khasraNo + "</td></tr>" +
+                        "<tr><td>ApplicationType</td><td>" + data.ApplicationType + "</td></tr>" +
+                        "<tr><td>Permission Type</td><td>" + data.FixedPermissionName + "</td></tr>" +
+                        "<tr><td>Latitude</td><td>" + data.Latitude + "</td></tr>" +
+                        "<tr><td>Longitude</td><td>" + data.Longitude + "</td></tr>" +
+                        "<tr><td>Payment Done</td><td>" + data.PaymentDone + "</td></tr>" +
+                        "<tr><td>Paid Amount</td><td>" + data.PaidAmount + "</td></tr>" +
+                        "<tr><td>GT Sheet Avaliable</td><td>" + data.IsGTSheetAvaliable + "</td></tr>" +
+                        "<tr><td>Nearest Water Source</td><td>" + data.Nearest_WaterSource + "</td></tr>" +
+                        "<tr><td>Water Source Distance</td><td>" + data.WaterSource_Distance + "</td></tr>" +
+                        "<tr><td>Forest Distance</td><td>" + data.Forest_Distance + "</td></tr>" +
+                        "<tr><td>Wildlife Distance</td><td>" + data.Wildlife_Distance + "</td></tr>" +
+                        "<tr><td>Tree species</td><td>" + data.Tree_species + "</td></tr>" +
+                        "<tr><td>Aravalli Hills</td><td>" + data.AravalliHills + "</td></tr>" +
+                        "<tr><td>Forest Land</td><td>" + data.ForestLand + "</td></tr>" +
+                        "<tr><td>Plantation Area</td><td>" + data.Plantation_Area + "</td></tr>" +
+                        "<tr><td>Approver/Reviwer Status</td><td>" + data.StatusDesc + "</td></tr>" +
+                        "<tr><td>Approver/Reviwer Reason</td><td>" + data.Reason_Desc + "</td></tr>" +
+                        "<tr><td>Approver/Reviwer Remarks</td><td>" + data.Remarks + "</td></tr>" +
+                        "<tr><td>Kml</td><td><a href='" + data.KmlPath + "' ><img src='../images/globe.png' Width='30' /></a> </td></tr>" +
+                        "<tr><td>Revenue Record</td><td><a href='../FixedLandDocument/" + data.Revenue_Record_Path + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                        "<tr><td>Revenue Map</td><td><a href='../FixedLandDocument/" + data.Revenue_Map_Path + "' target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                        "<tr><td>Citizen Comment</td><td>" + data.Citizen_Comment + "</td></tr>" +
+                        "<tr><td>Area Size(sq km)</td><td>" + data.Area_Size + "</td></tr>";
+                        var AdditionalDoc = "<tr><td>Additional Document</td><td><a href='../FixedLandDocument/" + data.Additional_Document + "' target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>";
+                        var Survey_Doc = "<tr><td>Survey Document</td><td><a href='../FixedLandDocument/" + data.Survey_Document + "' target='_blank'><img src='../images/pdfimg.png' Width='30' /></a></td></tr>";
+                        var finalvar = bardata;
+                        if (data.Additional_Document != "") {
+                            finalvar = finalvar + AdditionalDoc;
+                        }
+                        if (data.Survey_Document != "" && data.Survey_Document != null) {
+                            finalvar = finalvar + Survey_Doc;
+                        }
+                        $("#tbdyScart").append(finalvar);
+                    }
+                    else {
+                        var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName + "</td></tr>" +
+                        "<tr><td>Service Type</td><td>" + data.ServiceType + "</td></tr>" +
+                        "<tr><td>Permission Type</td><td>" + data.PermissionType + "</td></tr>" +
+                        "<tr><td>Permission Name</td><td>" + data.PermissionName + "</td></tr>" +
+                        "<tr><td>RequestId</td><td>" + data.RequestId + "</td></tr>" +
+                        "<tr><td>Requested On</td><td>" + data.RequestedOn + "</td></tr>" +
+                        "<tr><td>Requested By</td><td>" + data.RequestedBy + "</td></tr>" +
+                        "<tr><td>Duration</td><td>" + data.Duration + "</td></tr>" +
+                        "<tr><td>Division Name</td><td>" + data.Division_Name + "</td></tr>" +
+                        "<tr><td>District</td><td>" + data.District + "</td></tr>" +
+                        "<tr><td>Place</td><td>" + data.Place + "</td></tr>" +
+                        "<tr><td>Block</td><td>" + data.Block + "</td></tr>" +
+                        "<tr><td>GramPanchayat</td><td>" + data.GramPanchayat + "</td></tr>" +
+                        "<tr><td>Village</td><td>" + data.Village + "</td></tr>" +
+                        "<tr><td>KhasraNo</td><td>" + data.khasraNo + "</td></tr>" +
+                        "<tr><td>ApplicationType</td><td>" + data.ApplicationType + "</td></tr>" +
+                        "<tr><td>Permission Type</td><td>" + data.FixedPermissionName + "</td></tr>" +
+                        "<tr><td>Latitude</td><td>" + data.Latitude + "</td></tr>" +
+                        "<tr><td>Longitude</td><td>" + data.Longitude + "</td></tr>" +
+                        "<tr><td>Payment Done</td><td>" + data.PaymentDone + "</td></tr>" +
+                        "<tr><td>Paid Amount</td><td>" + data.PaidAmount + "</td></tr>" +
+                        "<tr><td>Approver/Reviwer Status</td><td>" + data.StatusDesc + "</td></tr>" +
+                        "<tr><td>Approver/Reviwer Reason</td><td>" + data.Reason_Desc + "</td></tr>" +
+                        "<tr><td>Approver/Reviwer Remarks</td><td>" + data.Remarks + "</td></tr>" +
+                        "<tr><td>Kml</td><td><a href='" + data.KmlPath + "' ><img src='../images/globe.png' Width='30' /></a> </td></tr>" +
+                        "<tr><td>Revenue Record</td><td><a href='../FixedLandDocument/" + data.Revenue_Record_Path + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                        "<tr><td>Revenue Map</td><td><a href='../FixedLandDocument/" + data.Revenue_Map_Path + "' target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                        "<tr><td>Citizen Comment</td><td>" + data.Citizen_Comment + "</td></tr>" +
+                          "<tr><td>Area Size(sq km)</td><td>" + data.Area_Size + "</td></tr>";
+                        var AdditionalDoc = "<tr><td>Additional Document</td><td><a href='../FixedLandDocument/" + data.Additional_Document + "' target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>";
+                        var Survey_Doc = "<tr><td>Survey Document</td><td><a href='../FixedLandDocument/" + data.Survey_Document + "' target='_blank'><img src='../images/pdfimg.png' Width='30' /></a></td></tr>";
+                        var finalvar = bardata;
+                        if (data.Additional_Document != "") {
+                            finalvar = finalvar + AdditionalDoc;
+                        }
+                        if (data.Survey_Document != "" && data.Survey_Document != null) {
+                            finalvar = finalvar + Survey_Doc;
+                        }
+                        $("#tbdyScart").append(finalvar);
+                    }
+                   
+                }
+                if (data.TableName == 'tbl_FDM_MicroPlan') {
+                  
+                    var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                     "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                     "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                     "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                     "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                     "</td></tr><tr><td>Requested On</td><td>" + data.RequestedOn +
+                     "</td></tr><tr><td>Requested By</td><td>" + data.RequestedBy +
+                     "</td></tr><tr><td>District</td><td>" + data.District +
+                    "<tr><td>Block</td><td>" + data.Block + "</td></tr>" +
+                    "<tr><td>GramPanchayat</td><td>" + data.GramPanchayat + "</td></tr>" +
+                    "<tr><td>Village</td><td>" + data.Village + "</td></tr>" +
+                     "<tr><td>Duration</td><td>" + data.Duration + "</td></tr>" +
+                     "<tr><td>MicroPlan Name</td><td>" + data.MicroPlanName + "</td></tr>" +
+                     "<tr><td>MicroPlan Code</td><td>" + data.MicroPlanCode + "</td></tr>" +
+                     "<tr><td>Status</td><td>" + data.StatusDesc +
+                     "</td></tr><tr><td>Reason</td><td>" + data.Reason_Desc +
+                     "</td></tr><tr><td>Remarks</td><td>" + data.Remarks +
+                     "</td></tr>";
+                   
+                    $("#tbdyScart").append(bardata);
+                }                                              
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+         });
+    });
+
+
+</script>
+
+<script type="text/javascript">
+
+    $(function (e) {
+
+        $('#btnprint').click(function (e) {
+            var divContents = $("#divPrint").html();
+            //var printWindow = window.open('', '', 'height=400,width=800');
+            //printWindow.document.write('<html><head><title>DIV Contents</title>');
+            //printWindow.document.write('</head><body >');
+            //printWindow.document.write(divContents);
+            //printWindow.document.write('</body></html>');
+            //printWindow.document.close();
+            //printWindow.print();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            frameDoc.document.write('<html><head><title>Forest Department Rajasthan </title>');
+            frameDoc.document.write('<link href="../css/bootstrap.min.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/mobile.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/main.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/dashboard.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/font-awesome.min.css" rel="stylesheet" />');
+            frameDoc.document.write('</head><body>');
+            frameDoc.document.write(divContents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        })
+    });
+
+
+
+</script>
+
+<script type="text/javascript">
+    $(function (e) { 
+    $("#two").hide();
+    $("#three").hide();
+    $("#four").hide();
+    $("#five").hide();
+    $("#six").hide();  
+    if ($('#hdnServiceType').val() == 'Production') {
+        $("#three").show();
+        $("#one").hide();
+        $("#two").hide();
+        $("#four").hide();
+        $("#five").hide();
+        $("#six").hide();
+
+        $("#three3").addClass('panel-primary');
+        $("#three3").removeClass('panel-green');
+        $("#two2").addClass('panel-light-blue');
+        $("#one1").removeClass('panel-primary');
+        $("#one1").addClass('panel-blue');
+        $("#four4").addClass('panel-yellow');
+        $("#four4").removeClass('panel-primary');
+        $("#five5").addClass('panel-red');
+        $("#five5").removeClass('panel-primary');
+        $("#six6").addClass('panel-pink');
+        $("#six6").removeClass('panel-primary');
+        
+    }
+    if ($('#hdnServiceType').val() == 'Citizen') {
+        $("#one").show();
+        $("#two").hide();
+        $("#three").hide();
+        $("#four").hide();
+        $("#five").hide();
+        $("#six").hide();
+
+        $("#one1").addClass('panel-primary');
+        $("#one1").removeClass('panel-blue');
+        $("#two2").removeClass('panel-primary');
+        $("#two2").addClass('panel-light-blue');
+        $("#three3").removeClass('panel-primary');
+        $("#three3").addClass('panel-green');
+        $("#four4").removeClass('panel-primary');
+        $("#four4").addClass('panel-yellow');
+        $("#five5").removeClass('panel-primary');
+        $("#five5").addClass('panel-red');
+        $("#six6").addClass('panel-pink');
+        $("#six6").removeClass('panel-primary');      
+
+    }
+    
+    if ($('#hdnServiceType').val() == 'Development') {
+        $("#two").show();
+        $("#one").hide();
+        $("#three").hide();
+        $("#four").hide();
+        $("#five").hide();
+        $("#six").hide();
+
+        $("#two2").addClass('panel-primary');
+        $("#two2").removeClass('panel-light-blue');
+        $("#one1").removeClass('panel-primary');
+        $("#one1").addClass('panel-blue');
+        $("#three3").removeClass('panel-primary');
+        $("#three3").addClass('panel-green');
+        $("#four4").addClass('panel-yellow');
+        $("#four4").removeClass('panel-primary');
+        $("#five5").addClass('panel-red');
+        $("#five5").removeClass('panel-primary');
+        $("#six6").addClass('panel-pink');
+        $("#six6").removeClass('panel-primary');
+
+    }
+    $("#tab1").click(function (e) {
+        $("#one").show();
+        $("#two").hide();
+        $("#three").hide();
+        $("#four").hide();
+        $("#five").hide();
+        $("#six").hide();
+
+        $("#one1").addClass('panel-primary');
+        $("#one1").removeClass('panel-blue');
+        $("#two2").removeClass('panel-primary');
+        $("#two2").addClass('panel-light-blue');
+        $("#three3").removeClass('panel-primary');
+        $("#three3").addClass('panel-green');
+        $("#four4").removeClass('panel-primary');
+        $("#four4").addClass('panel-yellow');
+        $("#five5").removeClass('panel-primary');
+        $("#five5").addClass('panel-red');
+        $("#six6").addClass('panel-pink');
+        $("#six6").removeClass('panel-primary');       
+
+    });
+
+    $("#tab2").click(function (e) {
+        $("#two").show();
+        $("#one").hide();
+        $("#three").hide();
+        $("#four").hide();
+        $("#five").hide();
+        $("#six").hide();
+
+        $("#two2").addClass('panel-primary');
+        $("#two2").removeClass('panel-light-blue');
+        $("#one1").removeClass('panel-primary');
+        $("#one1").addClass('panel-blue');
+        $("#three3").removeClass('panel-primary');
+        $("#three3").addClass('panel-green');
+        $("#four4").addClass('panel-yellow');
+        $("#four4").removeClass('panel-primary');
+        $("#five5").addClass('panel-red');
+        $("#five5").removeClass('panel-primary');
+        $("#six6").addClass('panel-pink');
+        $("#six6").removeClass('panel-primary');      
+    });
+
+    $("#tab3").click(function (e) {
+        $("#three").show();
+        $("#one").hide();
+        $("#two").hide();
+        $("#four").hide();
+        $("#five").hide();
+        $("#six").hide();
+
+        $("#three3").addClass('panel-primary');
+        $("#three3").removeClass('panel-green');
+        $("#two2").addClass('panel-light-blue');
+        $("#one1").removeClass('panel-primary');
+        $("#one1").addClass('panel-blue');
+        $("#four4").addClass('panel-yellow');
+        $("#four4").removeClass('panel-primary');
+        $("#five5").addClass('panel-red');
+        $("#five5").removeClass('panel-primary');
+        $("#six6").addClass('panel-pink');
+        $("#six6").removeClass('panel-primary');
+        
+    });
+
+    $("#tab4").click(function () {
+        $("#four").show();
+        $("#one").hide();
+        $("#two").hide();
+        $("#three").hide();
+        $("#five").hide();
+        $("#six").hide();
+
+        $("#four4").addClass('panel-primary');
+        $("#four4").removeClass('panel-yellow');
+        $("#two2").addClass('panel-light-blue');
+        $("#one1").removeClass('panel-primary');
+        $("#one1").addClass('panel-blue');
+        $("#three3").removeClass('panel-primary');
+        $("#three3").addClass('panel-green');
+        $("#five5").addClass('panel-red');
+        $("#five5").removeClass('panel-primary');
+        $("#six6").addClass('panel-pink');
+        $("#six6").removeClass('panel-primary');
+    });
+
+    $("#tab5").click(function () {
+        $("#five").show();
+        $("#one").hide();
+        $("#two").hide();
+        $("#three").hide();
+        $("#four").hide();
+        $("#six").hide();
+
+        $("#five5").addClass('panel-primary');
+        $("#five5").removeClass('panel-red');
+        $("#four4").addClass('panel-yellow');
+        $("#four4").removeClass('panel-primary');
+        $("#two2").addClass('panel-light-blue');
+        $("#one1").removeClass('panel-primary');
+        $("#one1").addClass('panel-blue');
+        $("#three3").removeClass('panel-primary');
+        $("#three3").addClass('panel-green');
+        $("#six6").addClass('panel-pink');
+        $("#six6").removeClass('panel-primary');
+    });
+
+    $("#tab6").click(function () {
+        $("#six").show();
+        $("#one").hide();
+        $("#two").hide();
+        $("#three").hide();
+        $("#four").hide();
+        $("#five").hide();
+
+        $("#six6").addClass('panel-primary');
+        $("#six6").removeClass('panel-pink');
+        $("#five5").addClass('panel-red');
+        $("#five5").removeClass('panel-primary');
+        $("#four4").addClass('panel-yellow');
+        $("#four4").removeClass('panel-primary');
+        $("#two2").addClass('panel-light-blue');
+        $("#one1").removeClass('panel-primary');
+        $("#one1").addClass('panel-blue');
+        $("#three3").removeClass('panel-primary');
+        $("#three3").addClass('panel-green');
+    });
+
+    });
+  
+</script>
+
+
+<input type="hidden" id="hdnServiceType" value="@Session["Servivetype"]" />
+@using (Html.BeginForm("submit", "ForestAction", FormMethod.Post)) { 
+<input type="hidden" id="hdnReq" name="RequestId" />
+<input type="hidden" id="hdnPermissionName" />
+<input type="hidden" id="hdnRequestOn" />
+<input type="hidden" id="hdnPaidAmount" />
+
+<div id="wrapper">
+    @if (@TempData["kml"] != null)
+    {
+        // <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["kml"]</div>
+        <script type="text/javascript" language="javascript">
+            alert('@TempData["kml"]');
+        </script>
+    }
+    <div class="container-fluid desh">                              
+        <!-- Page Content -->
+        <div id="page-wrapper">
+            <div class="col-lg-12 rgt">
+                <h1 class="page-header">My Dashboard <span class="desh-small">| Forest official, Dy. Conservator of Forests (IT)</span></h1>
+
+                <!-- Services -->
+                <div class="row" id="services">
+                    <div class="col-lg-2">
+                        <div class="panel panel-primary" id="one1">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-1">
+                                        <i class="fa fa-star fa-2x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge">Citizen Services</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a id="tab1" href="@Url.Action("ForesterAction", "ForesterAction", new { ServiceType = "Citizen" })">
+                                <div class="panel-footer">
+                                    <span class="pull-left">View Details</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    @*<div class="col-lg-2">
+                        <div class="panel panel-light-blue" id="two2">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-1">
+                                        <i class="fa fa-thumbs-o-up fa-2x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge">Forest Development</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a id="tab2" href="@Url.Action("ForesterAction", "ForesterAction", new { ServiceType = "Development" })">
+                                <div class="panel-footer">
+                                    <span class="pull-left">View Details</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2">
+                        <div class="panel panel-green" id="three3">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-1">
+                                        <i class="fa fa-gear fa-2x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge">Forest Production</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a id="tab3" href="@Url.Action("ForesterAction", "ForesterAction", new {ServiceType="Production" })">
+                                <div class="panel-footer">
+                                    <span class="pull-left">View Details</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="panel panel-yellow" id="four4">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-1">
+                                        <i class="fa fa-umbrella fa-2x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge">Forest Protection</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a id="tab4">
+                                <div class="panel-footer">
+                                    <span class="pull-left">View Details</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>                  
+                    <div class="col-lg-2">
+                        <div class="panel panel-pink" id="six6">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-1">
+                                        <i class="fa fa-users fa-2x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge">Finance Management</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a id="tab6">
+                                <div class="panel-footer">
+                                    <span class="pull-left">View Details</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>*@
+                </div>
+                <!--/.Services-->
+
+                
+                <!-- ID one -->
+                <div class="row" id="one">
+                    <!-- Tab1 -->
+                    <div class="col-md-12" style="padding-right:0">
+                        <div class="panel with-nav-tabs panel-default">
+                            <div class="panel-heading">
+                                <ul class="nav nav-tabs">
+                                    <li class="active"><a href="#tab1default" data-toggle="tab"><i class="fa fa-star fa-fw"></i> My Actions</a></li>
+                                    <li class=""><a href="#tab3default" data-toggle="tab"><i class="fa fa-user fa-fw"></i> Pending Requests</a></li>
+                                    @*<li class=""><a href="#tab2default" data-toggle="tab"><i class="fa fa-comment fa-fw"></i>My Transactions</a></li>*@
+                                </ul>
+                            </div>
+                            <div class="panel-body">
+                                <div class="tab-content">
+                                    <div class="tab-pane fade active in tbl-scroll" id="tab1default">
+                                        <div class="panel-body">
+                                            <div class="table-responsive request-id">
+                                                <table class="table table-striped table-bordered table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Request Id</th>
+                                                            <th>Request Type</th>
+                                                            <th>Date</th>
+                                                            <th>Action Taken</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if(ViewData["actionRequestList1"]!=null)
+                                                        {
+                                                        foreach (var item1 in ViewData["actionRequestList1"] as IEnumerable<FMDSS.Models.ForesterAction.ActionRequest>)
+                                                        {
+                                                            string abc = item1.Status;
+                                                        <tr class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                                            <td>
+                                                                @Html.DisplayFor(model => item1.RequestId)
+                                                            </td>
+                                                            <td style="display:none;">
+                                                                @Html.DisplayFor(model => item1.TableName)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(model => item1.PermissionName)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(model => item1.RequestedOn)
+                                                            </td>
+                                                            <td>
+                                                                @abc
+                                                            </td>
+                                                        </tr>
+                                                        }
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                                <a href="#" class="btn btn-default btn-block">Read more</a>
+                                            </div>
+                                            <!-- /.table-responsive -->
+                                        </div>
+                                    </div>
+                                    <!-- /.Tab1 -->
+                                    <!-- /.Tab2 -->
+                                    <div class="tab-pane fade" id="tab2default"><h3 style="color:lightgray;text-align:center">Coming Soon...</h3></div>
+                                    <div class="tab-pane fade tbl-scroll" id="tab3default">
+                                        <div class="panel-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Transaction Id</th>
+                                                            <th>Service Type</th>
+                                                            <th>Date</th>
+                                                            <th>Transaction</th>
+                                                            <th>Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if(ViewData["actionRequestList"]!=null)
+                                                        { 
+                                                        foreach (var item in ViewData["actionRequestList"] as IEnumerable<FMDSS.Models.ForesterAction.ActionRequest>)
+                                                        {
+                                                            string abc = item.Status;
+                                                        <tr>
+                                                            <td>
+                                                                @Html.DisplayFor(model => item.RequestId)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(model => item.PermissionName)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(model => item.RequestedOn)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(model => item.TransactionStatus)
+                                                            </td>
+                                                            <td>
+                                                                <a class="edit" href='@Url.Action("ForesterStatus", "ForesterAction", new { RequestId = item.RequestId, TableName = item.TableName, ModuleId = item.ModuleId, ServiceTypeId = item.ServiceTypeId, PermissionId = item.PermissionId, SubPermissionId = item.SubPermissionId })'>
+                                                                    @abc
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                        }
+                                                        }
+                                                        <tr></tr>
+                                                    </tbody>
+
+                                                </table>
+                                            </div>
+                                            <!-- /.table-responsive -->
+                                        </div>
+                                    </div>
+
+                                    <!-- /.Tab3 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.Tab1 -->
+
+               
+
+
+                </div>
+                <!-- /.ID one -->
+
+                <!-- ID two -->
+                <div class="row" style="display:none" id="two">
+                    <!-- Tab1 -->
+                    <div class="col-md-12" style="padding-right:0">
+                        <div class="panel with-nav-tabs panel-default">
+                            <div class="panel-heading">
+                                <ul class="nav nav-tabs">
+                                    <li class="active"><a href="#tab1develop" data-toggle="tab"><i class="fa fa-star fa-fw"></i> My Actions123</a></li>
+                                    <li class=""><a href="#tab2develop" data-toggle="tab"><i class="fa fa-user fa-fw"></i> Pending Requests</a></li>
+                                    <li class=""><a href="#tab3develop" data-toggle="tab"><i class="fa fa-comment fa-fw"></i>My Transactions</a></li>
+                                </ul>
+                            </div>
+                            <div class="panel-body">
+                                <div class="tab-content">
+                                    <div class="tab-pane fade active in tbl-scroll" id="tab1develop">
+                                        <div class="panel-body">
+                                            <div class="table-responsive request-id">
+                                                <table class="table table-striped table-bordered table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Request Id</th>
+                                                            <th>Request Type</th>
+                                                            <th>Date</th>
+                                                            <th>Action Taken</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if (ViewData["DevelopmentActionRequestList"] != null)
+                                                        {
+                                                            foreach (var item1 in ViewData["DevelopmentActionRequestList"] as IEnumerable<FMDSS.Models.ForesterAction.ActionRequest>)
+                                                            {
+                                                                string abc = item1.Status;
+                                                                <tr class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item1.RequestId)
+                                                                    </td>
+                                                                    <td style="display:none;">
+                                                                        @Html.DisplayFor(model => item1.TableName)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item1.PermissionName)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item1.RequestedOn)
+                                                                    </td>
+                                                                    <td>
+                                                                        @abc
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                                <a href="#" class="btn btn-default btn-block">Read more</a>
+                                            </div>
+                                            <!-- /.table-responsive -->
+                                        </div>
+                                    </div>
+                                    <!-- /.Tab1 -->
+                                    <!-- /.Tab2 -->                                  
+                                    <div class="tab-pane fade tbl-scroll" id="tab2develop">
+                                        <div class="panel-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Transaction Id</th>
+                                                            <th>Service Type</th>
+                                                            <th>Date</th>
+                                                            <th>Transaction</th>
+                                                            <th>Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if (ViewData["DevelopmentActionRequestList1"] != null)
+                                                        {
+                                                            foreach (var item in ViewData["DevelopmentActionRequestList1"] as IEnumerable<FMDSS.Models.ForesterAction.ActionRequest>)
+                                                            {
+                                                                string abc = item.Status;
+                                                                <tr>
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item.RequestId)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item.PermissionName)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item.RequestedOn)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item.TransactionStatus)
+                                                                    </td>
+                                                                    <td>
+                                                                        <a class="edit" href='@Url.Action("ForesterStatus", "ForesterAction", new { RequestId = item.RequestId, TableName = item.TableName, ModuleId = item.ModuleId, ServiceTypeId = item.ServiceTypeId, PermissionId = item.PermissionId, SubPermissionId = item.SubPermissionId })'>
+                                                                            @abc
+                                                                        </a>
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        }
+                                                        <tr></tr>
+                                                    </tbody>
+
+                                                </table>
+                                            </div>
+                                            <!-- /.table-responsive -->
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="tab3develop"><h3 style="color:lightgray;text-align:center">Coming Soon...</h3></div>
+                                    <!-- /.Tab3 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.Tab1 -->
+
+                  
+
+                </div>
+                <!-- /.ID two -->
+
+                <!-- ID three -->
+                <div class="row" style="display:none" id="three">
+                    <!-- Tab1 -->
+                    <div class="col-md-12" style="padding-right:0">
+                        <div class="panel with-nav-tabs panel-default">
+                            <div class="panel-heading">
+                                <ul class="nav nav-tabs">
+                                    <li class="active"><a href="#tab1pdefault" data-toggle="tab"><i class="fa fa-star fa-fw"></i> My Actions</a></li>
+                                    <li class=""><a href="#tab3pdefault" data-toggle="tab"><i class="fa fa-user fa-fw"></i> Pending Requests</a></li>
+                                    <li class=""><a href="#tab2pdefault" data-toggle="tab"><i class="fa fa-comment fa-fw"></i>My Transactions</a></li>
+                                </ul>
+                            </div>
+                            <div class="panel-body">
+                                <div class="tab-content">
+                                    <div class="tab-pane fade active in tbl-scroll" id="tab1pdefault">
+                                        <div class="panel-body">
+                                            <div class="table-responsive request-id">
+                                                <table class="table table-striped table-bordered table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Request Id</th>
+                                                            <th>Request Type</th>
+                                                            <th>Date</th>
+                                                            <th>Action Taken</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if (ViewData["productionActionRequestList1"] != null)
+                                                        {
+                                                            foreach (var item1 in ViewData["productionActionRequestList1"] as IEnumerable<FMDSS.Models.ForesterAction.ActionRequest>)
+                                                        {
+                                                            string abc = item1.Status;
+                                                            <tr class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item1.RequestId)
+                                                                </td>
+                                                                <td style="display:none;">
+                                                                    @Html.DisplayFor(model => item1.TableName)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item1.PermissionName)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item1.RequestedOn)
+                                                                </td>
+                                                                <td>
+                                                                    @abc
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                                <a href="#" class="btn btn-default btn-block">Read more</a>
+                                            </div>
+                                            <!-- /.table-responsive -->
+                                        </div>
+                                    </div>
+                                    <!-- /.Tab1 -->
+                                    <!-- /.Tab2 -->
+                                    <div class="tab-pane fade" id="tab2pdefault"><h3 style="color:lightgray;text-align:center">Coming Soon...</h3></div>
+                                    <div class="tab-pane fade tbl-scroll" id="tab3pdefault">
+                                        <div class="panel-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Transaction Id</th>
+                                                            <th>Service Type</th>
+                                                            <th>Date</th>
+                                                            <th>Transaction</th>
+                                                            <th>Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if (ViewData["productionActionRequestList"] != null)
+                                                        {
+                                                            foreach (var item in ViewData["productionActionRequestList"] as IEnumerable<FMDSS.Models.ForesterAction.ActionRequest>)
+                                                        {
+                                                            string abc = item.Status;
+                                                            <tr>
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item.RequestId)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item.PermissionName)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item.RequestedOn)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item.TransactionStatus)
+                                                                </td>
+                                                                <td>
+                                                                    <a class="edit" href='@Url.Action("ForesterStatus", "ForesterAction", new { RequestId = item.RequestId, TableName = item.TableName, ModuleId = item.ModuleId, ServiceTypeId = item.ServiceTypeId, PermissionId = item.PermissionId, SubPermissionId = item.SubPermissionId })'>
+                                                                        @abc
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                        }
+                                                        <tr></tr>
+                                                    </tbody>
+
+                                                </table>
+                                            </div>
+                                            <!-- /.table-responsive -->
+                                        </div>
+                                    </div>
+
+                                    <!-- /.Tab3 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.Tab1 -->                    
+                </div>
+                <!-- /.ID three -->
+
+                <!-- ID four -->
+                <div class="row" style="display:none" id="four">
+                    <!-- Tab1 -->
+                    <div class="col-md-12" style="padding-right:0">
+                        <div class="panel with-nav-tabs panel-default">
+                            <div class="panel-heading">
+                                <ul class="nav nav-tabs">
+                                    <li class="active"><a href="#tab1default" data-toggle="tab"><i class="fa fa-star fa-fw"></i> My Actions</a></li>
+                                    <li class=""><a href="#tab3default" data-toggle="tab"><i class="fa fa-user fa-fw"></i> Pending Requests</a></li>
+                                    <li class=""><a href="#tab2default" data-toggle="tab"><i class="fa fa-comment fa-fw"></i>My Transactions123</a></li>
+                                </ul>
+                            </div>
+                            <div class="panel-body">
+                                <div class="tab-content">
+                                    <div class="tab-pane fade active in tbl-scroll" id="tab1default">
+                                        <div class="panel-body">
+                                            <div class="table-responsive request-id">
+                                                <table class="table table-striped table-bordered table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Request Id</th>
+                                                            <th>Request Type</th>
+                                                            <th>Date</th>
+                                                            <th>Action Taken</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if(ViewData["actionRequestList1"]!=null)
+                                                        { 
+                                                        foreach (var item1 in ViewData["actionRequestList1"] as IEnumerable<FMDSS.Models.ForesterAction.ActionRequest>)
+                                                        {
+                                                            string abc = item1.Status;
+                                                            <tr class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item1.RequestId)
+                                                                </td>
+                                                                <td style="display:none;">
+                                                                    @Html.DisplayFor(model => item1.TableName)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item1.PermissionName)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item1.RequestedOn)
+                                                                </td>
+                                                                <td>
+                                                                    @abc
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                                <a href="#" class="btn btn-default btn-block">Read more</a>
+                                            </div>
+                                            <!-- /.table-responsive -->
+                                        </div>
+                                    </div>
+                                    <!-- /.Tab1 -->
+                                    <!-- /.Tab2 -->
+                                    <div class="tab-pane fade" id="tab2default"><h3 style="color:lightgray;text-align:center">Coming Soon...</h3></div>
+                                    <div class="tab-pane fade tbl-scroll" id="tab3default">
+                                        <div class="panel-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Transaction Id</th>
+                                                            <th>Service Type</th>
+                                                            <th>Date</th>
+                                                            <th>Transaction</th>
+                                                            <th>Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if(ViewData["actionRequestList"]!=null)
+                                                        { 
+                                                        foreach (var item in ViewData["actionRequestList"] as IEnumerable<FMDSS.Models.ForesterAction.ActionRequest>)
+                                                        {
+                                                            string abc = item.Status;
+                                                            <tr>
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item.RequestId)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item.PermissionName)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item.RequestedOn)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item.TransactionStatus)
+                                                                </td>
+                                                                <td>
+                                                                    <a class="edit" href='@Url.Action("ForesterStatus", "ForesterAction", new { RequestId = item.RequestId, TableName = item.TableName, ModuleId = item.ModuleId, ServiceTypeId = item.ServiceTypeId, PermissionId = item.PermissionId, SubPermissionId = item.SubPermissionId })'>
+                                                                        @abc
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                        }
+                                                        <tr></tr>
+                                                    </tbody>
+
+                                                </table>
+                                            </div>
+                                            <!-- /.table-responsive -->
+                                        </div>
+                                    </div>
+
+                                    <!-- /.Tab3 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.Tab1 -->
+
+                    
+
+
+                </div>
+                <!-- /.ID four -->
+
+                <!-- ID six -->
+                <div class="row" style="display:none" id="six">
+                    <!-- Tab1 -->
+                    <div class="col-md-12" style="padding-right:0">
+                        <div class="panel with-nav-tabs panel-default">
+                            <div class="panel-heading">
+                                <ul class="nav nav-tabs">
+                                    <li class="active"><a href="#tab1default" data-toggle="tab"><i class="fa fa-star fa-fw"></i> My Content</a></li>
+                                    <li class=""><a href="#tab3default" data-toggle="tab"><i class="fa fa-user fa-fw"></i> Pending Requests</a></li>
+                                    <li class=""><a href="#tab2default" data-toggle="tab"><i class="fa fa-comment fa-fw"></i>My Transactions</a></li>
+                                </ul>
+                            </div>
+                            <div class="panel-body">
+                                <div class="tab-content">
+                                    <div class="tab-pane fade active in tbl-scroll" id="tab1default">
+                                        <div class="panel-body">
+                                            <div class="table-responsive request-id">
+                                                <table class="table table-striped table-bordered table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Request Id</th>
+                                                            <th>Request Type</th>
+                                                            <th>Date</th>
+                                                            <th>Action Taken</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if(ViewData["actionRequestList1"]!=null)
+                                                        { 
+                                                        foreach (var item1 in ViewData["actionRequestList1"] as IEnumerable<FMDSS.Models.ForesterAction.ActionRequest>)
+                                                        {
+                                                            string abc = item1.Status;
+                                                            <tr class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item1.RequestId)
+                                                                </td>
+                                                                <td style="display:none;">
+                                                                    @Html.DisplayFor(model => item1.TableName)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item1.PermissionName)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item1.RequestedOn)
+                                                                </td>
+                                                                <td>
+                                                                    @abc
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                                <a href="#" class="btn btn-default btn-block">Read more</a>
+                                            </div>
+                                            <!-- /.table-responsive -->
+                                        </div>
+                                    </div>
+                                    <!-- /.Tab1 -->
+                                    <!-- /.Tab2 -->
+                                    <div class="tab-pane fade" id="tab2default"><h3 style="color:lightgray;text-align:center">Coming Soon...</h3></div>
+                                    <div class="tab-pane fade tbl-scroll" id="tab3default">
+                                        <div class="panel-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Transaction Id</th>
+                                                            <th>Service Type</th>
+                                                            <th>Date</th>
+                                                            <th>Transaction</th>
+                                                            <th>Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if(ViewData["actionRequestList"]!=null)
+                                                        { 
+                                                        foreach (var item in ViewData["actionRequestList"] as IEnumerable<FMDSS.Models.ForesterAction.ActionRequest>)
+                                                        {
+                                                            string abc = item.Status;
+                                                            <tr>
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item.RequestId)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item.PermissionName)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item.RequestedOn)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(model => item.TransactionStatus)
+                                                                </td>
+                                                                <td>
+                                                                    <a class="edit" href='@Url.Action("ForesterStatus", "ForesterAction", new { RequestId = item.RequestId, TableName = item.TableName, ModuleId = item.ModuleId, ServiceTypeId = item.ServiceTypeId, PermissionId = item.PermissionId, SubPermissionId = item.SubPermissionId })'>
+                                                                        @abc
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                        }
+
+                                                        <tr></tr>
+                                                    </tbody>
+
+                                                </table>
+                                            </div>
+                                            <!-- /.table-responsive -->
+                                        </div>
+                                    </div>
+
+                                    <!-- /.Tab3 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.Tab1 -->
+
+                    
+
+
+                </div>
+                <!-- /.ID six -->
+                <div class="modal fade in" id="myModalDashboard" tabindex="-1" role="dialog" aria-hidden="false">
+                    <div class="modal-dialog mdw">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                <h4 class="modal-title" id="myModalLabel">
+                                    View Request Details
+                                    <button type="button" name="btnprint" id="btnprint" class="btn btn-default pull-right">
+                                        <i class="fa fa-print"></i> Print
+                                    </button>
+                                </h4>
+                            </div>
+
+                            <div id="divPrint" class="modal-body tbl-scroll">
+                                <img src='../images/logo.png' alt='Forest Department, Government of Rajasthan' title='Logo' class='logo'>
+                                <!-- From URL Get -->
+                                <table class="table table-striped table-bordered table-hover">
+
+                                    <tbody id="tbdyScart"></tbody>
+                                </table>
+
+                                <!-- /. From URL Get -->
+                            </div>
+                            <!-- /.modal-body -->
+                            <div class="modal-footer" id="fot-f">
+                                <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                                    <i class="fa fa-times fa-fw"></i> Close
+                                </button>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+
+                
+                <!-- /.Row -->
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+        <!-- /#page-wrapper -->
+ 
+    </div>
+</div>
+}

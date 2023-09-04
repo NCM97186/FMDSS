@@ -1,0 +1,360 @@
+﻿
+@model FMDSS.Models.Master.UserProfileDetails
+
+
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/js/bootstrap.min.js"></script>
+<script src="~/js/Common.js"></script>
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+      
+
+        $('#btn_submit1').click(function (e) {
+
+            if ($('#Ssoid').val().trim() == "") {
+                $('#errSsoid').css("display", "block");
+                $('#errSsoid').focus();
+                return false;
+            }
+            else {
+                $('#errSsoid').css("display", "none");
+            }
+
+            if ($('#Name').val().trim() == "") {
+                $("#errName").css("display", "block");
+                $('#errName').focus();
+                return false;
+            }
+            else {
+                $("#errName").css("display", "none");
+            }
+            if ($('#EmailId').val().trim() == "") {
+                $('#errEmailId').css("display", "block");
+                $('#errEmailId').focus();
+                return false;
+            }
+            else {
+                $('#errEmailId').css("display", "none");
+            }
+
+            if ($('#Mobile').val().trim() == "") {
+                $("#errMobile").css("display", "block");
+                $('#errMobile').focus();
+                return false;
+            }
+            else {
+                $("#errMobile").css("display", "none");
+            }
+
+
+            if ($('option:selected', $('#Designation')).index() == 0) {
+                $("#errDesignation").css("display", "block");
+                $('#errDesignation').focus();
+                return false;
+            }
+            else {
+                $("#errDesignation").css("display", "none");
+            }
+
+            if ($('option:selected', $('#Gender')).index() == 0) {
+                $("#errGender").css("display", "block");
+                $('#errGender').focus();
+                return false;
+            }
+            else {
+                $("#errGender").css("display", "none");
+            }
+
+
+            if ($('#Postal_Address1').val().trim() == "") { 
+                $("#errPostal_Address1").css("display", "block");
+                $('#errPostal_Address1').focus();
+                return false;
+            }
+            else {
+                $("#errPostal_Address1").css("display", "none");
+            }
+
+
+            if ($('#Postal_Code1').val().trim() == "") {
+                $("#errPostal_Code1").css("display", "block");
+                $('#errPostal_Code1').focus();
+                return false;
+            }
+            else {
+                $("#errPostal_Code1").css("display", "none");
+            }
+
+
+            if ($('option:selected', $('#IsKioskUser')).index() == 0) {
+                $("#errIsKioskUser").css("display", "block");
+                $('#errIsKioskUser').focus();
+                return false;
+            }
+            else {
+                $("#errIsKioskUser").css("display", "none");
+            }
+
+            if ($('option:selected', $('#IsDepartmentalKioskUser')).index() == 0) {
+                $("#errIsDepartmentalKioskUser").css("display", "block");
+                $('#errIsDepartmentalKioskUser').focus();
+                return false;
+            }
+            else {
+                $("#errIsDepartmentalKioskUser").css("display", "none");
+            }
+
+            
+            
+            if ($('option:selected', $('#Isactive')).index() == 0) {
+                $("#errIsactive").css("display", "block");
+                $('#errIsactive').focus();
+                return false;
+            }
+            else {
+                $("#errIsactive").css("display", "none");
+            }
+
+            if ($('option:selected', $('#IsKioskUser')).index() == 1 && $('option:selected', $('#IsDepartmentalKioskUser')).index() == 1) {
+                $("#errIsKioskUserIsDepartmentalKioskUser").css("display", "block");
+                return false;
+            }
+            else {
+                $("#errIsKioskUserIsDepartmentalKioskUser").css("display", "none");
+            }
+
+        });
+
+    });
+
+
+</script>
+<script type="text/javascript">
+   
+    $(document).ready(function () {
+   
+        $("#DOB").datepicker({  dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+       
+
+        $(document).on('keypress', '#DOB', function (event) {
+
+            event.preventDefault();
+            return false;
+
+        });
+
+
+    });
+
+
+</script> 
+
+@using (Html.BeginForm("ADDUpdateUserProfileDetails", "UserManagementMaster", FormMethod.Post))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @*<label id="lbl_dpt">Add/Edit Place</label>*@
+                @ViewBag.OpType
+            </h4>
+        </div>
+
+        <div class="modal-body">
+            @Html.HiddenFor(model => model.UserID)
+          
+              <div class="col-lg-6">
+                <div class="form-group">
+                    <label>SSO ID: <span class="mandatory">*</span></label>
+
+                    sdfsdf
+                    @if (ViewBag.OpType == "Add User" )
+                    { 
+                    @Html.TextBoxFor(model => model.Ssoid, new { @class = "form-control common", @maxlength = "100" })
+                    }
+                    else
+                    { 
+                    
+                     @Html.TextBoxFor(model => model.Ssoid, new { @class = "form-control common", disabled="true",  @maxlength = "100" })
+                    }
+                    <div id="errSsoid" style="display:none" class="alert-danger1">Ssoid is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Name: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Name, new { @class = "form-control common", @maxlength = "100" })
+                    <div id="errName" style="display:none" class="alert-danger1">User Name is Required.</div>
+                </div>
+            </div>
+  
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Email ID: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.EmailId, new { @class = "form-control common", @maxlength = "100" })
+                    <div id="errEmailId" style="display:none" class="alert-danger1">Email ID is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Mobile No. : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Mobile, new { @class = "form-control common", @maxlength = "100" })
+                    <div id="errMobile" style="display:none" class="alert-danger1">Mobile number is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Bhamasha Id : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Bhamashah_Id, new { @class = "form-control common", @maxlength = "200" })
+
+
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Adhar Id : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Aadhar_ID, new { @class = "form-control common", @maxlength = "200" })
+
+
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Designation : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.Designation, (IEnumerable<SelectListItem>)ViewBag.ddlDesignation, "--Select--", new { @class = "form-control common", id = "Designation" })
+                    <div id="errDesignation" style="display:none" class="alert-danger1">Designation  is Required.</div>
+
+                </div>
+            </div>
+
+             @*<div class="col-lg-6">
+                <div class="form-group">
+                    <label>Date of Birth <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.DOB, new { @class = "form-control common", @maxlength = "100" })
+                    <div id="errDOB" style="display:none" class="alert-danger1">DOB is Required.</div>
+                </div>
+            </div>*@
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Date of Birth:</label>
+                    @Html.TextBoxFor(model => model.DOB, new { @class = "form-control common", @maxlength = "10", id = "DOB" })
+                </div>
+            </div>    
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Gender : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.Gender, (IEnumerable<SelectListItem>)ViewBag.GenderType, "--Select--", new { @class = "form-control common", id = "Gender" })
+                    <div id="errGender" style="display:none" class="alert-danger1">Gender  is Required.</div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Postal Address: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Postal_Address1, new { @class = "form-control common", @maxlength = "200" })
+                    <div id="errPostal_Address1" style="display:none" class="alert-danger1">Postal_Address is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Postal Code: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Postal_Code1, new { @class = "form-control common", @maxlength = "60" })
+                    <div id="errPostal_Code1" style="display:none" class="alert-danger1">Postal Code is Required.</div>
+                </div>
+            </div>
+          
+            @*<div class="col-lg-6">
+                <div class="form-group">
+                    <label>Kiosk User : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.IsKioskUser, (IEnumerable<SelectListItem>)ViewBag.Kioskuserlst, "--Select--", new { @class = "form-control common", id = "IsKioskUser" })
+                    <div id="errIsKioskUser" style="display:none" class="alert-danger1">Gender  is Required.</div>
+
+                </div>
+            </div>*@
+
+            @*<div class="col-lg-6">
+                <div class="form-group">
+                    <label>SSO User : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.IsSSO, (IEnumerable<SelectListItem>)ViewBag.ISavilableSSolst, "--Select--", new { @class = "form-control common", id = "IsSSO" })
+                    <div id="errIsSSO" style="display:none" class="alert-danger1">Gender  is Required.</div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Bhamashah User : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.IsBhamashah, (IEnumerable<SelectListItem>)ViewBag.Bhamashalst, "--Select--", new { @class = "form-control common", id = "IsBhamashah" })
+                    <div id="errIsBhamashah" style="display:none" class="alert-danger1">Gender  is Required.</div>
+
+                </div>
+            </div>*@
+
+
+            @*<div class="col-lg-6">
+                <div class="form-group">
+                    <label>Department Kiosk User  : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.IsDepartmentalKioskUser, (IEnumerable<SelectListItem>)ViewBag.DeptKioskUserlst, "--Select--", new { @class = "form-control common", id = "IsDepartmentalKioskUser" })
+                    <div id="errIsDepartmentalKioskUser" style="display:none" class="alert-danger1">Gender  is Required.</div>
+
+                </div>
+            </div>*@
+
+            
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Active / Deactive : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.Isactive, (IEnumerable<SelectListItem>)ViewBag.ISactivelst, "--Select--", new { @class = "form-control common", id = "Isactive" })
+                    <div id="errIsactive" style="display:none" class="alert-danger1">Active / Deactive  is Required.</div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <br />
+                <div id="errIsKioskUserIsDepartmentalKioskUser" style="display:none" class="alert-danger1">
+
+                    Select only one column 'Yes' at a time for Kiosk and Department User
+
+                </div>
+            </div>
+            <!-- /.Btn Groping -->
+
+
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success" value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+}
+

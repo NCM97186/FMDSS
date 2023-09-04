@@ -1,0 +1,721 @@
+﻿@{
+    ViewBag.Title = "ManageAsset";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+@model IEnumerable<FMDSS.Models.ForestProduction.AssetManagement>
+
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function (e) {
+
+        $('#AssetGrid').DataTable({
+            responsive: true
+        });
+
+
+        $("#ddl_Districts").bind("change", function () {
+            $('#ddl_Block').empty();
+            var values = {
+                DistrictID: $("#ddl_Districts").val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'ManageAsset/BindBlock',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddl_Block").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+        $("#ddl_Block").bind("change", function () {
+            $('#ddl_GP').empty();
+            var values = {
+                DistrictID: $("#ddl_Districts").val(),
+                BlockID: $("#ddl_Block").val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'ManageAsset/BindGramPanchayat',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddl_GP").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+        $("#ddl_GP").bind("change", function () {
+            $('#ddl_Village').empty();
+            var values = {
+                DistrictID: $("#ddl_Districts").val(),
+                BlockID: $("#ddl_Block").val(),
+                GpID: $("#ddl_GP").val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'ManageAsset/BindVillage',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddl_Village").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+        //$("#ddl_Village").bind("change", function () {
+        //    $('#ddl_JFMC').empty();
+        //    var values = {
+        //        DistrictID: $("#ddl_Districts").val(),
+        //        BlockID: $("#ddl_Block").val(),
+        //        GpID: $("#ddl_GP").val(),
+        //        villageID: $("#ddl_Village").val()
+        //    };
+
+        //    $.ajax({
+        //        type: 'POST',
+        //        contentType: 'application/json; charset=utf-8',
+        //        url: RootUrl + 'ManageAsset/BindJFMC',
+        //        data: JSON.stringify(values),
+        //        success: function (data) {
+        //            $('#ddl_JFMC').empty();
+        //            $.each(data, function (i, items) {
+        //                $("#ddl_JFMC").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+        //            });
+        //        },
+        //        traditional: true,
+        //        error: function (data) { console.log(data) }
+        //    });
+        //});
+
+        $('#ddl_Village').change(function (e) {
+
+            //alert($("#divisionCode").val());
+            //alert($("#rangeCode").val());
+            $("#ddlWorkOrder").empty();
+            $("#ddlWorkOrder").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'TransitPermit/BindWorkOrder', // we are calling json method
+                dataType: 'json',
+                data: { villCode: $("#ddl_Village").val() },
+                success: function (range) {
+                    $.each(range, function (i, items) {
+                        $("#ddlWorkOrder").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    //alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#ddlWorkOrder').change(function (e) {
+            $("#ddl_AssetCategory").empty();
+            $("#txt_assetName").empty();
+            $("#ddl_AssetCategory").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            $("#txt_assetName").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageAsset/assetListByWorkorderID', // we are calling json method
+                dataType: 'json',
+                data: { workOrderID: $("#ddlWorkOrder").val() },
+                success: function (data) {
+                    $.each(data.list, function (i, items) {
+                        $("#ddl_AssetCategory").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    })
+                    $.each(data.list1, function (i, items) {
+                        $("#txt_assetName").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                        //$("#txt_jfmcAgency").val(items.JfmcName);
+                        //$("#txt_totalAsset").val(items.TotalAsset);
+                    })
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+        });
+
+        $('#txt_assetName').change(function (e) {
+            $("#txt_jfmcAgency").val(''); $("#txt_totalAsset").val('');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageAsset/getAssetNumber', // we are calling json method
+                dataType: 'json',
+                data: { workOrderID: $("#ddlWorkOrder").val(), assetCat: $("#ddl_AssetCategory").val(), assetId: $("#txt_assetName").val() },
+                success: function (data) {
+
+                    $("#txt_jfmcAgency").val(data.JfmcName);
+                    $("#txt_totalAsset").val(data.TotalAsset);
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+        });
+
+
+        $('#btn_submit1').click(function (e) {
+            if ($('#ddl_Village').val() == '' || $('#ddl_Village').val() == null || $('#ddl_Village').val() == '0') {
+                $("#errorVillage").css("display", "block");
+                $('#ddl_Village').focus();
+                return false;
+            }
+            else {
+                $("#errorVillage").css("display", "none");
+            }
+
+
+            if ($('#txt_assetName').val() == '') {
+                $("#errorAName").css("display", "block");
+                $('#txt_assetName').focus();
+                return false;
+            }
+            else {
+                $("#errorAName").css("display", "none");
+            }
+
+            //   if ($('#ddl_AssetCategory').val() == '' || $('#ddl_AssetCategory').val() == null || $('#ddl_AssetCategory').val() == '0') {
+            //       $("#errorCategory").css("display", "block");
+            //    $('#ddl_AssetCategory').focus();
+            //    return false;
+            //}
+            //else {
+            //       $("#errorCategory").css("display", "none");
+            //}
+
+            if ($('#txt_totalAsset').val() == '') {
+                $("#errorNoAsset").css("display", "block");
+                $('#txt_totalAsset').focus();
+                return false;
+            }
+            else {
+                $("#errorNoAsset").css("display", "none");
+            }
+        });
+
+        $('.EditAsset').click(function (e) {
+            $('#lbl_ast').text("Edit Asset");
+            var $row = jQuery(this).closest('tr');
+            var $columns = $row.find('td');
+            var values = "";
+            var astID = $(this).parents('tr').find('input[type="hidden"]').val();
+
+            var option = "Edit";
+            EditAsset(astID, option);
+        });
+
+        $('.ViewAsset').click(function (e) {
+
+            var $row = jQuery(this).closest('tr');
+            var $columns = $row.find('td');
+            var values = "";
+            var astID = $(this).parents('tr').find('input[type="hidden"]').val();
+            var option = "View";
+            EditAsset(astID, option);
+
+        });
+
+        function EditAsset(did, option) {
+            clear();
+            $('#hdn_assetID').val(did);
+            var tblinfo = {
+                AssetID: $.trim(did)
+            }
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(tblinfo),
+                url: RootUrl + 'ManageAsset/EditDetails',
+                success: function (data) {
+                    if (option == "Edit") {
+                        var D_Code = data.DistrictCode;
+                        var B_Code = data.BlockCode;
+                        var G_Code = data.PanchayatCode;
+                        var V_Code = data.VillageCode;
+                        var W_Code = data.WorkOrder;
+                        var As_Code = data.AssetID;
+                        var AC_Code = data.AssetCategoryID;
+
+
+                        $('#txt_assetName').val(data.AssetName);
+                        $('#txt_totalAsset').val(data.TotalAsset);
+
+                        $("#ddl_Districts").val(D_Code);
+                        $("#ddl_AssetCategory").val(AC_Code);
+
+                        var dist = { DistrictID: D_Code };
+                        $('#ddl_Block').empty();
+                        $.ajax({
+                            type: 'POST',
+                            contentType: 'application/json; charset=utf-8',
+                            url: RootUrl + 'ManageAsset/BindBlock',
+                            data: JSON.stringify(dist),
+                            success: function (data) {
+                                $.each(data, function (i, items) {
+                                    $("#ddl_Block").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                                    if (items.Value == B_Code) {
+                                        $('#ddl_Block option').filter(function () { return $(this).val() == B_Code }).attr('selected', true);
+
+                                    }
+                                });
+                            },
+                            traditional: true,
+                            error: function (data) { console.log(data) }
+                        });
+
+                        var list = { DistrictID: D_Code, BlockID: B_Code };
+
+                        $.ajax({
+                            type: 'POST',
+                            contentType: 'application/json; charset=utf-8',
+                            url: RootUrl + 'ManageAsset/BindGramPanchayat',
+                            data: JSON.stringify(list),
+                            success: function (data) {
+                                $("#ddl_GP").empty();
+                                $.each(data, function (i, items) {
+                                    $("#ddl_GP").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                                    if (items.Value == G_Code) {
+                                        $('#ddl_GP option').filter(function () { return $(this).val() == G_Code }).attr('selected', true);
+                                    }
+                                });
+                            },
+                            traditional: true,
+                            error: function (data) { console.log(data) }
+                        });
+
+                        $('#ddl_Village').empty();
+                        var lst1 = { DistrictID: D_Code, BlockID: B_Code, GpID: G_Code };
+                        $.ajax({
+                            type: 'POST',
+                            contentType: 'application/json; charset=utf-8',
+                            url: RootUrl + 'ManageAsset/BindVillage',
+                            data: JSON.stringify(lst1),
+                            success: function (data) {
+                                $.each(data, function (i, items) {
+                                    $("#ddl_Village").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                                    if (items.Value == V_Code) {
+                                        $('#ddl_Village option').filter(function () { return $(this).val() == V_Code }).attr('selected', true);
+                                    }
+                                });
+                            },
+                            traditional: true,
+                            error: function (data) { console.log(data) }
+                        });
+
+                        $.ajax({
+                            type: 'POST',
+                            url: RootUrl + 'TransitPermit/BindWorkOrder', // we are calling json method
+                            dataType: 'json',
+                            data: { villCode: V_Code },
+                            success: function (range) {
+                                $.each(range, function (i, items) {
+                                    $("#ddlWorkOrder").append('<option value="' + items.Value + '">' +
+                                     items.Text + '</option>');
+                                    if (items.Value == W_Code) {
+                                        $('#ddlWorkOrder option').filter(function () { return $(this).val() == W_Code }).attr('selected', true);
+                                    }
+                                });
+                            },
+                            error: function (ex) {
+                                //alert('Failed to retrieve states.' + ex);
+                            }
+
+                        });
+
+
+                        $.ajax({
+                            type: 'POST',
+                            url: RootUrl + 'ManageAsset/assetListByWorkorderID', // we are calling json method
+                            dataType: 'json',
+                            data: { workOrderID: W_Code },
+                            success: function (data) {
+                                $.each(data.list, function (i, items) {
+                                    $("#ddl_AssetCategory").append('<option value="' + items.Value + '">' + items.Text + '<option>');
+                                    if (items.Value == AC_Code) {
+                                        $('#ddl_AssetCategory option').filter(function () { return $(this).val() == AC_Code }).attr('selected', true);
+                                    }
+                                })
+
+                                $.each(data.list1, function (i, items) {
+                                    $("#txt_assetName").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+
+                                    if (items.Value == As_Code) {
+                                        $('#txt_assetName option').filter(function () { return $(this).val() == As_Code }).attr('selected', true);
+                                    }
+                                })
+                            },
+                            traditional: true,
+                            error: function (data) { console.log(data) }
+                        });
+
+                        $.ajax({
+                            type: 'POST',
+                            url: RootUrl + 'ManageAsset/getAssetNumber', // we are calling json method
+                            dataType: 'json',
+                            data: { workOrderID: W_Code, assetCat: AC_Code, assetId: As_Code },
+                            success: function (data) {
+
+                                $("#txt_jfmcAgency").val(data.JfmcName);
+                                //$("#txt_totalAsset").val(data.TotalAsset);
+                            },
+                            traditional: true,
+                            error: function (data) { console.log(data) }
+                        });
+
+
+                        $("#txt_totalAsset").val(data.TotalAsset);
+
+
+                        $("#btn_submit1").html('Update');
+                        $('#btn_submit1').val('Update');
+                    }
+                    else if (option == "View") {
+
+                        $("#tbdyAsset").empty();
+                        var bardata = "<tr><td>District</td><td>" + data.DistrictName +
+                 "</td></tr><tr><td>Block</td><td>" + data.BlockName +
+                 "</td></tr><tr><td>Gram Panchayat</td><td>" + data.PanchayatName +
+                 "</td></tr><tr><td>Village</td><td>" + data.VillageName +
+                 "</td></tr><tr><td>Work Order</td><td>" + data.WorkOrder_Code +
+                 "</td></tr><tr><td>Asset Category</td><td>" + data.AssetCategoryName +
+                 "</td></tr><tr><td>Asset Name</td><td>" + data.AssetName +
+                 "</td></tr><tr><td>No of Asset</td><td>" + data.TotalAsset +
+                 "</td></tr>";
+
+                        $("#tbdyAsset").append(bardata);
+                    }
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        }
+
+        $('#btn_addAssetPopup').click(function (e) {
+            $('#lbl_ast').text("Add Asset");
+            clear();
+        });
+        $('#btn_reset').click(function (e) {
+            clear();
+        });
+        function clear() {
+
+            $("#ddl_Districts").val('');
+            $("#ddl_Block").empty();
+            $("#ddl_Block").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            $("#ddl_GP").empty();
+            $("#ddl_GP").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            $("#ddl_Village").empty();
+            $("#ddl_Village").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            $("#ddl_Village").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            $("#ddlWorkOrder").empty();
+            $("#ddlWorkOrder").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            $("#ddl_AssetCategory").empty();
+            $("#ddl_AssetCategory").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+
+            $("#txt_assetName").empty();
+            $("#txt_assetName").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            $("#txt_jfmcAgency").val('');
+
+            $("#btn_submit1").html('Save');
+            $('#btn_submit1').val('Save');
+            $("#txt_totalAsset").val('');
+            $("#errorVillage").css("display", "none");
+            $("#errorAName").css("display", "none");
+        }
+
+        $('#txt_assetName').keypress(function (e) {
+
+            var kc = e.which;
+
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95) || (kc >= 44 && kc <= 57) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+        $('[data-toggle=modal]').on('click', function (e) {
+            var $target = $($(this).data('target'));
+            $target.data('triggered', true);
+            setTimeout(function () {
+                if ($target.data('triggered')) {
+                    $target.modal('show').data('triggered', false);
+                };
+            }, 1000); // milliseconds
+            return false;
+        });
+
+    });
+    function isNumberKey(event) {
+        var id = $(event.target).attr("id");
+        if (id == 'txt_totalAsset') {
+            document.getElementById("errorAssetNo").style.display = 'none';
+        }
+
+        var charCode = (event.which) ? event.which : event.keyCode
+        if (charCode == 46 || charCode > 31 && (charCode < 48 || charCode > 57)) {
+            if (id == 'txt_totalAsset') {
+                document.getElementById("errorAssetNo").style.display = 'block';
+            }
+            return false;
+        }
+        else
+            return true;
+    }
+</script>
+@using (Html.BeginForm("SubmitAsset", "ManageAsset", FormMethod.Post, new { id = "submitForm" }))
+{
+    <div id="page-wrapper-inn">
+        <div class="col-lg-12 pad">
+            <h1 class="page-header">Asset Management</h1>
+            @if (@Session["Asset_Status"] != null)
+            {
+                <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@Session["Asset_Status"]</div>
+                Session["Asset_Status"] = null;
+            }
+        </div>
+        <!-- /.col-lg-12 -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+
+
+                    <div class="panel-body">
+                        <div class="col-lg-3 pull-right" style="display:none">
+                            <button type="button" class="btn btn-success btn_pp pull-right AddNewDepot" id="btn_addAssetPopup" name="btn_addpopip" value="" data-toggle="modal" data-target="#myModal" title="Add New Depot">
+                                <i class="fa fa-plus"></i> Add New Asset
+                            </button>
+                        </div>
+                        <div class="dataTable_wrapper">
+                            <div id="tbl" class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover table-responsive" id="AssetGrid">
+
+                                    <thead>
+                                        <tr>
+                                            <th style="width:10%;">S. No</th>
+                                            <th>Work Order</th>
+                                            <th>Asset Category</th>
+                                            <th>Asset Name</th>
+                                            <th>No. of Asset</th>
+                                            <th style="width:15%;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+
+                                            <tr>
+                                                <td class="name">
+                                                    @Html.DisplayFor(model => item.RowID)
+                                                    @Html.HiddenFor(model => item.AssetID)
+                                                </td>
+                                                <td class="name">
+                                                    @Html.DisplayFor(model => item.WorkOrder_Code)
+                                                </td>
+                                                <td class="name">
+                                                    @Html.DisplayFor(model => item.AssetCategoryName)
+                                                </td>
+                                                <td class="name">
+                                                    @Html.DisplayFor(model => item.AssetName)
+                                                </td>
+                                                <td class="name">
+                                                    @Html.DisplayFor(model => item.TotalAsset)
+                                                </td>
+
+                                                <td>
+                                                    <button type="button" class="btn btn-success btn-circle ViewAsset" title="View" data-toggle="modal" data-target="#myViewAsset">
+                                                        <i class="fa fa-eye"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-warning btn-circle EditAsset" data-toggle="modal" data-target="#myModal" title="Edit" style="display:none">
+                                                        <i class="fa fa-edit"></i>
+                                                    </button>
+
+                                                    <a class="btn btn-danger btn-circle" onclick="return confirm('Are you sure you wish to delete this record?');" href='@Url.Action("DeleteRecord", "ManageAsset", new { id = item.AssetID })' style="display:none">
+                                                        <i class="fa fa-times"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="myModal" role="dialog">
+                    <div class="modal-dialog modal-lg">
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">
+                                    &times;
+                                </button>
+                                <h4 class="modal-title">
+                                    <label id="lbl_ast" for="email"></label>
+                                </h4>
+                            </div>
+                            <div class="modal-body">
+
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>District Name: <span class="mandatory"></span></label>
+                                        @Html.DropDownList("DistrictCode", (IEnumerable<SelectListItem>)ViewBag.Districts, "--Select--", new { @class = "form-control", id = "ddl_Districts" })
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Block Name: <span class="mandatory"></span></label>
+                                        @Html.DropDownList("BlockCode", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddl_Block" })
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Gram Panchayat: <span class="mandatory"></span></label>
+                                        @Html.DropDownList("PanchayatCode", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddl_GP" })
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Village Name: <span class="mandatory">*</span></label>
+                                        @Html.DropDownList("VillageCode", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddl_Village" })
+                                        <span id="errorVillage" style="display: none" class="alert-danger1">* Please Select Village.</span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="Village">
+                                            Work Order:
+                                        </label>
+                                        @Html.DropDownList("WorkOrder", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "ddlWorkOrder" })
+
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Asset Category: <span class="mandatory">*</span></label>
+                                        @Html.DropDownList("AssetCategoryID", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "ddl_AssetCategory" })
+
+
+                                        @*@Html.DropDownList("AssetCategoryID", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddl_AssetCategory" })*@
+                                        <span id="errorCategory" style="display: none" class="alert-danger1">* Please Select Category.</span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Asset Name: <span class="mandatory">*</span></label>
+                                        @Html.DropDownList("AssetName", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "txt_assetName" })
+
+                                        <input type="hidden" id="hdn_assetID" name="AssetID" value="0">
+
+
+                                        <span id="errorAName" style="display: none" class="alert-danger1">* Please Enter Asset Name.</span>
+
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>JFMCAgency/Contractor Name: <span class="mandatory">*</span></label>
+                                        <input class="form-control" id="txt_jfmcAgency" name="JfmcContractor" readonly="readonly" />
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>No of Asset: <span class="mandatory">*</span></label>
+                                        <input class="form-control" id="txt_totalAsset" name="TotalAsset" onkeypress="return isNumberKey(event);" maxlength="5" />
+                                        <span id="errorNoAsset" style="display: none" class="alert-danger1">* Please Enter No of Asset.</span>
+                                        <span id="errorAssetNo" style="display: none" class="alert-danger1">* Input digits (0 - 9)</span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12"></div>
+                            </div>
+                            <div class="modal-footer" style="clear:both">
+                                <div id="btn" class="col-lg-12">
+
+                                    <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit1">
+                                        <i class="fa fa-check"></i> Save
+                                    </button>
+                                    <button type="button" class="btn btn-warning" id="btn_reset">
+                                        <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                    </button>
+                                    <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                                        <i class="fa fa-times fa-fw"></i> Close
+                                    </button>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal fade in" id="myViewAsset" tabindex="-1" role="dialog" aria-hidden="false">
+                    <div class="modal-dialog mdw">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                <h4 class="modal-title" id="myModalLabel">View Depot Details</h4>
+                            </div>
+
+                            <div class="modal-body">
+                                <!-- From URL Get -->
+                                <table class="table table-striped table-bordered table-hover">
+                                    <tbody id="tbdyAsset"></tbody>
+                                </table>
+
+                                <!-- /. From URL Get -->
+                            </div>
+                            <!-- /.modal-body -->
+                            <div class="modal-footer" id="fot-f">
+                                <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                                    <i class="fa fa-times fa-fw"></i> Close
+                                </button>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+
+
+                <!-- /.panel -->
+
+            </div>
+            <!-- /.col-lg-12 -->
+
+        </div>
+
+        <!-- /.Row -->
+
+    </div>
+}

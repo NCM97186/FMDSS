@@ -1,0 +1,109 @@
+﻿@model FMDSS.Models.MIS.MISNursueryDetailsModel
+@{
+    ViewBag.Title = "MISPurchaseHistory";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString());
+}
+
+<style>
+    .hideRow {
+        display: none;
+    }
+</style>
+<script type="text/javascript">
+    $(function () {
+        $('.show-details').click(
+          function () {
+              if (!$(this).hasClass('panel-collapsed')) {
+                  $(this).parent('tr').next().fadeIn(700);
+                  $(this).addClass('panel-collapsed');
+                  $(this).find('i').removeClass('glyphicon-plus').addClass('glyphicon-minus');
+              } else {
+                  $(this).parent('tr').next().fadeOut(700);
+                  $(this).removeClass('panel-collapsed');
+                  $(this).find('i').removeClass('glyphicon-minus').addClass('glyphicon-plus');
+              }
+          }
+        );
+    });
+</script>
+
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        
+        $('.gridtable').DataTable({
+            responsive: true,
+            "bSort": false
+        })
+
+        
+
+    });
+</script>
+
+<div class="col-lg-9">
+    <div class="">
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered table-hover table-responsive" id="tbl1">
+                <thead>
+                    <tr class="background-blue">
+                        <th>Nursery Name</th>
+                        <th>Online Purchase QTY</th>
+                        <th>Offline Purchase  QTY</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var itm in Model.NurseryInfo)
+                    {
+                        <tr>
+                            <td>@itm.NurseryName</td>
+                            <td>@itm.CitizenQty</td>
+                            <td>@itm.DeptQty</td>
+                            <td class="show-details"><i class="glyphicon glyphicon-plus"></i></td>
+                        </tr>
+
+                        <tr class="hideRow">
+                            <td colspan="4">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered table-hover table-responsive gridtable" rules="all">
+                                        <!--Start of the nested table-->
+                                        <thead>
+                                            <tr class="background-blue">
+                                                <th>OrderNo</th>
+                                                <th>Produce Type</th>
+                                                <th>Produce Name</th>
+                                                <th>Quantity</th>
+                                                <th>Rate Per Item (INR)</th>
+                                                <th>Discount Citizen (%)</th>
+                                                <th>PaidAmount  (INR)</th>
+                                                <th>ID of purcher</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var child in Model.OrderInfo.Where(s => s.NurseryName == itm.NurseryName))
+                                            {
+                                                <tr>
+                                                    <td>@child.OrderNo</td>
+                                                    <td>@child.ProduceType</td>
+                                                    <td>@child.ProductName</td>
+
+                                                    <td>@child.PurchaseQuantity</td>
+                                                    <td>@child.RatePerItem</td>
+                                                    <td>@child.Discount</td>
+                                                    <td>@child.PaidAmount</td>
+                                                    <td>@child.Ssoid</td>
+                                                </tr>
+                                            }
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

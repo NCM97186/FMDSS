@@ -1,0 +1,152 @@
+﻿@model FMDSS.Models.MiddleWareModules
+
+<table class="table tabtext table-striped  table-bordered table-hover" style="width:100%;">
+    <thead>
+        <tr>
+            @*<th class="inth" rowspan="1">Zone</th>
+        <th class="inth" colspan="2">Morning Shift Availability </th>
+        <th class="inth" colspan="2">Evening Shift Availability</th>*@
+
+            @{
+                if (Model.AvailList != null)
+                {
+                    if (Model.AvailList[0].ZoneName == "ALL Zone" && Model.AvailList[0].PlaceID == 65)
+                    {
+                        <th class="inth" rowspan="1">Zone</th>
+                        <th class="inth">Morning Shift Availability (Seats) </th>
+                        <th class="inth">Evening Shift Availability (Seats)</th>
+                        <th class="inth">Full Day Shift Availability (Seats)</th>
+                    }
+                    else
+                    {
+                        <th class="inth" rowspan="1">Zone</th>
+                        <th class="inth" colspan="2">Morning Shift Availability (Seats)</th>
+                        <th class="inth" colspan="2">Evening Shift Availability (Seats)</th>
+                    }
+                }
+                else
+                {
+                    <th class="inth" rowspan="1">Zone</th>
+                    <th class="inth" colspan="2">Morning Shift Availability (Seats)</th>
+                    <th class="inth" colspan="2">Evening Shift Availability (Seats)</th>
+                }
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @{
+        <tr>
+            @{ if (Model.AvailList != null)
+                {
+                    if (Model.AvailList[0].ZoneName == "ALL Zone" && Model.AvailList[0].PlaceID == 65)
+                    {
+                        <td class="inth"></td>
+                        <td class="inth"><b>Gypsy</b></td>
+                        <td class="inth"><b>Gypsy</b></td>
+                        <td class="inth"><b>Gypsy</b></td>
+                    }
+                    else
+                    {
+                        if (Model.AvailList[0].PlaceID == 60)
+                        {
+                            <td class="inth"></td>
+                            <td class="inth"  colspan="2"><b>Gypsy</b></td>
+
+                            <td class="inth"  colspan="2"><b>Gypsy</b></td>
+
+                        }
+                        else
+                        {
+                            <td class="inth"></td>
+                            <td class="inth"><b>Gypsy</b></td>
+                            <td class="inth"><b>Canter</b></td>
+                            <td class="inth"><b>Gypsy</b></td>
+                            <td class="inth"><b>Canter</b></td>
+                        }
+
+                    }
+                }
+                else
+                {
+                    if (Model.PermitAvailList[0].PlaceID == 60)
+                    {
+                        <td class="inth"></td>
+                        <td class="inth"  colspan="2"><b>Gypsy</b></td>
+
+                        <td class="inth"  colspan="2"><b>Gypsy</b></td>
+
+                    }
+                    else
+                    {
+                        <td class="inth"></td>
+                        <td class="inth"><b>Gypsy</b></td>
+                        <td class="inth"><b>Canter</b></td>
+                        <td class="inth"><b>Gypsy</b></td>
+                        <td class="inth"><b>Canter</b></td>
+                    }
+
+                }
+            }
+
+        </tr>
+                if (Model.PermitAvailList != null)
+                {
+                    int zoneid = 0;
+                    if (Model.PermitAvailList.Count > 0)
+                    {
+                        foreach (var item in Model.PermitAvailList)
+                        {
+                            if (zoneid != item.ZoneId)
+                            {
+                                zoneid = item.ZoneId;
+                                <tr>
+                                    @{
+                                        if (item.PlaceID == 60)
+                                        {
+                                            <td class="inth">@item.ZoneName</td>
+                                            <td class="inth" colspan="2">@item.Gypsy1</td>                                     
+                                            <td class="inth" colspan="2">@item.Gypsy2</td>                                   
+                                        }
+                                        else
+                                        {
+                                            <td class="inth">@item.ZoneName</td>
+                                            <td class="inth">@item.Gypsy1</td>
+                                            <td class="inth">@item.Canter1</td>
+                                            <td class="inth">@item.Gypsy2</td>
+                                            <td class="inth">@item.Canter2</td>
+                                        }
+                                    }
+                                </tr>
+                        }
+                    }
+                }
+            }
+            if (Model.AvailList != null)
+            {
+                if (Model.AvailList.Count > 0)
+                {
+                    foreach (var item in Model.AvailList)
+                    {
+                        if (item.ZoneName == "ALL Zone" && item.PlaceID == 65)
+                        {
+                            <tr>
+                                <td class="inth">@item.ZoneName</td>
+                                <td class="inth">@item.MorningRemaing</td>
+                                <td class="inth">@item.EveningRemaing</td>
+                                <td class="inth">@item.FullDayRemaing</td>
+                            </tr>
+                        }
+                    }
+                }
+            }
+        }
+        @*
+        <tr>
+            <td class="inth">1</td>
+            <td class="inth">2</td>
+            <td class="inth">1</td>
+            <td class="inth">2</td>
+            <td class="inth">1</td>
+        </tr>*@
+    </tbody>
+</table>

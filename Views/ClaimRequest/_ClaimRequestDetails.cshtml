@@ -1,0 +1,325 @@
+﻿@model List<FMDSS.Entity.FRAViewModel.ClaimRequestDetailsVM>
+@{
+    var isEsignRequired = false;
+    var currentUserDesignationID = Convert.ToInt32(Session["DesignationId"]);
+}
+<div class="col-md-12">
+    @Html.Partial("_ErrorMsg")
+    <div class="panel with-nav-tabs panel-default">
+        <div class="panel-heading">
+            <ul class="nav nav-tabs" id="myTab">
+                <li class=""><a href="#tab1default" data-toggle="tab"><i class="fa fa-user fa-fw"></i>Pending Request For Action</a></li>
+                <li class=""><a href="#tab2default " data-toggle="tab"><i class="fa fa-comment fa-fw"></i>Processed Request</a></li>
+                @if (currentUserDesignationID == 21 || currentUserDesignationID == 20)
+                {
+                    <li class="" onclick="ViewDetailsCommon(2,1)"><a href="#tabAppealDetails" data-toggle="tab"><i class="fa fa-comment fa-fw"></i>Pending Appeal</a></li>
+                    <li class="" onclick="ViewDetailsCommon(3,1)"><a href="#tab_ProcessedAppeal" data-toggle="tab"><i class="fa fa-comment fa-fw"></i>Processed Appeal</a></li>
+                }
+            </ul>
+        </div>
+        <div class="panel-body">
+            <div class="tab-content">
+                <div class="tab-pane fade scroll active in" id="tab1default">
+                    <div class="panel-body">
+                        @if (Model.Where(x => x.CurrentApprovalLevel >= 7 && x.CurrentUserDesignationID == x.CurrentApproverDesignationID).Count() > 0)
+                        {
+                            isEsignRequired = true;
+                            <div class="pull-right" style="padding:0 20px 10px 0;">
+                                <a href="javascript:void(0);" data-toggle="modal" data-target="#modalWorkFlowDetails" onclick="return ApproveAllRequest(5)" class="btn">Aprrove / E-Sign All Selected Request</a>
+                            </div>
+                        }
+                        <div class="col-lg-12">
+                            <table id="tblPendingCRDetails" class="table table-striped table-bordered table-hover gridtable">
+                                <thead>
+                                    <tr>
+                                        <th width="10px"></th>
+                                        <th width="10px"></th>
+                                        <th width="10px" colspan="4">Claimant Details</th>
+                                        <th width="10px"></th>
+                                        <th width="10px"></th>
+                                        <th width="10px" colspan="2">Dependant Details</th>
+                                        <th width="10px" colspan="2">Forest Land Details</th>
+                                        <th width="10px" colspan="3">Bordering GIS Details</th>
+                                        <th width="10px"></th>
+                                        <th width="10px"></th>
+                                        @if (isEsignRequired)
+                                        {
+                                            <th width="10px"></th>
+                                        }
+                                    </tr>
+                                    <tr>
+                                        <th width="10px">SNo</th>
+                                        <th width="10px">Req ID & Date</th>
+                                        <th>Appeal ID</th>
+                                        <th>Claimant Name / Spouse Name </th>
+                                        <th>Father's / Mother's Name</th>
+                                        <th> GP, Tehsil, District Address</th>
+                                        <th>SC/ST or OTFD</th>
+                                        <th>Forest Right Purpose</th>
+                                        <th>Name</th>
+                                        <th>Relation</th>
+                                        <th>Khasra No</th>
+                                        <th>Total Area(Hectare)</th>
+                                        <th>Van Khand Name</th>
+                                        <th>Compartment No</th>
+                                        <th>GPS Address</th>
+                                        <th>Current Status</th>
+                                        <th class="nosort">Action</th>
+                                        @if (isEsignRequired)
+                                        {
+                                            <th class="nosort">ESign <input type="checkbox" onclick="SelectAllForESign(this)" /></th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody id="tbClaimReq">
+                                    @if (Model != null)
+                                    {
+                                        var _data = Model.Where(x => x.CurrentUserDesignationID == x.CurrentApproverDesignationID);
+                                        if (_data.Count() > 0)
+                                        {
+                                            int index = 1;
+                                            foreach (var item in _data)
+                                            {
+                                                <tr>
+                                                    <td>@index</td>
+                                                    <td>@item.ClaimRequestIDWithPrefix  <br>  @item.RaisedOn.Value.ToString("dd-MM-yyyy")</td>
+                                                    <td>@item.AppealRequestIDWithPrefix</td>
+                                                    <td>@item.ApplicantName_SpouseName</td>
+                                                    <td>@item.FatherName</td>
+                                                    <td>@item.GPName, @item.VillageName, @item.BlockName,  @item.DistrictName  </td>
+                                                    <td>@item.Individual_STribe</td>
+                                                    <td>@item.Purpose</td>
+                                                    <td>@item.MemberName</td>
+                                                    <td>@item.Relation</td>
+                                                    <td>@item.SurvedetialsKhasraNumber</td>
+                                                    <td>@item.TotalAreaAgainstKhasra</td>
+                                                    <td>@item.ForestSectionName</td>
+                                                    <td>@item.KhasraCompartmentNumber</td>
+                                                    <td>@item.GISID</td>
+                                                    <td>@(item.CurrentStatus + (String.IsNullOrWhiteSpace(item.PendingAt) ? String.Empty : "\n(" + item.PendingAt + ")"))</td>
+                                                    <td>
+                                                        <a href="javascript:void(0)" data-toggle="modal" data-target="#modalWorkFlowDetails" onclick="GetWorkFlowDetails(@item.ClaimRequestDetailsID)">Action</a> |
+                                                        @if (Convert.ToString(item.CurrentApproverDesignationID) == "20" && item.IsPattaGenerated == false)
+                                                        {
+                                                            <a id="lnkAddSurvey_@item.ClaimRequestDetailsID" data-toggle="modal" data-target="#modalSurveyDetails" onclick="AddSurveyDetails(@item.ClaimRequestDetailsID,5)" href="javascript:void(0)">Edit Survey Details</a>
+                                                            <span> |</span>
+                                                        }
+                                                        else if (Convert.ToString(item.CurrentApproverDesignationID) == "19" && (item.IsForesterGenerated == false || item.IsHalkaPatwariGenerated == false))
+                                                        {
+                                                            <a id="lnkAddSurvey_@item.ClaimRequestDetailsID" data-toggle="modal" data-target="#modalSurveyDetails" onclick="AddSurveyDetails(@item.ClaimRequestDetailsID,2)" href="javascript:void(0)">Add Survey Details</a>
+                                                            <span> |</span>
+                                                        }
+                                                        <a href="javascript:void(0)" data-toggle="modal" data-target="#modalWorkFlowDetails" onclick="PrintRaisedRequest(@item.ClaimRequestDetailsID)">Print</a>
+                                                    </td>
+                                                    @if (isEsignRequired)
+                                                    {
+                                                        <td>
+                                                            @if (item.CurrentApprovalLevel >= 7)
+                                                            {
+                                                                <input id="chkApprove_@index" type="checkbox" value="@item.ClaimRequestDetailsID" />
+                                                            }
+                                                        </td>
+                                                    }
+                                                </tr>
+                                                index++;
+                                            }
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="tab-pane fade  in scroll" id="tab2default">
+                    <div class="panel-body">
+                        <div class="col-lg-12">
+                            <table id="tblProcessedCRDetails" class="table table-striped table-bordered table-hover gridtable">
+                                <thead>
+                                    <tr>
+                                        <th width="10px"></th>
+                                        <th width="10px"></th>
+                                        <th width="10px" colspan="4">Claimant Details</th>
+                                        <th width="10px"></th>
+                                        <th width="10px"></th>
+                                        <th width="10px" colspan="2">Dependant Details</th>
+                                        <th width="10px" colspan="2">Forest Land Details</th>
+                                        <th width="10px" colspan="3">GIS Details</th>
+                                        <th width="10px"></th>
+                                        <th width="10px"></th>
+                                    </tr>
+                                    <tr>
+                                        <th width="10px">SNo</th>
+                                        <th width="10px">Req ID & Date</th>
+                                        <th>Appeal ID</th>
+                                        <th>Claimant Name / Spouse Name </th>
+                                        <th>Father's / Mother's Name</th>
+                                        <th> GP, Tehsil, District Address</th>
+                                        <th>SC/ST or OTFD</th>
+                                        <th>Forest Right Purpose</th>
+                                        <th>Name</th>
+                                        <th>Relation</th>
+                                        <th>Khasra No</th>
+                                        <th>Total Area(Hectare)</th>
+                                        <th>Van Khand Name</th>
+                                        <th>Compartment No</th>
+                                        <th>GPS Address</th>
+                                        <th>Current Status</th>
+                                        <th class="nosort">Action</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model != null)
+                                    {
+                                        var _data = Model.Where(x => x.CurrentUserDesignationID != x.CurrentApproverDesignationID);
+                                        if (_data.Count() > 0)
+                                        {
+                                            int index = 1;
+                                            foreach (var item in _data)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @index
+                                                    </td>
+                                                    <td>@item.ClaimRequestIDWithPrefix  <br>  @item.RaisedOn.Value.ToString("dd-MM-yyyy")</td>
+                                                    <td>@item.AppealRequestIDWithPrefix</td>
+                                                    <td>@item.ApplicantName_SpouseName</td>
+                                                    <td>@item.FatherName</td>
+                                                    <td>@item.GPName, @item.VillageName, @item.BlockName,  @item.DistrictName  </td>
+                                                    <td>@item.Individual_STribe</td>
+                                                    <td>@item.Purpose</td>
+                                                    <td>@item.MemberName</td>
+                                                    <td>@item.Relation</td>
+                                                    <td>@item.SurvedetialsKhasraNumber</td>
+                                                    <td>@item.TotalAreaAgainstKhasra</td>
+                                                    <td>@item.ForestSectionName</td>
+                                                    <td>@item.KhasraCompartmentNumber</td>
+                                                    <td>@item.GISID</td>
+                                                    <td>@(item.CurrentStatus + (String.IsNullOrWhiteSpace(item.PendingAt) ? String.Empty : "\n(" + item.PendingAt + ")"))</td>
+                                                    <td>
+                                                        <a href="javascript:void(0)" data-toggle="modal" data-target="#modalWorkFlowDetails" onclick="GetWorkFlowDetailsView(@item.ClaimRequestDetailsID)">View</a> |
+                                                        @if (!string.IsNullOrWhiteSpace(item.KMLID))
+                                                        {
+                                                            <a href="javascript:void(0)" target="_blank" onclick="ViewFile('@item.KMLID')">View KML</a><span> | </span>
+                                                        }
+                                                        <a id="lnkAddSurvey_@item.ClaimRequestDetailsID" data-toggle="modal" data-target="#modalSurveyDetails" onclick="AddSurveyDetails(@item.ClaimRequestDetailsID,4)" href="javascript:void(0)">View Survey Details</a>
+                                                    </td>
+                                                </tr>
+                                                index++;
+                                            }
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+                @if (currentUserDesignationID == 21 || currentUserDesignationID == 20)
+                {
+                    <div class="tab-pane fade scroll" id="tabAppealDetails"></div>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+<form id="postData" name="postData" method="post" target="_blank">
+    <input type="hidden" id="portalid" name="portalid" value="rajcomp123" />
+    <input type="hidden" id="ssoid" name="ssoid" value="@Session["SSOID"]" />
+    <input type="hidden" id="requestFor" name="requestFor" value="Forest" />
+    <input type="hidden" id="fileName" name="fileName" value="" />
+</form>
+@Html.Hidden("hdnClaimRequestDetailsID", "")
+<script>
+    $(document).ready(function () {
+        $('#tblPendingCRDetails,#tblProcessedCRDetails').DataTable({
+            responsive: true,
+            "aaSorting": [],
+            'aoColumnDefs': [{
+                'bSortable': false,
+                'aTargets': ['nosort']
+            }]
+        });
+
+        if ('@ViewBag.reqID' != null && '@ViewBag.reqID' != '') {
+            $('#lnkAddSurvey_@ViewBag.reqID').trigger('click');
+        }
+
+    });
+    function AddSurveyDetails(reqID,userType) {
+        $('#hdnClaimRequestDetailsID').val(reqID);
+        $.ajax({
+            type: 'GET',
+            url: rootURl + "ClaimRequest/AddSurveyDetails?userType=" + userType+"&ClaimRequestDetailsID=" + reqID,
+            dataType: 'html',
+            success: function (data) {
+                $('#modalSurveyDetails').html(data);
+            },
+            error: function (ex) {
+                console.log(ex.error);
+            }
+        });
+    };
+
+    function SelectAllForESign(cntrl) {
+        if (cntrl.checked) {
+            $('#tbClaimReq').find('input[id^="chkApprove_"]').prop('checked', true);
+        }
+        else {
+            $('#tbClaimReq').find('input[id^="chkApprove_"]').removeProp('checked');
+        }
+    }
+
+    function ViewFile(kmlid) {
+        if (kmlid == "" || kmlid == null) {
+            alert("No KML File found.");
+            return false;
+        }
+
+        document.getElementById("fileName").value = kmlid;
+        document.getElementById("postData").action = 'https://gis.rajasthan.gov.in/fmdssgis/gisview/viewongis.aspx';
+        document.getElementById("postData").submit();
+    }
+
+    function ViewDetailsCommon(actionCode, parentID) {
+        var rootURl = '@Url.Content("~/")';
+        $.ajax({
+            type: 'GET',
+            url: rootURl + 'ClaimRequest/ViewDetailsCommon',
+            dataType: 'html',
+            data: { "actionCode": actionCode, "parentID": parentID },
+            success: function (data) {
+                $("#tabAppealDetails").html(data);
+            },
+            error: function (ex) {
+                alert('Failed to retrieve details.' + ex);
+            }
+        });
+    }
+</script>
+
+<style>
+    #modalWorkFlowDetails .modal-dialog {
+        width: 1092px !important;
+    }
+
+    #modalSurveyDetails .modal-dialog {
+        width: 1000px !important;
+    }
+
+    #modalWorkFlowDetails .scroll {
+        overflow-y: auto;
+        max-height: 350px !important;
+    }
+
+    .scroll {
+        overflow-y: auto;
+        max-height: 600px !important;
+    }
+
+    #modalSurveyDetails .tbl-scroll {
+        height: 450px !important;
+    }
+</style>

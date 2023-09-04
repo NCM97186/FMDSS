@@ -1,0 +1,1782 @@
+﻿@model FMDSS.Models.ForestDevelopment.MicroPlan
+
+@{
+    ViewBag.Title = "MicroPlan";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<style type="text/css">
+    .field-validation-error {
+        color: #ff0000;
+    }
+
+    .field-validation-valid {
+        display: none;
+    }
+
+    .input-validation-error {
+        border: 1px solid #ff0000;
+        background-color: #ffeeee;
+    }
+
+    .validation-summary-errors {
+        font-weight: bold;
+        color: #ff0000;
+    }
+
+    .validation-summary-valid {
+        display: none;
+    }
+</style>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/js/validation.js" type="text/javascript"></script>
+
+<script src="@Url.Content("~/Scripts/jquery-1.8.2.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.js")" type="text/javascript"></script> 
+
+<script type="text/javascript">
+  
+    if ('@ViewData["Message"]' != '') {
+        alert('@ViewData["Message"]');
+    }
+    var RootUrl = '@Url.Content("~/")';
+    var rbtntype = $('#rbtnNgo').val();
+    var educount = 1;
+    var empcount = 1;
+    var castcount = 1;
+
+    $(window).bind('load', function(){
+
+        $(".allownumericwithoutdecimal").on("keypress keyup blur", function (event) {
+            $(this).val($(this).val().replace(/[^\d].+/, ""));
+            if ((event.which < 48 || event.which > 57)) {
+                event.preventDefault();
+            }
+        })
+    });
+
+    $(".allownumericwithoutdecimal input:text").keyup(function (event) {}).keyup();
+
+
+   
+
+    $(document).ready(function () {
+
+        $(".Alphanumeric").on("keypress", function (event) { return IsAlphanumeric(event); });
+        $(".Numeric").on("keypress", function (event) { return isNumber(event, this); });
+        //  $('.alert-danger1').hide();
+
+        $("#StartDate").change(function () {
+            $("#EndDate").val('');
+        });
+
+        $('#divnobutton').hide();
+
+        $("#EndDate").change(function () {
+            var str1 = $("#StartDate").val();
+            var str2 = $("#EndDate").val();
+
+            var L = 3, d1 = $("#StartDate").val().split('/'), d2 = $("#EndDate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                $('#errordivDuration').hide();
+
+            }
+            else {
+                $("#EndDate").val('');
+                $('#errordivDuration').show();
+                $('#errordivDuration').html("To Date Must be Greater then From Date" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+               
+                return false;
+
+            }
+        });
+
+       
+        $(".allownumericwithoutdecimal").on("keypress keyup blur", function (event) {
+            $(this).val($(this).val().replace(/[^\d].+/, ""));
+            if ((event.which < 48 || event.which > 57)) {
+                event.preventDefault();
+            }
+        })
+ 
+
+
+        if(@Model.ID>0)
+        {
+           
+            var Div_Code ='';
+            var Dist_Code =''
+            var GP_Code='';
+            var block_Code='';
+            
+            var villName = '';
+            var ddlVillage = $("#ddlVillName option:selected").val();
+            if (ddlVillage > 0)
+                villName =  $("#ddlVillName option:selected").text().trim();
+            //  var div_code ='';
+            $.ajax({
+                type: 'POST',
+                // contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'MicroPlan/GetGetHierarchybyVillageCode', // we are calling json method
+                dataType: 'json',
+                data: { Vill_Code: ddlVillage },
+                success: function (data) {
+                    Div_Code = data.DIV_CODE;
+                    Dist_Code = data.DIST_CODE;
+                    GP_Code = data.GP_CODE;
+                    block_Code = data.BLK_CODE;
+
+                    $('#hdnDivCode').val(data.DIV_CODE);
+                    $('#PanchayatComittee').val(data.GP_NAME);
+                    $('#RangeOfficeUnit').val(data.RANGE_NAME);
+                    $('#ForestAdminUnit').val(data.DIV_NAME);
+                   
+                  
+                    fillforestEmployee(Div_Code);
+
+                    fillbhamashahdata(Dist_Code,block_Code,GP_Code,ddlVillage);
+                    fillCattlebyMicroplanID(@Model.ID);
+              
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve HierarchybyVillageCode.' + ex);
+                }
+
+            });          
+               
+            
+            $('#RevenueVillage').val(villName);
+               
+            $("#lblForestOfficer").html("Forest Department Officer's of " + villName);
+            $("#lblNGOfficer").html("NGO / SHG of " + villName);
+            $("#lblLanduse").html("Total Land Use &amp; Land Cover of " + villName);
+            $("#lblvillpop").html("Village Population Details of " + villName);
+            $("#lblvilledu").html("Village Education Details of " + villName);
+            
+            if (!(@Model.Status ==1 || @Model.Status==6)) {           
+                $('#btn').hide(); $('#divnobutton').show();
+            }
+
+
+            var sss = '@ViewBag.SchemeIDs';
+           // alert (sss);
+            var array = sss.split(',');
+            for (var i = 0; i < array.length; i++) {
+                if (array[i].length > 0) {
+                    $('#Dropscheme option[value=' + array[i] + ']').attr("selected", true);
+                }
+            }
+                
+        }
+        else
+        {     
+            $('#rbtnNgo').attr('checked', true);
+        $('#divnobutton').hide();
+    }
+
+
+        $('#division').change(function (e) {
+            $("#district").empty();
+            $("#ForestAdminUnit").val($("#division option:selected").text());
+            var ddldiv = $("#division option:selected").val();
+            $("#employeeTable").empty();
+            $("#ForestEmployee").val(',');
+             //  alert(ddldiv);
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'FixedPermission/GetDistrictName', // we are calling json method
+                dataType: 'json',
+                data: { Division: ddldiv },
+                success: function (range) {
+                  //  $("#district").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#district").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MicroPlan/GetFORESTOFFICERSbyDivCode', // we are calling json method
+                dataType: 'json',
+                data: { div_code: ddldiv },
+                success: function (range) {
+                    $.each(range, function (i, items) {
+                        var bardata = "<tr class='" + items.OfficeName + "'><td style='border:1px'>" + items.OfficeName + "</td><td style='border:1px'>" + items.EmpName + "</td><td style='border:1px'>" + items.EmpId + "</td><td style='border:1px'>" + items.Desig_Name + "</td><td style='border:1px'><input type='checkbox' name='Addthis_" + empcount + "' checked='checked' Value='"+items.SSO_ID+"' /></td></tr>";
+                        empcount=empcount+1;
+                        $("#employeeTable").append(bardata);
+                    });
+                    $('#totalemp').val(empcount - 1);
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+          
+        });
+
+        $('#district').change(function (e) {
+            var ddldist = $("#district option:selected").val();
+            //  alert(ddldist);
+            //  $('#blockname').val(ddldist);
+            $("#blockname").empty();
+            $("#Dropscheme").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MicroPlan/GetBlockName', // we are calling json method
+                dataType: 'json',
+                data: { District: ddldist },
+                success: function (range) {
+                 //   $("#blockname").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#blockname").append('<option value="' + items.Value + '">  ' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MicroPlan/SelectSchemeByDist_Code', // we are calling json method
+                dataType: 'json',
+                data: { Dist_Code: ddldist },
+                success: function (range) {
+                   // $("#Dropproject").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#Dropscheme").append('<option selected="true" value="' + items.Value + '">  ' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+
+        });
+       
+
+  
+
+        $(".datefield").datepicker({ minDate: new Date(1999, 10 - 1, 25), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+
+        $('#rbtnNgo').on('click', function () {
+            var ddlVillage = $("#ddlVillName option:selected").val();
+            rbtntype = $('#rbtnNgo').val();
+            $('#rbtnshg').attr('checked', false);
+            $("#ddlNgoShg").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MicroPlan/GetNONGOVTOFFICERS', // we are calling json method
+                dataType: 'json',
+                data: { Type: rbtntype, Village_Code: ddlVillage },
+                success: function (range) {
+                    $("#ddlNgoShg").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlNgoShg").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+        });
+
+        $('#rbtnshg').on('click', function () {
+            //  alert('SHG Clicked');
+            $('#rbtnNgo').attr('checked', false);
+            var ddlVillage = $("#ddlVillName option:selected").val();
+            rbtntype = $('#rbtnshg').val();
+            $("#ddlNgoShg").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MicroPlan/GetNONGOVTOFFICERS', // we are calling json method
+                dataType: 'json',
+                data: { Type: rbtntype, Village_Code: ddlVillage },
+                success: function (range) {
+                    $("#ddlNgoShg").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlNgoShg").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+        });
+
+
+        //$('#totalCast').val(castcount-1);
+
+
+        $('#blockname').change(function (e) {
+            var ddldist = $("#district option:selected").val();
+            var ddlblockname = $("#blockname option:selected").val();
+            $("#ddlGPName").empty();
+            //$('#blockname').val(ddldist);
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MicroPlan/GetGramPName', // we are calling json method
+                dataType: 'json',
+                data: { District: ddldist, BlockName: ddlblockname },
+                success: function (range) {
+                  //  $("#ddlGPName").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlGPName").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+
+        });
+
+        $('#ddlGPName').change(function (e) {
+            var ddldist = $("#district option:selected").val();
+            var ddlblockname = $("#blockname option:selected").val();
+            var ddlGPName = $("#ddlGPName option:selected").val();
+            $("#ddlVillName").empty();
+            //$('#blockname').val(ddldist);
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MicroPlan/GetVillageName', // we are calling json method
+                dataType: 'json',
+                data: { District: ddldist, BlockName: ddlblockname, GPName: ddlGPName },
+                success: function (range) {
+                  //  $("#ddlVillName").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlVillName").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+
+        });
+        $('#ddlForestDesignation').change(function (e) {
+            $("#ddlForestOfficer").empty();
+            
+            var ddlVillage = $("#ddlVillName option:selected").val();
+            var ddlDesignation = $("#ddlForestDesignation option:selected").val();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MicroPlan/GetFORESTOFFICERS', // we are calling json method
+                dataType: 'json',
+                data: { Village_Code: ddlVillage,FORESTDesignationID: ddlDesignation },
+                success: function (range) {
+                    $("#ddlForestOfficer").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlForestOfficer").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+        });
+        $("#ddlRange").bind("change", function () {
+            $('#ddlVillName').empty();           
+            $("#ddlVillName").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            var values = {
+                RangeCode: $("#ddlRange option:selected").val()
+            };
+
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'FdmBudgetEstimation/GetVillageNamebyRange',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddlVillName").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+
+        
+
+        if($('#ReturnVillageIDGIS').val() !="")
+        {
+            
+
+            var Div_Code ='';
+            var Dist_Code =''
+            var GP_Code='';
+            var block_Code='';
+            $("#Dropscheme").empty();
+            var villName = '';
+            var ddlVillage = $("#ddlVillName option:selected").val();
+            if (ddlVillage > 0)
+                villName =  $("#ddlVillName option:selected").text().trim();
+            //  var div_code ='';
+            $.ajax({
+                type: 'POST',
+                // contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'MicroPlan/GetGetHierarchybyVillageCode', // we are calling json method
+                dataType: 'json',
+                data: { Vill_Code: ddlVillage },
+                success: function (data) {
+                    Div_Code = data.DIV_CODE;
+                    Dist_Code = data.DIST_CODE;
+                    GP_Code = data.GP_CODE;
+                    block_Code = data.BLK_CODE;
+                    MPCode=data.MPCode;
+                    $('#hdnDivCode').val(data.DIV_CODE);
+                    $('#PanchayatComittee').val(data.GP_NAME);
+                    $('#RangeOfficeUnit').val(data.RANGE_NAME);
+                    $('#ForestAdminUnit').val(data.DIV_NAME);
+                    $('#MicroPlanName').val(data.MPCode)
+                    ////$.each(data, function (i, items) 
+                    ////{
+                    //Microplan name will be autogenerated added for defect log id 250 solved by Durgesh N Sharma
+                 //   $('#MicroPlanName').val(Div_Code+"/" +Dist_Code +"/"+block_Code+"/"+ GP_Code +"/"+ $("#ddlVillName option:selected").val())
+                    $.ajax({
+                        type: 'POST',
+                        url: RootUrl + 'MicroPlan/SelectSchemeByDist_Code', // we are calling json method
+                        dataType: 'json',
+                        data: { Dist_Code: Dist_Code },
+                        success: function (range) {
+                            // $("#Dropproject").append('<option value=0>--Select--</option>');
+                            $.each(range, function (i, items) {
+                                $("#Dropscheme").append('<option selected="true" value="' + items.Value + '">  ' + items.Text + '</option>');
+                            });
+                        },
+                        error: function (ex) {
+                            alert('Failed to retrieve states.' + ex);
+                        }
+
+                    });
+                    fillforestEmployee(Div_Code);
+
+                    fillbhamashahdata(Dist_Code,block_Code,GP_Code,ddlVillage);
+                    ////});
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve HierarchybyVillageCode.' + ex);
+                }
+
+            });
+               
+            // alert(div_code);
+            $("#ddlForestOfficer").empty();
+            $("#ddlNgoShg").empty();
+            $("#ddlJFMC").empty();
+            $('#txtdesignation').val('');
+            $('#RevenueVillage').val(villName);
+               
+            $("#lblForestOfficer").html("Forest Department Officer's of " + villName);
+            $("#lblNGOfficer").html("NGO / SHG of " + villName);
+            $("#lblLanduse").html("Total Land Use &amp; Land Cover of " + villName);
+            $("#lblvillpop").html("Village Population Details of " + villName);
+            $("#lblvilledu").html("Village Education Details of " + villName);
+            //$('#blockname').val(ddldist);
+            // $("#lblJFMC").val('');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MicroPlan/GetNONGOVTOFFICERS', // we are calling json method
+                dataType: 'json',
+                data: { Type: rbtntype, Village_Code: ddlVillage },
+                success: function (range) {
+                    $("#ddlNgoShg").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlNgoShg").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve NON GOVT OFFICERS.' + ex);
+                }
+
+            });
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MicroPlan/GetJFMC', // we are calling json method
+                dataType: 'json',
+                data: { Village_Code: ddlVillage },
+                success: function (range) {
+                    $("#ddlJFMC").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlJFMC").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                        // $("#lblJFMC").val(items.Text);
+                        // $("#hdnJFMC").val(items.Value);
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve VFPMC.' + ex);
+                }
+
+            });
+               
+            // $("#ddlForestDesignation").val(0);
+           
+        }
+
+
+
+
+
+
+
+
+
+
+        $('#ddlVillName').change(function (e) {
+            var Div_Code ='';
+            var Dist_Code =''
+            var GP_Code='';
+            var block_Code='';
+            $("#Dropscheme").empty();
+            var villName = '';
+                var ddlVillage = $("#ddlVillName option:selected").val();
+                if (ddlVillage > 0)
+                    villName =  $("#ddlVillName option:selected").text().trim();
+              //  var div_code ='';
+                $.ajax({
+                    type: 'POST',
+                   // contentType: 'application/json; charset=utf-8',
+                    url: RootUrl + 'MicroPlan/GetGetHierarchybyVillageCode', // we are calling json method
+                    dataType: 'json',
+                    data: { Vill_Code: ddlVillage },
+                    success: function (data) {
+                        Div_Code = data.DIV_CODE;
+                        Dist_Code = data.DIST_CODE;
+                        GP_Code = data.GP_CODE;
+                        block_Code = data.BLK_CODE;
+                        MPCode=data.MPCode;
+                        $('#hdnDivCode').val(data.DIV_CODE);
+                        $('#PanchayatComittee').val(data.GP_NAME);
+                        $('#RangeOfficeUnit').val(data.RANGE_NAME);
+                        $('#ForestAdminUnit').val(data.DIV_NAME);
+                        $('#MicroPlanName').val(data.MPCode)
+                        ////$.each(data, function (i, items) 
+                        ////{
+                        //Microplan name will be autogenerated added for defect log id 250 solved by Durgesh N Sharma
+                     //   $('#MicroPlanName').val(Div_Code+"/" +Dist_Code +"/"+block_Code+"/"+ GP_Code +"/"+ $("#ddlVillName option:selected").val())
+                        $.ajax({
+                            type: 'POST',
+                            url: RootUrl + 'MicroPlan/SelectSchemeByDist_Code', // we are calling json method
+                            dataType: 'json',
+                            data: { Dist_Code: Dist_Code },
+                            success: function (range) {
+                                // $("#Dropproject").append('<option value=0>--Select--</option>');
+                                $.each(range, function (i, items) {
+                                    $("#Dropscheme").append('<option selected="true" value="' + items.Value + '">  ' + items.Text + '</option>');
+                                });
+                            },
+                            error: function (ex) {
+                                alert('Failed to retrieve states.' + ex);
+                            }
+
+                        });
+                        fillforestEmployee(Div_Code);
+
+                        fillbhamashahdata(Dist_Code,block_Code,GP_Code,ddlVillage);
+                        ////});
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve HierarchybyVillageCode.' + ex);
+                    }
+
+                });
+               
+               // alert(div_code);
+                $("#ddlForestOfficer").empty();
+                $("#ddlNgoShg").empty();
+                $("#ddlJFMC").empty();
+                $('#txtdesignation').val('');
+                $('#RevenueVillage').val(villName);
+               
+                $("#lblForestOfficer").html("Forest Department Officer's of " + villName);
+                $("#lblNGOfficer").html("NGO / SHG of " + villName);
+                $("#lblLanduse").html("Total Land Use &amp; Land Cover of " + villName);
+                $("#lblvillpop").html("Village Population Details of " + villName);
+                $("#lblvilledu").html("Village Education Details of " + villName);
+                //$('#blockname').val(ddldist);
+               // $("#lblJFMC").val('');
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'MicroPlan/GetNONGOVTOFFICERS', // we are calling json method
+                    dataType: 'json',
+                    data: { Type: rbtntype, Village_Code: ddlVillage },
+                    success: function (range) {
+                        $("#ddlNgoShg").append('<option value=0>--Select--</option>');
+                        $.each(range, function (i, items) {
+                            $("#ddlNgoShg").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve NON GOVT OFFICERS.' + ex);
+                    }
+
+                });
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'MicroPlan/GetJFMC', // we are calling json method
+                    dataType: 'json',
+                    data: { Village_Code: ddlVillage },
+                    success: function (range) {
+                        $("#ddlJFMC").append('<option value=0>--Select--</option>');
+                        $.each(range, function (i, items) {
+                            $("#ddlJFMC").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                           // $("#lblJFMC").val(items.Text);
+                           // $("#hdnJFMC").val(items.Value);
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve VFPMC.' + ex);
+                    }
+
+                });
+               
+
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'MicroPlan/GetTotalLandUseAndLandCoverOfVillage', // we are calling json method for Total Land Use & Land Cover of a village
+                    dataType: 'json',
+                    data: { Village_Code: ddlVillage },
+                    success: function (range) {
+                        $("#ddlJFMC").append('<option value=0>--Select--</option>');
+                        $.each(range, function (i, items) {
+                            $("#ddlJFMC").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                            // $("#lblJFMC").val(items.Text);
+                            // $("#hdnJFMC").val(items.Value);
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve VFPMC.' + ex);
+                    }
+
+                });
+
+               // $("#ddlForestDesignation").val(0);
+            });
+            //$('#ddlForestOfficer').change(function (e) {
+            //    $('#txtdesignation').val($(this).val().split("#")[1]);
+            //});
+
+            $('#btnSubmit').click(function (e) {              
+               
+                if ($('#district option:selected').text() == '--Select--') {
+                    $('#errdistrict').show();
+                    $('#district').focus();
+                    e.preventDefault();
+                }
+                else if ($('#blockname option:selected').text() == '--Select--') {
+                    $('#errblockname').show();
+                    $('#blockname').focus();
+                    e.preventDefault();
+                }
+                else if ($('#ddlGPName option:selected').text() == '--Select--') {
+                    $('#errddlGPName').show();
+                    $('#ddlGPName').focus();
+                    e.preventDefault();
+                }
+                else if ($('#ddlVillName option:selected').text() == '--Select--') {
+                    $('#errddlVillName').show();
+                    $('#ddlVillName').focus();
+                    e.preventDefault();
+                }
+                if ($('#Dropscheme option:selected').val() == '') {
+//$('#errdistrict').show();
+//$('#district').focus();
+                    //e.preventDefault();
+                }
+               /* else if ($('#ddlForestDesignation option:selected').text() == '--Select--') {
+                    $('#errddlForestDesignation').show();
+                    $('#ddlForestDesignation').focus();
+                    e.preventDefault();
+                }*/
+              /*  else if ($('#ddlForestOfficer option:selected').text() == '--Select--') {
+                    $('#errddlForestOfficer').show();
+                    $('#ddlForestOfficer').focus();
+                    e.preventDefault();
+                }*/
+                else if ($('#ddlNgoShg option:selected').text() == '--Select--') {
+                    alert('Pleasse Select any NGO / SHG');
+                    $('#errddlNgoShg').show();
+                    $('#ddlNgoShg').focus();
+                    e.preventDefault();
+                }  
+                else if ($('#ddlJFMC option:selected').text() == '--Select--') {
+                    alert('Pleasse Select any JFMC');
+                    $('#errddlNgoShg').show();
+                    $('#ddlJFMC').focus();
+                    e.preventDefault();
+                } 
+                else if ($('#Dropscheme').val() == '') {
+                    alert('Pleasse Select any Scheme');
+                    $('#errddlNgoShg').show();
+                    $('#Dropscheme').focus();
+                    e.preventDefault();
+                }
+                else if ($('#DateofRequest').val() == '') {
+                    alert('Pleasse Select Date of request');                   
+                    $('#DateofRequest').focus();
+                    e.preventDefault();
+                } else if ($('#StartDate').val() == '') {
+                    alert('Pleasse Select Start Date');                   
+                    $('#StartDate').focus();
+                    e.preventDefault();
+                }else if ($('#EndDate').val() == '') {
+                    alert('Pleasse Select Start Date');                   
+                    $('#EndDate').focus();
+                    e.preventDefault();
+                }
+                else if ($('#MicroPlanName').val() == '') {
+                    $('#errMicroPlanName').show();
+                    $('#MicroPlanName').focus();
+                    e.preventDefault();
+                }
+                else if ($('#ForestAdminUnit').val() == '') {
+                    $('#ForestAdminUnit').show();
+                    $('#ForestAdminUnit').focus();
+                    e.preventDefault();
+                } else if ($('#RangeOfficeUnit').val() == '') {
+                    $('#RangeOfficeUnit').show();
+                    $('#RangeOfficeUnit').focus();
+                    e.preventDefault();
+                }
+                else {
+
+                }
+            });
+    });
+
+    function reload() {
+        var r = confirm("Do you want to leave page!");
+        if (r) {
+            window.location = RootUrl + "ForesterAction/ForesterAction";
+        }
+        else {
+            //do nothing
+        }
+    }
+    //Forest officers added defect log id 252 solved by Durgesh N Sharma-->
+    function fillproject(Dist_Code)
+    {
+        $("#Dropscheme").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'MicroPlan/SelectSchemeByDist_Code', // we are calling json method
+            dataType: 'json',
+            data: { Dist_Code: Dist_Code },
+            success: function (range) {
+                // $("#Dropproject").append('<option value=0>--Select--</option>');
+                $.each(range, function (i, items) {
+                    $("#Dropscheme").append('<option value="' + items.Value + '">  ' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve Projects.' + ex);
+            }
+
+        });
+       
+    }
+    function fillforestEmployee(Div_Code)
+    {
+       // alert('filling forest employees');
+        $("#employeeTable").empty();
+        $.ajax({
+        type: 'POST',
+        url: RootUrl + 'MicroPlan/GetFORESTOFFICERSbyDivCode', // we are calling json method
+        dataType: 'json',
+        data: { div_code: Div_Code },
+        success: function (range) {
+            $.each(range, function (i, items) {
+                var bardata = "<tr class='" + items.OfficeName + "'><td style='border:1px'>" + items.OfficeName + "</td><td style='border:1px'>" + items.EmpName + "</td><td style='border:1px'>" + items.EmpId + "</td><td style='border:1px'>" + items.Desig_Name + "</td><td style='border:1px'><input type='checkbox' name='Addthis_" + empcount + "' Value='"+items.ROWID+"' id='chk_"+items.ROWID+"' /></td></tr>";
+                //if($.inArray(items.SSO_ID, array))
+                //    bardata =bardata+ "checked='true' /></td></tr>";         
+
+                //else
+               //     bardata =bardata+ "/></td></tr>";     
+              empcount=empcount+1;
+
+                $("#employeeTable").append(bardata);
+            });
+            $('#totalemp').val(empcount - 1);
+            var sss = '@ViewBag.ForestEmployees';
+            //alert (sss);
+            var array = sss.split(',');
+            for (var i = 0; i < array.length; i++) {
+                if (array[i].length > 0) {
+                    var chk = array[i];
+                    //  alert(chk);
+                    $("#chk_"+chk).prop('checked',true);
+                    $("#chk_"+chk).attr('checked',true);
+                   // alert($("#chk_"+chk).val());
+                }
+                // $("#chk_15504")
+            }      
+        },
+        error: function (ex) {
+            alert('Failed to retrieve states.' + ex);
+        }
+
+        });
+       // alert('end filling forest employees')
+//$("#chk_15520").prop( "checked", true );
+    } 
+    function fillCattlebyMicroplanID(MicroPlanID)
+    {
+        // alert('filling forest employees');
+       // $("#employeeTable").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'MicroPlan/GetCattleDetailbyMicroplan', // we are calling json method
+            dataType: 'json',
+            data: { MicroplanID: MicroPlanID },
+            success: function (range) {
+                $.each(range, function (i, items) {
+                    $('#CattleType_'+i).val(items.CattleType);
+                     $('#CattleName_'+i).val(items.CattleName);  
+                     $('#CattleCount_'+i).val(items.CattleCount);                     
+                });
+                  
+            },
+            error: function (ex) {
+                alert('Failed to retrieve Cattle Detail.' + ex);
+            }
+
+        });
+        // alert('end filling forest employees')
+        //$("#chk_15520").prop( "checked", true );
+    }
+
+    function fillbhamashahdata(Dist_Code,block_Code,GP_Code,ddlVillage)
+    {
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'MicroPlan/GetBhamashahData', // we are calling json method
+            dataType: 'json',
+            data: {Dist_Code:Dist_Code,block_Code:block_Code,GP_Code:GP_Code,ddlVillage:ddlVillage},
+            success: function (data) {
+               // alert(data.literacy_level[0].FEMALE);
+                for (var literacy in data.literacy_level) {
+                   
+                    $("#customFields").append('<tr class="educationtemplate" name="rowedu_' + educount + '"><td>' + educount + '</td><td id="tdEdu_' +educount  + '"><input readonly="true" type="text" style="display:none;" name="eduID_' + educount + '" value=' + data.literacy_level[educount-1].EDUCATION_DESC_ENG + ' >' + data.literacy_level[educount-1].EDUCATION_DESC_ENG  + '</td>  <td> <input readonly="true" type="text" id="femaleEdu_' + educount + '" class="allownumericwithoutdecimal form-control" name="femaleEdu_' + educount + '" style="width: 100px;" value='+data.literacy_level[educount-1].FEMALE +' >   </td> <td> <input readonly="true" type="text" id="maleEdu" name="maleEdu_' + educount + '" style="width: 100px;" value='+data.literacy_level[educount-1].MALE +' class="allownumericwithoutdecimal form-control" > </td> <td> <input readonly="true" type="text" id="TotalEdu" name="TotalEdu_' + educount + '" style="width: 150px;" value='+data.literacy_level[educount-1].COUNT +' class="allownumericwithoutdecimal form-control" ></td></tr>');
+                    educount = educount + 1;
+                }
+                for (var cast in data.cast_category) {
+                    $("#customFieldsEdu").append('<tr class="educationtemplate numeric"><td> ' + castcount + ' </td><td id="tdcast_' +castcount+ '">' + ' <input readonly="true" type="text" style="display:none;" name="castID_' + castcount + '" value=' + data.cast_category[castcount-1].CATEGORY_DESC_ENG + ' >' + data.cast_category[castcount-1].CATEGORY_DESC_ENG + '</td>  <td>    <input readonly="true" type="text" id="Text87" name="familycount_' + castcount + '" value='+data.cast_category[castcount-1].FAMILIES+' class="allownumericwithoutdecimal form-control" ></td><td>    <input readonly="true" type="text" id="Text89" name="AdultF_' + castcount + '" style="width: 80px;"  value='+data.cast_category[castcount-1].FEMALE+' class="allownumericwithoutdecimal form-control" ></td><td>    <input readonly="true" type="text" id="Text88" name="adultM_' + castcount + '" style="width: 80px;" value='+data.cast_category[castcount-1].MALE+' class="allownumericwithoutdecimal form-control" ></td><td>    <input readonly="true" type="text" id="Text90" style="width: 100px;"  value='+data.cast_category[castcount-1].COUNT+' class="allownumericwithoutdecimal form-control" ></td><td>    <input readonly="true" type="text" id="Text91" name="ChildM_' + castcount + '" style="width: 80px;"  value='+data.cast_category[castcount-1].CHILD_MALE+' class="allownumericwithoutdecimal form-control" ></td><td>    <input readonly="true" type="text" name="ChildF_' + castcount + '" id="Text92" style="width: 80px;"  value='+data.cast_category[castcount-1].CHILD_FEMALE+' class="allownumericwithoutdecimal form-control" ></td><td>    <input readonly="true" type="text" id="Text93" style="width: 100px;" value='+data.cast_category[castcount-1].CHILD_COUNT+' class="allownumericwithoutdecimal form-control" ></td></tr>');                    
+                    castcount = castcount + 1;
+                }
+
+                //alert(educount);
+                $('#totalEducation').val(educount - 1);   
+              //  $('#totalCattle').val(Cattlecount - 1);
+                $('#totalCast').val(castcount - 1);
+            },
+            error: function (ex) {
+                alert('Failed to retrieve Bhamashah Data.' + ex);
+            }
+
+        });
+        if($('#totalEducation').val()==1){
+            alert('No Education Bhamashah Data Available.' );}
+        if($('#totalCast').val()==1){
+            alert('No Caste Bhamashah Data Available.' );}
+    }
+    function AddRemoveForestEmp(ssoid)
+    {
+        alert(ssoid);
+    }
+</script>
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <div class="col-lg-10 pad">
+            <h1 class="page-header">Define Micro Plan</h1>
+        </div>
+        <div class="col-lg-2 pull-right">
+            <button type="button" class="btn btn-success btn_pp pull-right" name="btn_addpopip" value="" title="Micro Plan List" onclick="location.href='@Url.Action(@Html.AttributeEncode("index"), "MicroPlan")'">
+            
+                    <i class=" fa fa-th-list ">
+                </i> Micro Plan List
+            </button>
+        </div>
+    
+</div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!--<div class="panel-heading">Processing Fees</div>-->
+                <!-- /.panel-heading -->
+                @using (Html.BeginForm("Create", "MicroPlan", FormMethod.Post, new { data_behavior = "confirm" }))
+                {
+                    <input type="hidden" id="ReturnVillageIDGIS" value="@ViewBag.VillageIDGIS" />
+
+
+                    <div class="panel-body">
+                        @Html.HiddenFor(x => x.RefGisID)
+                        @if (HttpContext.Current.Session["DesignationId"] != null)
+                        {
+                            if (HttpContext.Current.Session["DesignationId"].ToString() == "8")
+                            {
+                                <div class="col-lg-6 multi range">
+                                    <div class="form-group">
+                                        <label for="Tehsil">
+                                            Range Name:<span class="mandatory">*</span>
+                                        </label>
+                                        @Html.DropDownListFor(x => x.RANGE_CODE, (IEnumerable<SelectListItem>)ViewBag.ddlRange, "--Select--", new { @class = "form-control input-width", id = "ddlRange" })
+                                        <div id="errordiv03" style="display:none" class="alert-danger1"></div>
+                                        @Html.HiddenFor(x => x.DIV_CODE, new { id = "hdnDivCode" })
+                                    </div>
+                                </div>
+                            }
+                            else if (HttpContext.Current.Session["DesignationId"].ToString() == "6")
+                            {
+                                <div class="col-lg-6 multi div">
+                                    <div class="form-group">
+                                        <label for="Proposed">
+                                            Forest Division Name:<span class="mandatory">*</span>
+                                        </label>
+                                        @Html.DropDownListFor(x => x.DIV_CODE, (IEnumerable<SelectListItem>)ViewBag.ddlDivision1, "--Select--", new { @class = "form-control common", id = "division" })
+                                        <div id="errordiv52" style="display:none" class="alert-danger1"></div>
+
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 multi div">
+                                    <div class="form-group">
+                                        <label>Select District: <span class="mandatory">*</span></label>
+                                        @Html.DropDownListFor(x => x.DIST_CODE, (IEnumerable<SelectListItem>)ViewBag.ddlDistrict1, "--Select--", new { @class = "form-control common", title = "Select District", id = "district" })
+                                        <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.DIST_CODE)</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6 multi div">
+                                    <div class="form-group">
+                                        <label>Select Block: <span class="mandatory">*</span></label>
+                                        @Html.DropDownListFor(x => x.BLK_CODE, (IEnumerable<SelectListItem>)ViewBag.ddlBlockName1, new { @class = "form-control common", title = "Select Block Name", id = "blockname" })
+                                        <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.BLK_CODE)</div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-lg-6 multi div">
+                                    <div class="form-group">
+                                        <label for="GramPanchayat">
+                                            Select Gram Panchayat:
+                                        </label>
+                                        @Html.DropDownListFor(x => x.GP_CODE, (IEnumerable<SelectListItem>)ViewBag.ddlGPName1, new { @class = "form-control common", title = "Select GP Name", id = "ddlGPName" })
+                                        <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.GP_CODE)</div>
+                                    </div>
+                                </div>
+                            }
+                        }
+
+
+                        <div class="col-lg-6 multi ">
+                            <div class="form-group">
+                                <label for="Village">
+                                    Select Village:
+                                </label>
+
+                                @Html.DropDownListFor(x => x.VILL_CODE, (IEnumerable<SelectListItem>)ViewBag.ddlVillName1, new { @class = "form-control common", title = "Select Village Name", id = "ddlVillName" })
+                                <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.VILL_CODE)</div>
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <a class="btn btn-info btn-circle" title="Get LatLong" onclick="return MicroPlan();">
+                                    <i class="fa fa-map-marker"></i>
+                                </a>
+
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-6 multi">
+                            <div class="form-group">
+                                <label>Date of submission: <span class="mandatory">*</span></label>
+                                <div data-date-format="mm-dd-yyyy" class="input-group date" id="datepicker">
+                                    @Html.TextBoxFor(x => x.DateofRequest, new { @class = "form-control datefield", title = "Enter Date of submission", @maxlength = 50, @id = "DateofRequest" })
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>From Date: <span class="mandatory">*</span></label>
+                                <div data-date-format="mm-dd-yyyy" class="input-group date" id="datepicker">
+                                    @Html.TextBoxFor(x => x.StartDate, new { @class = "form-control datefield", title = "Enter Start Date eg:02/21/2016", @maxlength = 50, @id = "StartDate" })
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.StartDate)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <div id="errordivDuration" style="display:none" class="alert-danger1"></div>
+                                <label>To Date: <span class="mandatory">*</span></label>
+                                <div data-date-format="mm-dd-yyyy" class="input-group date" id="datepicker">
+                                    @Html.TextBoxFor(x => x.EndDate, new { @class = "form-control datefield", title = "Enter End Date eg: 02/29/2020", @maxlength = 50, @id = "EndDate" })
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.EndDate)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Panchayat Samiti:</label>
+                                @Html.TextBoxFor(x => x.PanchayatComittee, new { @class = "form-control Alphanumeric", title = "Enter Panchayat Comittee", @readonly = "true", @placeholder = "Enter Panchayat Comittee", @maxlength = 500, @id = "PanchayatComittee" })
+                                <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.PanchayatComittee)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Revenue Village:</label>
+                                @Html.TextBoxFor(x => x.RevenueVillage, new { @class = "form-control Alphanumeric", title = "Enter Revenue Village", @readonly = "true", @placeholder = "Enter Revenue Village", @maxlength = 500, @id = "RevenueVillage" })
+                                <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.RevenueVillage)</div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Forest Administration Unit:</label>
+                                @Html.TextBoxFor(x => x.ForestAdminUnit, new { @class = "form-control Alphanumeric", title = "Enter Forest Admin Unit", @readonly = "true", @placeholder = "Enter Forest Admin Unit", @maxlength = 500, @id = "ForestAdminUnit" })
+                                <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.ForestAdminUnit)</div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Range Office Unit:</label>
+                                @Html.TextBoxFor(x => x.RangeOfficeUnit, new { @class = "form-control Alphanumeric", title = "Enter Range Office Unit", @readonly = "true", @value = Convert.ToString(@Session["RangeOffice"]), @placeholder = "Enter Range Office Unit", @maxlength = 500, @id = "RangeOfficeUnit" })
+                                <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.RangeOfficeUnit)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Total area(Hectare):</label>
+                                @Html.TextBoxFor(x => x.Totalarea, new { @class = "form-control Numeric", title = "Enter Total area", @readonly = "true", @placeholder = "Enter Total area", @maxlength = 15, @id = "Totalarea" })
+                                <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.Totalarea)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Recommended VFPMC:</label>
+                                @*@Html.TextBoxFor(x => x.JFMCorContractAgencyName, @readonly = "true", new { @class = "form-control", @readonly = "readonly", @maxlength = 500, @id = "lblJFMC" })
+                                    @Html.HiddenFor(x => x.JFMCorContractAgency, new {@id = "hdnJFMC" })*@
+                                @Html.DropDownListFor(x => x.JFMCorContractAgency, (IEnumerable<SelectListItem>)ViewBag.ddlJFMCorContractAgency1, "--Select--", new { @class = "form-control common", title = "Select VFPMC", id = "ddlJFMC" })
+
+                                <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.JFMCorContractAgency)</div>
+                            </div>
+                        </div>
+                        <!--Microplan name will be autogenerated added for defect log id 250 solved by Durgesh N Sharma-->
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Micro Plan Code:</label>
+                                @Html.TextBoxFor(x => x.MicroPlanName, new { @class = "form-control Alphanumeric", title = "This will be auto generated like divcode/distcode/blockcode/villagecode/uniquenumber", @readonly = "readonly", @placeholder = "This will be auto generated like divcode/distcode/blockcode/villagecode/uniquenumber", @maxlength = 500, @id = "MicroPlanName" })
+                                <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.MicroPlanName)</div>
+                                @Html.HiddenFor(x => x.ID)
+                                @Html.HiddenFor(x => x.ForestOfficerEmpId, new { @id = "ForestEmployee" })
+                            </div>
+                        </div>
+                        @*<div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Select Project:</label>
+                                @Html.DropDownListFor(x => x.ProjectIDs, (IEnumerable<SelectListItem>)ViewBag.project, new { @class = "form-control", id = "Dropproject", name = "Dropproject", multiple = "multiple" })
+                            </div>
+                        </div>*@
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Select Scheme:</label>
+                                @Html.DropDownListFor(x => x.SchemeIDs, (IEnumerable<SelectListItem>)ViewBag.Scheme, new { @class = "form-control", id = "Dropscheme", name = "Dropscheme", multiple = "multiple" })
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <label>Stakeholders:</label>
+                            <div class="divider"></div>
+                        </div>
+
+                        <!--Tabs-->
+                        <div class="col-lg-12">
+                            <div id="accordion" class="panel-group">
+                                <!--Tab1-->
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a class="collapsed" aria-expanded="false" href="#collapse1" data-parent="#accordion" data-toggle="collapse">
+                                                <i class="fa  fa-angle-double-right fa-fw"></i>
+                                                <span id="lblForestOfficer">Forest Department Officer's</span>
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div style="height: 0px;" aria-expanded="false" class="panel-collapse collapse" id="collapse1">
+                                        <div class="panel-body">
+                                            <div role="form" class="">
+
+                                                @*<div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label for="txtName">
+                                                                Designation:
+                                                            </label>
+                                                            @Html.DropDownList("ddlForestDesignation", (IEnumerable<SelectListItem>)ViewBag.ForestDesignation1, "--Select--", new { @class = "form-control common", title = "Select Forest Officer", id = "ddlForestDesignation" })
+
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group"><label for="txtName">
+                                                                Name:
+                                                            </label>
+                                                            @Html.DropDownList("ddlForestOfficer", (IEnumerable<SelectListItem>)ViewBag.ddlBlockName1, "--Select--", new { @class = "form-control common", title = "Select Forest Officer", id = "ddlForestOfficer" })
+                                                            <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.ForestOfficerEmpId)</div>
+                                                        </div>
+                                                    </div>*@
+                                                <div class="col-lg-12">
+                                                    <table id="tempEmp" class="table table-bordered">
+                                                        <thead>
+                                                            <tr>
+                                                                @*<th>Id</th>*@
+                                                                <th>Office Name</th>
+                                                                <th>Emp Name</th>
+                                                                <th>Emp Id</th>
+                                                                <th>Desig Name</th>
+                                                                <th>Add</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="employeeTable"></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--Tab2-->
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a aria-expanded="false" class="collapsed" href="#collapse2" data-parent="#accordion" data-toggle="collapse">
+                                                <i class="fa  fa-angle-double-right fa-fw"></i>
+                                                <span id="lblNGOfficer"> NGO / SHG</span>
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div style="height: 0px;" aria-expanded="false" class="panel-collapse collapse" id="collapse2">
+                                        <div class="panel-body">
+                                            <div role="form" class="">
+                                                <div class="col-lg-12">
+                                                    <label class="radio-inline">
+                                                        @Html.RadioButtonFor(x => x.NGOorSHO, "NGO", new { id = "rbtnNgo" })   NGO
+                                                    </label>
+                                                    <label class="radio-inline">
+                                                        @Html.RadioButtonFor(x => x.NGOorSHO, "SHG", new { id = "rbtnshg" }) SHG
+                                                    </label>
+                                                    <div class="divider"></div>
+                                                </div>
+
+                                                <div style="" id="DistrictLabel" class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label>Select: <span class="mandatory">*</span></label>
+                                                        @Html.DropDownListFor(x => x.NGOorSHOOfficerEmpId, (IEnumerable<SelectListItem>)ViewBag.ddlNGOSHG1, "--Select--", new { @class = "form-control common", title = "Select NGO or SHO ", id = "ddlNgoShg" })
+                                                        <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.NGOorSHOOfficerEmpId)</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--Tab3-->
+                                @*<div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a aria-expanded="false" class="collapsed" href="#collapse3" data-parent="#accordion" data-toggle="collapse">
+                                                    <i class="fa  fa-angle-double-right fa-fw"></i> Recommended JFMC
+                                                </a>
+                                            </h4>
+                                        </div>
+                                        <div aria-expanded="false" class="panel-collapse collapse" id="collapse3" style="height: 0px;">
+                                            <div class="panel-body">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label for="txtJFMCName">
+                                                            Name:
+                                                        </label>
+                                                        @Html.DropDownListFor(x=>x.JFMCorContractAgency, (IEnumerable<SelectListItem>)ViewBag.ddlBlockName1, "--Select--", new { @class = "form-control common", title = "Select JFMC", id = "ddlJFMC" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>*@
+
+                                <!--Tab4-->
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a class="" aria-expanded="false" href="#collapseOne" data-parent="#accordion" data-toggle="collapse">
+                                                <i class="fa  fa-angle-double-right fa-fw"></i>
+                                                <span id="lblLanduse">Total Land Use &amp; Land Cover</span>
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div aria-expanded="false" class="panel-collapse collapse in" id="collapseOne" style="">
+                                        <div class="panel-body">
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Total Land Area(Hectare):</label>
+                                                    @Html.TextBoxFor(x => x.TotalLandAreaSQKM, new { @class = "form-control Numeric", @onkeypress = "return isNumber(event,this);", title = "Enter Total Land Area in SQKM eg: 1105.00", @placeholder = "Enter Total Land Area SQKM", @maxlength = 10, @id = "TotalLandAreaSQKM" })
+                                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.TotalLandAreaSQKM)</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Total Forest Area(Hectare):</label>
+                                                    @Html.TextBoxFor(x => x.TotalForestAreaSQKM, new { @class = "form-control Numeric", title = "Enter Total Forest Area in SQKM eg: 1124.00", @placeholder = "Enter Total Forest Area Hectare", @maxlength = 10, @id = "TotalForestAreaSQKM" })
+                                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.TotalForestAreaSQKM)</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Reserved Forest(Hectare):</label>
+                                                    @Html.TextBoxFor(x => x.ReservedForestSQKM, new { @class = "form-control Numeric", @placeholder = "Enter Reserved Forest Hectare", @maxlength = 10, @id = "ReservedForestSQKM" })
+                                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.ReservedForestSQKM)</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Protected Forest(Hectare):</label>
+                                                    @Html.TextBoxFor(x => x.ProtectedForestSQKM, new { @class = "form-control Numeric", @placeholder = "Enter Protected Forest Hectare", @maxlength = 10, @id = "ProtectedForestSQKM" })
+                                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.ProtectedForestSQKM)</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Unclassified Forest(Hectare):</label>
+                                                    @Html.TextBoxFor(x => x.UnclassifiedForestSQKM, new { @class = "form-control Numeric", @placeholder = "Enter Unclassified Forest Hectare", @maxlength = 10, @id = "UnclassifiedForestSQKM" })
+                                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.UnclassifiedForestSQKM)</div>
+                                                </div>
+                                            </div>
+
+                                            @*<div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Classified Forest(Hectare):</label>
+                                                    @Html.TextBoxFor(x => x.ClassifiedForestSQKM, new { @class = "form-control Numeric", @placeholder = "Enter Classified Forest Hectare", @maxlength = 10, @id = "ClassifiedForestSQKM", @disabled = "Disabled",@visible="false" })
+                                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.ClassifiedForestSQKM)</div>
+                                                </div>
+                                            </div>*@
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Fully Coverd(Hectare):</label>
+                                                    @Html.TextBoxFor(x => x.FullyCoveredSQKM, new { @class = "form-control Numeric", @placeholder = "Enter Fully Covered Hectare", @maxlength = 10, @id = "FullyCoveredSQKM" })
+                                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.FullyCoveredSQKM)</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Without Plantation(Hectare):</label>
+                                                    @Html.TextBoxFor(x => x.WithoutPlantSQKM, new { @class = "form-control Numeric", @placeholder = "Enter Without Plant Hectare", @maxlength = 10, @id = "WithoutPlantSQKM" })
+                                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.WithoutPlantSQKM)</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Land Allocation to Forest Department for Plantation(Hectare):</label>
+                                                    @Html.TextBoxFor(x => x.AllocateforPlantSQKM, new { @class = "form-control Numeric", @placeholder = "Enter Allocate for Plant Hectare", @maxlength = 10, @id = "AllocateforPlantSQKM" })
+                                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.AllocateforPlantSQKM)</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Grass/Range/Panchayat- Land(Hectare):</label>
+                                                    @Html.TextBoxFor(x => x.PanchayatLandSQKM, new { @class = "form-control Numeric", @placeholder = "Enter Panchayat Land Hectare", @maxlength = 10, @id = "PanchayatLandSQKM" })
+                                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.PanchayatLandSQKM)</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Revenue Land(Hectare):</label>
+                                                    @Html.TextBoxFor(x => x.RevenueLandSQKM, new { @class = "form-control Numeric", @placeholder = "Enter Revenue Land Hectare", @maxlength = 10, @id = "RevenueLandSQKM" })
+                                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.RevenueLandSQKM)</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Agricultural Land(Hectare):</label>
+                                                    @Html.TextBoxFor(x => x.AgricultureLand, new { @class = "form-control Numeric", @placeholder = "Enter Agriculture Land", @maxlength = 10, @id = "AgricultureLand" })
+                                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.AgricultureLand)</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Irrigated Land(Hectare):</label>
+                                                    @Html.TextBoxFor(x => x.IrregatedLandSQKM, new { @class = "form-control Numeric", @placeholder = "Enter Irregated Land Hectare", @maxlength = 10, @id = "IrregatedLandSQKM" })
+                                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.IrregatedLandSQKM)</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Non-Irrigated Land(Hectare):</label>
+                                                    @Html.TextBoxFor(x => x.NonIrregatedLandSQKM, new { @class = "form-control Numeric", @placeholder = "Enter Non Irregated Land Hectare", @maxlength = 10, @id = "NonIrregatedLandSQKM" })
+                                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.NonIrregatedLandSQKM)</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Residential Area(Hectare):</label>
+                                                    @Html.TextBoxFor(x => x.ResidentialAreaSQKM, new { @class = "form-control Numeric", @placeholder = "Enter Residential Area Hectare", @maxlength = 10, @id = "ResidentialAreaSQKM" })
+                                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.ResidentialAreaSQKM)</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Remaining Agricultural Land(Hectare):</label>
+                                                    @Html.TextBoxFor(x => x.RemAgricultureLandSQKM, new { @class = "form-control Numeric", @placeholder = "Enter Rem Agriculture Land Hectare", @maxlength = 10, @id = "RemAgricultureLandSQKM" })
+                                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.RemAgricultureLandSQKM)</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Remaining Non-Agricultural Land(Hectare):</label>
+                                                    @Html.TextBoxFor(x => x.RemNonAgricultureLandSQKM, new { @class = "form-control Numeric", @placeholder = "Enter Rem Non Agriculture Land Hectare", @maxlength = 10, @id = "RemNonAgricultureLandSQKM" })
+                                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.RemNonAgricultureLandSQKM)</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Others(Mountain, River, Drainage, Roads etc):</label>
+                                                    @Html.TextBoxFor(x => x.Other, new { @class = "form-control Numeric ", @placeholder = "Enter Other", @maxlength = 10, @id = "Other" })
+                                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.Other)</div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--Tab5--
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a data-toggle="collapse" data-parent="#accordion" href="#tab5" aria-expanded="false" class="collapsed"><i class="fa  fa-angle-double-right fa-fw"></i> Village Details</a>
+                                        </h4>
+                                    </div>
+                                    <div id="tab5" class="panel-collapse collapse" aria-expanded="false">
+                                        <div class="panel-body">
+
+
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--Tab6-->
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a aria-expanded="false" class="collapsed" href="#tab6" data-parent="#accordion" data-toggle="collapse">
+                                                <i class="fa  fa-angle-double-right fa-fw"></i>
+                                                <span id="lblvillpop"> Village Population Details</span>
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div aria-expanded="false" class="panel-collapse table-responsive collapse" id="tab6" style="height: 0px;">
+                                        <div class="panel-body">
+                                            <table class="table table-bordered Numeric" style="width: 100%;">
+                                                <thead>
+                                                    <tr>
+                                                        <th rowspan="2">
+                                                            SL NO.
+                                                            <input type="text" style="display:none;" id="totalCast" name="totalCast" value="1">
+                                                        </th>
+                                                        <th rowspan="2">
+                                                            Social Caste Category
+                                                        </th>
+                                                        <th rowspan="2">
+                                                            Number Of Families
+                                                        </th>
+                                                        <th style="text-align: center;" colspan="3">
+                                                            Adult
+                                                        </th>
+                                                        <th style="text-align: center;" colspan="4">
+                                                            Children
+                                                        </th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>
+                                                            F
+                                                        </th>
+                                                        <th>
+                                                            M
+                                                        </th>
+                                                        <th>
+                                                            Total
+                                                        </th>
+                                                        <th>
+                                                            F
+                                                        </th>
+                                                        <th>
+                                                            M
+                                                        </th>
+                                                        <th>
+                                                            Total
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="customFieldsEdu"></tbody>
+                                                @*<tfoot>
+                                                        <tr>
+                                                            <td>
+                                                                <input type="text" id="Text130" style="width: 40px;" value="Total">
+                                                            </td>
+                                                            <td></td>
+                                                            <td>
+                                                                <input type="text" id="Text106">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" id="Text107" style="width: 40px;">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" id="Text108" style="width: 40px;">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" id="Text109" style="width: 40px;">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" id="Text110" style="width: 40px;">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" id="Text111" style="width: 40px;">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" id="Text112" style="width: 40px;">
+                                                            </td>
+                                                        </tr>
+                                                    </tfoot>*@
+                                            </table>
+
+                                            @*<div class="form-group" style="text-align: center;">
+                                                    <div id="btn">
+                                                        <button id="BtnGenStat" value="Generate Statistics" name="Command" class="btn btn-success" type="button">
+                                                            <i class="fa fa-check"></i> Generate Statistics
+                                                        </button>
+                                                    </div>
+                                                </div>*@
+
+                                            @*<div style="display: none;" class="panel panel-default" id="StatsHide">
+                                                    <div class="panel-heading">
+                                                        <h4 class="panel-title">
+                                                            <a href="#collapse9" data-parent="#accordion1" data-toggle="collapse">Generate Statistics</a>
+                                                        </h4>
+                                                    </div>
+                                                    <div style="height: 300px;" class="form-control">
+                                                    </div>
+                                                </div>*@
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--Tab7-->
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a aria-expanded="false" class="collapsed" href="#tab7" data-parent="#accordion" data-toggle="collapse">
+                                                <i class="fa  fa-angle-double-right fa-fw"></i>
+                                                <span id="lblvilledu">Village Education Details</span>
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div aria-expanded="false" class="panel-collapse table-responsive collapse" id="tab7" style="height: 0px;">
+                                        <div class="panel-body">
+                                            <table class="table table-bordered Numeric" style="width: 100%;">
+                                                <thead>
+                                                    <tr>
+                                                        <th rowspan="2">
+                                                            SL. No<input type="text" style="display:none;" id="totalEducation" name="totalEducation" value="1">
+                                                        </th>
+                                                        <th rowspan="2">
+                                                            Education Level<input type="text" style="display:none;" id="totalemp" name="totalemp" value="1">
+                                                        </th>
+                                                        <th style="text-align: center;" colspan="3">
+                                                            Number
+                                                        </th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>
+                                                            F
+                                                        </th>
+                                                        <th>
+                                                            M
+                                                        </th>
+                                                        <th>
+                                                            Total
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="customFields"></tbody>
+                                                @*<tfoot>
+                                                        <tr>
+                                                            <td>
+                                                                <input type="text" id="Text167" style="width: 40px;" value="Total No. of Literate">
+                                                            </td>
+                                                            <td></td>
+                                                            <td>
+                                                                <input type="text" id="Text170" style="width: 40px;">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" id="Text171" style="width: 40px;">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" id="Text172" style="width: 40px;">
+                                                            </td>
+                                                        </tr>
+
+                                                    </tfoot>*@
+                                            </table>
+                                            @*<div class="form-group" style="text-align: center;">
+                                                    <div id="btn">
+                                                        <button id="BtnGenStat" value="Generate Statistics" name="Command" class="btn btn-success" type="button">
+                                                            <i class="fa fa-check"></i> Generate Statistics
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div style="display: none;" class="panel panel-default" id="StatsHide1">
+                                                    <div class="panel-heading">
+                                                        <h4 class="panel-title">
+                                                            <a href="#collapse9" data-parent="#accordion1" data-toggle="collapse">Generate Statistics</a>
+                                                        </h4>
+                                                    </div>
+                                                    <div style="height: 300px;" class="form-control">
+                                                    </div>
+                                                </div>*@
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!--Tab8-->
+                                <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a aria-expanded="false" class="collapsed" href="#tab8" data-parent="#accordion" data-toggle="collapse">
+                                            <i class="fa  fa-angle-double-right fa-fw"></i>
+                                            <span id="lblvilledu">Village Cattle Details</span>
+                                        </a>
+                                    </h4>
+                                </div>
+                                    <div aria-expanded="false" class="panel-collapse table-responsive collapse" id="tab8" style="height: 0px;">
+                                        <div class="panel-body">
+                                            <table class="table table-bordered " style="width: 100%;">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:4%">
+                                                            SL. No<input type="text" style="display:none;" id="totalCattle" name="totalCattle" value="5">
+                                                        </th>
+                                                        <th>
+                                                            Cattle Category
+                                                        </th>
+                                                        <th>
+                                                            Cattle 
+                                                        </th>
+                                                        <th>
+                                                            Count
+                                                        </th>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <td>1</td>
+                                                        @*<td><input type="text" id="CattleType_0" maxlength="50" name="CattleType_4"></td>*@
+                                                        <td>
+                                                            <select id="CattleType_0" name="CattleType_0" style="width:50%">
+                                                                <option value="0">--Select--</option>
+                                                                <option value="agriculture">agriculture</option>
+                                                                <option value="milk">milk</option>
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="text" id="CattleName_0" maxlength="50" name="CattleName_0"></td>
+                                                        <td><input type="text" id="CattleCount_0" maxlength="5" name="CattleCount_0" class="Numeric"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>2</td>
+                                                        @*<td><input type="text" id="CattleType_1" maxlength="50" name="CattleType_1"></td>*@
+                                                        <td>
+                                                            <select id="CattleType_1" name="CattleType_1" style="width:50%">
+                                                                <option value="0">--Select--</option>
+                                                                <option value="agriculture">agriculture</option>
+                                                                <option value="milk">milk</option>
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="text" id="CattleName_1" maxlength="50" name="CattleName_1"></td>
+                                                        <td><input type="text" id="CattleCount_1" maxlength="5" name="CattleCount_1" class="Numeric"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>3</td>
+                                                        @*<td><input type="text" id="CattleType_2" maxlength="50" name="CattleType_2"></td>*@
+                                                        <td>
+                                                            <select id="CattleType_2" name="CattleType_2" style="width:50%">
+                                                                <option value="0">--Select--</option>
+                                                                <option value="agriculture">agriculture</option>
+                                                                <option value="milk">milk</option>
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="text" id="CattleName_2" maxlength="50" name="CattleName_2"></td>
+                                                        <td><input type="text" id="CattleCount_2" maxlength="5" name="CattleCount_2" class="Numeric"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>4</td>
+                                                        @*<td><input type="text" id="CattleType_3" maxlength="50" name="CattleType_3"></td>*@
+                                                        <td>
+                                                            <select id="CattleType_3" name="CattleType_3" style="width:50%">
+                                                                <option value="0">--Select--</option>
+                                                                <option value="agriculture">agriculture</option>
+                                                                <option value="milk">milk</option>
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="text" id="CattleName_3" maxlength="50" name="CattleName_3"></td>
+                                                        <td><input type="text" id="CattleCount_3" maxlength="5" name="CattleCount_3" class="Numeric"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>5</td>
+                                                        @*<td><input type="text" id="CattleType_4" maxlength="50" name="CattleType_4"></td>*@
+                                                        <td>
+                                                            <select id="CattleType_4" name="CattleType_4" style="width:50%">
+                                                                <option value="0">--Select--</option>
+                                                                <option value="agriculture">agriculture</option>
+                                                                <option value="milk">milk</option>
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="text" id="CattleName_4" maxlength="50" name="CattleName_4"></td>
+                                                        <td><input type="text" id="CattleCount_4" maxlength="5" name="CattleCount_4" class="Numeric"></td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="customFields"></tbody>
+                                            </table>
+
+                                        </div>
+                                    </div>
+                        </div>
+                            </div>
+                        </div>
+                        <!--./Tabs-->
+
+                        <div class="col-lg-12"></div>
+
+                        <!-- Btn Groping -->
+                        <div class="btn-padd">
+                            <div class="col-lg-12" id="btn">
+                                <button id="btnSubmit" value="Submit" name="Command" class="btn btn-success" type="submit">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+                                <button class="btn btn-warning" type="reset">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+                                <button class="btn btn-danger" value="Cancel" name="Command" onclick="location.href='@Url.Action(@Html.AttributeEncode("index"), "MicroPlan")'" type="button">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+
+                            </div>
+                            <div class="col-lg-12" id="divnobutton">
+                                Only a pending or reassigned microplan can be edited.
+                                <!-- /.Btn Groping -->
+
+                            </div>
+                        </div>
+
+                        <!-- /.panel-body -->
+
+                    </div>}
+            <!-- /.panel -->
+
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>
+<!-- /.Row -->
+
+</div>
+
+@Html.Hidden("RangeORForestDivision", HttpContext.Current.Session["DesignationId"].ToString());
+
+
+<script type="text/javascript">
+
+    function MicroPlan() {
+        document.getElementById("ssoid").value = '@Session["SSOID"]';
+
+
+
+        if(document.getElementById("RangeORForestDivision").value == "6")
+        {
+            document.getElementById("RangeID").value = document.getElementById("division").value;
+            document.getElementById("DistrictID").value = document.getElementById("district").value;
+            document.getElementById("BlocknameID").value = document.getElementById("blockname").value;
+            document.getElementById("GPNameID").value = document.getElementById("ddlGPName").value;
+        }
+        else if(document.getElementById("RangeORForestDivision").value == "8")
+        {
+            document.getElementById("RangeID").value = document.getElementById("ddlRange").value;
+        }
+
+        document.getElementById("villageId").value = document.getElementById("ddlVillName").value;
+        document.getElementById("FPMparivadform").action = 'http://10.68.128.179/FMDSSGIS/activity/drawRequest.aspx';
+        document.getElementById("FPMparivadform").submit();
+        return false;
+    }
+
+</script>
+
+
+<form name="FPMparivadform" id="FPMparivadform" method="post">
+    <input type="hidden" id="ssoid" name="ssoid" />
+    <input type="hidden" id="portalid" name="portalid" value="portal123" />
+
+    <input type="hidden" id="DistrictID" name="DistrictID" value="NR" />
+    <input type="hidden" id="BlocknameID" name="blocknameID" value="NR" />
+    <input type="hidden" id="GPNameID" name="GPNameID" value="NR" />
+    <input type="hidden" id="RangeID" name="RangeID" /> @*RangeID column bind as per condition for both RangeID / Forest Division*@
+    <input type="hidden" id="villageId" name="villageId" />
+
+    <input type="hidden" id="requestFor" name="requestFor" value="MicroPlan" />
+
+    <input type="hidden" id="returnURL" name="returnURL" value="http://10.68.128.179/MicroPlan/MicroPlan" />
+
+</form>

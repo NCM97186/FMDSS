@@ -1,0 +1,65 @@
+﻿@model IEnumerable<FMDSS.Models.Admin.DashboardRescue>
+
+<div class="panel panel-primary">
+    <table id="tbl_@ViewBag.ParentID" name="tblRescueList" cellpadding="0" cellspacing="0" class="table table-striped table-bordered table-hover table-responsive">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Request ID</th>
+                <th>Animal Name</th>
+                <th>Citizen Mobile</th>
+                <th>Casualty Type</th>
+                <th>Rescue Status</th>
+        </thead>
+        <tbody>
+            @if (Model != null)
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.SNo</td>
+                        <td><a href="javascript:void(0);" onclick="ShowDashboardData('Rescue', '@item.RegistrationID', 'RescueDetailsByID', this)">@item.RegistrationID</a></td>
+                        <td>@item.Animal_NAME</td>
+                        <td>@item.CitizenMobileNo</td>
+                        <td>@item.CasualtyType</td>
+                        <td>@item.RescueStatus</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+@Html.Hidden("hdnRootURL", Url.Content("~/"))
+<div class="modal fade in" data-backdrop="static" id="myModalDashboard" tabindex="2" role="dialog" aria-hidden="false"></div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#tbl_@ViewBag.ParentID').DataTable({
+            responsive: true,
+            "bSort": true
+        });
+    });
+
+    function ShowDashboardData(moduleName, parentID, type, cntrlID) {
+         //string moduleName, string parentID, string type, string status, string fromDate, string toDate, int OffenceId
+        $.ajax({
+            type: 'GET',
+            data: { moduleName: moduleName, parentID: parentID, type: type, status: '', fromDate: '', toDate: '', OffenceId:0},
+            url: RootUrl + 'SystemAdmin/GetDashboardDetails',
+            dataType: 'html',
+            success: function (data) {
+                $("#myModalDashboard").html(data);
+                $('#myModalDashboard').show();
+            },
+            error: function (ex) {
+                console.log(ex.error);
+            }
+        });
+    }
+</script>
+
+
+
+
+
+

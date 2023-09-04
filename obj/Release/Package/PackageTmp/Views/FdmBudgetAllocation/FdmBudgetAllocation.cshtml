@@ -1,0 +1,931 @@
+﻿@model FMDSS.Models.ForesterDevelopment.FdmBudgetAllocation
+
+@{
+    ViewBag.Title = "FdmBudgetAllocation";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<!-- Form design -->
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Budget Allocation</h1>
+        @if (@TempData["ViewSuccessMessage"] != null)
+        {
+            <div class="alert alert-success divmsg"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["ViewSuccessMessage"]</div>
+        }
+        @if (@TempData["ViewErrorMessage"] != null)
+        {
+            <div class="alert alert-danger2 divmsg diverror"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["ViewErrorMessage"]</div>
+        }
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+
+                @if (HttpContext.Current.Session["DesignationId"] != null)
+                {
+                    if (HttpContext.Current.Session["DesignationId"].ToString() == "1" || HttpContext.Current.Session["DesignationId"].ToString() == "2")
+                    {
+                        @Html.Hidden("hdDesigID", "1")
+                        using (Html.BeginForm("SaveHQBudgetData", "FdmBudgetAllocation", FormMethod.Post, new { data_behavior = "confirm" }))
+                        {
+                            <div class="dataTable_wrapper">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="Proposed">
+                                            Financial Year:<span class="mandatory">*</span>
+                                        </label>
+                                        @Html.DropDownList("ddlFinancialYear", (IEnumerable<SelectListItem>)ViewBag.ddlFinancialYear, "--Select--", new { @class = "form-control input-width", @id = "ddlFinancialYear" })
+                                        <div id="errordiv01" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                <fieldset class="corner" style="margin: 10px; min-height: 300px; width:99%; border: 1px Solid #ccc;">
+                                    <label style="font-weight:normal; padding:10px">
+
+                                    </label>
+                                    <div class="col-lg-12">
+                                        <label>Self Budget Details:<span class="mandatory">*</span></label>
+                                        <div class="divider"></div>
+                                    </div>
+                                    <table class="table table-striped table-bordered table-hover table-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th>Index</th>
+                                                <th>State Name</th>
+                                                <th>Budget Head</th>
+                                                <th>Estimated Amount (INR)</th>
+                                                <th>Allocated Amount (INR)</th>
+
+                                            </tr>
+                                        </thead>
+
+                                        <tbody id="tbody_Budget11"></tbody>
+
+
+                                    </table>
+                                </fieldset>
+                                <fieldset class="corner" style="margin: 10px; min-height: 300px; width:99%; border: 1px Solid #ccc;">
+                                    <label style="font-weight:normal; padding:10px">
+
+                                    </label>
+                                    <div class="col-lg-12">
+                                        <label>Circle Budget Details:<span class="mandatory">*</span></label>
+                                        <div class="divider"></div>
+                                    </div>
+                                    <table class="table table-striped table-bordered table-hover table-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th>Index</th>
+                                                <th>Circle Name</th>
+                                                <th>Budget Head</th>
+                                                <th>Estimated Amount (INR)</th>
+                                                <th>Allocated Amount (INR)</th>
+
+                                            </tr>
+                                        </thead>
+
+                                        <tbody id="tbody_Budget"></tbody>
+
+
+                                    </table>
+                                </fieldset>
+                                <div class="col-lg-12"></div>
+
+                                <!-- Btn Groping -->
+                                <div class="btn-padd">
+                                    <div id="btn" class="col-lg-12">
+                                        <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_submit" disabled>
+                                            <i class="fa fa-check"></i> Allocate
+                                        </button>
+
+
+                                    </div>
+                                </div>
+
+                                <!-- /.Btn Groping -->
+                                <!-- /.panel-body -->
+                            </div>
+
+                <!-- /.panel -->
+                        }
+                    }
+
+                    else if (HttpContext.Current.Session["DesignationId"].ToString() == "4")
+                    {
+                        using (Html.BeginForm("SaveCCFBudgetData", "FdmBudgetAllocation", FormMethod.Post, new { data_behavior = "confirm" }))
+                        {
+                            if (ViewData["Dist_Code"] != "")
+                            {
+                                @Html.Hidden("hdDist_Code", ViewData["Dist_Code"])
+                            }
+                            @Html.Hidden("hdDesigID", "4")
+                            @Html.Hidden("hdTotalAmt0", "0")
+
+                            <div class="dataTable_wrapper">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="Proposed">
+                                            Financial Year:<span class="mandatory">*</span>
+                                        </label>
+                                        @Html.DropDownList("ddlFinancialYear", (IEnumerable<SelectListItem>)ViewBag.ddlFinancialYear, "--Select--", new { @class = "form-control input-width", @id = "ddlFinancialYear" })
+                                        <div id="errordiv01" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="Proposed">
+                                            Circle Name:<span class="mandatory">*</span>
+                                        </label>
+                                        @Html.DropDownList("CircleCode", (IEnumerable<SelectListItem>)ViewBag.CircleCode, "--Select--", new { @class = "form-control", id = "ddl_circleCode" })
+                                        <div id="errordiv02" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+                                <div id="divAmount" style="display:none" class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="Proposed">
+                                            Total Allocated Amount (INR):<span class="mandatory"></span>
+                                        </label>
+                                        <div id="divallocamt0"></div>
+                                    </div>
+                                </div>
+
+                                <fieldset class="corner" style="margin: 10px; min-height: 300px; width:99%; border: 1px Solid #ccc;">
+                                    <label style="font-weight:normal; padding:10px">
+
+                                    </label>
+                                    <div class="col-lg-12">
+                                        <label>Self Budget Details:<span class="mandatory">*</span></label>
+                                        <div class="divider"></div>
+                                    </div>
+                                    <table class="table table-striped table-bordered table-hover table-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th>Index</th>
+                                                <th>Circle Name</th>
+                                                <th>Budget Head</th>
+                                                <th>Estimated Amount (INR)</th>
+                                                <th>Allocated Amount (INR)</th>
+
+                                            </tr>
+                                        </thead>
+
+                                        <tbody id="tbody_Budget21"></tbody>
+
+
+                                    </table>
+                                </fieldset>
+                                <fieldset class="corner" style="margin: 10px; min-height: 300px; width:99%; border: 1px Solid #ccc;">
+                                    <label style="font-weight:normal; padding:10px">
+
+                                    </label>
+                                    <div class="col-lg-12">
+                                        <label>Division Budget Details::<span class="mandatory">*</span></label>
+                                        <div class="divider"></div>
+                                    </div>
+                                    <table class="table table-striped table-bordered table-hover table-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th>Index</th>
+                                                <th>Division Name</th>
+                                                <th>Budget Head</th>
+                                                <th>Estimated Amount (INR)</th>
+                                                <th>Allocated Amount (INR)</th>
+
+                                            </tr>
+                                        </thead>
+
+                                        <tbody id="tbody_Budget1"></tbody>
+
+
+                                    </table>
+                                </fieldset>
+                                <div class="col-lg-12"></div>
+
+                                <!-- Btn Groping -->
+                                <div class="btn-padd">
+                                    <div id="btn" class="col-lg-12">
+                                        <button type="submit" class="btn btn-success" name="Command" disabled value="Submit" id="btn_submit0">
+                                            <i class="fa fa-check"></i> Allocate
+                                        </button>
+                                        @*<button type="reset" class="btn btn-warning">
+                                            <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                        </button>*@
+
+                                    </div>
+                                </div>
+
+                                <!-- /.Btn Groping -->
+                                <!-- /.panel-body -->
+                            </div>
+
+                <!-- /.panel -->
+                        }
+                    }
+                    else if (HttpContext.Current.Session["DesignationId"].ToString() == "5" || HttpContext.Current.Session["DesignationId"].ToString() == "6")
+                    {
+                        using (Html.BeginForm("SaveDCFAllocatedBudgetData", "FdmBudgetAllocation", FormMethod.Post, new { data_behavior = "confirm" }))
+                        {
+                            if (ViewData["Dist_Code"] != "")
+                            {
+                                @Html.Hidden("hdDist_Code", ViewData["Dist_Code"])
+                            }
+                            @Html.Hidden("hdDesigID", "6")
+                            @Html.Hidden("hdTotalAmt1", "0")
+
+                            <div class="dataTable_wrapper">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="Proposed">
+                                            Financial Year:<span class="mandatory">*</span>
+                                        </label>
+                                        @Html.DropDownList("ddlFinancialYear", (IEnumerable<SelectListItem>)ViewBag.ddlFinancialYear, "--Select--", new { @class = "form-control input-width", @id = "ddlFinancialYear" })
+                                        <div id="errordiv01" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="Proposed">
+                                            Division Name:<span class="mandatory">*</span>
+                                        </label>
+                                        @Html.DropDownList("ddlDivision", (IEnumerable<SelectListItem>)ViewBag.ddlDivision, "--Select--", new { @class = "form-control ", id = "division" })
+                                        <div id="errordiv02" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+                                <div id="divAmount" style="display:none" class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="Proposed">
+                                            Total Allocated Amount (INR):<span class="mandatory"></span>
+                                        </label>
+                                        <div id="divallocamt"></div>
+                                    </div>
+                                </div>
+                                <fieldset class="corner" style="margin: 10px; min-height: 300px; width:99%; border: 1px Solid #ccc;">
+                                    <label style="font-weight:normal; padding:10px">
+
+                                    </label>
+                                    <div class="col-lg-12">
+                                        <label>Self Budget Details:<span class="mandatory">*</span></label>
+                                        <div class="divider"></div>
+                                    </div>
+                                    <table class="table table-striped table-bordered table-hover table-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th>Index</th>
+                                                <th>Div Name</th>
+                                                <th>Budget Head</th>
+                                                <th>Estimated Amount (INR)</th>
+                                                <th>Allocated Amount (INR)</th>
+
+                                            </tr>
+                                        </thead>
+
+                                        <tbody id="tbody_Budget31"></tbody>
+
+
+                                    </table>
+                                </fieldset>
+                                <fieldset class="corner" style="margin: 10px; min-height: 300px; width:99%; border: 1px Solid #ccc;">
+                                    <label style="font-weight:normal; padding:10px">
+
+                                    </label>
+                                    <div class="col-lg-12">
+                                        <label>Range Budget Details::<span class="mandatory">*</span></label>
+                                        <div class="divider"></div>
+                                    </div>
+                                    <table class="table table-striped table-bordered table-hover table-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th>Index</th>
+                                                <th>Range Name</th>
+                                                <th>Budget Head</th>
+                                                <th>Estimated Amount (INR)</th>
+                                                <th>Allocated Amount (INR)</th>
+
+                                            </tr>
+                                        </thead>
+
+                                        <tbody id="tbody_Budget1"></tbody>
+
+
+                                    </table>
+                                </fieldset>
+                                <div class="col-lg-12"></div>
+
+                                <!-- Btn Groping -->
+                                <div class="btn-padd">
+                                    <div id="btn" class="col-lg-12">
+                                        <button type="submit" class="btn btn-success" name="Command" disabled value="Submit" id="btn_submit1">
+                                            <i class="fa fa-check"></i> Allocate
+                                        </button>
+                                        @*<button type="reset" class="btn btn-warning">
+                                            <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                        </button>*@
+
+                                    </div>
+                                </div>
+
+                                <!-- /.Btn Groping -->
+                                <!-- /.panel-body -->
+                            </div>
+
+                <!-- /.panel -->
+                        }
+                    }
+                    else if (HttpContext.Current.Session["DesignationId"].ToString() == "8")
+                    {
+                        using (Html.BeginForm("SaveROAllocatedBudgetData", "FdmBudgetAllocation", FormMethod.Post, new { data_behavior = "confirm" }))
+                        {
+                            if (ViewData["Dist_Code"] != "")
+                            {
+                                @Html.Hidden("hdDist_Code", ViewData["Dist_Code"])
+                            }
+                            @Html.Hidden("hdDesigID", "8")
+                            @Html.Hidden("hdTotalAmt2", "0")
+
+                            <div class="dataTable_wrapper">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="Proposed">
+                                            Financial Year:<span class="mandatory">*</span>
+                                        </label>
+                                        @Html.DropDownList("ddlFinancialYear", (IEnumerable<SelectListItem>)ViewBag.ddlFinancialYear, "--Select--", new { @class = "form-control input-width", id = "ddlFinancialYear" })
+                                        <div id="errordiv01" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="Tehsil">
+                                            Range Name:<span class="mandatory">*</span>
+                                        </label>
+                                        @Html.DropDownList("ddlRange", (IEnumerable<SelectListItem>)ViewBag.ddlRange, "--Select--", new { @class = "form-control input-width", id = "ddlRange" })
+                                        <div id="errordiv03" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+                                <div id="divAmount1" style="display:none" class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="Proposed">
+                                            Total Allocated Amount (INR):<span class="mandatory"></span>
+                                        </label>
+                                        <div id="divallocamt1"></div>
+                                    </div>
+                                </div>
+
+                                <fieldset class="corner" style="margin: 10px; min-height: 300px; width:99%; border: 1px Solid #ccc;">
+                                    <label style="font-weight:normal; padding:10px">
+
+                                    </label>
+                                    <div class="col-lg-12">
+                                        <label>Self Budget Details:<span class="mandatory">*</span></label>
+                                        <div class="divider"></div>
+                                    </div>
+                                    <table class="table table-striped table-bordered table-hover table-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th>Index</th>
+                                                <th>Range Name</th>
+                                                <th>Budget Head</th>
+                                                <th>Estimated Amount (INR)</th>
+                                                <th>Allocated Amount (INR)</th>
+
+                                            </tr>
+                                        </thead>
+
+                                        <tbody id="tbody_Budget41"></tbody>
+
+
+                                    </table>
+                                    </fieldset>
+                                <fieldset class="corner" style="margin: 10px; min-height: 300px; width:99%; border: 1px Solid #ccc;">
+                                    <label style="font-weight:normal; padding:10px">
+
+                                    </label>
+                                    <div class="col-lg-12">
+                                        <label>Village Budget Details::<span class="mandatory">*</span></label>
+                                        <div class="divider"></div>
+                                    </div>
+                                    <table class="table table-striped table-bordered table-hover table-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th>Index</th>
+                                                <th>Village Name</th>
+                                                <th>Budget Head</th>
+                                                <th>Estimated Amount (INR)</th>
+                                                <th>Allocated Amount (INR)</th>
+
+                                            </tr>
+                                        </thead>
+
+                                        <tbody id="tbody_Budget2"></tbody>
+
+
+                                    </table>
+                                    
+                                </fieldset>
+                                    <div class="col-lg-12"></div>
+
+                                    <!-- Btn Groping -->
+                                    <div class="btn-padd">
+                                        <div id="btn" class="col-lg-12">
+                                            <button type="submit" class="btn btn-success" name="Command" disabled value="Submit" id="btn_submit2">
+                                                <i class="fa fa-check"></i> Allocate
+                                            </button>
+                                            @*<button type="reset" class="btn btn-warning">
+                                                <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                            </button>*@
+
+                                        </div>
+                                    </div>
+
+                                    <!-- /.Btn Groping -->
+                                    <!-- /.panel-body -->
+</div>
+
+                <!-- /.panel -->
+                        }
+                    }
+                }
+            </div>
+            <div class="modal fade" id="myModelManagement" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+                <div class="modal-dialog mdw">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                            <h4 class="modal-title" id="myModalLabel">Edit Budget Allocation</h4>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- From URL Get -->
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Division Name: </label>
+                                    <div id="divDivisionName" class="un-bold"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Allocated Amount (INR): </label>
+                                    <input type="text" id="txt_Allocated" />
+                                </div>
+                            </div>
+
+
+
+                            <!-- /. From URL Get -->
+                        </div>
+
+                        <!-- /.modal-body -->
+
+                        <div class="modal-footer" style="clear:both">
+                            <button name="button" class="btn btn-success" id="btn_EditBudget" value="Update" data-dismiss="modal">
+                                <i class="fa fa-times fa-fw"></i> Update
+                            </button>
+                            <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal">
+                                <i class="fa fa-times fa-fw"></i> Close
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.modal-content -->
+                </div>
+                <!-- /.modal-dialog -->
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+    </div>
+    <!-- /.Row -->
+</div>
+<script src="~/js/jquery.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function (e) {
+        var RootUrl = '@Url.Content("~/")';
+        $("#ddlFinancialYear").bind("change", function () {
+            if ($("#hdDesigID").val() == "1") {
+                var ddlfm = $("#ddlFinancialYear option:selected").val();
+
+                if (ddlfm == "") {
+                    $("#tbody_Budget").html('');
+                }
+                else {
+                    $.ajax({
+                        type: 'POST',
+                        url: RootUrl + 'FdmBudgetAllocation/GetHQBudgetData', // we are calling json method
+                        data: { financialYear: ddlfm },
+                        success: function (data) {
+                            var bardata;
+
+                            for (var i = 0; i < data.Model.length; i++) {
+                                bardata = "<tr class='rowid'><td>" + data.Model[i].Index + "<input type='hidden' name='hdCircleCode' id='hd_CircleCode' value='" + data.Model[i].CIRCLE_CODE + "' /></td>";
+                                bardata += "<td>" + data.Model[i].CIRCLE_NAME + "</td><td>" + data.Model[i].Budget_Head + "</td><input type='hidden' name='hdestimatedAmt' id='hd_divCode' value='" + data.Model[i].Estimated_Amount + "' /><td>" + data.Model[i].Estimated_Amount + "</td>";
+                                bardata += "<td>";
+
+                                if (data.Model[i].Edit_Mode == 1) {
+                                    bardata += "<input type='text' class='txt_clsBudget disabled' readonly name='txtAllocatedAmount'  value='" + data.Model[i].Allocated_Amount + "' /></td>";
+                                }
+                                else {
+                                    bardata += "<input type='text' MaxLength='15' class='txt_clsBudget' name='txtAllocatedAmount'  value='" + data.Model[i].Allocated_Amount + "' /></td>";
+                                }
+                                bardata += "<input type='hidden'  name='hdEditMode' value='" + data.Model[i].Edit_Mode + "' /><input type='hidden' name='hdAllocatedAmount' value='" + data.Model[i].Allocated_Amount + "' />" + "</td></tr>";
+
+                                $("#tbody_Budget").append(bardata);
+                            }
+                            for (var i = 0; i < data.Model1.length; i++) {
+                                bardata = "<tr class='rowid'><td>" + data.Model1[i].Index + "<input type='hidden' name='hdStCode' id='hd_StateCode' value='" + data.Model1[i].STATE_CODE + "' /></td>";
+                                bardata += "<td>" + data.Model1[i].STATE_NAME + "</td><td>" + data.Model1[i].Budget_Head + "</td><input type='hidden' name='hdbudgetHeadID' value='" + data.Model1[i].Budget_HeadID + "' /><input type='hidden' name='hdestimatedAmt1' id='hd_divCode1' value='" + data.Model1[i].Estimated_Amount + "' /><td>" + data.Model1[i].Estimated_Amount + "</td>";
+                                bardata += "<td><input type='text' MaxLength='15' class='txt_clsBudget' name='txtAllocatedAmount1'  value='" + data.Model1[i].Allocated_Amount + "' /></td></tr>";
+
+                                $("#tbody_Budget11").append(bardata);
+                            }
+                            $("#btn_submit").removeAttr("disabled");
+                        }
+
+                    });
+                }
+            }
+
+        });
+
+        $("#ddl_circleCode").bind("change", function () {
+            if ($("#hdDesigID").val() == "4") {
+                var ddlfm = $("#ddlFinancialYear option:selected").val();
+                var ddlCircleCode = $("#ddl_circleCode option:selected").val();
+                var allocatedamt = "0";
+                if (ddlfm == "") {
+                    $("#tbody_Budget1").html('');
+                }
+                else {
+                    $.ajax({
+                        type: 'POST',
+                        url: RootUrl + 'FdmBudgetAllocation/GetCCFBudgetData', // we are calling json method
+                        data: { financialYear: ddlfm, Circle_Code: ddlCircleCode },
+                        success: function (data) {
+                            var bardata;
+
+                            for (var i = 0; i < data.Model.length; i++) {
+
+                                bardata = "<tr class='rowid'><td>" + data.Model[i].Index + "<input type='hidden' name='hdDivCode' id='hd_DivCode' value='" + data.Model[i].DIV_CODE + "' /></td>";
+                                bardata += "<td>" + data.Model[i].DIV_Name + "</td><td>" + data.Model[i].Budget_Head + "</td><td>" + data.Model[i].Estimated_Amount;
+                                bardata += "<input type='hidden' name='hdestimatedAmt' value='" + data.Model[i].Estimated_Amount + "' /></td>";
+                                bardata += "<td>";
+                                if (data.Model[i].Edit_Mode == 1) {
+                                    bardata += "<input type='text' class='txt_clsBudget disabled' readonly name='txtAllocatedAmount'  value='" + data.Model[i].Allocated_Amount + "' /></td>";
+                                }
+                                else {
+                                    bardata += "<input type='text' MaxLength='15' class='txt_clsBudget txt_CCFBudget' value = '" + data.Model[i].Allocated_Amount + "' name='txtAllocatedAmount'/></td>";
+                                }
+
+                                bardata += "<input type='hidden' name='hdEditMode' value='" + data.Model[i].Edit_Mode + "' /><input type='hidden' name='hdAllocatedAmount' value='" + data.Model[i].Allocated_Amount + "' />" + "</td></tr>";
+                                $("#tbody_Budget1").append(bardata);
+                                allocatedamt = data.Model[0].ApprovedTotalAmount;
+
+
+                            }
+
+                            for (var i = 0; i < data.Model1.length; i++) {
+
+                                bardata = "<tr class='rowid'><td>" + data.Model1[i].Index + "<input type='hidden' name='hdCircleCode11' id='hd_CircleCode11' value='" + data.Model1[i].CIRCLE_CODE + "' /></td>";
+                                bardata += "<td>" + data.Model1[i].CIRCLE_NAME + "</td><td>" + data.Model1[i].Budget_Head + "</td><input type='hidden' name='hdbudgetHeadID' value='" + data.Model1[i].Budget_HeadID + "' /><input type='hidden' name='hdestimatedAmt1' id='hd_circleCode1' value='" + data.Model1[i].Estimated_Amount + "' /><td>" + data.Model1[i].Estimated_Amount + "</td>";
+                                bardata += "<td><input type='text' MaxLength='15' class='txt_clsBudget txt_CCFBudget' name='txtAllocatedAmount1'  value='" + data.Model1[i].Allocated_Amount + "' /></td></tr>";
+
+                                $("#tbody_Budget21").append(bardata);
+                            }
+                            $("#divAmount").show();
+                            $("#divallocamt0").html(allocatedamt);
+                            $("#btn_submit0").removeAttr("disabled");
+                        }
+
+                    });
+                }
+            }
+
+        });
+
+        $("#division").bind("change", function () {
+            if ($("#hdDesigID").val() == "6") {
+                var ddlfm = $("#ddlFinancialYear option:selected").val();
+                var ddlDivCode = $("#division option:selected").val();
+                var allocatedamt = "0";
+                if (ddlfm == "") {
+                    $("#tbody_Budget1").html('');
+                }
+                else {
+                    $.ajax({
+                        type: 'POST',
+                        url: RootUrl + 'FdmBudgetAllocation/GetDCFBudgetData', // we are calling json method
+                        data: { financialYear: ddlfm, Div_Code: ddlDivCode },
+                        success: function (data) {
+                            var bardata;
+
+                            for (var i = 0; i < data.Model.length; i++) {
+                                bardata = "<tr class='rowid'><td>" + data.Model[i].Index + "<input type='hidden' name='hdRangeCode' id='hd_RangeCode' value='" + data.Model[i].RANGE_CODE + "' /></td>";
+                                bardata += "<td>" + data.Model[i].RANGE_NAME + "</td><td>" + data.Model[i].Budget_Head + "</td><td>" + data.Model[i].Estimated_Amount;
+                                bardata += "<input type='hidden' name='hdestimatedAmt' value='" + data.Model[i].Estimated_Amount + "' /></td>";
+
+                                if (data.Model[i].Edit_Mode == 1) {
+
+
+                                    bardata += "<td><input type='text' class='txt_clsBudget txt_DCFBudget' readonly value='" + data.Model[i].Allocated_Amount + "'  name='txtAllocatedAmount'/></td>";
+                                }
+                                else {
+
+                                    bardata += "<td><input type='text' MaxLength='15' class='txt_clsBudget txt_DCFBudget' value = '" + data.Model[i].Allocated_Amount + "' name='txtAllocatedAmount'/></td>";
+                                }
+                                bardata += "<td><input type='hidden' name='hdEditMode' value='" + data.Model[i].Edit_Mode + "' /><input type='hidden' name='hdAllocatedAmount' value = '" + data.Model[i].Allocated_Amount + "'/></td></tr>";
+
+                                $("#tbody_Budget1").append(bardata);
+                                allocatedamt = data.Model[0].ApprovedTotalAmount;
+
+
+                            }
+
+                            for (var i = 0; i < data.Model1.length; i++) {
+
+                                bardata = "<tr class='rowid'><td>" + data.Model1[i].Index + "<input type='hidden' name='hdDivCode11' id='hd_DivCode11' value='" + data.Model1[i].DIV_CODE + "' /></td>";
+                                bardata += "<td>" + data.Model1[i].DIV_Name + "</td><td>" + data.Model1[i].Budget_Head + "</td><input type='hidden' name='hdbudgetHeadID' value='" + data.Model1[i].Budget_HeadID + "' /><input type='hidden' name='hdestimatedAmt1' id='hd_divCode1' value='" + data.Model1[i].Estimated_Amount + "' /><td>" + data.Model1[i].Estimated_Amount + "</td>";
+                                bardata += "<td><input type='text' MaxLength='15' class='txt_clsBudget txt_CCFBudget' name='txtAllocatedAmount1'  value='" + data.Model1[i].Allocated_Amount + "' /></td></tr>";
+
+                                $("#tbody_Budget31").append(bardata);
+                            }
+                            $("#divAmount").show();
+                            $("#divallocamt").html(allocatedamt);
+                            $("#btn_submit1").removeAttr("disabled");
+                        }
+
+                    });
+                }
+            }
+
+        });
+
+        $("#ddlRange").bind("change", function () {
+
+            if ($("#hdDesigID").val() == "8") {
+                var ddlfm = $("#ddlFinancialYear option:selected").val();
+                var ddlRange = $("#ddlRange option:selected").val();
+                var allocatedamt = "0";
+                if (ddlfm == "") {
+                    $("#tbody_Budget2").html('');
+                }
+                else {
+                    $("#tbody_Budget41").empty();
+                    
+                    $.ajax({
+                        type: 'POST',
+                        url: RootUrl + 'FdmBudgetAllocation/GetROBudgetData', // we are calling json method
+                        data: { financialYear: ddlfm, Range_Code: ddlRange },
+                        success: function (data) {
+                            var bardata;
+
+                            for (var i = 0; i < data.Model.length; i++) {
+                                bardata = "<tr class='rowid'><td>" + data.Model[i].Index + "<input type='hidden' name='hdVillCode' id='hd_VillCode' value='" + data.Model[i].VILL_CODE + "' /></td>";
+                                bardata += "<td>" + data.Model[i].VIll_Name + "</td><td>" + data.Model[i].Budget_Head + "</td><td>" + data.Model[i].Estimated_Amount;
+                                bardata += "<input type='hidden' name='hdestimatedAmt' value='" + data.Model[i].Estimated_Amount + "' /></td>";
+
+
+                                if (data.Model[i].Edit_Mode == 1) {
+                                    bardata += "<td><input type='text' class='txt_clsBudget txt_ROBudget' readonly value='" + data.Model[i].Allocated_Amount + "'  name='txtAllocatedAmount'/></td></tr>";
+                                }
+                                else {
+                                    bardata += "<td><input type='text' MaxLength='15' class='txt_clsBudget txt_ROBudget'  value='" + data.Model[i].Allocated_Amount + "'  name='txtAllocatedAmount'/></td></tr>";
+                                }
+
+                                bardata += "<input type='hidden'  name='hdEditMode' value='" + data.Model[i].Edit_Mode + "' /><td><input type='hidden'  name='hdAllocatedAmount' value='" + data.Model[i].Allocated_Amount + "' /></td></tr>";
+                                $("#tbody_Budget2").append(bardata);
+                                allocatedamt = data.Model[0].ApprovedTotalAmount;
+
+
+                            }
+
+                            for (var i = 0; i < data.Model1.length; i++) {
+                                bardata = "<tr class='rowid'><td>" + data.Model1[i].Index + "<input type='hidden' name='hdRangeCode' id='hd_RangeCode' value='" + data.Model1[i].RANGE_CODE + "' /></td>";
+                                bardata += "<td>" + data.Model1[i].RANGE_NAME + "</td><td>" + data.Model1[i].Budget_Head + "</td><input type='hidden' name='hdbudgetHeadID' value='" + data.Model1[i].Budget_HeadID + "' /><td>" + data.Model1[i].Estimated_Amount;
+                                bardata += "<input type='hidden' name='hdestimatedAmt1' value='" + data.Model1[i].Estimated_Amount + "' /></td>";
+                                bardata += "<td><input type='text' MaxLength='15' class='txt_clsBudget txt_DCFBudget' value = '" + data.Model1[i].Allocated_Amount + "' name='txtAllocatedAmount1'/></td>";
+                                $("#tbody_Budget41").append(bardata);
+                            }
+                            
+
+                            
+                            
+                            $("#divAmount1").show();
+                            $("#divallocamt1").html(allocatedamt);
+                            $("#btn_submit2").removeAttr("disabled");
+
+                        }
+                            
+                
+
+            });
+        }
+        }
+
+    });
+
+
+    $("#btn_EditBudget").click(function () {
+
+        var amt = $("#txt_Allocated").val();
+        var id = $("#btn_EditBudget").val();
+        var bdg = { AllocAmt: amt, BdgID: id };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(bdg),
+            url: RootUrl + "FdmBudgetAllocation/UpdateHQBudgetData",
+            success: function (data) {
+
+                if (data.id != "0") {
+
+                    window.location = RootUrl + "FdmBudgetAllocation/FdmBudgetAllocation";
+                }
+            },
+
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+
+
+    })
+
+    $(document).on('keypress', '.txt_clsBudget', function (e) {
+        var kc = e.which;
+        //alert(kc);
+        if (kc >= 46 && kc <= 57) {
+
+        }
+        else {
+            e.preventDefault();
+        }
+
+    })
+
+    //$(document).on('change', '.txt_CCFBudget', function (e) {
+
+    //    var ccftotalamt = parseFloat($("#divallocamt0").html());
+
+    //    if (ccftotalamt > 0) {
+
+    //        var val = 0;
+    //        $(".txt_CCFBudget").each(function () {
+
+    //            val += parseInt($(this).val());
+
+    //        })
+
+    //        if (val > ccftotalamt) {
+    //            $("#hdTotalAmt0").val(val);
+
+    //            alert("Allocated Amount can not be greator than Total Allocated Amount!!");
+    //            return false;
+    //        }
+    //        else {
+    //            $("#hdTotalAmt0").val('0');
+    //        }
+    //    }
+
+
+    //})
+    //$(document).on('change', '.txt_DCFBudget', function (e) {
+
+    //    var dcftotalamt = parseFloat($("#divallocamt").html());
+
+    //    if (dcftotalamt > 0) {
+
+    //        var val = 0;
+    //        $(".txt_DCFBudget").each(function () {
+
+    //            val += parseInt($(this).val());
+
+    //        })
+
+    //        if (val > dcftotalamt) {
+    //            $("#hdTotalAmt1").val(val);
+
+    //            alert("Allocated Amount can not be greator than Total Allocated Amount!!");
+    //            return false;
+    //        }
+    //        else {
+    //            $("#hdTotalAmt1").val('0');
+    //        }
+    //    }
+
+
+    //})
+
+    //$(document).on('change', '.txt_ROBudget', function (e) {
+
+
+    //    var ROtotalamt = parseFloat($("#divallocamt1").html());
+
+    //    if (ROtotalamt > 0) {
+
+    //        var val = 0;
+    //        $(".txt_ROBudget").each(function () {
+
+    //            val += parseInt($(this).val());
+
+    //        })
+
+    //        if (val > ROtotalamt) {
+    //            $("#hdTotalAmt2").val(val);
+
+    //            alert("Allocated Amount can not be greator than Total Allocated Amount!!");
+    //            return false;
+    //        }
+    //        else {
+    //            $("#hdTotalAmt2").val('0');
+    //        }
+    //    }
+
+
+    //})
+
+    //$(document).on('keypress', '.txt_clsBudget', function (e) {
+
+    //    return isNumber(event, this)
+    //});
+    //$(document).on('keypress', '.txt_ROBudget', function (e) {
+
+    //    return isNumber(event, this)
+    //});
+    //$(document).on('keypress', '.txt_DCFBudget', function (e) {
+
+    //    return isNumber(event, this)
+    //});
+
+    //$(document).on('click', '#btn_submit1', function () {
+
+    //    if ($("#hdTotalAmt").val() != "0") {
+    //        alert("Allocated Amount can not be greator than Total Allocated Amount!!");
+    //        return false;
+    //    }
+
+    //})
+
+    //$(document).on('click', '#btn_submit2', function () {
+
+    //    if ($("#hdTotalAmt0").val() != "0") {
+    //        alert("Allocated Amount can not be greator than Total Allocated Amount!!");
+    //        return false;
+    //    }
+
+    //})
+
+
+    });
+
+    function funEditData(ID) {
+
+        var bdg = { BdgID: ID };
+        var RootUrl = '@Url.Content("~/")';
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(bdg),
+            url: RootUrl + "FdmBudgetAllocation/EditHQBudgetData",
+            success: function (data) {
+                $("#divDivisionName").html(data.Div_Name);
+                $("#txt_Allocated").val(data.AllocAmount);
+                $("#btn_EditBudget").val(data.ID);
+
+            },
+
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+
+    }
+    function isNumber(evt, element) {
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+
+        if (
+             (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+            (charCode < 48 || charCode > 57))
+            return false;
+
+        //return true;
+    }
+
+
+    //function validate(id) {
+    //    $('#' + id).keypress(function (event) {
+    //        alert('aa');
+    //        return isNumber(event, this)
+
+    //    });
+    //}
+
+</script>

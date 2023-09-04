@@ -1,0 +1,450 @@
+﻿@model FMDSS.Entity.JFMC.ViewModel.JFMCRegistration
+@{
+    ViewBag.Title = "JFMC Registration";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">VFPMC Registration</h1>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                @using (Html.BeginForm("AddJFMCRegistration", "JFMC", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data", id = "frmJFMCRegistration" }))
+                {
+                    <div class="panel-body">
+                        @Html.Partial("_ErrorMsg")
+                        @Html.HiddenFor(m => m.JFMCRegistrationID)
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Circle: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.CircleCode, (IEnumerable<SelectListItem>)ViewBag.CircleCode, "--Select--", new { @class = "form-control", id = "ddlCircle", onchange = "BindAllDivision(this,'ddlDivision')" })
+                                <div class="alert-danger1">@Html.ValidationMessageFor(x => x.CircleCode)</div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Division: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.DivisionCode, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddlDivision", onchange = "BindAllRange(this,'ddlRange')" })
+                                <div class="alert-danger1">@Html.ValidationMessageFor(x => x.DivisionCode)</div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Range: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.RangeCode, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddlRange", onchange = "BindNaka(this,'ddlNaka')" })
+                                <div class="alert-danger1">@Html.ValidationMessageFor(x => x.RangeCode)</div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Naka: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.NakaID, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddlNaka" })
+                                <div class="alert-danger1">@Html.ValidationMessageFor(x => x.NakaID)</div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label for="Areainha">
+                                    Latitude:<span class="mandatory">*</span>
+                                </label>
+                                @Html.TextBoxFor(x => x.Latitude, new { @class = "form-control", title = "", placeholder = "Enter Latitude", maxlength = 50, onkeypress = "AllowNumberOnly(event)" })
+                                <div class="alert-danger1">@Html.ValidationMessageFor(x => x.Latitude)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label for="Areainha">
+                                    Longitude:<span class="mandatory">*</span>
+                                </label>
+                                @Html.TextBoxFor(x => x.Longitude, new { @class = "form-control", title = "", placeholder = "Enter Longitude", maxlength = 50, onkeypress = "AllowNumberOnly(event)" })
+                                <div class="alert-danger1">@Html.ValidationMessageFor(x => x.Longitude)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>
+                                    Name of Committee:<span class="mandatory">*</span>
+                                </label>
+                                @Html.TextBoxFor(x => x.CommitteeName, new { @class = "form-control", title = "Enter Committee Name", maxlength = 200 })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.CommitteeName)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>
+                                    Registration Number:<span class="mandatory">*</span>
+                                </label>
+                                @Html.TextBoxFor(x => x.RegistrationNumber, new { @class = "form-control", title = "Enter Registration Number", maxlength = 50 })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.RegistrationNumber)</div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>
+                                    Registration Date:<span class="mandatory">*</span>
+                                </label>
+                                @Html.TextBoxFor(x => x.RegistrationDate, new { id = "txtRegistrationDate", @class = "form-control", title = "Enter Registration Date", maxlength = 50, @readonly = "readonly" })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.RegistrationDate)</div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading" style="font-size:14px;font-weight:700;">
+                                    Number of Members
+                                </div>
+                                <div class="panel-body">
+
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label>
+                                                SC:
+                                            </label>
+                                            @Html.TextBoxFor(x => x.TotalSCCategory, new { @class = "form-control", title = "SC", maxlength = 50, onkeypress = "AllowNumericOnly(event)" })
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label>
+                                                ST:
+                                            </label>
+                                            @Html.TextBoxFor(x => x.TotalSTCategory, new { @class = "form-control", title = "ST", maxlength = 50, onkeypress = "AllowNumericOnly(event)" })
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label>
+                                                Female:
+                                            </label>
+                                            @Html.TextBoxFor(x => x.TotalFemaleCategory, new { @class = "form-control", title = "Female", maxlength = 50, onkeypress = "AllowNumericOnly(event)" })
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label>
+                                                Others:
+                                            </label>
+                                            @Html.TextBoxFor(x => x.TotalOthersCategory, new { @class = "form-control", title = "Others", maxlength = 50, onkeypress = "AllowNumericOnly(event)" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 bank">
+                            <div class="form-group">
+                                <label>
+                                    Managed Area/Ecotourism Site name:
+                                </label>
+                                @Html.TextBoxFor(x => x.ManagedAreaOrEcotourismSiteName, new { @class = "form-control", maxlength = 50 })
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6 bank">
+                            <div class="form-group">
+                                <label>
+                                    Name of the Bank:
+                                </label>
+                                @Html.TextBoxFor(x => x.BankName, new { @class = "form-control", title = "Enter bank name", maxlength = 200, @id = "Bank_Name", name = "Bank_Name" })
+                            </div>
+                        </div>
+                        <div class="col-lg-6 bank">
+                            <div class="form-group">
+                                <label>
+                                    Name of Branch:
+                                </label>
+                                @Html.TextBoxFor(x => x.BranchName, new { @class = "form-control", title = "Enter branch name", maxlength = 200, @id = "Branch_Name", name = "Branch_Name" })
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6 bank">
+                            <div class="form-group">
+                                <label>
+                                    IFSC Code:
+                                </label>
+                                @Html.TextBoxFor(x => x.IFSCCode, new { @class = "form-control", title = "Enter branch id", maxlength = 50, @id = "Branch_Id", name = "Branch_Id" })
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6 bank">
+                            <div class="form-group">
+                                <label>
+                                    Account Number:
+                                </label>
+                                @Html.TextBoxFor(x => x.AccountNo, new { @class = "form-control", title = "Enter account no", maxlength = 20, @id = "Account_No", name = "Account_No" })
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6 bank">
+                            <div class="form-group">
+                                <label>
+                                    Account Type:
+                                </label>
+                                @Html.TextBoxFor(x => x.AccountType, new { @class = "form-control", title = "Enter account type", maxlength = 50, @id = "Account_Type", name = "Account_Type" })
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6 bank">
+                            <div class="form-group">
+                                <label>
+                                    Deposits at the bank (Corpus fund):
+                                </label>
+                                @Html.TextBoxFor(x => x.CorpusFundDeposit, new { @class = "form-control", title = "Enter account type", maxlength = 50, onkeypress = "AllowNumberOnly(event)" })
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6 bank">
+                            <div class="form-group">
+                                <label>
+                                    Revenue during the Year:
+                                </label>
+                                @Html.TextBoxFor(x => x.TotalRevenueDuringYear, new { @class = "form-control", title = "Enter account type", maxlength = 50, onkeypress = "AllowNumberOnly(event)" })
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6 bank">
+                            <div class="form-group">
+                                <label>
+                                    Ecotourism plan/Management plan exist(Y/N):
+                                </label>
+                                @Html.DropDownListFor(x => x.IsEcotourismManagementExist, FMDSS.Entity.ViewModel.CommonListVM.YesNo, "Select", new { @class = "form-control", onchange = "ShowHideOption(this, 'Ecotourism')" })
+
+                            </div>
+                        </div>
+                        <div id="divUploadPlanEvidence" class="col-lg-6 bank hide">
+                            <div class="form-group">
+                                <label>
+                                    Upload Plan
+                                </label>
+                                @Html.TextBoxFor(x => x.UploadPlanEvidence, new { @class = "form-control", id = "txtUploadPlanEvidence", Type = "File" })
+                                @*<div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.UploadPlanEvidence)</div>*@
+                            </div>
+                        </div>
+                        <div class="col-lg-6 bank">
+                            <div class="form-group">
+                                <label>
+                                    Grading:
+                                </label>
+                                @Html.DropDownListFor(x => x.Grade, new List<SelectListItem> {
+                                    new SelectListItem { Text="A",Value="A"},
+                                    new SelectListItem { Text="B",Value="B"},
+                                    new SelectListItem { Text="C",Value="C"}
+                                    }, new { @class = "form-control", title = "Enter account type" })
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6 bank">
+                            <div class="form-group">
+                                <label>
+                                    Audited:
+                                </label>
+                                @Html.DropDownListFor(x => x.Audited, FMDSS.Entity.ViewModel.CommonListVM.YesNo, "Select", new { @class = "form-control", onchange = "ShowHideOption(this, 'Audit')" })
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6 bank audit hide">
+                            <div class="form-group">
+                                <label>
+                                    Last Audit date:
+                                </label>
+                                @Html.TextBoxFor(x => x.LastAuditDate, new { @class = "form-control", maxlength = 50, id = "txtLastAuditDate", @readonly = "readonly" })
+
+                            </div>
+                        </div>
+                        <div id="divUploadAuditEvidence" class="col-lg-6 bank audit hide">
+                            <div class="form-group">
+                                <label>
+                                    Upload Audit Report
+                                </label>
+                                @Html.TextBoxFor(x => x.UploadAuditEvidence, new { @class = "form-control", id = "txtUploadAuditEvidence", Type = "File" })
+                                @*<div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.UploadAuditEvidence)</div>*@
+                            </div>
+                        </div>
+                        <div class="col-lg-6 bank">
+                            <div class="form-group">
+                                <label>
+                                    Latest General Body Meeting date:
+                                </label>
+                                @Html.TextBoxFor(x => x.LatestGeneralBodyMeetingDate, new { @class = "form-control", maxlength = 50, id = "txtLatestGeneralBodyMeetingDate", @readonly = "readonly" })
+
+                            </div>
+                        </div>
+                        <div id="divUploadAuditEvidence" class="col-lg-6 bank">
+                            <div class="form-group">
+                                <label>
+                                    Upload General Body Minutes of Meeting
+                                </label>
+                                @Html.TextBoxFor(x => x.UploadGeneralBodyMOMEvidence, new { @class = "form-control", id = "txtUploadGeneralBodyMOMEvidence", Type = "File" })
+                                @*<div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.UploadGeneralBodyMOMEvidence)</div>*@
+                            </div>
+                        </div>
+                        <div class="col-lg-6 bank">
+                            <div class="form-group">
+                                <label>
+                                    Latest Executive Body Meeting date:
+                                </label>
+                                @Html.TextBoxFor(x => x.LatestExecutiveBodyMeetingDate, new { @class = "form-control", maxlength = 50, id = "txtLatestExecutiveBodyMeetingDate", @readonly = "readonly" })
+
+                            </div>
+                        </div>
+                        <div class="col-lg-5">
+                            <label>Member Details:</label>
+                            <div class="form-group">
+                                <table id="tblMemberDetails" class="table table-striped table-bordered table-hover notranslate">
+                                    <thead>
+                                        <tr style="color:#999; background-color:#ddd;">
+                                            <td><i>Members Details</i></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Executive Committee Member Names</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbMemberDetails" class="tbviewdet">
+
+                                        @if (Model.MemberList != null)
+                                        {
+                                            for (int i = 0; i < Model.MemberList.Count; i++)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @Html.HiddenFor(s => Model.MemberList[i].MemberID)
+                                                        @Html.TextBoxFor(s => Model.MemberList[i].MemberName, new { id = "txtMemberName_" + i, size = "50" })
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr class="rowSkip">
+                                                <td colspan="3">No record found.</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="3"><div class="previewModehide"><a onclick='AddNewRowOD(@Model.JFMCRegistrationID)' href="javascript:void(0)">Add New Row</a></div></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+
+                            </div>
+                        </div>
+                        <div id="divUploadAuditEvidence" class="col-lg-6 bank">
+                            <div class="form-group">
+                                <label>
+                                    Upload Committee Member Minutes of Meeting
+                                </label>
+                                @Html.TextBoxFor(x => x.UploadCMemberMOMEvidence, new { @class = "form-control", id = "txtUploadCMemberMOMEvidence", Type = "File" })
+                                @*<div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.UploadCMemberMOMEvidence)</div>*@
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <label for="txtareRemarks">
+                                    Overall Remarks:<span class="mandatory">*</span>
+                                </label>
+                                @Html.TextAreaFor(x => x.Remarks, new { @class = "form-control", title = "Enter remarks", maxlength = 500 })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Remarks)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12"></div>
+                        <div class="col-lg-12" id="btn">
+                            <button id="btnSubmit" type="submit" class="btn btn-success" name="Command" value="Save" title="Submit" onclick="return ValidateForm()">
+                                <i class="fa fa-check"></i> Save
+                            </button>
+
+                            <button type="button" name="Command" value="Cancel" class="btn btn-danger" title="Cancel" onclick="BackToList('ShowRegistrationDetails')">
+                                <i class="fa fa-times fa-fw"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    @Html.Hidden("hdnRootURL", Url.Content("~/"))
+
+</div>
+
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/Scripts/Controller/Common.js"></script>
+<script src="~/js/bootstrap-multiselect.js"></script>
+<link href="~/css/bootstrap-multiselect.css" rel="stylesheet" />
+<script>
+    $(document).ready(function () {
+        if ('@Model.JFMCRegistrationID' == '0') {
+            $('#txtRegistrationDate,#txtLatestExecutiveBodyMeetingDate,#txtLatestGeneralBodyMeetingDate,#txtLastAuditDate').datepicker({
+                dateFormat: GetDatePickerFormat(),
+                yearRange: GetYearRange(),
+                changeMonth: true,
+                changeYear: true,
+            });
+            $('#txtRegistrationDate').datepicker('setDate', new Date());
+        }
+        else {
+            $('#ddlCircle').val('@Model.CircleCode');
+            BindAllDivision_Edit('@Model.CircleCode', 'ddlDivision', '@Model.DivisionCode');
+            BindAllRange_Edit('@Model.DivisionCode', 'ddlRange', '@Model.RangeCode');
+            BindNaka_Edit('@Model.RangeCode', 'ddlNaka', '@Model.NakaID');
+        }
+    });
+
+    function AddNewRowOD(objectID) {
+        var isValid = true;
+        var rootURl = $('#hdnRootURL').val();
+        $('#tblMemberDetails').find('input[id^="txtMemberName_"]').each(function () {
+            if ($(this).val() == '') {
+                alert('Please enter current row details first.');
+                isValid = false;
+                return false;
+            }
+        })
+
+        if (isValid) {
+            var cIndx = $('#tbMemberDetails').find('tr:not(.rowSkip)').length;
+            $.ajax({
+                type: 'GET',
+                data: { "currentRowIndex": cIndx, "objectID": objectID },
+                url: rootURl + "JFMC/AddNewRowForMemberDetails",
+                dataType: 'html',
+                success: function (data) {
+                    $('#tbMemberDetails').find('.rowSkip').remove();
+                    $('#tbMemberDetails').append(data);
+                },
+                error: function (ex) {
+                    console.log(ex.error);
+                }
+            });
+        }
+    }
+    function ShowHideOption(cntrl, option){
+        switch (option) {
+            case "Ecotourism":
+                if (cntrl.value == 'True') {
+                    $('#divUploadPlanEvidence').removeClass('hide');
+                }
+                else {
+                    $('#divUploadPlanEvidence').addClass('hide');
+                }
+                break;
+            case "Audit":
+                if (cntrl.value == 'True') {
+                    $('.audit').removeClass('hide');
+                }
+                else {
+                    $('.audit').addClass('hide');
+                }
+                break;
+        }
+    }
+
+</script> 

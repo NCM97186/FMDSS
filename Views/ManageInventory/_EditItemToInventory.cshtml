@@ -1,0 +1,112 @@
+﻿@model FMDSS.Models.ForestProduction.DODItemAddedToInventory
+@{
+    var data = (FMDSS.Models.ForestProduction.DODItemAddedToInventory)ViewBag.IATInventory;
+}
+@using (Ajax.BeginForm("UpdateItemToInventory", "ManageInventory", new AjaxOptions { HttpMethod = "POST", Confirm = FMDSS.Globals.Constant.ConfirmMsg, OnSuccess = "UpdateItemToInventoryResponse", InsertionMode = InsertionMode.Replace, UpdateTargetId = "tab2default" }, new { id = "frmMInventory" }))
+{
+            <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-body">
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Depot Name: <span class="mandatory">*</span></label>
+                    <input class="form-control" type="text" id="txtUnitName" value="@data.Depot_Name" readonly="readonly">
+
+                </div>
+            </div> 
+            <div class="col-lg-12">
+                <label>Product Details:</label>
+                <div class="form-group">
+                    <table id="tblTPProductDetails" class="table table-striped table-bordered table-hover notranslate">
+                        <thead>
+                            <tr style="color:#999; background-color:#ddd;">
+                                <td colspan="7"><i>Product Details</i></td>
+                            </tr>
+                            <tr>
+                                <th>ProductType</th>
+                                <th>Product</th>
+                                <th>UnitName</th>
+                                <th>TransferQty</th>
+                                <th>GoodQty</th>
+                                <th>DamagedQty</th>
+                                <th>LostQty</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbTPProductDetails" class="tbviewdet">
+
+                            @if (Model.TPProductList != null && Model.TPProductList.Count > 0)
+                            {
+                                for (int i = 0; i < Model.TPProductList.Count; i++)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.HiddenFor(x => Model.TPProductList[i].SecondaryObjectID)
+                                            @Html.HiddenFor(x => Model.TPProductList[i].ProductID)
+                                            @Html.HiddenFor(x => Model.TPProductList[i].TransferQty,new { id= "hdnTransferQty_" + i })
+                                            @Model.TPProductList[i].ProductType
+                                        </td>
+                                        <td>@Model.TPProductList[i].ProductName</td>
+                                        <td>@Model.TPProductList[i].UnitName</td>
+                                        <td>@Model.TPProductList[i].TransferQty</td>
+                                        <td>@Html.TextBoxFor(s => Model.TPProductList[i].GoodQty, new { id = "txtGoodQty_" + i, size = "15", onkeypress = "AllowNumberOnly(event)", data_cntr=i, onchange="ValidateQty(this);",Value= Model.TPProductList[i].TransferQty, @readonly = "readonly" })</td>
+                                        <td>@Html.TextBoxFor(s => Model.TPProductList[i].DamagedQty, new { id = "txtDamagedQty_" + i, size = "15", onkeypress = "AllowNumberOnly(event)",Value="0", data_cntr = i, onchange = "ValidateQty(this);", @readonly = "readonly" })</td>
+                                        <td>@Html.TextBoxFor(s => Model.TPProductList[i].LostQty, new { id = "txtLostQty_" + i, size = "15", onkeypress = "AllowNumberOnly(event)", Value = "0",@readonly= "readonly" })</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr class="rowSkip">
+                                    <td colspan="7">No record found.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Comment/Reason:<span class="mandatory">*</span></label> 
+                    @Html.TextAreaFor(x => Model.Comment,new { @class="form-control", placeholder = "Enter Comment", required= "required" })
+                </div>
+            </div>
+        </div>
+
+        <!--/.model body-->
+
+        <div class="modal-footer" style="clear: both">
+
+            <div id="btn" class="col-lg-12">
+                <button type="submit" class="btn btn-success" name="Command" value="UpdateItemToInventory" id="btn_Save">
+                    <i class="fa fa-check"></i>Submit
+                </button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i>  Close
+                </button>
+
+            </div>
+        </div>
+
+    </div>
+    @Html.Hidden("TPID", data.TPID)
+}
+
+<script> 
+    function ValidateQty(cntrl) { 
+        var cntr = $(cntrl).data("cntr");
+        var transferQty = parseFloat($('#hdnTransferQty_' + cntr).val());
+        var goodQty = $('#txtGoodQty_' + cntr).val() == '' ? '0' :parseFloat($('#txtGoodQty_' + cntr).val());
+        var damagedQty = $('#txtDamagedQty_' + cntr).val() == '' ? '0' : parseFloat($('#txtDamagedQty_' + cntr).val()); 
+
+        if (transferQty < goodQty + damagedQty) {
+            alert('Qty should be less than Transfer Qty')
+            $('#txtGoodQty_' + cntr).val(transferQty);
+            $('#txtDamagedQty_' + cntr + ',#txtLostQty_' + cntr).val('0'); 
+            $(cntrl).focus();
+        }
+        else {
+            $('#txtLostQty_' + cntr).val(transferQty - goodQty - damagedQty); 
+        }
+    }
+</script>

@@ -1,0 +1,204 @@
+﻿@model FMDSS.Models.ForesterDevelopment.Activity
+
+@{
+    ViewBag.Title = "fdmActivity";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //  "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<style type="text/css">
+    .spanmark {
+        color: #222;
+        font-size: 12px;
+        font-weight: normal;
+    }
+    .scroll-ad {
+    overflow-y: scroll!important;
+    height: 218px!important;
+    border: 2px solid;
+    display: table-caption;
+    width: 750px;
+}
+    /*#Activity_BSR_Per_Unit {
+        border-radius: 4px;
+    }*/
+</style>
+
+<!-- Form design -->
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Circle Activity</h1>
+        @if (@TempData["ViewMessage"] != null)
+        {
+            <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["ViewMessage"]</div>
+        }
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!--<div class="panel-heading">Processing Fees</div>-->
+                <!-- /.panel-heading -->
+@using (Html.BeginForm("SaveCircleActivityData", "fdmActivity", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data" }))
+                                    {
+                <div class="panel-body">
+                    <div class="col-lg-6 multi">
+                        <div class="form-group">
+                            <label for="Proposed">
+                                Forest Division Name:<span class="mandatory">*</span>
+                            </label>
+                            @Html.DropDownList("division", (IEnumerable<SelectListItem>)ViewBag.ddlDivision1, "--Select--", new { @class = "form-control common", id = "division" })                          
+                            <div id="errordiv52" style="display:none" class="alert-danger1"></div>
+
+                        </div>
+                    </div>
+                    <div class="col-lg-6 multi">
+                        <div class="form-group">
+                            <label for="Proposed">
+                                Activity Name:<span class="mandatory">*</span>
+                            </label>
+                            @Html.DropDownList("Activity", (IEnumerable<SelectListItem>)ViewBag.ddlActivity1, "--Select--", new { @class = "form-control common", id = "Activity" })                          
+                            <div id="errordiv52" style="display:none" class="alert-danger1"></div>
+
+                        </div>
+                    </div>
+                    <!--Add New Btn-->
+                    <div class="col-lg-3 rgt pull-right">
+                        <button type="button" class="btn btn-success pull-right btn_pp" data-toggle="modal" id="btnShowActivity"  title="Show Activity">
+                            <i class="fa fa-plus"></i> Show 
+                        </button>
+                    </div>
+                    <div class="col-lg-12">
+                      
+                           
+                         
+                                    <table class="table table-bordered Numeric" style="width: 100%;">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    S. NO.
+                                                    <input type="text" style="display:none;" id="totalSubActivity" name="totalSubActivity" value="1">
+                                                    <input type="text" style="display:none;" id="type" name="type" value="">
+                                                </th>
+                                         
+                                                <th>
+                                                   Name
+                                                </th>
+                                                <th>
+                                                   BSR AVG Labour
+                                                </th><th>
+    BSR Circle Material
+</th>
+                                                <th >
+                                                    BSR AVG Labour
+                                                </th>
+                                               
+                                                <th >
+    BSR Circle Material
+</th>
+                                            </tr>
+                                            
+                                        </thead>
+                                        <tbody id="customFieldsSA"></tbody>
+                          
+                                    </table>
+
+                              
+                      
+
+                        </div>
+                        <div class="col-lg-3 rgt pull-right">
+                            <button id="btnSubmit" value="Submit" name="Command" class="btn btn-success" type="submit">
+                                <i class="fa fa-check"></i> Submit
+                            </button>
+                          
+                        </div>
+
+                    </div>
+}
+                <!--./Popup Model-->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $.noConflict(true);
+</script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+@*<script src="~/js/bootstrap.min.js"></script>*@
+@*<script src="~/js/Common.js"></script>*@
+@*<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />*@
+<script src="@Url.Content("~/Scripts/jquery-1.8.2.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.js")" type="text/javascript"></script> 
+
+<script type="text/javascript">
+
+    function isNumber(evt, element) {
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+
+        if (
+            (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+            (charCode < 48 || charCode > 57))
+            return false;
+        else
+            return true;
+
+    }
+    if ('@ViewData["Message"]' != '') {
+        alert('@ViewData["Message"]');
+    }
+    var RootUrl = '@Url.Content("~/")';
+    var sacount = 1;
+    var type = '';
+    @*if ('@Session["SMessage"]' != '') { showMessage("Success", "Record Save Successfully."); Session["SMessage"] = ''; }
+    else if ('@Session["UMessage"]' != '') { showMessage("Success", "Record Update Successfully."); Session["UMessage"] = ''; }
+    else if ('@Session["EMessage"]' != '') { showMessage("error", "Error occur while saving/updating records."); Session["EMessage"] = ''; }*@
+   
+
+    $(document).ready(function () {
+          
+
+            $(".Alphanumeric").on("keypress", function (event) { return IsAlphanumeric(event); });
+            $(".Numeric").on("keypress", function (event) { return isNumber(event, this); });
+            //  $('.alert-danger1').hide();
+
+
+        $("#btnShowActivity").click(function () {
+            $("#customFieldsSA").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'fdmActivity/GetBSRByDivActivity', // we are calling json method
+                dataType: 'json',
+                data: { Div_Code:  $("#division").val(), Activity_ID:$("#Activity").val()},
+             
+                success: function (range) {
+                    // $("#Dropproject").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        //alert(items.Name);
+                        $("#customFieldsSA").append('<tr class="educationtemplate" name="rowsa_' + sacount + '"><td> ' + sacount + ' </td><td id="tdsa_' + items.Name + '">' + ' <input readonly="true" type="text" style="display:none;" name="saID_' + sacount + '" value=' + items.ID + '#' + items.type + ' >' + items.Name + '</td>  <td>    <input readonly="true" type="text" id="Text87" name="sabsrLab_' + sacount + '" value=' + items.bsrLab + ' class="allownumericwithoutdecimal form-control" ></td><td>    <input readonly="true" type="text" id="Text89" name="sabsrMat_' + sacount + '" style="width: 80px;"  value=' + items.bsrMat + ' class="allownumericwithoutdecimal form-control" ></td><td>    <input type="text" id="Text88" name="sadivbsr_' + sacount + '" value=' + items.divbsrLab + ' class="allownumericwithoutdecimal form-control" ></td><td>    <input type="text" id="Text90" name=divbsrMat_' + sacount + ' value=' + items.divbsrMat + ' class="allownumericwithoutdecimal form-control" ></td></tr>');
+                        sacount = sacount + 1;
+                        type = items.type;
+                    });
+                   
+                   // alert(items);
+                    //alert(educount);
+
+                    //  $('#totalCattle').val(Cattlecount - 1);
+                    $('#totalSubActivity').val(sacount - 1);// $('#type').val(type);
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve Data.' + ex);
+                }
+
+            });
+
+        });
+    });
+
+</script>

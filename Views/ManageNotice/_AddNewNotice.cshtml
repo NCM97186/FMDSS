@@ -1,0 +1,454 @@
+﻿@model FMDSS.Models.ForestProduction.NoticeDetails
+
+<script src="~/js/bootstrap.min.js"></script>   
+@using (Ajax.BeginForm("SaveNotice", "ManageNotice", new AjaxOptions { HttpMethod = "POST", Confirm = FMDSS.Globals.Constant.ConfirmMsg, OnSuccess = "BackToList('ManageNotice')" }))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <div id="dvRevenueData" style="display:none" class="alert alert-success"><i class="fa fa-thumb-tack fa-fw"></i></div>
+
+            <h4 class="modal-title">
+                <label id="lbl_header"> </label>
+            </h4>
+        </div>
+        <div class="modal-body">
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Range Name: <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(m=>m.RangeCode, (IEnumerable<SelectListItem>)ViewBag.RangeCode, "--Select--", new { @class = "form-control", id = "rangeCode" }) 
+                    <div class="alert-danger1">@Html.ValidationMessageFor(x => x.RangeCode)</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Place/Depot of Auction: <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(m=>m.DepotId, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control required", id = "depotId", onchange = "OnChange_DepotId(this)" }) 
+                    <div class="alert-danger1">@Html.ValidationMessageFor(x => x.DepotId)</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Product Type: <span class="mandatory">*</span></label>
+                    @Html.DropDownList("ddlProductTypeID", new SelectList(string.Empty, "Value", "Text"), "--Select--", new {
+                   id = "ddlProductTypeID", @class = "form-control multi-ddl-height-102 required", 
+                   multiple = "multiple", onchange = "OnChange_ProductTypeID(this)" })
+                    @Html.TextBoxFor(m => m.ProductTypeID, new { id = "hdnProductTypeID",@class= "required visibility-hidden" }) 
+                    <div class="alert-danger1">@Html.ValidationMessageFor(x => x.ProductTypeID)</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Product: <span class="mandatory">*</span></label>
+                    @Html.DropDownList("ddlProductID", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id= "ddlProductID", @class = "form-control multi-ddl-height-102 required", multiple = "multiple", onchange = "OnChange_ProductID(this)" })
+                    @Html.TextBoxFor(m => m.ProductID, new { id = "hdnProductID", @class = "required visibility-hidden" })
+                    <div class="alert-danger1">@Html.ValidationMessageFor(x => x.ProductID)</div>
+                </div>
+            </div> 
+            <div class="col-lg-12 Depot">
+                <div class="form-group">
+                    <label>Inventory Lot Number:<span class="mandatory">*</span></label>
+                    @Html.DropDownList("ddlLotNumber", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control multi-ddl-height-102 required", id = "ddlLotNumber", multiple = "multiple", onchange = "Onchange_LotNumber(this)" })
+                    @Html.TextBoxFor(m=>m.InventoryID, new { id = "hdnLotNumber", @class = "required visibility-hidden" }) 
+                    <div class="alert-danger1">@Html.ValidationMessageFor(x => x.InventoryID)</div>
+                </div>
+            </div> 
+            <div id="divProductDetails"></div>
+            <div class="col-lg-4">
+                <div class="form-group">
+                    <label>Start Date of EMD: <span class="mandatory">*</span></label> 
+                    @Html.TextBox("txtDurationFrom","", new { id = "durationfrom", @class= "form-control datefield required durationFrom", autocomplete = "off",@readonly= "readonly", onchange = "SetTime(this, 'All')" })  
+                    @Html.TextBoxFor(m => m.DurationFrom,new { id= "hdnDurationFrom", @class= "visibility-hidden" })
+                    <div class="alert-danger1">@Html.ValidationMessageFor(x => x.DurationFrom)</div>
+                </div>
+            </div>
+            <div class="col-lg-2">
+                <div class="form-group">
+                    <label>EMD Time</label> 
+                    @Html.DropDownList("ddlEMDTime", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "ddlEMDTime", onchange = "SetTime(this, 'All')" })
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="form-group">
+                    <label>Date of Auction: <span class="mandatory">*</span></label> 
+                    @Html.TextBox("txtDurationTo", "", new { id = "durationto", @class = "form-control required durationTo", autocomplete = "off", @readonly = "readonly" }) 
+                    @Html.TextBoxFor(m => m.DurationTo, new { id = "hdnDurationTo", @class = "visibility-hidden" })
+                    <div class="alert-danger1">@Html.ValidationMessageFor(x => x.DurationTo)</div>
+                </div>
+            </div> 
+            <div class="col-lg-2">
+                <div class="form-group">
+                    <label>Auction Time</label>
+                    @Html.DropDownList("ddlAuctionTime", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "ddlAuctionTime", onchange = "SetTime(this, 'AuctionTime')" })
+                </div>
+            </div>
+            <div class="col-lg-12"></div>  
+        </div>
+
+        <!--/.model body-->
+
+        <div class="modal-footer" style="clear: both">
+
+            <div id="btn" class="col-lg-12">
+                <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_Save">
+                    <i class="fa fa-check"></i>Submit
+                </button> 
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i>  Close
+                </button>
+
+            </div>
+        </div>
+
+    </div>
+} 
+ 
+<script type="text/javascript" src="~/js/bootstrap.min.js"></script> 
+<script src="~/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js" type="text/javascript"></script>
+<script src="~/js/bootstrap-multiselect.js" type="text/javascript"></script>
+<link href="~/css/bootstrap-multiselect.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="~/Scripts/Controller/Common.js"></script>
+ 
+<script type="text/javascript">
+     var RootUrl = '@Url.Content("~/")';
+    $('#ddlLotNumber,#ddlProductTypeID,#ddlProductID').multiselect({
+        includeSelectAllOption: true,
+        maxHeight: 250
+    });
+
+    $(document).ready(function () { 
+
+        SetTime("","Default");
+        jQuery('.durationFrom').datepicker({
+            minDate: new Date(),
+            dateFormat: 'dd/mm/yy',
+            changeYear: true,
+            onClose: function (dateText, inst) {
+                $("[id$=auto]").focus();
+            },
+            onSelect: function (selected) {
+                SetTime("", "All");
+                $(".durationTo").datepicker("option", "minDate", selected)
+            }
+        });
+        jQuery('.durationTo').datepicker({
+            minDate: new Date(),
+            dateFormat: 'dd/mm/yy',
+            changeYear: true,
+            onClose: function (dateText, inst) {
+                $("[id$=auto]").focus();
+            },
+            onSelect: function (selected) {
+                SetTime("", "All");
+                $(".durationFrom").datepicker("option", "maxDate", selected)
+            }
+        }); 
+         
+        $('#regionCode').change(function (e) {
+            $("#divisionCode").empty();
+            $("#circleCode").empty();
+            $("#divisionCode").empty();
+            $("#rangeCode").empty();
+            $("#depotId").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/CircleData', // we are calling json method
+                dataType: 'json',
+                data: { regionCode: $("#regionCode").val() },
+                success: function (region) {
+                    $.each(region, function (i, items) {
+                        $("#circleCode").append('<option value="' + items.Value + '">' +
+                            items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#circleCode').change(function (e) {
+            $("#divisionCode").empty();
+            $("#rangeCode").empty();
+            $("#depotId").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/DivisionData', // we are calling json method
+                dataType: 'json',
+                data: { regionCode: $("#regionCode").val(), circleCode: $("#circleCode").val() },
+                success: function (circle) {
+                    $.each(circle, function (i, items) {
+                        $("#divisionCode").append('<option value="' + items.Value + '">' +
+                            items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+
+        $('#divisionCode').change(function (e) {
+            $("#rangeCode").empty();
+            $("#depotId").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/RangeData', // we are calling json method
+                dataType: 'json',
+                data: { regionCode: $("#regionCode").val(), circleCode: $("#circleCode").val(), divisionCode: $("#divisionCode").val() },
+                success: function (divCode) {
+                    $.each(divCode, function (i, items) {
+                        $("#rangeCode").append('<option value="' + items.Value + '">' +
+                            items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#rangeCode').change(function (e) {
+            $("#depotId").empty().append("<option value=''>--Select--</select>");
+
+            if ($('#rangeCode').val() != '') {
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'ManageNotice/getDepotDatanotice', // we are calling json method
+                    dataType: 'json',
+                    data: { rangeCode: $("#rangeCode").val() },
+                    success: function (response) {
+                        if (response.length > 0) {
+                            $.each(response, function (i, items) {
+                                $("#depotId").append('<option value="' + items.Value + '">' +
+                                    items.Text + '</option>');
+                            });
+                        }
+                        else {
+                            alert("There is no any item added in inventory for Notice, so it can not be proceed further.");
+                            $("#rangeCode").val('');
+                            $('#myModal').modal('toggle');
+                        }
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve range.' + ex);
+                    }
+
+                });
+            }
+            return false;
+        }); 
+
+        $('#addNewnotice').click(function (e) {
+            $("#lbl_header").html('For Sale Create Notice');
+            $("#btn_Save").html('Submit');
+            $("#btn_Save").val('Submit');
+
+        }); 
+
+        function isNumber(evt, element) {
+
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (
+                (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+                (charCode < 48 || charCode > 57))
+                return false;
+        }
+    }); 
+     
+    function OnChange_DepotId(cntrl) {
+        var $ddlTargetObjectID = $("#ddlProductTypeID"); 
+        var strOptions = "";
+        if (cntrl.value != '') {
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + "TransitPermit/GetDepotDetails",
+                dataType: 'json',
+                async: true,
+                data: { depotID: $(cntrl).val() },
+                success: function (response) { 
+                    $.each(response.ProductTypeList, function (i, j) {
+                        strOptions += "<option value='" + j.Value + "'>" + j.Text + "</option>";
+                    });
+                    $ddlTargetObjectID.html(strOptions);
+                    $ddlTargetObjectID.multiselect('rebuild');
+                },
+                error: function (ex) {
+                }
+            });
+        }
+        else {
+            $ddlTargetObjectID.html(strOptions); 
+            $ddlTargetObjectID.multiselect('rebuild');
+        }
+    }
+
+    function OnChange_ProductTypeID(cntrl) {
+        var cntrlValue = $(cntrl).val() == null ? '' : $(cntrl).val().toString();
+        $('#hdnProductTypeID').val(cntrlValue);
+
+        var $ddlTargetObjectID = $("#ddlProductID");
+        var strOptions = "";
+        if (cntrl.value != '') {
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'TransitPermit/GetDropdownData',
+                dataType: 'json',
+                async: true,
+                data: { key: "NoticeProduct", parentID: $('#depotId').val(), childID: cntrlValue },
+                success: function (response) { 
+                    $.each(response.data, function (i, j) {
+                        strOptions += "<option value='" + j.Value + "'>" + j.Text + "</option>";
+                    });
+                    $ddlTargetObjectID.html(strOptions);
+                    $ddlTargetObjectID.multiselect('rebuild');
+                },
+                error: function (ex) {
+                }
+            });
+        }
+        else {
+            $ddlTargetObjectID.html(strOptions);
+            $ddlTargetObjectID.multiselect('rebuild');
+        }
+    }
+
+    function OnChange_ProductID(cntrl) {
+        var cntrlValue = $(cntrl).val() == null ? '' : $(cntrl).val().toString();
+        $('#hdnProductID').val(cntrlValue);
+
+        var $ddlTargetObjectID = $("#ddlLotNumber");
+        var strOptions = ""; 
+        if (cntrl.value != '') {
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'TransitPermit/GetDropdownData',
+                dataType: 'json',
+                async: true,
+                data: { key: "NoticeLot", parentID: $('#depotId').val(), childID: cntrlValue },
+                success: function (response) {
+                    $.each(response.data, function (i, j) {
+                        strOptions += "<option value='" + j.Value + "'>" + j.Text + "</option>";
+                    });
+                    $ddlTargetObjectID.html(strOptions);
+                    $ddlTargetObjectID.multiselect("rebuild");
+                },
+                error: function (ex) {
+                }
+            });
+        }
+        else {
+            $ddlTargetObjectID.html(strOptions);
+            $ddlTargetObjectID.multiselect('rebuild');
+        }
+    }
+
+    function Onchange_LotNumber(cntrl) {
+        var cntrlValue = $(cntrl).val() == null ? '' : $(cntrl).val().toString();
+        $('#hdnLotNumber').val(cntrlValue);
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'ManageNotice/GetDODProductDetails',
+            dataType: 'html',
+            data: { parentID: cntrlValue },
+            success: function (response) {
+                $('#divProductDetails').html(response);
+            },
+            error: function (ex) {
+            }
+        });
+    }
+
+    function ClearField() {
+        $('select').val("");
+        $('input[type="text"]').val("");
+        $("#depotId").empty().append("<option value=''>--Select--</option>");
+        var currentDate = new Date();
+        $("#durationfrom").datepicker("setDate", currentDate);
+    }
+
+    function SetTime(cntrl, type)
+    {
+        var ddlOptions = "";
+        switch (type)
+        { 
+            case "All": 
+                var initialTime = parseInt($('#ddlEMDTime').val());
+                var durationFrom = $('#durationfrom').val();
+                var durationTo = $('#durationto').val(); 
+
+                if ($('#durationto>option').length < 24 && durationFrom == durationTo) {
+                    for (var i = initialTime; i < 24; i++) {
+                        if (i < 10) {
+                            time = "0" + i + ":00"
+                        }
+                        else {
+                            time = i + ":00"
+                        }
+                        ddlOptions += "<option value='" + i + "'>" + time + "</option>";
+                        $("#ddlAuctionTime").empty().append(ddlOptions);
+                    }
+                }
+                else if ($('#durationto>option').length < 24 && durationFrom != durationTo) {
+                    for (var i = 0; i < 24; i++) {
+                        if (i < 10) {
+                            time = "0" + i + ":00"
+                        }
+                        else {
+                            time = i + ":00"
+                        }
+                        ddlOptions += "<option value='" + i + "'>" + time + "</option>";
+                        $("#ddlAuctionTime").empty().append(ddlOptions);
+                    }
+                }
+                $('#hdnDurationFrom').val(durationFrom + ' ' + $('#ddlEMDTime>option:selected').text());
+                $('#hdnDurationTo').val(durationTo + ' ' + $('#ddlAuctionTime>option:selected').text());
+                break;
+            case "AuctionTime":
+                $('#hdnDurationTo').val($('#durationto').val() + ' ' + $('#ddlAuctionTime>option:selected').text());
+                break;
+            default:
+                $("#ddlAuctionTime,#ddlEMDTime").empty();
+                var time = "";
+
+                for (var i = 0; i < 24; i++) {
+                    if (i < 10) {
+                        time = "0" + i + ":00"
+                    }
+                    else {
+                        time = i + ":00"
+                    }
+                    $("#ddlAuctionTime,#ddlEMDTime").append("<option value='" + i + "'>" + time + "</option>");
+                } 
+                break;
+        } 
+    } 
+
+</script> 
+ 
+<style> 
+    select[multiple].multi-ddl-height-102 {
+        height: 102px;
+    }
+
+    select[multiple].multiselect-container > li > a > label.checkbox, .multiselect-container > li > a > label.radio {
+        background: #fff;
+        color: #555;
+    }
+
+    .visibility-hidden {
+        visibility: hidden;
+        position:fixed;
+        height: 0;
+        width: 0;
+    }
+</style>

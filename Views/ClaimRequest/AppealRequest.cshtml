@@ -1,0 +1,446 @@
+﻿@model FMDSS.Entity.FRAViewModel.AppealRequestVM
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Forest Rights Act (FRA): Appeal Form</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    @using (Html.BeginForm("AppealRequest", "ClaimRequest", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data", id = "frmAppealRequest" }))
+                    {
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading" style="font-size:14px;font-weight:700;">
+                                    Appeal Details
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Appeal Against:</label>
+                                            <div>
+                                                <label class="radio-inline">
+                                                    @Html.RadioButtonFor(m => m.EntryType, "0", new { @checked = "checked", onchange="EntryType_Change(this)" }) Claim Processed via online portal
+                                                </label>
+                                                <label class="radio-inline">
+                                                    @Html.RadioButtonFor(m => m.EntryType, "1",new { onchange = "EntryType_Change(this)" }) Processed via offline mode
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Application No:(<span class="mandatory">*</span>If online)</label>
+                                            @Html.DropDownListFor(m => m.ClaimRequestID, (IEnumerable<SelectListItem>)ViewBag.ClaimRequestList, "--Select--", new { @class = "form-control required", id = "ddlClaimRequestID", onchange= "ClaimRequestID_Change(this)" })
+                                            <div class="alert-danger1">@Html.ValidationMessageFor(m => m.ClaimRequestID)</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label>Reason for the appeal:</label>
+                                            <div>
+                                                <label class="radio-inline">
+                                                    @Html.RadioButtonFor(m => m.AppealReason, "0", new { @checked = "checked" }) Claim Rejected
+                                                </label>
+                                                <label class="radio-inline">
+                                                    @Html.RadioButtonFor(m => m.AppealReason, "1") Claim Partially Accepted
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Claim Type:</label>
+                                            <div>
+                                                <label class="radio-inline">
+                                                    @Html.RadioButtonFor(m => m.ClaimTypeID, "1", new { @checked = "checked" }) For Individual
+                                                </label>
+                                                <label class="radio-inline">
+                                                    @Html.RadioButtonFor(m => m.ClaimTypeID, "2") For Community
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label>Date of Claim:<span class="mandatory">*</span></label>
+                                            @Html.TextBoxFor(x => x.ClaimRequestDate, new { @class = "form-control", @readonly = "readonly", id= "txtClaimRequestDate" })
+                                            <div class="alert-danger1">@Html.ValidationMessageFor(m => m.ClaimRequestDate)</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label>Date of Rejection:<span class="mandatory">*</span></label>
+                                            @Html.TextBoxFor(x => x.RejectionDate, new { @class = "form-control", @readonly = "readonly", id= "txtRejectionDate" })
+                                            <div class="alert-danger1">@Html.ValidationMessageFor(m => m.RejectionDate)</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label>Reason of Rejection:<span class="mandatory">*</span></label>
+                                            @Html.TextBoxFor(x => x.RejectionReason, new { @class = "form-control", onkeypress = "RestrictSpecialChar(event)" })
+                                            <div class="alert-danger1">@Html.ValidationMessageFor(m => m.RejectionReason)</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label>Level of Rejection:<span class="mandatory">*</span> </label>
+                                            @Html.DropDownListFor(m => m.RejectedAt, (IEnumerable<SelectListItem>)ViewBag.DesignationList, "--Select--", new { @class = "form-control", @id = "ddlRejectedAt" })
+                                            <div class="alert-danger1">@Html.ValidationMessageFor(m => m.RejectedAt)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading" style="font-size:14px;font-weight:700;">
+                                    Claimant Details
+                                </div>
+                                <div class="panel-body">
+                                    <div class="HideInfoForApprover">
+                                        <div id="divClamantDetails">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Name Of Claimant:<span class="mandatory">*</span></label>
+                                                    @Html.TextBoxFor(x => x.ClaimantName, new { @class = "form-control", onkeypress = "RestrictSpecialChar(event)" })
+                                                    <div class="alert-danger1">@Html.ValidationMessageFor(m => m.ClaimantName)</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <div class="form-group">
+                                                    <label>Father Name:<span class="mandatory">*</span></label>
+                                                    @Html.TextBoxFor(x => x.FatherName, new { @class = "form-control", onkeypress = "RestrictSpecialChar(event)" })
+                                                    <div class="alert-danger1">@Html.ValidationMessageFor(m => m.FatherName)</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2">
+                                                <div class="form-group">
+                                                    <label>Mobile:<span class="mandatory">*</span></label>
+                                                    @Html.TextBoxFor(x => x.Mobile, new { @class = "form-control", maxlength = 10, onkeypress = "AllowNumericOnly(event)" })
+                                                    <div class="alert-danger1">@Html.ValidationMessageFor(m => m.Mobile)</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Schedule Tribe:</label>
+                                                    <div>
+                                                        <label class="radio-inline">
+                                                            @Html.RadioButtonFor(m => m.Individual_STribe, true, new { @checked = "checked" }) Yes
+                                                        </label>
+                                                        <label class="radio-inline">
+                                                            @Html.RadioButtonFor(m => m.Individual_STribe, false) No
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading" style="font-size:14px;font-weight:700;">
+                                    Claimant Address
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label>District:<span class="mandatory">*</span> </label>
+                                            @Html.DropDownListFor(m => m.DistrictID, (IEnumerable<SelectListItem>)ViewBag.DistList, "--Select--", new { @class = "form-control", @id = "ddlDistID", onchange = "ddlDistID_Change(this)" })
+                                            <div class="alert-danger1">@Html.ValidationMessageFor(m => m.DistrictID)</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label>Tehsil:<span class="mandatory">*</span> </label>
+                                            @Html.DropDownListFor(m => m.TehsilID, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddlTehsilID" })
+                                            <div class="alert-danger1">@Html.ValidationMessageFor(m => m.TehsilID)</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Block:<span class="mandatory">*</span></label>
+                                            @Html.DropDownListFor(m => m.BlockID, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddlBlockID", onchange = "ddlBlockID_Change(this)" })
+                                            <div class="alert-danger1">@Html.ValidationMessageFor(m => m.BlockID)</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>
+                                                Gram Panchayat:<span class="mandatory">*</span>
+                                            </label>
+                                            @Html.DropDownListFor(m => m.GPID, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddlGPID", onchange = "ddlGPID_Change(this)" })
+                                            <div class="alert-danger1">@Html.ValidationMessageFor(m => m.GPID)</div>
+
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>
+                                                Village:<span class="mandatory">*</span>
+                                            </label>
+                                            @Html.DropDownListFor(m => m.VillageCode, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddlVillageCode" })
+                                            <div class="alert-danger1">@Html.ValidationMessageFor(m => m.VillageCode)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading" style="font-size:14px;font-weight:700;">
+                                    Land Details
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-lg-2">
+                                        <div class="form-group">
+                                            <label>Khasra No:</label>
+                                            @Html.TextBoxFor(x => x.KhasraNumber, new { @class = "form-control", onkeypress = "RestrictSpecialChar(event)", size = "15" })
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <div class="form-group">
+                                            <label>Compartment No:</label>
+                                            @Html.TextBoxFor(x => x.CompartmentNumber, new { @class = "form-control", onkeypress = "RestrictSpecialChar(event)", size = "15" })
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label>Occupied Forest Land (Total Area in hectare):<span class="mandatory">*</span></label>
+                                            @Html.TextBoxFor(x => x.TotalAreaAgainstOccupiedForestLand, new { @class = "form-control", onkeypress = "AllowNumberOnly(event)", size = "15" })
+                                            <div class="alert-danger1">@Html.ValidationMessageFor(m => m.TotalAreaAgainstOccupiedForestLand)</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label>
+                                                Occupancy Type [Agriculture/Residence]:
+                                            </label>
+                                            @Html.TextBoxFor(x => x.OccupancyType, new { @class = "form-control", maxlength = "50" })
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label>Van Khand Name:</label>
+                                            @Html.TextBoxFor(x => x.ForestSectionName, new { @class = "form-control", maxlength = "50" })
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label>Latitude:</label>
+                                            @Html.TextBoxFor(x => x.Latitude, new { @class = "form-control", maxlength = "20" })
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label>Longitude:</label>
+                                            @Html.TextBoxFor(x => x.Longitude, new { @class = "form-control", maxlength = "20" })
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Upload Rejection Notice / Patta<br><i class="small">Upload file up to 2 MB</i></label>
+                                            @Html.TextBoxFor(x => x.UploadRejectionNoticeOrPatta, new { @class = "form-control", Type = "File" })
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Upload Other Evidence / documents<br><i class="small">Upload file up to 2 MB</i></label>
+                                            @Html.TextBoxFor(x => x.UploadOtherEvidenceOrdocuments, new { @class = "form-control", Type = "File" })
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-group">
+                                            <label>
+                                                Appeal Note (With Rejection Reason):<span class="mandatory">*</span>
+                                            </label>
+                                            @Html.TextAreaFor(x => x.Remarks, new { @class = "form-control", maxlength="250" })
+                                            <div class="alert-danger1">@Html.ValidationMessageFor(m => m.Remarks)</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <button type="submit" name="actionName" class="btn btn-info" value="Submit">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+                                <button type="button" name="actionName" value="Cancel" class="btn btn-danger" onclick="BackToList('Index')">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+
+                            </div>
+                        </div> 
+                    }
+                </div>
+            </div>
+        </div>
+    </div> 
+</div>
+<script src="~/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js" type="text/javascript"></script>
+<script src="~/Scripts/Controller/Common.js"></script>
+<script>
+    var rootURl = '@Url.Content("~/")';
+    $(document).ready(function () {
+        $('#txtClaimRequestDate,#txtRejectionDate').datepicker({
+            dateFormat: GetDatePickerFormat(),
+            yearRange: GetYearRange(),
+            changeMonth: true,
+            changeYear: true,
+        }); 
+    });
+    //Get Block by district
+    function ddlDistID_Change(cntrl) {
+        var strBlockID = '<option value="">--Select--</option>';
+        var strTehsilID = '<option value="">--Select--</option>';
+
+        if (cntrl.value != '') {
+            $.ajax({
+                type: 'POST',
+                url: rootURl + "ClaimRequest/GetBlockTehsil",
+                dataType: 'json',
+                async: true,
+                data: { distID: $(cntrl).val() },
+                success: function (response) {
+                    if (!response.isError) {
+                        $.each(response.blockList, function (i, j) {
+                            strBlockID += "<option value='" + j.Value + "'>" + j.Text + "</option>";
+                        });
+
+                        $.each(response.tehsilList, function (i, j) {
+                            strTehsilID += "<option value='" + j.Value + "'>" + j.Text + "</option>";
+                        });
+                    }
+                    else {
+                        alert(response.msg);
+                    }
+                    $("#ddlBlockID").html(strBlockID);
+                    $("#ddlTehsilID").html(strTehsilID);
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve data.' + ex);
+                }
+            });
+        }
+    }
+
+    //Get Gram Panchayat by block
+    function ddlBlockID_Change(cntrl) {
+        var $ddlGPID = $("#ddlGPID");
+        var strGPID = '<option value="">--Select--</option>';
+        if (cntrl.value != '') {
+            $.ajax({
+                type: 'POST',
+                url: rootURl + "ClaimRequest/GetGramPanchayat",
+                dataType: 'json',
+                async: true,
+                data: { blockID: $(cntrl).val() },
+                success: function (response) {
+                    if (!response.isError) {
+                        $.each(response.data, function (i, j) {
+                            strGPID += "<option value='" + j.Value + "'>" + j.Text + "</option>";
+                        });
+                    }
+                    else {
+                        alert(response.msg);
+                    }
+                    $ddlGPID.html(strGPID);
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve data.' + ex);
+                }
+            });
+        }
+    }
+
+    //Get Village by Gram panchayat
+    function ddlGPID_Change(cntrl) {
+        var $ddlVillageCode = $("#ddlVillageCode");
+        var strVillageCode = '<option value="">--Select--</option>';
+        if (cntrl.value != '') {
+            $.ajax({
+                type: 'POST',
+                url: rootURl + "ClaimRequest/GetVillage",
+                dataType: 'json',
+                async: true,
+                data: { gpID: $(cntrl).val() },
+                success: function (response) {
+                    if (!response.isError) {
+                        $.each(response.data, function (i, j) {
+                            strVillageCode += "<option value='" + j.Value + "'>" + j.Text + "</option>";
+                        });
+                    }
+                    else {
+                        alert(response.msg);
+                    }
+                    $ddlVillageCode.html(strVillageCode);
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve data.' + ex);
+                }
+            });
+        }
+    }
+
+    function EntryType_Change(cntrl) {
+        if (cntrl.value == "0") {
+            $('#ddlClaimRequestID').addClass('required').removeAttr('disabled');
+        }
+        else {
+            $('#ddlClaimRequestID').removeClass('required').prop('disabled', 'disabled');
+            $('#frmAppealRequest').find('input[type="text"],input[type="file"],select').val('');
+            $('input[name="AppealReason"][value="0"]').prop("checked", true);
+            $('input[name="ClaimTypeID"][value="1"]').prop("checked", true);
+        }
+    }
+
+    function ClaimRequestID_Change(cntrl) {  
+        if (cntrl.value != '') {
+            $.ajax({
+                type: 'POST',
+                url: rootURl + "ClaimRequest/GetRequestDetailsForAppeal",
+                dataType: 'json',
+                async: true,
+                data: { reqID: $(cntrl).val() },
+                success: function (response) {
+                    if (!response.IsError) {
+                        var crd = response.data[0];
+                        $('input[type="radio"][name="ClaimTypeID"][value="' + crd.ClaimTypeID + '"]').prop("checked", true);
+                        $('#ddlDistID').val(crd.DistrictID);
+                        $('#txtClaimRequestDate').val(crd.ClaimRequestDate);
+                        $('#txtRejectionDate').val(crd.RejectionDate);
+                        $('#RejectionReason').val(crd.RejectionReason);
+                        $('#ddlRejectedAt').val(crd.RejectedAt);
+                        $('#ClaimantName').val(crd.ClaimantName);
+                        $('#FatherName').val(crd.FatherName);
+                        $('#Mobile').val(crd.Mobile); 
+                        $("#ddlTehsilID").html('<option value="">--Select--</option><option selected value="' + crd.TehsilID + '">' + crd.TehsilName + '</option>');
+                        $("#ddlBlockID").html('<option value="">--Select--</option><option selected value="' + crd.BlockID + '">' + crd.BlockName + '</option>');
+                        $("#ddlGPID").html('<option value="">--Select--</option><option selected value="' + crd.GPID + '">' + crd.GPName + '</option>');
+                        $("#ddlVillageCode").html('<option value="">--Select--</option><option selected value="' + crd.VillageCode + '">' + crd.VillageName + '</option>'); 
+                        $('#KhasraNumber').val(crd.KhasraNumber);
+                        $('#CompartmentNumber').val(crd.CompartmentNumber);
+                        $('#TotalAreaAgainstOccupiedForestLand').val(crd.TotalAreaAgainstOccupiedForestLand);
+                        $('#OccupancyType').val(crd.OccupancyType);
+                        $('#ForestSectionName').val(crd.ForestSectionName);
+                        $('#Latitude').val(crd.Latitude);
+                        $('#Longitude').val(crd.Longitude); 
+                    } 
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve data.' + ex);
+                }
+            });
+        }
+    }
+</script>
+

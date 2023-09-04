@@ -1,0 +1,271 @@
+﻿@{
+    ViewBag.Title = "Helpfacilitationguidance";
+   
+    
+    if (HttpContext.Current.Session["User"] != null)
+    {
+        //Layout = null;
+        //if ((HttpContext.Current.Session["DesignationId"].ToString()!= "10"))
+        //{
+        //    Layout = "~/Views/Shared/Forestlayout.cshtml";
+        //}
+        //else 
+        //{
+        //    Layout = "~/Views/Shared/_Layout.cshtml";
+
+        //}
+        Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // 
+    }
+}
+
+@model FMDSS.Models.UserProfile
+
+<script src="~/js/jquery.min.js"></script>
+<script src="~/js/validation.js"></script>
+<script type="text/javascript">
+    $(document).ready(function (e) {
+
+        var RootUrl = '@Url.Content("~/")';
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'Feedback/PublishedAnswer',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(""),
+            success: function (fdata) {
+               
+                for (var i = 0; i < fdata.length; i++) {
+                    var bardata = "<div class='panel panel-default'><div class='panel-heading'><h4 class='panel-title'><a data-toggle='collapse' data-parent='#accordion' href='#collapse" + i + "' aria-expanded='false' class='collapsed'><i class='fa  fa-angle-double-right fa-fw'></i>" + fdata[i].Query + "</a></h4></div><div id='collapse"+i+"' class='panel-collapse collapse' aria-expanded='false' style='height: 0px;'><div class='panel-body'>" + fdata[i].Answer + "</div></div></div>";
+                    $("#accordion").append(bardata);
+                }
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+
+        $('#phone').keypress(function (e) {
+            var kc = e.which;
+            if (kc >= 48 && kc <= 57) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+
+        })
+
+        $('#name').keypress(function (e) {
+            var kc = e.which;
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        })
+
+        $('#query').keypress(function (e) {
+            var kc = e.which;
+
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95) || (kc >= 44 && kc <= 57) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        })
+
+
+        $('#btnsubmit').click(function (e) {
+            var email = $('#email').val();
+
+            if ($('#name').val() == '') {
+                $('#errordiv').show();
+                $('#errordiv').html("Please Enter Your Name" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#name").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv').hide(); }
+
+            if ($('#email').val() == '') {
+                $('#errordiv21').show();
+                $('#errordiv21').html("Please Enter Your Email" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#email").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv21').hide(); }
+
+            if (IsEmail(email) == false) {
+
+                $('#errordiv21').show();
+                $('#errordiv21').html("Please Enter Valid Your Email" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#email").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv21').hide(); }
+
+
+            if ($('#phone').val() == '') {
+                $('#errordiv2').show();
+                $('#errordiv2').html("Please Enter Your Phone No." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#phone").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv2').hide(); }
+
+            if ($('#query').val() == '') {
+                $('#errordiv3').show();
+                $('#errordiv3').html("Please Enter Your Questions" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#query").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv3').hide(); }
+
+        });
+    });
+
+
+
+
+</script>
+
+
+@using (Html.BeginForm("SubmitQueryData", "Feedback", FormMethod.Post, new { id = "submitForm" }))
+{
+
+    <div id="page-wrapper-inn">
+        <div class="col-lg-12 pad">
+            <h1 class="page-header">Help, Facilitation and Guidance</h1>
+            @if (@TempData["Status"] != null)
+            {
+                <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["Status"]</div>
+            }
+        </div>
+        <!-- /.col-lg-12 -->
+        <!-- buttons -->
+        <div class="help-margn">
+            <div class="col-sm-6 pad">
+                <a class="btn btn-block btn-social btn-quicklinks" href="../Help/Help_document.docx">
+                    <i class=" fa fa-download">
+                    </i> Help File Doc
+                </a>
+            </div>
+            <div class="col-sm-6">
+                <a class="btn btn-block btn-social btn-quicklinks" data-toggle="modal" data-target="#askQue">
+                    <i class="fa fa-thumbs-o-up"></i> Ask a Question
+                </a>
+            </div>
+        </div>
+        <!-- Ask a Questions -->
+        <div class="modal fade" id="askQue" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog mdw">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel">Submit Your Query...</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <!-- From URL Get -->
+
+                        <div class="form-group">
+                            <label>Name:</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                <input type="text" id="name" name="Name" class="form-control"  value="@Model.FullName" readonly="readonly">
+                            </div>
+                            <div id="errordiv" style="display:none" class="alert-danger1"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-envelope"></i></span>
+                                <input type="text" id="email" name="Email" class="form-control" value="@Model.EmailId" readonly="readonly">
+                            </div>
+                            <div id="errordiv21" style="display:none" class="alert-danger1"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Phone:</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-mobile-phone"></i></span>
+                                <input type="text" id="phone" name="Phone" class="form-control" maxlength="10"  value="@Model.MobileNumber" readonly="readonly">
+                            </div>
+                            <div id="errordiv2" style="display:none" class="alert-danger1"></div>
+                        </div>
+
+
+                        <div class="form-group">
+                            <label>Query: <span class="mandatory">*</span></label>
+                            <textarea class="form-control" id="query" name="Query" rows="3"></textarea>
+                            <div id="errordiv3" style="display:none" class="alert-danger1"></div>
+                        </div>
+
+                        <!-- /. From URL Get -->
+                    </div>
+                    <!-- /.modal-body -->
+                    <div class="modal-footer">
+                        <!-- Btn Groping -->
+
+                        <div id="btn" class="col-lg-12">
+                            <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btnsubmit">
+                                <i class="fa fa-check"></i> Submit
+                            </button>
+
+                            <button type="button" class="btn btn-danger" data-dismiss="modal">
+                                <i class="fa fa-times fa-fw"></i>  Close
+                            </button>
+
+                        </div>
+
+                        <!-- /.Btn Groping -->
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- ./Ask a Questions -->
+        <!-- /.buttons -->
+        <!-- Row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">FAQ</div>
+                    <!-- /.panel-heading -->
+
+                    <div class="panel-body">
+
+                        <!-- Questions Accordion -->
+                        <div class="col-lg-12">
+                            <div class="panel-group" id="accordion">
+                              
+                            </div>
+                        </div>
+                        <!-- ./Questions Accordion -->
+
+                        <div class="col-lg-12"></div>
+
+                    </div>
+                    <!-- /.panel-body -->
+
+                </div>
+                <!-- /.panel -->
+
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+    </div>
+}

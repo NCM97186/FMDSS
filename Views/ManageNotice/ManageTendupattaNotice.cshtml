@@ -1,0 +1,411 @@
+﻿@{
+    ViewBag.Title = "ManageTendupattaNotice";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //"~/Views/Shared/Forestlayout.cshtml";
+}
+
+@model IEnumerable<FMDSS.Models.ForestProduction.NoticeManagement>
+
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+    $(document).ready(function () {
+
+        $(".datefield").datepicker({
+            minDate: new Date(), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); }
+        });
+
+
+        var date1 = $("#durationfrom").val().split('/'), date2 = $("#durationto").val().split('/');
+
+        var dateFrom = new Date(date1[2], date1[1] - 1, date1[0]), dateTo = new Date(date2[2], date2[1] - 1, date2[0]);
+
+        if (dateTo <= dateFrom) {
+            alert('Kindly select Bid Submission End Date greater than Bid Submission Opening Date!');
+            $("#durationto").val('');
+            return;
+        }
+        else {
+            
+        }
+   
+
+
+    $("#durationfrom").change(function () {
+        debugger;
+        if ($("#chkSchedlrNotice").is(":checked")) {
+            if ($(".radioBtnClass").is(":checked"))
+                return true;
+            else {
+                alert('Kindly select Auction date from the grid shown above!');
+                return false;
+            }
+        }
+    });
+
+
+    $('#durationfrom,#durationto').keydown(function (event)
+    { return cancelBackspace(event) });
+
+
+
+        $("#rangeCode").change(function () {
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/GetSiteInfo', // we are calling json method
+                dataType: 'json',
+                data: { rangeCode: $("#rangeCode").val() },
+                success: function (data) {
+                   
+                    $('#NoticeDIV').html(data.TenduPattaPartialView);
+                },
+                error: function (ex) {
+
+                }
+
+            });
+            return false;
+        });
+    });
+
+    </script>
+
+
+@using (Html.BeginForm("SubmitTendupatta", "ManageNotice", FormMethod.Post, new { id = "submitForm" }))
+{
+    <div id="page-wrapper-inn">
+        <div class="col-lg-12 pad">
+            <h1 class="page-header"><span>Auction Notice for Tendupatta</span></h1>
+
+                @if (@TempData["No_Status"] != null)
+            {
+                <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["No_Status"]</div>
+                TempData["No_Status"] = null;
+            }
+
+            </div>
+            <!-- /.col-lg-12 -->
+            <!-- Row -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+
+
+                        <div class="panel-body">
+                            <!--./Search-->
+                            <!--Add New Btn-->
+                            <div class="col-lg-3 rgt pull-right">
+                                <button type="button" class="btn btn-success AddNewAuction pull-right" data-toggle="modal" id="addNewnotice" data-target="#myModal" title="Add New Notice" onclick="ClearField()">
+                                    <i class="fa fa-plus"></i> Create New Notice
+                                </button>
+                            </div>
+                            <!--./Add New Btn-->
+
+                            <div class="dataTable_wrapper">
+                                <table class="table table-striped table-bordered table-hover table-responsive" id="tbl_notice">
+                                    <thead>
+                                        <tr>
+                                            <th style="display:none;"><i class="fa fa-envelope fa-fw"></i>S.No </th>
+                                            <th> Notice No.</th>
+                                            <th><i class="fa  fa-angle-double-right fa-fw"></i>Range name</th>
+                                            <th><i class="fa fa-caret-down"></i> Reserved price</th>
+                                            <th><i class="fa fa-caret-down"></i> Notice Status</th>
+                                            <th style="width:170px!important;">Action</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                    {
+
+                                        <tr>
+                                            <td style="display:none;">
+                                                @Html.DisplayFor(model => item.NoticeId)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.NoticeNo)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.Rangename)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.ReservedPrice)
+                                            </td>
+                                            <td>
+                                                @if (@item.No_Status == "Published")
+                                                {
+                                                    @Html.DisplayFor(model => item.No_Status)
+                                                }
+                                                else
+                                                {
+                                                    @Html.DisplayFor(model => item.ReqAction)
+                                                }
+
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-success btn-circle" data-toggle="modal" data-target="#myViewNoticeModal" style="cursor:pointer" title="view" onclick="viewNotice('@Html.DisplayFor(model => item.NoticeId)')">
+                                                    <i class="fa fa-eye"></i>
+                                                </button>
+                                                @if (@item.No_Status == "Published")
+                                                {
+                                                    <button type="button" class="btn btn-circle" data-toggle="modal" data-target="#myModal" style="cursor:pointer" title="Please Click for Amendment the auction notices" onclick="EditNotice('@Html.DisplayFor(model => item.NoticeId)','Re-New')">
+                                                        <i class="fa fa-refresh"></i>
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#myModal" style="cursor:pointer" title="Edit" onclick="EditNotice('@Html.DisplayFor(model => item.NoticeId)','Update')">
+                                                        <i class="fa fa-edit"></i>
+                                                    </button>
+                                                }
+
+
+                                                @if (@item.No_Status == "Dropout")
+                                                {
+                                                    <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#myModal" style="cursor:pointer" title="Re-New Notice" onclick="EditNotice('@Html.DisplayFor(model => item.NoticeId)','Re-New')">
+                                                        <i class="fa fa-plus"></i>
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <a href='javascript:void(0);' style="cursor:not-allowed">
+
+                                                    </a> }
+                                                @if (@item.ReqAction == "Approved" && @item.No_Status == "NEW")
+                                                {
+                                                    <button type="button" class="btn btn-success btn-circle" data-toggle="modal" data-target="#myViewNoticeModal2" style="cursor:pointer" title="Publish/Generate Auction Notice" onclick="PublishNotice('@Html.DisplayFor(model => item.NoticeId)')">
+                                                        <i class="fa fa-eye"></i>
+                                                    </button>
+
+                                                }
+                                                else
+                                                {
+                                                    <a href='javascript:void(0);' style="cursor:not-allowed">
+
+                                                    </a> }
+
+
+                                                <a class="btn btn-danger btn-circle" title="Delete" onclick="return confirm('Are you absolutely sure you want to delete?')" href="@Url.Action("DeleteNoticeData", "ManageNotice", new { id = item.NoticeId })">
+
+                                                    <i class="fa fa-times"></i>
+                                                </a>
+
+                                            </td>
+                                        </tr>
+                                    }
+                                    </tbody>
+
+
+
+                                </table>
+                            </div>
+
+                        </div>
+                        <!-- /.panel-body -->
+
+                    </div>
+                    <!-- /.panel -->
+
+
+                    <div class="modal fade" id="myModal" role="dialog">
+                        <div class="modal-dialog modal-lg">
+                            <!-- Modal content-->
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <div id="dvRevenueData" style="display:none" class="alert alert-success"><i class="fa fa-thumb-tack fa-fw"></i></div>
+
+                                    <h4 class="modal-title">
+                                        <label id="lbl_header"> </label>
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Range Name: <span class="mandatory">*</span></label>
+        @Html.DropDownList("RangeCode", (IEnumerable<SelectListItem>)ViewBag.RangeCode, "--Select--", new { @class = "form-control", id = "rangeCode" })
+                                            <input type="hidden" id="noticeId" name="Notice_Id" value="0" />
+
+
+                                            <div id="rangeerrordiv" style="display:none" class="alert-danger1"></div>
+                                        </div>
+                                    </div>
+
+                                    <div id="NoticeDIV" class="col-lg-12">
+
+                                    </div>
+
+                                
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+
+                                            <label>Start Date of Bid Submission: <span class="mandatory">*</span></label>
+                                            <input type="text" class="form-control datefield" id="durationfrom" name="Durationfrom" />
+
+                                            <div id="errordiv6" style="display:none" class="alert-danger1"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>End Date of bid Submission: <span class="mandatory">*</span></label>
+                                            <input type="text" class="form-control datefield" id="durationto" name="Durationto" />
+
+                                            <div id="errordiv7" style="display:none" class="alert-danger1"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Reserved Price (INR): <span class="mandatory">*</span></label>
+                                            <input class="form-control" id="txt_amount" name="ReservedPrice" readonly="readonly">
+
+                                            <div id="amounterrordiv" style="display:none" class="alert-danger1"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-12"></div>
+
+
+
+
+
+                                    <div class="form-group" id="btn-cont1">
+                                        <div class="col-sm-offset-2 col-sm-10">
+                                            <button type="button" class="btn btn-success" id="procedId" style="display:none">
+                                                Proceed
+                                            </button>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--/.model body-->
+
+                                <div class="modal-footer" style="clear: both">
+
+                                    <div id="btn" class="col-lg-12">
+                                        <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_Save">
+                                            <i class="fa fa-check"></i>Submit
+                                        </button>
+                                        <button type="button" class="btn btn-warning" onclick="ClearField();">
+                                            <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                        </button>
+                                        <button type="button" class="btn btn-danger" data-dismiss="modal">
+                                            <i class="fa fa-times fa-fw"></i>  Close
+                                        </button>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /.col-lg-12 -->
+                <div class="modal fade in" id="myViewNoticeModal" tabindex="-1" role="dialog" aria-hidden="false">
+                    <div class="modal-dialog mdw">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                                <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> </label></h4>
+                            </div>
+
+                            <div class="modal-body">
+                                <!-- From URL Get -->
+
+                                <table class="table table-striped table-bordered table-hover">
+                                    <tbody id="tbdyScart"></tbody>
+                                </table>
+
+                                <!-- /. From URL Get -->
+                            </div>
+                            <!-- /.modal-body -->
+                            <div class="modal-footer" id="fot-f">
+                                <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                                    <i class="fa fa-times fa-fw"></i> Close
+                                </button>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+
+                <div class="modal fade in" id="myViewNoticeModal2" tabindex="-1" role="dialog" aria-hidden="false">
+                    <div class="modal-dialog mdw">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                                <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> </label></h4>
+                            </div>
+
+                            <div class="modal-body">
+                                <!-- From URL Get -->
+                                <input type="hidden" id="pHdn_No" name="PHdn_No" />
+                                <div id="divPublish"></div>
+
+                                <!-- /. From URL Get -->
+                            </div>
+                            <!-- /.modal-body -->
+                            <div class="modal-footer" id="fot-f">
+                                <div id="btn" class="col-lg-12">
+                                    <button type="submit" class="btn btn-success hdm" name="Command" value="Publish" id="btn_Save">
+                                        <i class="fa fa-check"></i>Publish
+                                    </button>
+
+                                    <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                                        <i class="fa fa-times fa-fw"></i> Close
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+
+                <div class="modal fade in" id="myViewNoticeModalau" tabindex="-1" role="dialog" aria-hidden="false">
+                    <div class="modal-dialog mdw">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                                <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> </label></h4>
+                            </div>
+
+                            <div class="modal-body">
+                                <!-- From URL Get -->
+
+                                <div id="divPublishau"></div>
+
+                                <!-- /. From URL Get -->
+                            </div>
+                            <!-- /.modal-body -->
+                            <div class="modal-footer" id="fot-f">
+                                <div id="btn" class="col-lg-12">
+
+                                    <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                                        <i class="fa fa-times fa-fw"></i> Close
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+
+
+
+
+
+            </div>
+        </div>
+
+}

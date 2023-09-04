@@ -1,0 +1,322 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //  "~/Views/Shared/Forestlayout.cshtml";
+}
+
+
+
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+
+    function download(file) {
+       
+        $.get('/Customers/Download/', { fileName: file }, function (data) {
+            //Do I need to do something here? Or where?
+        });
+    }
+
+
+    $(document).ready(function () {
+        // date validation ========================================================================
+
+        $(".datefield").datepicker({ yearRange: '2008:', dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, maxDate: new Date(), onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        var currentDate = new Date();
+        //$("#txt_fromdate").datepicker("setDate", currentDate);
+        //$("#txt_todate").datepicker("setDate", currentDate);
+
+        $("#txt_fromdate").change(function () {
+            $("#txt_todate").val('');
+        });
+
+        $(document).on('keypress', '#txt_fromdate,#txt_todate', function (event) {
+
+            event.preventDefault();
+            return false;
+
+        });
+
+        $('#txt_fromdate,#txt_todate').keydown(function (event)
+        { return cancelBackspace(event) });
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+        $("#txt_todate").change(function () {
+            var str1 = $("#txt_fromdate").val();
+            var str2 = $("#txt_todate").val();
+
+            var L = 3, d1 = $("#txt_fromdate").val().split('/'), d2 = $("#txt_todate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#txt_todate").val('');
+                alert('Date Must be GreaterThen From Date');
+            }
+        });
+
+        // date validation ========================================================================
+
+
+
+        $('#Module').change(function (e) {
+            $("#ServiceType").empty();
+            $("#Permission").empty();
+            $("#SubPermission").empty();
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'DMS/ServiceTypeData', // we are calling json method
+                dataType: 'json',
+                data: { ModuleCode: $("#Module").val() },
+                success: function (circle) {
+                    $.each(circle, function (i, items) {
+                        $("#ServiceType").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#ServiceType').change(function (e) {
+            $("#Permission").empty();
+            $("#SubPermission").empty();
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'DMS/PermissionData', // we are calling json method
+                dataType: 'json',
+                data: { ModuleCode: $("#Module").val(), ServiceTypeCode: $("#ServiceType").val() },
+                success: function (circle) {
+                    $.each(circle, function (i, items) {
+                        $("#Permission").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#Permission').change(function (e) {
+            $("#SubPermission").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'DMS/SubPermissionData', // we are calling json method
+                dataType: 'json',
+                data: { ModuleCode: $("#Module").val(), ServiceTypeCode: $("#ServiceType").val(), PermissionCode: $("#Permission").val() },
+                success: function (circle) {
+                    $.each(circle, function (i, items) {
+                        $("#SubPermission").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+
+
+        $('#btn_submit').click(function (e) {
+
+            if ($('option:selected', $('#Module')).index() == 0) {
+                $("#errModule").css("display", "block");
+                $('#errModule').focus();
+                return false;
+            }
+            else {
+                $("#errModule").css("display", "none");
+            }
+
+
+            if ($('option:selected', $('#ServiceType')).index() == 0) {
+                $("#errServiceType").css("display", "block");
+                $('#errServiceType').focus();
+                return false;
+            }
+            else {
+                $("#errServiceType").css("display", "none");
+            }
+
+            if ($('option:selected', $('#Permission')).index() == 0) {
+                $("#errPermission").css("display", "block");
+                $('#errPermission').focus();
+                return false;
+            }
+            else {
+                $("#errPermission").css("display", "none");
+            }
+
+            if ($('option:selected', $('#SubPermission')).index() == 0) {
+                $("#errSubPermission").css("display", "block");
+                $('#errSubPermission').focus();
+                return false;
+            }
+            else {
+                $("#errSubPermission").css("display", "none");
+            }
+
+            if ($('#txt_fromdate').val() == '') {
+                $("#errFromDate").css("display", "block");
+                $('#errFromDate').focus();
+                return false;
+            }
+            else {
+                $("#errFromDate").css("display", "none");
+            }
+
+            if ($('#txt_todate').val() == '') {
+                $("#errToDate").css("display", "block");
+                $('#errToDate').focus();
+                return false;
+            }
+            else {
+                $("#errToDate").css("display", "none");
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'DMS/FetchRepoData', // we are calling json method
+                dataType: 'HTML',
+                data: { ModuleCode: $("#Module").val(), ServiceTypeCode: $("#ServiceType").val(), PermissionCode: $("#Permission").val(), SubPermissionCode: $("#SubPermission").val(), FromDate: $("#txt_fromdate").val(), ToDate: $("#txt_todate").val() },
+                success: function (data) {
+                    $("#DMStbl").empty();
+                    if (data.length > 0) {
+                        $("#DMStbl").html(data);
+                        //$.each(data, function (i, items) {
+                        //   // var id = "'" + items.rowid + "'";
+                        //    alert(items);
+                        //    //var bardata = "<tr style='border:1px'><td style='border:1px'>" + items.RequestId + "</td><td style='border:1px'><table>" + items.each(function(i, ii){ + "<tr><td>"+ ii.FileExtension +" </td><td>"+ ii.FileExtension +" </td> <td>" + ii.FileType + "</td><td style='border:1px'>" + ii.FileType + "</tr></table>"}+";
+
+                        //    //var bardata = "<tr style='border:1px'><td style='border:1px'>" + items.RequestId + "</td><td style='border:1px'>" + items.FileExtension + "</td><td style='border:1px'>" + items.FileType + "</td><td style='border:1px'> <a  target='_blank' href=Download?name=" + items.DownloadDocument + ">download</a> </td></tr>";
+                        //    $("#DMStbl").append(items);
+                        //});
+                    }
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+
+
+        });
+
+    });
+
+
+</script>
+  
+<div class="row">
+    <div class="col-lg-9 pad">
+        <h1 class="page-header"><span>DMS : Push Data List </span></h1>
+    </div>
+    
+
+    <div class="col-lg-9">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Module :<span class="mandatory">*</span></label>
+                        @Html.DropDownList("Module", (IEnumerable<SelectListItem>)ViewBag.Module, new { @class = "form-control", id = "Module" })
+                        <div id="errModule" class="alert-danger1" style="display:none"> Module is Required. </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Service Type :<span class="mandatory">*</span></label>
+                        @Html.DropDownList("ServiceType", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ServiceType" })
+                        <div id="errServiceType" style="display:none" class="alert-danger1">Service Type is Required.</div>
+
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Permission:<span class="mandatory">*</span></label>
+                        @Html.DropDownList("Permission", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "Permission" })
+                        <div id="errPermission" style="display:none" class="alert-danger1">Permission is Required.</div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Sub Permission:<span class="mandatory">*</span></label>
+                        @Html.DropDownList("SubPermission", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "SubPermission" })
+                        <div id="errSubPermission" style="display:none" class="alert-danger1">Sub Permission is Required.</div>
+
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>From Date:<span class="mandatory">*</span></label>
+
+                        <input class="form-control datefield" type="text" id="txt_fromdate" name="FromDate" />
+                        <span id="errFromDate" style="display: none" class="alert-danger1">From Date is Required.</span>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>To Date:<span class="mandatory">*</span></label>
+                        <input class="form-control datefield" type="text" id="txt_todate" name="ToDate" />
+
+                        <span id="errToDate" style="display: none" class="alert-danger1">To Date is Required.</span>
+
+                    </div>
+                </div>
+
+                <div id="btn" class="col-lg-12">
+                    <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit">
+                        <i class="fa fa-check"></i> Submit
+                    </button>
+                    <button type="button" class="btn btn-warning" id="btn_reset">
+                        <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="dataTable_wrapper">
+                    <div id="tbl" class="table-responsive">
+                        <table id="temp" class="table table-striped table-bordered table-hover table-responsive gridtable">
+                            <thead>
+                                <tr>
+                                    <th width="25%;">Request Id</th>
+                                    <th width="25%;">File Type</th>
+                                    <th width="25%;">File Extension</th>
+                                    <th width="25%;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="DMStbl"></tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+

@@ -1,0 +1,1069 @@
+﻿@{
+    ViewBag.Title = "Crime Survey Report";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+@model FMDSS.Models.ForestProtection.CrimeSurveyDetails
+@*@model  IEnumerable<FMDSS.Models.ForestProtection.CrimeSurveyDetails>*@
+<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<link href="~/css/timepicki.css" type="text/css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+@*<script src="~/js/jquery.min.js"></script>*@
+<script type="text/javascript">
+    var errorCount = '';
+    var  $j = jQuery.noConflict();
+
+     $j(document).ready(function () {
+         $j(".timepicker").timepicki();
+
+    });
+</script>
+
+ 
+<script type="text/javascript">
+        var RootUrl = '@Url.Content("~/")';
+         $j(function () {
+             $j(".datefield").datepicker({ maxDate: new Date(), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) {  $j("[id $j=auto]").focus(); } });
+        });
+         $j(document).ready(function (e) {
+             $j("#ddl_Village").prop("enabled", true);
+     
+           //  $j("#ddl_Range").append('<option value="' + '0' + '">' + "--Select--" + '</option>');
+
+             $j("#ddl_Range").bind("change", function () {
+            
+                 $j('#ddl_Village').empty();
+                 $j("#ddl_Village").append('<option value="' + '0' + '">' + "--Select--" + '</option>');
+                var RangeCode1 = {
+                    RangeCode1:  $j("#ddl_Range").val()
+                };               
+                 $j.ajax({
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    url: RootUrl + 'CrimeSurvey/Bind_Village',
+                    data: JSON.stringify(RangeCode1),
+                    success: function (data) {
+                     
+                        // $j.each(data.list1, function (i, items) {
+                        //     $j("#ddl_Village").append('<option value="' + items.list1.Value + '">' + items.list1.Text + '</option>');
+                        //});
+
+                        for (var i = 0; i < data.list1.length; i++) {
+                             $j("#ddl_Village").append('<option value="' + data.list1[i].Value + '">' + data.list1[i].Text + '</option>');
+                        }
+                    },
+                    traditional: true,
+                    error: function (data) { console.log(data) }
+                });
+             });
+
+
+             $('#txt_longitude').keydown(function (e) {
+                 var kc = e.keyCode;
+                 var position = $(this).val().length;
+                 if (position == 2 && kc != 8) {
+                     if (parseInt($(this).val().substring(0, 2), 10) >= 67 && parseInt($(this).val().substring(0, 2), 10) <= 78) {
+                         var value = $('#txt_longitude').val();
+                         $('#txt_longitude').val(value + '.');
+                     }
+                 }
+                 if (position > 2 && kc != 8) {
+                     if (!(parseInt($(this).val().substring(0, 2), 10) >= 67 && parseInt($(this).val().substring(0, 2), 10) <= 78)) {
+                         $('#errorLong').show();
+                         $('#errorLong').html("Enter the GPS longitude between 67° to 78°!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                         $('#txt_longitude').focus();
+                         e.preventDefault();
+                     }
+                 }
+             });
+
+             $('#txt_latitude').keydown(function (e) {
+                 var kc = e.keyCode;
+                 var position = $(this).val().length;
+                 if (position == 2 && kc != 8) {
+                     if (parseInt($(this).val().substring(0, 2), 10) >= 23 && parseInt($(this).val().substring(0, 2), 10) <= 29) {
+                         var value = $('#txt_latitude').val();
+                         $('#txt_latitude').val(value + '.');
+                     }
+                 }
+                 if (position > 2 && kc != 8) {
+                     if (!(parseInt($(this).val().substring(0, 2), 10) >= 23 && parseInt($(this).val().substring(0, 2), 10) <= 29)) {
+                         $('#errorLat').show();
+                         $('#errorLat').html("Enter the GPS latitude between 23° - 29°!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                         $('#txt_latitude').focus();
+                         e.preventDefault();
+                     }
+
+                 }
+             });
+
+
+             $j('#btn_submit1').click(function (e) {
+
+                if ( $j('#txt_Amount').val() == '0') {
+                     $j('#errordiv8').show();
+                     $j('#errordiv8').html("Please Click Add button to Survey, Because Total Survey Amount Can Not be Zero!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j("#txt_Amount").focus();
+                    return false;
+                }
+
+
+                else if ( $j('#txt_DOV').val() == '') {
+                     $j('#errordiv9').show();
+                     $j('#errordiv9').html("Please Select Date!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j("#txt_DOV").focus();
+                    return false;
+                }
+
+
+             
+
+              else if ( $j('#txt_desc').val() == '') {
+                     $j('#errordiv11').show();
+                     $j('#errordiv11').html("Please Enter Description!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j("#txt_desc").focus();
+                    return false;
+                }
+
+
+             
+
+              else if ( $j('#txt_Place').val() == '' || parseInt( $j('#txt_Place').val()) < 1 ||  $j('#txt_Place').val().indexOf('.') == 0) {
+                   $j('#errordiv6').show();
+                   $j('#errordiv6').html("Invalid Place!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                   $j("#errordiv6").focus();
+                    e.preventDefault();
+                }
+
+              else if ( $j('#PhotoURL').val() == '') {
+                    document.getElementById("errorPhoto").style.display = 'block';
+                     $j("#PhotoURL").focus();
+                    return false;
+                }
+
+              else if ( $j('#txt_latitude').val() == '') {
+                     $j('#errorLat').show();
+                     $j('#errorLat').html("Please enter the Latitude!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j('#txt_latitude').focus();
+                    return false;
+                }
+
+
+              else if (( $j('#txt_latitude').val().substr(0, 1) == '.') || ( $j('#txt_latitude').val().length <= 1)) {
+                     $j('#errorLat').show();
+                     $j('#errorLat').html("Please enter the Latitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j('#txt_latitude').focus();
+                    return false;
+                }
+
+
+              else if ((parseFloat( $j('#txt_latitude').val())) <= 0) {
+                     $j('#errorLat').show();
+                     $j('#errorLat').html("Please enter the Latitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j('#txt_latitude').focus();
+                    return false;
+                }
+              else if (!(parseInt($('#txt_latitude').val().substring(0, 2), 10) >= 23 && parseInt($('#txt_latitude').val().substring(0, 2), 10) <= 29)) {
+                  $('#errorLat').show();
+                  $('#errorLat').html("Enter the GPS latitude between 23° - 29°!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                  $('#txt_latitude').focus();
+                  return false;
+              }
+
+              else if ( $j('#txt_longitude').val() == '') {
+                     $j('#errorLong').show();
+                     $j('#errorLong').html("Please enter the Longitude !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j('#txt_longitude').focus();
+                    return false;
+                }
+
+
+              else if (( $j('#txt_longitude').val().substr(0, 1) == '.') || ( $j('#txt_longitude').val().length <= 1)) {
+                     $j('#errorLong').show();
+                     $j('#errorLong').html("Please enter the Longitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j('#txt_longitude').focus();
+                    return false;
+                }
+
+
+              else if ((parseFloat( $j('#txt_longitude').val())) <= 0) {
+                     $j('#errorLong').show();
+                     $j('#errorLong').html("Please enter the Longitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j('#txt_longitude').focus();
+                    return false;
+                }
+
+
+              else if ((parseFloat( $j('#txt_longitude').val())) <= 0) {
+                   $j('#errorLong').show();
+                   $j('#errorLong').html("Please enter the Longitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                   $j('#txt_longitude').focus();
+                  return false;
+              }
+              else if (!(parseInt($('#txt_longitude').val().substring(0, 2), 10) >= 67 && parseInt($('#txt_longitude').val().substring(0, 2), 10) <= 78)) {
+                  $('#errorLong').show();
+                  $('#errorLong').html("Enter the GPS longitude between 67° to 78°!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                  $('#txt_longitude').focus();
+                  return false;
+              }
+              else {
+
+                   $j('#temp').css("display", "block");
+                   $j('#errorLong').hide();
+                   $j('#errorLat').hide();
+                   $j('#errordiv11').hide();
+                   $j('#errordiv11').hide();
+                   $j('#errordiv11').hide();
+                   $j('#errordiv11').hide();
+                   $j('#errorAreaName').hide();
+                   $j('#errorArea').hide();
+              }
+
+
+
+
+
+            });
+
+                
+
+             $j(document).on('change', '#txt_Place', function (e) {
+                var str =  $j('#txt_Place').val();
+                if (str.match(/[a-z]/i)) {
+                     $j('#errorAreaName').hide();
+                }
+                else {
+                     $j('#errorAreaName').show();
+                     $j('#errorAreaName').html("Please enter the Valid Place Name!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j('#txt_Place').focus();
+                    return false;
+                }
+            })
+           
+
+         
+
+
+             $j('#btn_Update').click(function () {
+
+       
+
+                if ( $j('#txt_DOV').val() == '') {
+                     $j('#errordiv9').show();
+                     $j('#errordiv9').html("Please Select Date!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j("#txt_DOV").focus();
+                    return false;
+                }
+                else {  $j('#errordiv9').hide(); }
+
+                
+
+                if ( $j('#txt_desc').val() == '') {
+                     $j('#errordiv11').show();
+                     $j('#errordiv11').html("Please Enter Description!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j("#txt_desc").focus();
+                    return false;
+                }
+                else {  $j('#errordiv11').hide(); }
+
+                if ( $j('#txt_latitude').val() == '') {
+                     $j('#errorLat').show();
+                     $j('#errorLat').html("Please enter the Latitude!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j('#txt_latitude').focus();
+                    return false;
+                }
+                else {  $j('#errorLat').hide(); }
+
+                if (( $j('#txt_latitude').val().substr(0, 1) == '.') && ( $j('#txt_latitude').val().length <= 1)) {
+                     $j('#errorLat').show();
+                     $j('#errorLat').html("Please enter the Latitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j('#txt_latitude').focus();
+                    return false;
+                }
+                else {  $j('#errorLat').hide(); }
+
+                if ((parseFloat( $j('#txt_latitude').val())) <= 0) {
+                     $j('#errorLat').show();
+                     $j('#errorLat').html("Please enter the Latitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j('#txt_latitude').focus();
+                    return false;
+                }
+                else {  $j('#errorLat').hide(); }
+
+                if ( $j('#txt_longitude').val() == '') {
+                     $j('#errorLong').show();
+                     $j('#errorLong').html("Please enter the Longitude !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j('#txt_longitude').focus();
+                    return false;
+                }
+                else {  $j('#errorLong').hide(); }
+
+                if (( $j('#txt_longitude').val().substr(0, 1) == '.') && ( $j('#txt_longitude').val().length <= 1)) {
+                     $j('#errorLong').show();
+                     $j('#errorLong').html("Please enter the Longitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j('#txt_longitude').focus();
+                    return false;
+                }
+                else {  $j('#errorLong').hide(); }
+
+                if ((parseFloat( $j('#txt_longitude').val())) <= 0) {
+                     $j('#errorLong').show();
+                     $j('#errorLong').html("Please enter the Longitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j('#txt_longitude').focus();
+                    return false;
+                }
+                else {  $j('#errorLong').hide(); }
+
+                if ((parseFloat( $j('#txt_longitude').val())) <= 0) {
+                     $j('#errorLong').show();
+                     $j('#errorLong').html("Please enter the Longitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                     $j('#txt_longitude').focus();
+                    return false;
+                }
+                else {  $j('#errorLong').hide(); }
+
+
+                 $j('#temp').css("display", "block");
+
+            });
+
+
+
+
+             $j('#btn_addNewSurvey').click(function (e) {
+
+                 $j.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'SurveyBudgetEstimation/DeleteFile', // we are calling json method
+                    contentType: 'application/json; charset=utf-8',
+
+                    success: function (data) {
+                        $j('#NewSurvey').show();
+                        $j('#btn_Update').hide();
+                        $j('#btn_submit1').show();
+                $j("#activityTable").empty();
+                 $j('#txt_Amount').val('0');
+                 $j('#txt_DOV').val('');
+                 $j('#txt_year').val('');
+                 $j('#txt_desc').val('');
+                 $j('#txt_Place').val('');
+                 $j('#txt_latitude').val('');
+                 $j('#txt_longitude').val('');
+                 $j('#txt_area').val(data.Area);
+                 $j('#viewPhotoURL1').hide();
+                 $j('#viewPhotoURL2').hide();
+                 $j('#viewPhotoURL3').hide();
+                 $j('#lbl1').hide();
+                 $j('#lbl2').hide();
+                 $j('#lbl3').hide();
+
+                 $j('#ddl_Range').show();
+                 $j('#ddl_Village').show();
+                 $j('#txt_Offence').show();
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve states.' + ex);
+                    }
+                });
+                
+
+                 $j('html, body').animate({ scrollTop:  $j("#NewSurvey").offset().top - 120 }, 'slow');
+
+
+            });
+
+             $j('#txt_latitude').keypress(function (event) {
+
+                 return isNumber(event, this)
+
+             });
+
+             $j('#txt_longitude').keypress(function (event) {
+
+                 return isNumber(event, this)
+
+             });
+
+        });
+         function isNumber(evt, element) {
+             var charCode = (evt.which) ? evt.which : event.keyCode
+             if (
+                  (charCode != 46 || $j(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+                 (charCode < 48 || charCode > 57))
+                 return false;
+         }
+        function EditSurvey(ID) {
+
+          
+          
+             $j("#hdSurveyID").val(ID);
+           //  $j("#activityTable").empty();
+            var ID = { ID: ID }
+             $j.ajax({
+                type: 'POST',
+                url: RootUrl + 'CrimeSurvey/Edits', // we are calling json method
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(ID),
+                success: function (data) {
+                    var offence_code = data.OffenseCode;
+                   
+                   //  $j('#ddl_Range option').filter(function () { return  $j(this).val() == data.Rang_Code }).attr('selected', true);
+                
+                     $j('#txt_DOV').val(data.sDate_Of_Visit);                   
+                     $j('#txt_TimeVisit').val(data.Time_Of_Visit)
+                     $j('#txt_desc').val(data.Description_of_Crime);
+                     $j('#txt_Place').val(data.PlaceOfVisit);
+                     $j('#txt_latitude').val(data.Latitude);
+                     $j('#txt_longitude').val(data.Longitude);
+                     $j('#hdRangeCode').val(data.Rang_Code);
+                     $j('#hdVillageCode').val(data.Village_Code);
+         
+                     $j('#lblOffenceCode').show();
+                     $j('#lblRangName').show();
+                     $j('#lblVillageName').show();
+                     $j('#lblOffenceCode').text(data.OffenseCode);
+
+                     $j('#lblRangName').text(data.Range_Name);
+                     $j('#lblVillageName').text(data.Village_Name);
+
+                     $j('#ddl_Range').hide();
+                     $j('#ddl_Village').hide();
+                     $j('#txt_Offence').hide();
+
+
+                    if (data.Pictures_of_Crime1 != '') {
+                        var filename = data.Pictures_of_Crime1;
+                        var str = filename.split('/');
+
+
+                         $j('#viewPhotoURL1').show();
+                         $j('#viewPhotoURL1').attr('href', '../ForestProtectionDocument/CrimeSceneDetails/' + str[3]);
+                         $j('#viewPhotoURL1').attr('target', '_blank');
+                         $j('#lbl1').show();
+                    }
+                     else
+                    { $j('#lbl1').hide(); }
+                    if (data.Pictures_of_Crime2 != '') {
+                        var filename1 = data.Pictures_of_Crime2;
+                        var str1 = filename1.split('/');
+                         $j('#viewPhotoURL2').show();
+                         $j('#viewPhotoURL2').attr('href', '../ForestProtectionDocument/CrimeSceneDetails/' + str1[3]);
+                         $j('#viewPhotoURL2').attr('target', '_blank');
+                         $j('#lbl2').show();
+                    } else { $j('#lbl2').hide(); }
+                    if (data.Pictures_of_Crime3 != '') {
+                        var filename2 = data.Pictures_of_Crime3;
+                        var str2 = filename1.split('/');
+                         $j('#viewPhotoURL3').show();
+                         $j('#viewPhotoURL3').attr('href', '../ForestProtectionDocument/CrimeSceneDetails/' + str2[3]);
+                         $j('#viewPhotoURL3').attr('target', '_blank');
+                         $j('#lbl3').show();
+                    } else { $j('#lbl3').hide(); }
+                     $j('#NewSurvey').show();
+                     $j('#btn_submit1').hide();
+                     $j('#btn_Update').show();
+                     $j('html, body').animate({ scrollTop:  $j("#NewSurvey").offset().top - 120 }, 'slow');
+                    // $j('#txt_Amount').val(data.FileURL);
+                    // $j('#txt_Amount').val(data.ShapeFileURL);
+                    // $j('#txt_Amount').val(data.PhotoURL);
+
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+            var RangeCode1 = {
+                RangeCode1:  $j('#hdRangeCode').val()
+            };
+           
+             $j.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'CrimeSurvey/Bind_Village',
+                data: JSON.stringify(RangeCode1),
+                success: function (data) {
+                     $j.each(data, function (i, items) {
+
+                        for (var i = 0; i < data.list1.length; i++) {
+                             $j("#ddl_Village").append('<option value="' + data.list1[i].Value + '">' + data.list1[i].Text + '</option>');
+                        }
+                        // $j("#ddl_Village").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                        //var villageCode =  $j("#hdVillageCode").val()
+
+                        // $j('#ddl_Village option').filter(function () { return  $j(this).val() == villageCode }).attr('selected', true);
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+        }
+
+     
+     
+
+
+</script>
+
+
+@*<script src="~/Scripts/jquery-1.8.2.js"></script>*@
+
+<script>
+
+    var ALERT_TITLE = "!!!";
+    var ALERT_BUTTON_TEXT = "Ok";
+
+    //if (document.getElementById) {
+    //    window.alert = function (txt) {
+    //        createCustomAlert(txt);
+    //    }
+    //}
+
+    function createCustomAlert(txt) {
+        d = document;
+        if (d.getElementById("modalContainer")) return;
+        mObj = d.getElementsByTagName("body")[0].appendChild(d.createElement("div"));
+        mObj.id = "modalContainer";
+        mObj.style.height = d.documentElement.scrollHeight + "px";
+
+        alertObj = mObj.appendChild(d.createElement("div"));
+        alertObj.id = "alertBox";
+        if (d.all && !window.opera) alertObj.style.top = document.documentElement.scrollTop + "px";
+        alertObj.style.left = (d.documentElement.scrollWidth - alertObj.offsetWidth) / 2 + "px";
+        alertObj.style.visiblity = "visible";
+
+        h1 = alertObj.appendChild(d.createElement("h1"));
+        h1.appendChild(d.createTextNode(ALERT_TITLE));
+
+        msg = alertObj.appendChild(d.createElement("p"));
+        //msg.appendChild(d.createTextNode(txt));
+        msg.innerHTML = txt;
+
+        btn = alertObj.appendChild(d.createElement("a"));
+        btn.id = "closeBtn";
+        btn.appendChild(d.createTextNode(ALERT_BUTTON_TEXT));
+        btn.href = "#";
+        btn.focus();
+        btn.onclick = function () { removeCustomAlert(); return false; }
+
+        alertObj.style.display = "block";
+
+    }
+
+    function removeCustomAlert() {
+        document.getElementsByTagName("body")[0].removeChild(document.getElementById("modalContainer"));
+    }
+
+</script>
+<style>
+    #modalContainer {
+        background-color: rgba(0, 0, 0, 0.3);
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0px;
+        left: 0px;
+        z-index: 10000;
+        background-image: url(tp.png); /* required by MSIE to prevent actions on lower z-index elements */
+    }
+
+    #alertBox {
+        position: relative;
+        width: 300px;
+        min-height: 100px;
+        margin-top: 310px;
+        border: 1px solid #666;
+        background-color: #fff;
+        background-repeat: no-repeat;
+        background-position: 20px 30px;
+    }
+
+    #modalContainer > #alertBox {
+        position: fixed;
+    }
+
+    #alertBox h1 {
+        margin: 0;
+        font-size: 18px;
+        background-color: #3073BB;
+        color: #FFF;
+        border-bottom: 1px solid #000;
+        padding: 2px 0 2px 5px;
+    }
+
+    #alertBox p {
+        text-align: center;
+        padding: 20px;
+    }
+
+    #alertBox #closeBtn {
+        display: block;
+        position: relative;
+        margin: 5px auto;
+        padding: 7px;
+        border: 0 none;
+        width: 70px;
+        font: 0.7em verdana,arial;
+        text-transform: uppercase;
+        text-align: center;
+        color: #FFF;
+        background-color: #357EBD;
+        border-radius: 3px;
+        text-decoration: none;
+    }
+
+    /* unrelated styles */
+
+    #mContainer {
+        position: relative;
+        width: 600px;
+        margin: auto;
+        padding: 5px;
+        border-top: 2px solid #000;
+        border-bottom: 2px solid #000;
+        font: 0.7em verdana,arial;
+    }
+
+    h1, h2 {
+        margin: 0;
+        padding: 4px;
+        font: bold 1.5em verdana;
+        border-bottom: 1px solid #000;
+    }
+
+    code {
+        font-size: 1.2em;
+        color: #069;
+    }
+
+    #credits {
+        position: relative;
+        margin: 25px auto 0px auto;
+        width: 350px;
+        font: 0.7em verdana;
+        border-top: 1px solid #000;
+        border-bottom: 1px solid #000;
+        height: 90px;
+        padding-top: 4px;
+    }
+
+        #credits img {
+            float: left;
+            margin: 5px 10px 5px 0px;
+            border: 1px solid #000000;
+            width: 80px;
+            height: 79px;
+        }
+
+    .important {
+        background-color: #F5FCC8;
+        padding: 2px;
+    }
+
+    code span {
+        color: green;
+    }
+
+    #selectedFiles div {
+        background-color: #f1f2f6;
+        height: 35px;
+        width: 100%;
+        padding: 10px;
+        box-shadow: 0 1px 2px #000;
+        font-size: 12px;
+        margin: 0 0 10px;
+    }
+
+        #selectedFiles div a {
+            border-radius: 50%;
+            background: #c9302c;
+            padding: 2px 4px 2px 2px;
+            color: #fff;
+            font-weight: bold;
+            margin: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition-property: background, box-shadow;
+            transition-duration: .3s;
+            transition-timing-function: linear;
+            -webkit-transition-duration: .3s;
+        }
+
+            #selectedFiles div a:hover, .#selectedFiles div a:focus {
+                background: #df8402;
+                box-shadow: 0 5px 10px #5d3701;
+                text-decoration: none;
+            }
+</style>
+
+<script>
+    var nowTemp = new Date();
+    var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+    var files;
+    var storedFiles = [];
+    var upc = 0;
+    var $j = jQuery.noConflict();
+
+    $j(function () {
+
+        $j(":file").attr('title', '  ');
+        var $jloading = $j('#loadingDiv').hide();
+
+        $j("input[id^='fileToUpload']").change(function (e) {
+            if (($j('#fileToUpload')[0].files[0].size / 1048576) > 2) {
+                createCustomAlert('File Size cannot be more than 2 mb!!!');
+                $j("input[id^='fileToUpload']").val('');
+            }
+            else {
+                doReCreate(e);
+            }
+        });
+
+        selDiv = $j("#selectedFiles");
+    });
+
+    function doReCreate(e) {
+        createCustomAlert('File has been selected for upload!!!');
+        upc = upc + 1;
+        handleFileSelect(e);
+
+        $j("input[id^='fileToUpload']").hide();
+
+        $j('<input>').attr({
+            type: 'file',
+            multiple: 'multiple',
+            id: 'fileToUpload' + upc,
+            class: 'form-control',
+            name: 'fileUpload',
+            style: 'float: left',
+            title: '  ',
+            onchange: "doReCreate(event)"
+
+        }).appendTo('#uploaders');
+    }
+
+    function handleFileSelect(e) {
+        selDiv = document.querySelector("#selectedFiles");
+
+        if (!e.target.files) return;
+        files = e.target.files;
+
+        for (var i = 0; i < files.length; i++) {
+            var f = files[i];
+          //  if (storedFiles.length <= 2) {
+                if (storedFiles.length == 0) {
+                    selDiv.innerHTML += "<div>" + f.name +
+                    "<a onclick='removeAtt(this)'> X </a></div>";
+                    storedFiles.push(f.name);
+                }
+                else {
+                    var chk = 0;
+                    for (var a = 0; a < storedFiles.length; a++) {
+                        if (storedFiles[a] == f.name) {
+                            chk = 1;
+                        }
+                    }
+                    if (chk == 0) {
+                        selDiv.innerHTML += "<div>" + f.name +
+                        "<a onclick='removeAtt(this)'> X </a></div>";
+                        storedFiles.push(f.name);
+                    }
+                }
+            //}
+            //else {
+            //    createCustomAlert('Maximum 3 files can be upload!!!');
+            //    e.preventDefault();
+            //}
+        }
+        $j('#@Html.IdFor(i => i.FilesToBeUploaded)').val(storedFiles);
+    }
+
+    function removeAtt(t) {
+        var serEle = $j(t).parent().text().slice(0, -3);
+        var index = storedFiles.indexOf(serEle);
+        if (index !== -1) {
+            storedFiles.splice(index, 1);
+        }
+        $j(t).parent().remove();
+        $j('#@Html.IdFor(i => i.FilesToBeUploaded)').val(storedFiles);
+
+    }
+</script>
+
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <div class="col-lg-10 pad">
+            <h1 class="page-header">Crime Scene Description</h1>
+            @if (@TempData["BGS_Status"] != null)
+            {
+                <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["BGS_Status"]</div>
+                //Session["Status"] = null;
+            }
+        </div>
+
+
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+
+
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!--<div class="panel-heading">Processing Fees</div>-->
+                <!-- /.panel-heading -->
+                @using (Html.BeginForm("Create", "CrimeSurvey", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data" }))
+                {
+                    <div><button type="button" class="btn btn-success add-btn-servy " id="btn_addNewSurvey">  Add New Survey</button></div>
+                    <input type="hidden" id="hdSurveyID" name="hdSurveyID" />
+                    <input type="hidden" id="hdRangeCode" name="hdRangeCode" />
+                    <input type="hidden" id="hdVillageCode" name="hdVillageCode" />
+                    @*<input type="hidden" id="hdOffenseCode" name="hdOffenseCode" value="@Session["Offensecode"]" />*@
+                    <div class="panel-body">
+                        <div class="dataTable_wrapper">
+                            <div id="tbl" class="table-responsive">
+                                @if (ViewData["CrimeLst"]!="")
+                                {                                                                
+                                <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                                    <thead>
+                                        <tr>
+                                            @*<th style="width:7%;">S. No</th>*@
+                                            <th style="width:14%;">Offense Code</th>
+                                            <th style="width:14%;">Date of Visit</th>
+                                            <th style="width:14%;">Place of Visit</th>
+                                            <th style="width:14%;">Description</th>
+                                            <th style="width:14%;">Village</th>
+                                            <th style="width:14%;">Range</th>                                   
+                                            <th style="width:14%;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in ViewData["CrimeLst"] as IEnumerable<FMDSS.Models.ForestProtection.CrimeSurveyDetails>)                                          
+                                        {
+                                            if (item.ID != 0) { 
+                                               <tr>
+                                                @*<td>
+                                                        @Html.DisplayFor(model => item.SurveyID)
+                                                    </td>*@
+                                                <td>
+                                                    @Html.DisplayFor(model => item.OffenseCode)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.sDate_Of_Visit)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.PlaceOfVisit)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Description_of_Crime)
+                                                </td>
+
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Village_Name)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Range_Name)
+                                                </td>
+                                               
+                                                <td>
+                                                   @if (@item.IsComplete == "0")
+                                                {
+                                                    <button type="button" class="btn btn-warning btn-circle" id="btnedit @item.ID" title="Edit" value="@item.ID" onclick="EditSurvey('@item.ID')" data-toggle=" modal" data-target="#myModal">
+                                                        <i class="fa fa-edit"></i>
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <a href='javascript:void(0);' style="cursor:not-allowed">
+                                                        Not Allowed
+                                                    </a>
+                                                   }
+                                                </td>
+
+                                            </tr>
+                                            }
+                                         
+
+                                        }
+                                    </tbody>
+                                </table>
+                                
+                                }
+                            </div>
+
+                        </div>
+
+                    </div>
+                       <div class="col-lg-12" id="abc"><br /></div>
+                     <div class="col-lg-12" id="NewSurvey" style="display:none">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="Village">
+                                        Range:
+                                    </label>
+                                    @Html.DropDownList("RangeCode", (IEnumerable<SelectListItem>)ViewBag.Range, new { @class = "form-control", id = "ddl_Range" })
+                                    <label id="lblRangName" style="display:none"> </label>
+                                    <div id="errordiv1" style="display:none" class="alert-danger1"></div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="Village">
+                                        Village Name:
+                                    </label>
+                                    @*@Html.DropDownList("VillageCode", (IEnumerable<SelectListItem>)ViewBag.ddlVillName, "--Select--", new { @class = "form-control", id = "ddl_Village" })*@
+                                    @Html.DropDownList("VillageCode", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddl_Village" })
+                                    <div id="errordiv2" style="display:none" class="alert-danger1"></div>
+                                    <label id="lblVillageName" style="display:none"> </label>
+                                </div>
+                            </div>
+                         <div class="col-lg-6">
+                             <div class="form-group">
+                                 <label for="Offence">
+                                     Offense ID:
+                                 </label>
+                                 <input class="form-control" id="txt_Offence" name="txt_Offence" value="@Session["OffenseCode"]" readonly="readonly" />                                 
+                                 <div id="errordiv3" style="display:none" class="alert-danger1"></div>
+                                 <label id="lblOffenceCode" style="display:none"> </label>
+                             </div>
+                         </div>
+           
+                            
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Date of Visit: <span class="mandatory">*</span></label>
+                                    <input class="form-control datefield" id="txt_DOV" name="txt_DOV" />
+                                    <div id="errordiv4" style="display:none" class="alert-danger1"></div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label> Time of Visit: <span class="mandatory">*</span></label>
+                                    <div id="datepicker" class="input-group date">
+                                        <input class="form-control timepicker" id="txt_TimeVisit" name="txt_TimeVisit" maxlength="10" />
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>                                       
+                                        <div id="errordiv5" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                    </div>
+                            </div>
+                         <div class="col-lg-6">
+                             <div class="form-group">
+                                 <label>Place of Visit: <span class="mandatory">*</span></label>
+                                 <input class="form-control" id="txt_Place" name="txt_Place" maxlength="200" />
+                                 <div id="errordiv6" style="display:none" class="alert-danger1"></div>
+
+                             </div>
+                         </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label> Description: <span class="mandatory">*</span></label>
+                                    <input class="form-control" id="txt_desc" name="txt_desc" maxlength="200" />
+                                    <div id="errordiv11" style="display:none" class="alert-danger1"></div>
+
+                                </div>
+                            </div>
+                          
+                        
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label> Latitude: <span class="mandatory">*</span></label>
+                                    <input class="form-control" id="txt_latitude" name="txt_latitude" maxlength="6" />
+                                    <div id="errorLat" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label> Longitude:  <span class="mandatory">*</span></label>
+                                    <input class="form-control" id="txt_longitude" name="txt_longitude" maxlength="6" />
+                                    <div id="errorLong" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div> 
+                         @Html.HiddenFor(X => X.FilesToBeUploaded)                        
+                         @*<input type="hidden" id="FilesToBeUploaded" name="FilesToBeUploaded">*@
+                         <div class="form-group">
+                             <div class="col-lg-6">
+                                 <div id="uploaders">
+                                     <label>Photographs/Document related to offense/crime scene:</label>
+                                     <input type="file" id="fileToUpload" class="form-control"
+                                            name="fileUpload" multiple="multiple" style="float: left;" />
+                                     <div id="errordivEvidenceDocURL" style="display:none; position:static" class="alert-danger1"></div>
+                                     <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                                     <br />
+                                     <div class="control-section" style="padding: 0px;">
+                                         <div id="selectedFiles"></div>
+                                     </div>
+                                     <span id="spnFile" style="float: left; color: #FF0000"></span>
+                                     @Html.ValidationMessage("File")
+                                     @Html.Hidden("hdnFileUpload")
+                                 </div>
+                             </div>
+
+                         </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label id="lbl1">Photo 1<span class="mandatory">*</span><a style="display:none;" id="viewPhotoURL1">view document</a></label>
+                                    <label id="lbl2">Photo 2 <span class="mandatory">*</span><a style="display:none;" id="viewPhotoURL2">view document</a></label>
+                                    <label id="lbl3">Photo 3 <span class="mandatory">*</span><a style="display:none;" id="viewPhotoURL3">view document</a></label>
+                                    @*<input type="file" class="form-control" id="PhotoURL1" name="PhotoURL1" />
+                                    <div id="errorPhoto1" style="display:none" class="alert-danger1">Please Upload Photo.</div>*@
+                                </div>
+                            </div>
+                            @*<div class="col-lg-6">
+                                <div class="form-group">
+                            
+                               <input type="file" class="form-control" id="PhotoURL2" name="PhotoURL2" />
+                                    <div id="errorPhoto2" style="display:none" class="alert-danger1">Please Upload File.</div> 
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                              
+                                <input type="file" class="form-control" id="PhotoURL3" name="PhotoURL3" />
+                                    <div id="Photo3" style="display:none" class="alert-danger1">Please Upload File.</div> 
+                                </div>
+                            </div>*@
+                            <div class="col-lg-12"></div>
+
+                            <!-- Btn Groping -->
+                            <div class="btn-padd">
+                                <div class="col-lg-12" id="btn">
+                                    <button id="btn_submit1" value="Submit" name="Command" class="btn btn-success" type="submit">
+                                        <i class="fa fa-check"></i> Submit
+                                    </button>
+
+                                    <button id="btn_Update" value="Update" name="Command" class="btn btn-success" type="submit">
+                                        <i class="fa fa-check"></i> Update
+                                    </button>
+
+                                    <button class="btn btn-warning" type="reset">
+                                        <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                    </button>
+                                    <button class="btn btn-danger" value="Cancel" name="Command" type="submit">
+                                        <i class="fa fa-times fa-fw"></i> Cancel
+                                    </button>
+
+                                </div>
+                            </div>
+                            <!-- /.Btn Groping -->
+
+                        </div>
+                    
+                    
+                    
+                }
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>

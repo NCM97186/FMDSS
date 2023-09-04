@@ -1,0 +1,1382 @@
+﻿@{
+    ViewBag.Title = "dashboard";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //  "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+
+
+</script>
+<style>
+    .crose {
+        float: right;
+        position: absolute;
+        right: 6px;
+        top: -8px;
+        border-radius: 50px;
+        padding: 3px;
+        font-size: 11px;
+        color: #337ab7;
+        border: 1px solid #e7e7e7;
+        background: #f8f8f8;
+        cursor: pointer;
+    }
+</style>
+<script type="text/javascript">
+    $(document).on('click', '.PrintApps', function (e) {
+        var $item = $(this).closest("tr").find('td');
+        alert($item);
+        var i = 0;
+        var RequestID;
+        var Status;
+        var TableName;
+        $.each($item, function (key, value) {
+            if (i == 0) {
+                RequestID = $(value).text();
+            }
+            if (i == 1) {
+                TableName = $(value).text();
+            }
+            if (i == 5) {
+                Status = $(value).text();
+            }
+            i++;
+        });
+        $.ajax({
+            type: 'POST',
+            headers: {
+                __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+            },
+            url: RootUrl + 'dashboard/PrintAfterApproval',
+            data: { RequestID: $.trim(RequestID), Status: $.trim(Status), TableName: $.trim(TableName) },
+            success: function (data) {
+                $("#dvContainer").html(data);
+                var contents = $("#dvContainer").html();
+                var frame1 = $('<iframe />');
+                frame1[0].name = "frame1";
+                //frame1.css({ "position": "absolute", "top": "-1000000px" });
+                $("body").append(frame1);
+                var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+                frameDoc.document.open();
+                //Create a new HTML document.
+                frameDoc.document.write('<html><head><title> </title>');
+                //Append the external CSS file.
+                frameDoc.document.write('<link href="../css/bootstrap.min.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="../css/mobile.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="../css/dashboard/main.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="../css/dashboard/dashboard.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="../css/dashboard/font-awesome.min.css" rel="stylesheet" />');
+                frameDoc.document.write('</head><body>');
+                //Append the DIV contents.
+                frameDoc.document.write(contents);
+                frameDoc.document.write('</body></html>');
+                frameDoc.document.close();
+                setTimeout(function () {
+                    window.frames["frame1"].focus();
+                    window.frames["frame1"].print();
+                    frame1.remove();
+                }, 500);
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+        "<div class='divider'></div></div> </section></div>";
+    });
+
+    if ('@ViewData["Message"]' == '2') {
+        alert('@ViewData["Messagetext"]');
+    }
+    if ('@ViewData["Message"]' == '1') {
+        alert('@ViewData["Messagetext"]');
+    }
+    if ('@ViewData["Message"]' == '3') {
+        alert('@ViewData["Messagetext"]');
+    }
+    if ('@ViewData["Message"]' == '4') {
+        alert('@ViewData["Messagetext"]');
+    }
+    $(document).ready(function () {
+        $('#btnDetails').click(function () {
+            var requestId = $("#btnDetails").val();
+            var FinalAmount;
+            var requestId = {
+                RequestID: requestId,
+                Final_Amount: FinalAmount
+            };
+            $.ajax({
+                type: 'POST',
+                headers: {
+                    __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+                },
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(requestId),
+                url: RootUrl + "dashboard/GetTransDetails",
+                success: function (data) {
+                    $("#lblFinalAmount").text(data.Final_Amount);
+                    $("#lblStatus").text(data.Status);
+                    $("#Date").text(data.Date);
+                    $("#lblApprovedDate").text(data.ApprovedDate);
+                    $("#lblApprovedID").text(data.ApprovedStatus);
+                    $("#lblReviewedDate").text(data.ApprovedID);
+                    $("#lblReviewedStatus").text(data.ReviewedDate);
+                    $("#lblReviewedID").text(data.ReviewedStatus);
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+            $('#myModal').show();
+            //return false;
+        });
+    });
+    function isNumberKey(evt) {
+        var id = $(evt.target).attr("id");
+        document.getElementById("error").style.display = 'none';
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57)) {
+            if (id == 'txt_totalCrewmember') {
+                document.getElementById("error").style.display = 'block';
+            }
+            return false;
+        }
+        else
+            return true;
+    }
+    function printDiv() {
+        var divToPrint = document.getElementById("tblTransaction");
+        newWin = window.open("");
+        newWin.document.write(divToPrint.outerHTML);
+        newWin.print();
+        newWin.close();
+    }
+
+    $(document).on('click', '.reqid', function (e) {
+        var $item = $(this).closest("tr").find('td');
+        var i = 0;
+        var RequestId;
+        var TableName;
+        $.each($item, function (key, value) {
+            if (i == 0) {
+                RequestId = $(value).text();
+            }
+            if (i == 1) {
+                TableName = $(value).text();
+            }
+            i++;
+        });
+        var tblinfo = {
+            RequestId: $.trim(RequestId),
+            TableName: $.trim(TableName)
+        }
+        $("#tbdyScart").empty();
+        var isPartial = false;
+        switch (tblinfo.TableName) {
+            case "tbl_ResearchStudyPermissions":
+                isPartial = true;
+        }
+        if (isPartial) {
+            $.ajax({
+                type: 'Post',
+                headers: {
+                    __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+                },
+                data: {
+                    "RequestId": $.trim(RequestId), "TableName": $.trim(TableName)
+                },
+                url: RootUrl + "dashboard/ViewDetails",
+                dataType: 'html',
+                success: function (data) {
+                    $("#tbdyScart").append(data);
+                },
+                error: function (ex) {
+                    console.log(ex.error);
+                }
+            });
+        }
+        else {
+            $.ajax({
+                type: 'POST',
+                headers: {
+                    __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+                },
+                url: RootUrl + 'dashboard/ViewDetails',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(tblinfo),
+                success: function (data) {
+                    if (data.TableName == 'tbl_FilmShootingPermissions') {
+                        var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                            "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                            "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                            "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                            "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                            "</td></tr><tr><td>Requested On</td><td>" + data.RequestedOn +
+                            "</td></tr><tr><td>Requested By</td><td>" + data.RequestedBy +
+                            "</td></tr><tr><td>District</td><td>" + data.District +
+                            "</td></tr><tr><td>Place</td><td>" + data.Place +
+                            "</td></tr><tr><td>Duration</td><td>" + data.Duration +
+                            "</td></tr><tr><td>Number Of Person</td><td>" + data.NumberOfPerson +
+                            "</td></tr><tr><td>Indian Citizen</td><td>" + data.IndianCitizen +
+                            "</td></tr><tr><td>Non Indian Citizen</td><td>" + data.NonIndianCitizen +
+                            "</td></tr><tr><td>Students</td><td>" + data.Students +
+                            "</td></tr><tr><td>Application Type</td><td>" + data.ApplicationType +
+                            "</td></tr><tr><td>Film Title</td><td>" + data.FilmTitle +
+                            "</td></tr><tr><td>Shooting Purpose</td><td>" + data.ShootingPurpose +
+                            "</td></tr><tr><td>OCM Purpose</td><td>" + data.Purpose_OCM +
+                            "</td></tr><tr><td>Description</td><td>" + data.Description +
+                            "</td></tr><tr><td>Payment Done</td><td>" + data.PaymentDone +
+                            "</td></tr><tr><td>Paid Amount</td><td>" + data.PaidAmount +
+                            "</td></tr><tr><td>Identity Proof Number</td><td>" + data.IdProofNo +
+                            "</td></tr><tr><td>Identity Proof</td><td><a href='../PermissionDocument/" + data.IdProofUrl + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                            "<tr><td>Approver/Reviwer Status</td><td>" + data.StatusDesc +
+                            "</td></tr><tr><td>Approver/Reviwer Reason</td><td>" + data.Reason_Desc +
+                            "</td></tr><tr><td>Approver/Reviwer Remarks</td><td>" + data.Remarks +
+                            "</td></tr>";
+                        $("#tbdyScart").append(bardata);
+                    }
+                    if (data.TableName == 'tbl_OrganisingCamp') {
+                        var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                            "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                            "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                            "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                            "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                            "</td></tr><tr><td>Requested On</td><td>" + data.RequestedOn +
+                            "</td></tr><tr><td>Requested By</td><td>" + data.RequestedBy +
+                            "</td></tr><tr><td>District</td><td>" + data.District +
+                            "</td></tr><tr><td>Place</td><td>" + data.Place +
+                            "</td></tr><tr><td>Duration</td><td>" + data.Duration +
+                            "</td></tr><tr><td>Number Of Person</td><td>" + data.NumberOfPerson +
+                            "</td></tr><tr><td>Application Type</td><td>" + data.ApplicationType +
+                            "</td></tr><tr><td>OCM Purpose</td><td>" + data.Purpose_OCM +
+                            "</td></tr><tr><td>Payment Done</td><td>" + data.PaymentDone +
+                            "</td></tr><tr><td>Paid Amount</td><td>" + data.PaidAmount +
+                            "</td></tr><tr><td>Identity Proof Number</td><td>" + data.IdProofNo +
+                            "</td></tr><tr><td>Identity Proof</td><td><a href='../PermissionDocument/" + data.IdProofUrl + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                            "<tr><td>Approver/Reviwer Status</td><td>" + data.StatusDesc +
+                            "</td></tr><tr><td>Approver/Reviwer Reason</td><td>" + data.Reason_Desc +
+                            "</td></tr><tr><td>Approver/Reviwer Remarks</td><td>" + data.Remarks +
+                            "</td></tr>";
+                        $("#tbdyScart").append(bardata);
+                    }
+                    if (data.TableName == 'tbl_ResearchStudyPermissions') {//Needs work
+
+
+
+                        var presentation = "", assistantIdProof = "";
+                        if (data.PresentationPath != 'N/A')
+                        { presentation = "</td></tr><tr><td>Prsentation Uploaded</td><td><a href='../PermissionDocument/" + data.PresentationPath + "'  target='_blank'><img src='../images/pptIcon.png' Width='30' /></a>"; }
+                        else
+                        { presentation = "</td></tr><tr><td>Prsentation Uploaded</td><td>N/A"; }
+                        if (data.AssistIdProofPath != 'N/A')
+                        { assistantIdProof = "</td></tr><tr><td>Assistant Identity Proof</td><td><a href='../PermissionDocument/" + data.AssistIdProofPath + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a>"; }
+                        else
+                        { assistantIdProof = "</td></tr><tr><td>Assistant Identity Proof</td><td>N/A"; }
+                        var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                            "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                            "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                            "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                            "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                            "</td></tr><tr><td>Requested On</td><td>" + data.RequestedOn +
+                            "</td></tr><tr><td>Requested By</td><td>" + data.RequestedBy +
+                            "</td></tr><tr><td>Duration</td><td>" + data.Duration +
+                            "</td></tr><tr><td>District</td><td>" + data.District +
+                            "</td></tr><tr><td>Place</td><td>" + data.Place +
+                            "</td></tr><tr><td>Qualification</td><td>" + data.Qualification +
+                            "</td></tr><tr><td>ApplicationType</td><td>" + data.ApplicationType +
+                            "</td></tr><tr><td>College</td><td>" + data.College +
+                            "</td></tr><tr><td>Research Subject</td><td>" + data.ResearchSubject +
+                            "</td></tr><tr><td>Research Procedure</td><td>" + data.ResearchProcedure +
+                            "</td></tr><tr><td>Animal Category</td><td>" + data.AnimalCategory +
+                            "</td></tr><tr><td>Animal Name</td><td>" + data.AnimalName +
+                            "</td></tr><tr><td>Animal Serial No</td><td>" + data.Animal_SerialNo +
+                            "</td></tr><tr><td>Species Category </td><td>" + data.SpeciesCategory +
+                            "</td></tr><tr><td>Species Name</td><td>" + data.SpeciesName +
+                            "</td></tr><tr><td>Species Serial No</td><td>" + data.Species_SerialNo +
+                            "</td></tr><tr><td>Benefits</td><td>" + data.Benefits +
+                            "</td></tr><tr><td>Synopsis Uploaded</td><td><a href='../PermissionDocument/" + data.SynopsisPath + "'  target='_blank'><img src='../images/pdfimg.png' Width='30' /></a>" +
+                            presentation +
+                            "</td></tr><tr><td>CoordinatorId</td><td>" + data.CoordinatorId +
+                            "</td></tr><tr><td>Assistant Name</td><td>" + data.AssistName +
+                            assistantIdProof +
+                            "</td></tr><tr><td>Vehicle Category</td><td>" + data.Vehiclecat +
+                            "</td></tr><tr><td>Vehicle Name</td><td>" + data.VehicleName +
+                            "</td></tr><tr><td>Approver/Reviwer Status</td><td>" + data.StatusDesc +
+                            "</td></tr><tr><td>Approver/Reviwer Reason</td><td>" + data.Reason_Desc +
+                            "</td></tr><tr><td>Approver/Reviwer Remarks</td><td>" + data.Remarks +
+
+                            "</td></tr>";
+                        if (data.ApprovedFile != null && data.ApprovedFile != '') {
+                            bardata = bardata + "<tr><td>Approve Doc</td><td><a href='../PermissionDocument/" + data.ApprovedFile + "'  target='_blank'><img src='../images/pdfimg.png' Width='30' /></a></td></tr>";
+                        }
+                        $("#tbdyScart").append(bardata);
+                        $('#tbdyDfo').append(bardata);
+
+                    }
+                    if (data.TableName == 'tbl_EducationTourPermissions') {
+                        var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                            "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                            "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                            "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                            "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                            "</td></tr><tr><td>Requested On</td><td>" + data.RequestedOn +
+                            "</td></tr><tr><td>Requested By</td><td>" + data.RequestedBy +
+                            "</td></tr><tr><td>Duration</td><td>" + data.Duration +
+                            "</td></tr><tr><td>District</td><td>" + data.District +
+                            "</td></tr><tr><td>Place</td><td>" + data.Place +
+                            "</td></tr><tr><td>Institute Name</td><td>" + data.CollegeName +
+                            "</td></tr><tr><td>Institute Address</td><td>" + data.CollegeAddress +
+                            "</td></tr><tr><td>Institute Phone number</td><td>" + data.Phonenumber +
+                            "</td></tr><tr><td>Category</td><td>" + data.Category +
+                            "</td></tr><tr><td>Head of Institute</td><td>" + data.Princeple_Name +
+                            "</td></tr><tr><td>Phone Number</td><td>" + data.P_Address +
+                            "</td></tr><tr><td>No. of Members</td><td>" + data.P_NumberOfMember +
+                            "</td></tr><tr><td>List of members</td><td><a href='../PermissionDocument/" + data.MemberListPath + "'  target='_blank'><img src='../images/pdfIcon.jpg' Width='30' /></a></td></tr>" +
+                            "</td></tr><tr><td>Document for Educational Tour Request</td><td><a href='../PermissionDocument/" + data.DocEducationalToueReqPath + "'  target='_blank'><img src='../images/pdfIcon.jpg' Width='30' /></a></td></tr>" +
+                            "</td></tr><tr><td>Vehicle Name</td><td>" + data.Vehiclecat +
+                            "</td></tr><tr><td>Vehicle Category</td><td>" + data.ddl_vehicle +
+                            "</td></tr><tr><td>Approver/Reviwer Status</td><td>" + data.StatusDesc +
+                            "</td></tr><tr><td>Approver/Reviwer Reason</td><td>" + data.Reason_Desc +
+                            "</td></tr><tr><td>Approver/Reviwer Remarks</td><td>" + data.Remarks +
+                            "</td></tr>";
+                        $("#tbdyScart").append(bardata);
+                    }
+                    if (data.TableName == 'tbl_FixedPermissions') {
+                        var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName + "</td></tr>" +
+                            "<tr><td>Service Type</td><td>" + data.ServiceType + "</td></tr>" +
+                            "<tr><td>Permission Type</td><td>" + data.PermissionType + "</td></tr>" +
+                            "<tr><td>Permission Name</td><td>" + data.PermissionName + "</td></tr>" +
+                            "<tr><td>RequestId</td><td>" + data.RequestId + "</td></tr>" +
+                            "<tr><td>Requested On</td><td>" + data.RequestedOn + "</td></tr>" +
+                            "<tr><td>Requested By</td><td>" + data.RequestedBy + "</td></tr>" +
+                            "<tr><td>Duration</td><td>" + data.Duration + "</td></tr>" +
+                            "<tr><td>Division Name</td><td>" + data.Division_Name + "</td></tr>" +
+                            "<tr><td>District</td><td>" + data.District + "</td></tr>" +
+                            "<tr><td>Place</td><td>" + data.Place + "</td></tr>" +
+                            "<tr><td>Block</td><td>" + data.Block + "</td></tr>" +
+                            "<tr><td>GramPanchayat</td><td>" + data.GramPanchayat + "</td></tr>" +
+                            "<tr><td>Village</td><td>" + data.Village + "</td></tr>" +
+                            "<tr><td>KhasraNo</td><td>" + data.khasraNo + "</td></tr>" +
+                            "<tr><td>ApplicationType</td><td>" + data.ApplicationType + "</td></tr>" +
+                            "<tr><td>Permission Type</td><td>" + data.FixedPermissionName + "</td></tr>" +
+                            "<tr><td>Latitude</td><td>" + data.Latitude + "</td></tr>" +
+                            "<tr><td>Longitude</td><td>" + data.Longitude + "</td></tr>" +
+                            "<tr><td>Payment Done</td><td>" + data.PaymentDone + "</td></tr>" +
+                            "<tr><td>Paid Amount</td><td>" + data.PaidAmount + "</td></tr>" +
+                            "<tr><td>GT Sheet Avaliable</td><td>" + data.IsGTSheetAvaliable + "</td></tr>" +
+                            "<tr><td>Nearest Water Source</td><td>" + data.Nearest_WaterSource + "</td></tr>" +
+                            "<tr><td>Water Source Distance</td><td>" + data.WaterSource_Distance + "</td></tr>" +
+                            "<tr><td>Forest Distance</td><td>" + data.Forest_Distance + "</td></tr>" +
+                            "<tr><td>Wildlife Distance</td><td>" + data.Wildlife_Distance + "</td></tr>" +
+                            "<tr><td>Tree species</td><td>" + data.Tree_species + "</td></tr>" +
+                            "<tr><td>Number of Trees</td><td>" + data.PlantCount + "</td></tr>" +
+                            "<tr><td>Aravalli Hills</td><td>" + data.AravalliHills + "</td></tr>" +
+                            "<tr><td>Forest Land</td><td>" + data.ForestLand + "</td></tr>" +
+                            "<tr><td>Plantation Area</td><td>" + data.Plantation_Area + "</td></tr>" +
+                            "<tr><td>Approver/Reviwer Status</td><td>" + data.StatusDesc + "</td></tr>" +
+                            "<tr><td>Approver/Reviwer Reason</td><td>" + data.Reason_Desc + "</td></tr>" +
+                            "<tr><td>Approver/Reviwer Remarks</td><td>" + data.Remarks + "</td></tr>" +
+                            "<tr><td>Kml</td><td><a href='" + data.KmlPath + "' ><img src='../images/globe.png' Width='30' /></a> </td></tr>" +
+                            "<tr><td>Revenue Record</td><td><a href='../FixedLandDocument/" + data.Revenue_Record_Path + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                            "<tr><td>Revenue Map</td><td><a href='../FixedLandDocument/" + data.Revenue_Map_Path + "' target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                            "<tr><td>Project Description</td><td>" + data.Citizen_Comment + "</td></tr>" +
+                            "<tr><td>Area Size(in Hectare)</td><td>" + data.Area_Size + "</td></tr>";
+                        var AdditionalDoc = "<tr><td>DPR</td><td><a href='../FixedLandDocument/" + data.Additional_Document + "' target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>";
+                        var Survey_Doc = "<tr><td>Inspection/Verification Report</td><td><a href='../FixedLandDocument/" + data.Survey_Document + "' target='_blank'><img src='../images/pdfimg.png' Width='30' /></a></td></tr>";
+                        var finalvar = bardata;
+                        if (data.Additional_Document != "" && data.Additional_Document != null) {
+                            finalvar = finalvar + AdditionalDoc;
+                        }
+                        if (data.Survey_Document != "" && data.Survey_Document != null) {
+                            finalvar = finalvar + Survey_Doc;
+                        }
+                        $("#tbdyScart").append(finalvar);
+                    }
+                    if (data.TableName == 'tbl_FPM_ForesterSeizedTeam' || data.TableName == 'tbl_FPM_ForesterWarrantDetails' || data.TableName == 'tbl_FPM_ForesterParivadCategory' || data.TableName == 'tbl_FPM_ParivadRegistration') {
+                        if (data.EvidenceDoc == '') {
+                            var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                                "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                                "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                                "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                                "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                                "</td></tr><tr><td>Requested On</td><td>" + data.RequestedOn +
+                                "</td></tr><tr><td>Requested By</td><td>" + data.RequestedBy +
+                                "</td></tr><tr><td>District</td><td>" + data.District +
+                                "<tr><td>Block</td><td>" + data.Block + "</td></tr>" +
+                                "<tr><td>GramPanchayat</td><td>" + data.GramPanchayat + "</td></tr>" +
+                                "<tr><td>Village</td><td>" + data.Village + "</td></tr>" +
+                                "<tr><td>OffenderName</td><td>" + data.OffenderName + "</td></tr>" +
+                                "<tr><td>Father Name</td><td>" + data.FatherName + "</td></tr>" +
+                                "<tr><td>Offender Caste</td><td>" + data.Caste + "</td></tr>" +
+                                "<tr><td>Offender Address</td><td>" + data.Address + "</td></tr>" +
+                                "<tr><td>Offender PhoneNo</td><td>" + data.PhoneNo + "</td></tr>" +
+                                "<tr><td>Offender Age</td><td>" + data.OffenderAge + "</td></tr>" +
+                                "<tr><td>Police Station</td><td>" + data.PoliceStation + "</td></tr>" +
+                                "<tr><td>Offender ClothesWorn</td><td>" + data.ClothesWorn + "</td></tr>" +
+                                "<tr><td>Offender ClothesColor</td><td>" + data.ClothesColor + "</td></tr>" +
+                                "<tr><td>Offender PhysicalAppearance</td><td>" + data.PhysicalAppearance + "</td></tr>" +
+                                "<tr><td>Offender Height</td><td>" + data.Height + "</td></tr>" +
+                                "<tr><td>Offender EvidenceDoc</td><td>N/A</td></tr>";
+                        }
+                        else {
+                            var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                                "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                                "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                                "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                                "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                                "</td></tr><tr><td>Requested On</td><td>" + data.RequestedOn +
+                                "</td></tr><tr><td>Requested By</td><td>" + data.RequestedBy +
+                                "</td></tr><tr><td>District</td><td>" + data.District +
+                                "<tr><td>Block</td><td>" + data.Block + "</td></tr>" +
+                                "<tr><td>GramPanchayat</td><td>" + data.GramPanchayat + "</td></tr>" +
+                                "<tr><td>Village</td><td>" + data.Village + "</td></tr>" +
+                                "<tr><td>OffenderName</td><td>" + data.OffenderName + "</td></tr>" +
+                                "<tr><td>Father Name</td><td>" + data.FatherName + "</td></tr>" +
+                                "<tr><td>Offender Caste</td><td>" + data.Caste + "</td></tr>" +
+                                "<tr><td>Offender Address</td><td>" + data.Address + "</td></tr>" +
+                                "<tr><td>Offender PhoneNo</td><td>" + data.PhoneNo + "</td></tr>" +
+                                "<tr><td>Offender Age</td><td>" + data.OffenderAge + "</td></tr>" +
+                                "<tr><td>Police Station</td><td>" + data.PoliceStation + "</td></tr>" +
+                                "<tr><td>Offender ClothesWorn</td><td>" + data.ClothesWorn + "</td></tr>" +
+                                "<tr><td>Offender ClothesColor</td><td>" + data.ClothesColor + "</td></tr>" +
+                                "<tr><td>Offender PhysicalAppearance</td><td>" + data.PhysicalAppearance + "</td></tr>" +
+                                "<tr><td>Offender Height</td><td>" + data.Height + "</td></tr>" +
+                                "<tr><td>Offender EvidenceDoc</td><td><a href='../ForestProtectionDocument/" + data.EvidenceDoc + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>";
+                        }
+                        var status = "<tr><td>Status</td><td>" + data.StatusDesc +
+                            "</td></tr><tr><td>Reason</td><td>" + data.Reason_Desc +
+                            "</td></tr><tr><td>Remarks</td><td>" + data.Remarks +
+                            "</td></tr>";
+                        if (data.TableName == 'tbl_FPM_ForesterSeizedTeam' || data.TableName == 'tbl_FPM_ForesterWarrantDetails' || data.TableName == 'tbl_FPM_ForesterParivadCategory' || data.TableName == 'tbl_FPM_ParivadRegistration') {
+                            $("#tbdyScart").append(bardata + status);
+                        }
+                    }
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        }
+    });
+    $(function (e) {
+        $('#btnprint').click(function (e) {
+            var divContents = $("#divPrint").html();
+            //var printWindow = window.open('', '', 'height=400,width=800');
+            //printWindow.document.write('<html><head><title>DIV Contents</title>');
+            //printWindow.document.write('</head><body >');
+            //printWindow.document.write(divContents);
+            //printWindow.document.write('</body></html>');
+            //printWindow.document.close();
+            //printWindow.print();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            frameDoc.document.write('<html><head><title>Forest Department Rajasthan </title>');
+            frameDoc.document.write('<link href="../css/bootstrap.min.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/mobile.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/main.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/dashboard.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/font-awesome.min.css" rel="stylesheet" />');
+            frameDoc.document.write('</head><body>');
+            frameDoc.document.write(divContents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        })
+    });
+    function ViewDetails(OffenseCode) {
+        var tblinfo = {
+            OffenseCode: $.trim(OffenseCode)
+        }
+        $("#tbdyScart").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'ForesterParivadRegistration/GetParivadeDetails',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(tblinfo),
+            success: function (data) {
+                $('#tbdyScart').html(data.OffenderListPartialView);
+            }
+        });
+    };
+</script>
+<!-- /.navbar-static-side -->
+<!-- Page Content -->
+<div style="display:none" id="dvContainer">
+</div>
+<div id="page-wrapper" style="min-height: 394px;">
+    @Html.AntiForgeryToken()
+    @if (@TempData["kml"] != null)
+    {
+        // <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["kml"]</div>
+        <script type="text/javascript" language="javascript">
+            alert('@TempData["kml"]');
+
+        </script>
+    }
+    @if(!string.IsNullOrEmpty(Convert.ToString(Session["MSGforMultipleID"])))
+    {
+        // <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["kml"]</div>
+        <script type="text/javascript" language="javascript">
+            alert('@Session["MSGforMultipleID"]');
+
+        </script>
+    }
+    @if (TempData["Parivad"] != null)
+    {
+        <script type="text/javascript" language="javascript">
+            alert('@TempData["Parivad"]');
+        </script>
+    }
+    <div>
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog modal-lg">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">
+                            &times;
+                        </button>
+                        <h4 class="modal-title">
+                            My Transaction Details
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <div id="popupDetails">
+                            <table id="tblTransaction" class="table table-striped table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Final Amount</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Approved Date</th>
+                                        <th>Approved Status</th>
+                                        <th>Approved ID</th>
+                                        <th>Reviewed Date</th>
+                                        <th>Reviewed Status</th>
+                                        <th>Reviewed ID</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><label id="lblFinalAmount"></label></td>
+                                        <td><label id="lblStatus"></label></td>
+                                        <td><label id="lblDate"></label></td>
+                                        <td><label id="lblApprovedDate"></label></td>
+                                        <td><label id="lblApprovedStatus"></label></td>
+                                        <td><label id="lblApprovedID"></label></td>
+                                        <td><label id="lblReviewedDate"></label></td>
+                                        <td><label id="lblReviewedStatus"></label></td>
+                                        <td><label id="lblReviewedID"></label></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table align="center">
+                                <tr>
+                                    <td>
+                                        <button type="button" class="btn btn-success" onclick="printDiv()">
+                                            <i class="fa fa-print"></i> Print
+                                        </button>
+                                    </td>
+                                    <td style="padding-left:10px;">
+                                        <button type="reset" class="btn btn-danger">
+                                            <i class="fa fa-circle-o-notch fa-fw"></i> Cancel
+                                        </button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-12 rgt">
+        <h1 class="page-header">My Dashboard <span class="desh-small">| @ViewBag.UserName</span></h1>
+        <div class="row">
+            <div class="col-md-12">
+                <p>Dear Guest, If you  found any difficulty while downloading e-Permit , kindly please click on <a href="~/BookOnlineTicket/WildLifeTicketHistory" target="_blank" style="color:red">Download e-Permit</a></p>
+            </div>
+            <!-- Tab1 -->
+            <div class="col-md-6" style="padding-right:0">
+                <div class="panel with-nav-tabs panel-default">
+                    <div class="panel-heading">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#tab1default" data-toggle="tab"><i class="fa fa-star fa-fw"></i> My Transactions</a></li>
+                            <li class=""><a href="#tab2default" data-toggle="tab"><i class="fa fa-user fa-fw"></i> Reassigned</a></li>
+                        </ul>
+                    </div>
+                    <div class="panel-body">
+                        <div class="tab-content">
+                            <div class="tab-pane fade active in tbl-scroll" id="tab1default">
+                                <div class="panel-body">
+                                    <div class="table-responsive request-id">
+                                        <table class="table table-striped table-bordered table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Request Id</th>
+                                                    <th>Request Type</th>
+                                                    <th>Date</th>
+                                                    <th>Status</th>
+                                                    <th>Print</th>
+                                                    <th>NOC</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var item in ViewData["citizenList"] as IEnumerable<FMDSS.Models.CitizenDashboard>)
+                                                {
+                                                    if (item.RequestType == "Register Parivad")
+                                                    {
+                                                        <tr data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer" onclick="ViewDetails('@item.RequstedID')">
+                                                            <td>
+                                                                @Html.DisplayFor(model => item.RequstedID)
+                                                            </td>
+                                                            <td style="display:none">
+                                                                @Html.DisplayFor(model => item.TableName)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(model => item.RequestType)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(model => item.Date)
+                                                            </td>
+                                                            <td>
+                                                                @item.StatusDesc
+                                                            </td>
+                                                            <td style="display:none">
+                                                                @Html.DisplayFor(model => item.Status)
+                                                            </td>
+                                                            <td class="PrintApps">
+                                                                <button type="button" id="PrintApp" class="btn btn-success">
+                                                                    <i class="fa fa-print"></i> Print
+                                                                </button><br /><br />
+                                                            </td>
+                                                            <td>
+                                                                @if ((@item.Status == "2" && !string.IsNullOrEmpty(@item.PageURl)) && @item.TableName == "tbl_FixedPermissions" || @item.TableName == "tbl_ResearchStudyPermissions" || @item.TableName == "Tbl_Citizen_TransitPermit")
+                                                                {
+                                                                    @*<a href='@Url.Action("PDFAfterApproval", "Dashboard", new { RequestId = item.RequstedID, Status = item.Status, TableName = item.TableName })' target="_blank">
+                                                                    Print NOC
+                                                                </a>*@
+                                                                    <a href='@item.PageURl' target="_blank">
+                                                                        Print NOC
+                                                                    </a>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <a href='javascript:void(0);' style="cursor:not-allowed">
+                                                                    </a>
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                    else if (item.RequestType == "Online Ticketing")
+                                                    {
+                                                        <tr>
+                                                            <td class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                                                @Html.DisplayFor(model => item.RequstedID)
+                                                            </td>
+                                                            <td style="display:none">
+                                                                @Html.DisplayFor(model => item.TableName)
+                                                            </td>
+                                                            <td class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                                                @{ string requesttype = item.RequestType.Replace("Online Ticketing", "Online Permit").ToString();}
+                                                                @Html.DisplayFor(model => requesttype)
+                                                                @*@Html.DisplayFor(model => item.RequestType)*@
+                                                            </td>
+                                                            <td class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                                                @Html.DisplayFor(model => item.Date)
+                                                            </td>
+                                                            <td class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                                                <strong>Status :</strong> @(string.IsNullOrEmpty(item.StatusDesc) ? "N/A" : item.StatusDesc)<br />
+                                                            </td>
+                                                            <td style="display:none">
+                                                                @Html.DisplayFor(model => item.Status)
+                                                            </td>
+                                                            <td class="">
+                                                                @if ((@item.Status == "2" && !string.IsNullOrEmpty(@item.PageURl)))
+                                                                {
+
+                                                                    <a href='@item.PageURl' target="_blank">
+                                                                        Print Permit
+                                                                    </a>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <a href='javascript:void(0);' style="cursor:not-allowed">
+                                                                    </a>
+                                                                }
+                                                            </td>
+                                                            <td></td>
+                                                        </tr>
+                                                    }
+                                                    else
+                                                    {
+                                                        <tr>
+                                                            <td class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                                                @Html.DisplayFor(model => item.RequstedID)
+                                                            </td>
+                                                            <td style="display:none">
+                                                                @Html.DisplayFor(model => item.TableName)
+                                                            </td>
+                                                            <td class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                                                @Html.DisplayFor(model => item.RequestType)
+                                                            </td>
+                                                            <td class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                                                @Html.DisplayFor(model => item.Date)
+                                                            </td>
+                                                            <td class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                                                <strong>Wildlife Status :</strong> @(string.IsNullOrEmpty(item.StatusDesc) ? "N/A" : item.StatusDesc)<br />
+                                                                <strong>Forest Status :</strong> @item.ForestStatus
+                                                            </td>
+                                                            <td style="display:none">
+                                                                @Html.DisplayFor(model => item.Status)
+                                                            </td>
+                                                            <td class="PrintApps">
+                                                                <button type="button" id="PrintApp" class="btn btn-success">
+                                                                    <i class="fa fa-print"></i> Print
+                                                                </button><br /><br />
+                                                            </td>
+                                                            <td>
+                                                                @if ((@item.Status == "2" && !string.IsNullOrEmpty(@item.PageURl)) && @item.TableName == "tbl_FixedPermissions" || @item.Status == "2" && @item.TableName == "tbl_ResearchStudyPermissions" || @item.Status == "2" && @item.TableName == "Tbl_Citizen_TransitPermit")
+                                                                {
+                                                                    @*<a href='@Url.Action("PDFAfterApproval", "Dashboard", new { RequestId = item.RequstedID, Status = item.Status, TableName = item.TableName })' target="_blank">
+                                                                    Print NOC
+                                                                </a>*@
+                                                                    <a href='@item.PageURl' target="_blank">
+                                                                        Print NOC
+                                                                    </a>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <a href='javascript:void(0);' style="cursor:not-allowed">
+                                                                    </a>
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!-- /.table-responsive -->
+                                </div>
+                            </div>
+                            <div class="tab-pane fade tbl-scroll" id="tab2default">
+                                <div class="panel-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-bordered table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Request Id</th>
+                                                    <th>Request Type</th>
+                                                    <th>Date</th>
+                                                    <th>Status</th>
+                                                    <th>Letter</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var item in ViewData["citizenList1"] as IEnumerable<FMDSS.Models.CitizenDashboard>)
+                                                {
+                                                    <tr>
+                                                        <td class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor: pointer;">
+                                                            @Html.DisplayFor(model => item.RequstedID)
+                                                        </td>
+                                                        <td style="display:none;">
+                                                            @Html.DisplayFor(model => item.TableName)
+                                                        </td>
+                                                        <td class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer;">
+                                                            @Html.DisplayFor(model => item.RequestType)
+                                                        </td>
+                                                        <td class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer;">
+                                                            @Html.DisplayFor(model => item.Date)
+                                                        </td>
+                                                        <td class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer;">
+                                                            @item.StatusDesc
+                                                        </td>
+                                                        <td>
+                                                            @if (@item.Status == "6")
+                                                            {
+                                                                <a href='@Url.Action("PDFForReassigned", "Dashboard", new { RequestId = item.RequstedID, Status = item.Status, TableName = item.TableName })' target="_blank">
+                                                                    Letter
+                                                                </a>
+                                                            }
+                                                            else
+                                                            {
+                                                                <a href='javascript:void(0);' style="cursor:not-allowed">
+                                                                    Letter
+                                                                </a>
+                                                            }
+                                                        </td>
+                                                        <td>
+                                                            @if (@item.PermissionID == "1")
+                                                            {
+                                                                <a href='@Url.Action("UpdateFixedPermission", "FixedPermission", new { id = Encryption.encrypt(item.RequstedID) })'>
+                                                                    Edit
+                                                                </a>
+                                                            }
+                                                            else if (@item.PermissionID == "4")
+                                                            {
+                                                                <a href='@Url.Action("EditRequest", "ResearchStudy", new { id = Encryption.encrypt(item.RequstedID) })'>
+                                                                    Edit
+                                                                </a>
+                                                            }
+                                                            else
+                                                            {
+                                                                <a href='javascript:void(0);' style="cursor:not-allowed">
+                                                                    Edit
+                                                                </a>
+                                                            }
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!-- /.table-responsive -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade in" id="myModalDashboard" tabindex="-1" role="dialog" aria-hidden="false">
+                <div class="modal-dialog mdw">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                            <h4 class="modal-title" id="myModalLabel">
+                                View Request Details
+                            </h4>
+                        </div>
+                        <div id="divPrint" class="modal-body">
+                            <img src='../images/logo.png' alt='Forest Department, Government of Rajasthan' title='Logo' class=''>
+                            <table class="table table-striped table-bordered table-hover">
+                                <tbody id="tbdyScart"></tbody>
+                            </table>
+                            <!-- /. From URL Get -->
+                        </div>
+                        <!-- /.modal-body -->
+                        <div class="modal-footer" id="fot-f">
+                            <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                                <i class="fa fa-times fa-fw"></i> Close
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.modal-content -->
+                </div>
+                <!-- /.modal-dialog -->
+            </div>
+            <!-- /.Tab1 -->
+            <!-- Tab2 -->
+            <div class="col-md-6">
+                <div class="panel with-nav-tabs panel-default">
+                    <div class="panel-heading">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#tab4default" data-toggle="tab"><i class="fa fa-star fa-fw"></i> Favourite Services</a></li>
+                            <li><a href="#tab5default" data-toggle="tab"><i class="fa fa-gears fa-fw"></i> All Services</a></li>
+                            <li><a href="#tab6default" data-toggle="tab"><i class="fa fa-star fa-fw"></i> Favourite Pages</a></li>
+                        </ul>
+                    </div>
+                    <div class="panel-body">
+                        <div class="tab-content">
+                            <div class="tab-pane fade active in tbl-scroll" id="tab4default">
+                                <div class="col-sm-6">
+                                    <a class="btn btn-block btn-social btn-quicklinks" href="fixed_permission_common.html" id="ser-a1" style="display:none">
+                                        <i class="fa fa-thumbs-o-up"></i> Apply for Forest Rights
+                                    </a>
+                                </div>
+                                <div class="col-sm-12">
+                                    <button id="btnAddservice" type="button" class="btn btn-default ad-ser-btn pull-right" data-toggle="modal" data-target="#AddModal" style="width:auto"><i class="fa fa-plus fa-fw"></i> Add Services</button>
+                                </div>
+                                <input type="hidden" id="hdn_ServiceId" />
+                                <input type="hidden" id="hdn_ServiceDesc" />
+                                <!-- Ad Model -->
+                                <div class="modal fade" id="AddModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+                                    <div class="modal-dialog mdw">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                                <h4 class="modal-title" id="myModalLabel">Add Services</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <!-- From URL Get -->
+                                                <div class="form-group">
+                                                    <div class="dropdown">
+                                                        <button id="btnStype" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+                                                            Services Type
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            <!--<li><a tabindex="-1" href="#">HTML</a></li>
+                                                    <li><a tabindex="-1" href="#">CSS</a></li>-->
+                                                            <li class="dropdown-submenu">
+                                                                <a id="ob0" class="test" tabindex="-1" href="#">Permission Services</a>
+                                                                <ul id="ps" class="dropdown-menu">
+                                                                    <li class="dropdown-submenu">
+                                                                        <a id="a1" class="test" href="#">Fixed Land Usage</a>
+                                                                        <ul id="fxd" class="dropdown-menu">
+                                                                            <li id="1"><a>Fixed Land Usage</a></li>
+                                                                        </ul>
+                                                                    </li>
+                                                                    <li class="dropdown-submenu">
+                                                                        <a id="a4" class="test" href="#">Offense Services</a>
+                                                                        <ul id="Offense" class="dropdown-menu">
+                                                                            <li id="10"><a>Offense Registration</a></li>
+                                                                        </ul>
+                                                                    </li>
+                                                                    <li class="dropdown-submenu">
+                                                                        <a id="a2" class="test" href="#">Education Service</a>
+                                                                        <ul id="Resrch" class="dropdown-menu">
+                                                                            <li id="2"><a>Wildlife Research</a></li>
+                                                                            <li id="3"><a>Forest Research</a></li>
+                                                                            <li id="4"><a>Wildlife Visit</a></li>
+                                                                            <li id="5"><a>Forest Visit</a></li>
+                                                                        </ul>
+                                                                    </li>
+                                                                    <li class="dropdown-submenu">
+                                                                        <a id="a3" class="test" href="#">Misc Service</a>
+                                                                        <ul id="Misc" class="dropdown-menu">
+                                                                            <li id="8"><a>Apply for Organizing Camps</a></li>
+                                                                            <li id="9"><a>Film Shooting Permission</a></li>
+                                                                        </ul>
+                                                                    </li>
+                                                                </ul>
+                                                            </li>
+                                                            <li class="dropdown-submenu">
+                                                                <a id="ob1" class="test" tabindex="-1" href="#">Online Booking</a>
+                                                                <ul id="Online" class="dropdown-menu">
+                                                                    <li id="6"><a>Online Ticketing</a></li>
+                                                                    <li id="7"><a>Online Zoo</a></li>
+                                                                </ul>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <!-- Delet Or Update -->
+                                                <div class="table-responsive request-id" id="ser-del" style="display:none">
+                                                    <table class="table table-striped table-bordered table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Favourite Services</th>
+                                                                <th>Status</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="tblbody"></tbody>
+                                                    </table>
+                                                </div>
+                                                <!-- /. Delet Or Update -->
+                                                <!-- /. From URL Get -->
+                                            </div>
+                                            <!-- /.modal-body -->
+                                            <div class="modal-footer">
+                                                <button name="button" class="btn btn-success" id="ad-btn" type="button" value="Submit" style="width:auto" data-dismiss="modal" aria-hidden="true" disabled>
+                                                    <i class="fa fa-check"></i> Update
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <!-- /.modal-content -->
+                                    </div>
+                                    <!-- /.modal-dialog -->
+                                </div>
+                            </div>
+                            <!-- ./Ad Model -->
+                            <div class="tab-pane fade" id="tab5default">
+                                <!-- Fixed Land Usage -->
+                                <div class="col-lg-6">
+                                    <div class="panel panel-default" id="PS">
+                                        <div class="panel-heading">
+                                            <i class="fa fa-user fa-fw"></i> Fixed Land Usage
+                                        </div>
+                                        <!-- /.panel-heading -->
+                                        <div class="panel-body">
+                                            <a href='@Url.Action("FixedPermission", "FixedPermission", new { aid = Encryption.encrypt("1") })'>
+                                                Apply for Fixed Land Usage
+                                            </a><hr>
+                                            @*<a href='@Url.Action("FixedPermission", "FixedPermission", new { aid = Encryption.encrypt("1") })'>
+                                            Cable Line Permission
+                                        </a><hr>
+                                        <a href='@Url.Action("FixedPermission", "FixedPermission", new { aid = Encryption.encrypt("2") })'>
+                                            Electricity Lines
+                                        </a><hr>
+                                        <a href='@Url.Action("FixedPermission", "FixedPermission", new { aid = Encryption.encrypt("5") })'>
+                                            Hospital
+                                        </a><hr>
+                                        <a href='@Url.Action("FixedPermission", "FixedPermission", new { aid = Encryption.encrypt("3") })'>
+                                            Industry Set up
+                                        </a><hr>
+                                        <a href='@Url.Action("FixedPermission", "FixedPermission", new { aid = Encryption.encrypt("4") })'>
+                                            Mining Permission
+                                        </a><hr>
+                                        <a href='@Url.Action("FixedPermission", "FixedPermission", new { aid = Encryption.encrypt("11") })'>
+                                            Other Permission
+                                        </a><hr>
+                                        <a href='@Url.Action("FixedPermission", "FixedPermission", new { aid = Encryption.encrypt("6") })'>
+                                            Power Plant
+                                        </a><hr>
+                                        <a href='@Url.Action("FixedPermission", "FixedPermission", new { aid = Encryption.encrypt("8") })'>
+                                            Road/Highway
+                                        </a><hr>
+                                        <a href='@Url.Action("FixedPermission", "FixedPermission", new { aid = Encryption.encrypt("7") })'>
+                                            School Permission
+                                        </a><hr>
+                                        <a href='@Url.Action("FixedPermission", "FixedPermission", new { aid = Encryption.encrypt("9") })'>
+                                            Sawmill Permission
+                                        </a><hr>
+                                        <a href='@Url.Action("FixedPermission", "FixedPermission", new { aid = Encryption.encrypt("10") })'>
+                                            Telephone Lines
+                                        </a>*@
+                                        </div>
+                                        <!-- <a href="#" class="btn btn-default btn-block">View All Alerts</a>-->
+                                    </div>
+                                    <!-- /.panel-body -->
+                                </div>
+                                <!-- /.Fixed Land Usage -->
+                                <!-- Stakeholder Services -->
+                                @*<div class="col-lg-6">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <i class="fa fa-user fa-fw"></i> Stakeholder Services
+                                    </div>
+                                    <!-- /.panel-heading -->
+                                    <div class="panel-body">
+                                        <a href="#">Contractor Registration</a><hr>
+                                        <a href="#">JFMC Member’s Registration</a><hr>
+                                        <a href="#">JFMC Registration</a><hr>
+                                        <a href="#">Work Progress Entry</a>
+                                    </div>
+                                </div>
+                                <!-- /.panel-body -->
+                            </div>*@
+                                <!-- /.Stakeholder Services -->
+                                <!-- Offense Services -->
+                                @*<div class="col-lg-6 min-hgt">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <i class="fa fa-user fa-fw"></i> Offense Services
+                                    </div>
+                                    <div class="panel-body">
+                                        <a href="#">Offense Reporting</a><hr>
+                                        <a href="#">Apply for Compounding</a><hr>
+                                        <a href="#">Apply for Release of Seized Item</a>
+                                    </div>
+                                </div>
+                            </div>*@
+                                <!-- /.Offense Services -->
+                                <!-- Education Service  -->
+                                <div class="col-lg-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <i class="fa fa-user fa-fw"></i> Education Services
+                                        </div>
+                                        <!-- /.panel-heading -->
+                                        <div class="panel-body">
+                                            <a href='@Url.Action("ResearchStudy", "ResearchStudy", new { aid = Encryption.encrypt("1") })'>Apply for Research in Wildlife</a>
+                                        </div>
+                                        <div class="panel-body">
+                                            <a href='@Url.Action("ResearchStudy", "ResearchStudy", new { aid = Encryption.encrypt("2") })'>Apply for Research in Forest</a>
+                                        </div>
+                                        <div class="panel-body">
+                                            <a href='@Url.Action("EducationVisit", "EducationVisit", new { aid = Encryption.encrypt("1") })'>Apply for Educational in wildlife</a>
+                                        </div>
+                                        <div class="panel-body">
+                                            <a href='@Url.Action("EducationVisit", "EducationVisit", new { aid = Encryption.encrypt("2") })'>Apply for Educational in forest</a>
+                                        </div>
+                                        <!-- <a href="#" class="btn btn-default btn-block">View All Alerts</a>-->
+                                    </div>
+                                    <!-- /.panel-body -->
+                                </div>
+                                <!-- /.Education Service  -->
+                                <!-- Online Booking -->
+                                <div class="col-lg-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <i class="fa fa-user fa-fw"></i> Online Booking
+                                        </div>
+                                        <!-- /.panel-heading -->
+                                        <div class="panel-body">
+                                            <a href='@Url.Action("BookTicket", "TicketBooking")'>Online Tickting</a>
+                                        </div>
+                                        <div class="panel-body">
+                                            <a href='@Url.Action("BookOnlineZoo", "BookOnlineZoo")'>Online Zoo</a>
+                                        </div>
+                                    </div>
+                                    <!-- /.panel-body -->
+                                </div>
+                                <!-- /. Online Booking -->
+                                <!-- Misc Service -->
+                                <div class="col-lg-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <i class="fa fa-user fa-fw"></i> Misc Services
+                                        </div>
+                                        <div class="panel-body">
+                                            <a href='@Url.Action("OrganisingCamp", "FilmShooting")'>Organizing Camps Permission</a><hr>
+                                            <a href='@Url.Action("FilmShooting", "FilmShooting")'>Film Shooting Permission</a>
+                                        </div>
+                                    </div>
+                                    <!-- /.panel-body -->
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <i class="fa fa-user fa-fw"></i> Grievances
+                                        </div>
+                                        <div class="panel-body">
+                                            <a target="_blank" href="~/WebForm1.aspx?val=Grievance">Apply Grievances</a><hr>
+                                            <a target="_blank" href="~/WebForm1.aspx?val=RTI">RTI</a>
+                                        </div>
+                                    </div>
+                                    <!-- /.panel-body -->
+                                </div>
+                                <!-- /.Misc Service -->
+                                <!-- Production Services -->
+                                <div class="col-lg-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <i class="fa fa-user fa-fw"></i> Production Services
+                                        </div>
+                                        <!-- /.panel-heading -->
+                                        <div class="panel-body">
+                                            <a href="#">Apply for Auction</a><hr>
+                                            <a href="#">Online Purchase of Produce</a><hr>
+                                            <a href="#">Permission for Transit</a>
+                                        </div>
+                                    </div>
+                                    <!-- /.panel-body -->
+                                </div>
+                                <!-- /.Production Services-->
+                                <!--  Grievance Services  -->
+                                @*<div class="col-lg-6">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <i class="fa fa-user fa-fw"></i> Grievance Services
+                                    </div>
+                                    <!-- /.panel-heading -->
+                                    <div class="panel-body">
+                                        <a href="#">Apply Grievances</a><hr>
+                                        <a href="#">File RTI</a>
+                                    </div>
+                                </div>
+                                <!-- /.panel-body -->
+                            </div>*@
+                                <!-- /. Grievance Services  -->
+                            </div>
+                            <div class="tab-pane fade" id="tab6default">
+                                <div class="col-sm-12">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-bordered table-hover" style="width:400px;">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Module Name</th>
+                                                    @*<th>User Name</th>*@
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var item in ViewData["FavouriteList"] as IEnumerable<FMDSS.Models.CitizenDashboard>)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            <a href="@item.PageURl">@item.PageName</a>
+                                                        </td>
+                                                        <td>
+                                                            @Html.DisplayFor(model => item.ModuleName)
+                                                        </td>
+                                                        @*<td>
+                                                        @Html.DisplayFor(model => item.UserName)
+                                                    </td>*@
+                                                        <td>
+                                                            <a href='@Url.Action("DeleteFavouritelink", "dashboard", new { ID = @item.FavouritelinkID })'>
+                                                                Delete
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!-- /.table-responsive -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /#page-wrapper -->
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+</script>
+<script>
+    $(function (e) {
+        $("#ad-ser").click(function () {
+            $("#ad-service").show();
+        });
+        $("#12").click(function () {
+            $("#ser-del").show();
+        });
+        $.ajax({
+            type: 'POST',
+            headers: {
+                __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+            },
+            url: RootUrl + 'dashboard/GetAddFavourite',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(''),
+            success: function (data) {
+                var tbody;
+                $.each(data, function (i, state) {
+                    tbody = "<div id='set' class='col-sm-6' style='padding-bottom:5px'><p style='display:none'>" + state.ServiceId + "</p><a class='btn btn-block btn-social btn-quicklinks' href=" + "../" + state.Controller + "/" + state.Action + ">" +
+                      "<i class='fa fa-thumbs-o-up'></i>" + state.FavItem + "</a>" + "<i class='fa fa-close crose'></i></div>"
+                    $('#tab4default').prepend(tbody);
+                });
+            }
+        });
+        $(document).on('click', '.crose', function () {
+            var item = $(this).closest("div").find('p');
+            //alert($('#set').find('a').text());
+            //alert(item.text());
+            var serviceid = item.text();
+            $.ajax({
+                type: 'POST',
+                headers: {
+                    __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+                },
+                url: RootUrl + 'dashboard/DelFavourite', // we are calling json method
+                dataType: 'json',
+                data: { ServiceId: serviceid },
+                success: function (data) {
+                    if (data == 'ok') {
+                        location.reload(true);
+                    }
+                    else {
+                        alert('Not Found');
+                    }
+                    $('#tblbody').empty();
+                }
+            });
+        });
+        $('#ob0').click(function (e) {
+            $('#Online,#Offense').hide();
+            $('#fxd,#Misc,#Resrch').hide();
+        });
+        $('#ob1').click(function (e) {
+            $('#ps').hide();
+            $('#Offense').hide();
+            $('#fxd,#Misc,#Resrch').hide();
+        });
+        $('#a2').click(function (e) {
+            $('#Online,#Offense').hide();
+            $('#fxd,#Misc').hide();
+        });
+        $('#a1').click(function (e) {
+            $('#Resrch,#Misc').hide();
+            $('#Online,#Offense').hide();
+        });
+        $('#a3').click(function (e) {
+            $('#fxd,#Resrch').hide();
+            $('#Online,#Offense').hide();
+        });
+        $('#a4').click(function (e) {
+            $('#fxd,#Resrch').hide();
+            $('#Online,#Misc').hide();
+        });
+        $('#btnAddservice').click(function (e) {
+            $('#btnStype').show();
+        });
+        $('#Online').click(function (e) {
+            $('#ps').hide();
+        });
+        $('#ps').click(function (e) {
+            $('#Online').hide();
+        });
+        // var ServiceId; var ServiceDesc
+        $('#fxd li').click(function (e) {
+            //ServiceId = $(this).attr('id');
+            //ServiceDesc = $(this).text();
+            $('#btnStype').hide();
+            $('#hdn_ServiceId').val($(this).attr('id'));
+            $('#hdn_ServiceDesc').val($(this).text());
+            var tbody = "<tr><td>" + $('#hdn_ServiceDesc').val() + "</td><td><button  class='btn btn-danger refresh'>Cancel</button></td></tr>"
+            $('#tblbody').append(tbody);
+            $("#ser-del").show();
+        });
+        $('#Resrch li').click(function (e) {
+            //ServiceId = $(this).attr('id');
+            //ServiceDesc = $(this).text();
+            $('#btnStype').hide();
+            $('#hdn_ServiceId').val($(this).attr('id'));
+            $('#hdn_ServiceDesc').val($(this).text());
+            var tbody = "<tr><td>" + $('#hdn_ServiceDesc').val() + "</td><td><button class='btn btn-danger refresh' data-dismiss='modal'>Cancel</button></td></tr>"
+            $('#tblbody').append(tbody);
+            $("#ser-del").show();
+        });
+        $('#Misc li').click(function (e) {
+            $('#btnStype').hide();
+            //ServiceId = $(this).attr('id');
+            //ServiceDesc = $(this).text();
+            $('#hdn_ServiceId').val($(this).attr('id'));
+            $('#hdn_ServiceDesc').val($(this).text());
+            var tbody = "<tr><td>" + $('#hdn_ServiceDesc').val() + "</td><td><button class='btn btn-danger refresh' data-dismiss='modal'>Cancel</button></td></tr>"
+            $('#tblbody').append(tbody);
+            $("#ser-del").show();
+        });
+        $('#Online li').click(function (e) {
+            $('#btnStype').hide();
+            //ServiceId = $(this).attr('id');
+            //ServiceDesc = $(this).text();
+            $('#hdn_ServiceId').val($(this).attr('id'));
+            $('#hdn_ServiceDesc').val($(this).text());
+            var tbody = "<tr><td>" + $('#hdn_ServiceDesc').val() + "</td><td><button class='btn btn-danger refresh' data-dismiss='modal'>Cancel</button></td></tr>"
+            $('#tblbody').append(tbody);
+            $("#ser-del").show();
+        });
+        $('#Offense li').click(function (e) {
+            $('#btnStype').hide();
+            //ServiceId = $(this).attr('id');
+            //ServiceDesc = $(this).text();
+            $('#hdn_ServiceId').val($(this).attr('id'));
+            $('#hdn_ServiceDesc').val($(this).text());
+            var tbody = "<tr><td>" + $('#hdn_ServiceDesc').val() + "</td><td><button class='btn btn-danger refresh' data-dismiss='modal'>Cancel</button></td></tr>"
+            $('#tblbody').append(tbody);
+            $("#ser-del").show();
+        });
+        $(document).on('click', '.refresh', function () {
+            location.reload(true);
+        });
+        $("#ad-btn").click(function () {
+            var ServiceId; var ServiceDesc;
+            var tblinfo = {
+                ServiceId: $('#hdn_ServiceId').val(),
+                ServiceDesc: $('#hdn_ServiceDesc').val()
+            }
+            $.ajax({
+                type: 'POST',
+                headers: {
+                    __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+                },
+                url: RootUrl + 'dashboard/AddFavourite',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(tblinfo),
+                success: function (data) {
+                    @*var tbody1;
+                 $.each(data, function (i, state) {
+                     tbody1 = "<div class='col-sm-6'><a class='btn btn-block btn-social btn-quicklinks' href='@Url.Action("FixedPermission", "FixedPermission")'>" +
+                       "<i class='fa fa-thumbs-o-up'></i>" + state.Text + " </a></div>"
+                     $('#tab4default').prepend(tbody1);
+                 });*@
+                    location.reload(true);
+                    $('#tblbody').empty();
+                }
+            });
+        });
+    });
+</script>

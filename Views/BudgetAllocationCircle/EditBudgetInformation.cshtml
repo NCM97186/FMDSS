@@ -1,0 +1,658 @@
+﻿@model FMDSS.Models.ForesterDevelopment.BudgetAllocation.ViewModel.View_BudgetAllocation_Circle
+@{
+    ViewBag.Title = "BudgetAllocationTocircle";
+    Layout = "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<style>
+    .hide {
+        display: none;
+    }
+
+    .center {
+        margin-top: 50%;
+    }
+</style>
+<script src="~/js/jquery.min.js"></script>
+
+
+<div id="page-wrapper-inn">
+
+    <div class="col-lg-12 pad">
+        <div class="col-lg-10">
+            <h1 class="page-header">Edit Budget Allocation (@Session["User"].ToString())</h1>
+        </div>
+
+    </div>
+    <div class="col-lg-12 pad">
+        @Html.Raw(TempData["Message"])
+    </div>
+
+    <div class="row">
+        <div class="panel panel-default col-lg-12">
+            <div class="panel panel-default col-lg-12">
+                @using (Html.BeginForm("EditBudgetInformation", "BudgetAllocationCircle", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data", id = "IdFor" }))
+                {
+                    <div class="col-lg-12">
+                        @Html.HiddenFor(x => x.BudgetHeadAllocationID, new { @id = "BudgetHeadAllocationID", name = "BudgetHeadAllocationID" })
+                        <div class="col-lg-12">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Select Any option <span class="mandatory"></span></label><br />
+
+                                    @Html.RadioButtonFor(s => s.ISCircleDivision, "Circle", new { @class = "ISCircleDivision", @checked = "checked" }) Circle
+                                    @Html.RadioButtonFor(s => s.ISCircleDivision, "Division", new { @class = "ISCircleDivision" }) Division
+                                    @Html.RadioButtonFor(s => s.ISCircleDivision, "HQ", new { @class = "ISCircleDivision" }) HQ
+                                    @Html.RadioButtonFor(s => s.ISCircleDivision, "Sanctuary", new { @class = "ISCircleDivision" }) Sanctuary 
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Office: <span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(x => x.CIRCLE_CODE, (IEnumerable<SelectListItem>)ViewBag.Circle, "--Select--", new { @class = "form-control", @id = "CIRCLE_CODE", name = "CIRCLE_NAME" })
+
+                                    @Html.DropDownListFor(model => model.CIRCLE_CODE, new List<SelectListItem> {
+                                                   new SelectListItem{Text="HQ",Value="HQ"}}, new { @class = "form-control hide", @id = "CircleHQ" })
+                                    @*<div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.BudgetHeadID)</div>*@
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="col-lg-6" id="divisions">
+                                <div class="form-group">
+                                    <label>Division: <span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(x => x.Division, (IEnumerable<SelectListItem>)ViewBag.Divisionlst, "--Select--", new { @class = "form-control ", @id = "Division", name = "DIV_CODE" })
+                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Division)</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6" id="SanctuaryVal">
+                                <div class="form-group">
+                                    <label>Sanctuary: <span class="mandatory">*</span></label> 
+                                    @Html.DropDownListFor(model => model.SanctuaryCode, (IEnumerable<SelectListItem>)ViewBag.SanctuaryList, new { @class = "form-control", @id = "Sanctuary" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Financial Year: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.FY_ID, (IEnumerable<SelectListItem>)ViewBag.FinancialYear, "--Select--", new { @class = "form-control", @id = "FY_ID", name = "FY_ID" })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.FY_ID)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label>Scheme: <span class="mandatory">*</span></label>
+
+                                @Html.DropDownListFor(x => x.SchemeID, (IEnumerable<SelectListItem>)ViewBag.Scheme, "--Select--", new { @class = "form-control", @id = "SchemeID", name = "SchemeID" })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.SchemeID)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-group">
+                                <label>Is Core Or Buffer: <span class="mandatory">*</span></label>
+
+                                @Html.DropDownListFor(model => model.IsCoreOrBuffer, new List<SelectListItem> {
+                                                   new SelectListItem{Text="BOTH",Value="BOTH"},new SelectListItem{Text="CORE",Value="CORE"},new SelectListItem{Text="BUFFER",Value="BUFFER"}}, new { @class = "form-control", @id = "IsCoreOrBuffer" })
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Budget Head: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.BudgetHeadID, (IEnumerable<SelectListItem>)ViewBag.BudgetHead, "--Select--", new { @class = "form-control", @id = "BudgetHeadID", name = "BudgetHeadID" })
+                                @*<div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.BudgetHeadID)</div>*@
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Budget Sub Head: <span class="mandatory"></span></label>
+                                @Html.DropDownListFor(x => x.SubBudgetHeadID, (IEnumerable<SelectListItem>)ViewBag.SubbudgetHead, "--Select--", new { @class = "form-control", @id = "SubBudgetHeadID", name = "SubBudgetHeadID" })
+                                @*<div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.SubBudgetHeadID)</div>*@
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Activity : <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.ActivityID, (IEnumerable<SelectListItem>)ViewBag.Activity, "--Select--", new { @class = "form-control", @id = "ActivityID", name = "ActivityID" })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.ActivityID)</div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Sub Activity: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.SubActivityID, (IEnumerable<SelectListItem>)ViewBag.SubActivity, "--Select--", new { @class = "form-control", @id = "SubActivityID", name = "SubActivityID" })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.SubActivityID)</div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Site Name: <span class="mandatory"></span></label>
+                                    @Html.TextBoxFor(x => x.SiteName, new { @class = "form-control", @id = "SiteName", name = "SiteName" })
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label><span class="mandatory"></span></label><br />
+                                    @Html.RadioButtonFor(s => s.IsRecurring, "0", new { @class = "IsRecurring" }) Recurring
+                                    @Html.RadioButtonFor(s => s.IsRecurring, "1", new { @class = "IsRecurring" }) Non–Recurring
+                                    @Html.RadioButtonFor(s => s.IsRecurring, "2", new { @class = "IsRecurring" }) None
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Unit: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.Unit, (IEnumerable<SelectListItem>)ViewBag.Sub_Activity_Unit, "--Select--", new { @class = "form-control", @id = "Unit", name = "Unit" })
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Number: <span class="mandatory"></span></label>
+                                @Html.TextBoxFor(s => s.NumberPerUnit, new { @class = "form-control", @id = "NumberPerUnit" })
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Rate: <span class="mandatory"></span></label>
+                                @Html.TextBoxFor(s => s.RatePerUnit, new { @class = "form-control", @id = "RatePerUnit" })
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Available Amount: (lakh)<span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(x => x.TotalAmount, new { @class = "form-control", @id = "AvailableAmount", name = "AvailableAmount" })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.TotalAmount)</div>
+
+                            </div>
+                        </div>
+                        @*<div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Release Amount: (lakh)<span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.RemaningAmount, new { @class = "form-control", @id = "RemaningAmount", name = "RemaningAmount" })
+                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.RemaningAmount)</div>
+                                </div>
+                            </div>*@
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Allocated Amount: (lakh)<span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(x => x.AllocatedAmount, new { @class = "form-control", @id = "AllocatedAmount", name = "AllocatedAmount" })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.AllocatedAmount)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Extra Allocated Amount: (lakh)<span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(x => x.ExtraAllocatedAmount, new { @class = "form-control", @id = "ExtraAllocatedAmount", name = "ExtraAllocatedAmount" })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.ExtraAllocatedAmount)</div>
+                            </div>
+                        </div>
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <button type="submit" class="btn btn-success confirm-toggle" name="Command" value="submit" id="Savepermission">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+
+                                <button type="button" name="Command" value="Cancel" class="btn btn-danger" >
+                                    <i class="fa fa-times fa-fw"></i> @Html.ActionLink("Cancel", "AddBudgetInformation", "BudgetAllocationCircle")
+                                </button>
+
+                            </div>
+                        </div>
+                    </div>
+
+                }
+                <!-- /.Row -->
+            </div>
+
+            <!-- /.panel-body -->
+
+        </div>
+        <!-- /.panel -->
+
+    </div>
+
+
+</div>
+<script>
+    var RootURl = '@Url.Content("~/")';
+</script>
+<script>
+
+    $(function () {
+
+        $("#AllocatedAmount").keypress(function (event) {
+
+            if ((event.which != 46 || $(this).val().indexOf('.') != -1) && (event.which < 48 || event.which > 57)) {
+                if ((event.which != 46 || $(this).val().indexOf('.') != -1)) {
+                    alert('Multiple Decimals are not allowed');
+                }
+                event.preventDefault();
+            }
+            if (this.value.indexOf(".") > -1 && (this.value.split('.')[1].length > 4)) {
+                alert('Five numbers only allowed after decimal point');
+                event.preventDefault();
+            }
+
+        });
+        $("#AllocatedAmount").blur(function () {
+            if ($(this).val() != '') {
+                $("#AllocatedAmount").val(parseFloat($(this).val()).toFixed(4));
+            }
+        });
+
+
+
+
+        $('#BudgetHeadID').change(function (e) {
+            GetSubBudgetHead();
+        });
+
+        //$('#SchemeID').change(function (e) {
+        //    GetActivity();
+        //});
+        var ActivityId;
+        $('#ActivityID').change(function (e) {
+            GetSubActivity();
+
+        });
+        $('#Division').change(function (e) {
+            GetSantauary();
+
+        });
+        $('#Savepermission').click(function () {
+
+            if ($('#FY_ID').val() == '') {
+                $('#FY_ID').focus();
+                return false;
+            }
+            if ($('#SchemeID').val() == '') {
+
+                $('#SchemeID').focus();
+                return false;
+            }
+            if ($('#ActivityID').val() == 0 || $('#ActivityID').val() == '') {
+                $('#ActivityID').focus();
+                return false;
+            }
+            if ($('#SubActivityID').val() == 0 || $('#SubActivityID').val() == '') {
+
+                $('#SubActivityID').focus();
+                return false;
+            }
+            if ($('#BudgetHeadID').val() == '' || $('#BudgetHeadID').val() == 0) {
+
+                $('#BudgetHeadID').focus();
+                return false;
+            }
+            if ($('#Unit').val() == '' || $('#Unit').val() == 0) {
+
+                $('#Unit').focus();
+                return false;
+            }
+
+            //if ($('#CIRCLE_CODE').val() == '' || $('#CIRCLE_CODE').val() == 'undefined') {
+            //    $('#CIRCLE_CODE').focus();
+            //    return false;
+            //}
+
+            if ($(".ISCircleDivision:checked").val() == "Circle") {
+                if ($('#CIRCLE_CODE').val() == '' || $('#CIRCLE_CODE').val() == 'undefined') {
+                    $('#CIRCLE_CODE').focus();
+                    return false;
+                }
+            }
+            else if ($(".ISCircleDivision:checked").val() == "Division") {
+                if ($('#Division').val() == '' || $('#Division').val() == '0' || $('#Division').val() == 'undefined') {
+                    $('#Division').focus();
+                    return false;
+                }
+            }
+            else if ($(".ISCircleDivision:checked").val() == "HQ") {
+                if ($('#CircleHQ').val() == '' || $('#CircleHQ').val() == 'undefined') {
+                    $('#CircleHQ').focus();
+                    return false;
+                }
+            }
+            else if ($(".ISCircleDivision:checked").val() == "Sanctuary") {
+                if ($('#Division').val() == '' || $('#Division').val() == '0' || $('#Division').val() == 'undefined') {
+                    $('#Division').focus();
+                    return false;
+                }
+                if ($('#Sanctuary').val() == '' || $('#Sanctuary').val() == '0' || $('#Sanctuary').val() == 'undefined') {
+                    $('#Sanctuary').focus();
+                    return false;
+                }
+            }
+            if ($('#AllocatedAmount').val() == '' || parseFloat($('#AllocatedAmount').val()) == 0) {
+                $('#AllocatedAmount').focus();
+                return false;
+            }
+            if (parseFloat($('#AvailableAmount').val()) < parseFloat($('#AllocatedAmount').val())) {
+                alert('Allocated amount cannot be exceed than Available amount!!!');
+                $('#AllocatedAmount').focus();
+                return false;
+            }
+            else {
+                if (parseFloat($("#AllocatedAmount").val()) <= parseFloat($("#AvailableAmount").val())) {
+                    //$("#RemaningAmount").val(parseFloat($("#RemaningAmount").val()) - parseFloat($("#AllocatedAmount").val()));
+                }
+                else {
+                    alert('Allocated amount cannot be exceed than Available amount!!!');
+                    $('#AllocatedAmount').focus();
+                    return false;
+                }
+
+                var Division = '0';
+                if ($("#divisions").attr("style") == 'display:block' && $(".ISCircleDivision:checked").val() == "Division") {
+                    if ($('#Division').val() != '' && $('#Division').val() != '0' && $('#Division').val() != 'undefined') {
+                        Division = $('#Division').val();
+                        Circles = $("#CIRCLE_CODE").val();
+                    }
+                    else {
+                        $('#Division').focus();
+                        return false;
+                    }
+                }
+                var Sanctuary = '0';
+                if ($("#divisions").attr("style") == 'display:block' && $(".ISCircleDivision:checked").val() == "Sanctuary") {
+                    if ($('#Division').val() != '' && $('#Division').val() != '0' && $('#Division').val() != 'undefined') {
+                        Division = $('#Division').val();
+                        Circles = $("#CIRCLE_CODE").val();
+                    }
+                    else {
+                        $('#Division').focus();
+                        return false;
+                    }
+                    if ($('#Sanctuary').val() != '' && $('#Sanctuary').val() != '0' && $('#Sanctuary').val() != 'undefined') {
+                        Sanctuary = $("#Sanctuary").val();
+                    }
+                    else {
+                        $('#Sanctuary').focus();
+                        return false;
+                    }
+                }
+                if ($(".ISCircleDivision:checked").val() == "Circle" && $("#CIRCLE_CODE option:selected").val() != "") {
+                    Circles = $("#CIRCLE_CODE").val();
+                }
+                if ($(".ISCircleDivision:checked").val() == "HQ" && $("#CircleHQ option:selected").val() != "") {
+                    Circles = $("#CircleHQ").val();
+                }
+
+            }
+        });
+    });
+
+    var BudgetHeadID;
+    function GetSubBudgetHead() {
+        $("#SubBudgetHeadID").empty();
+        var option = $("<option />");
+        option.attr("value", '0').text('--Select--');
+        $('#SubBudgetHeadID').append(option);
+        var budgetHead = $('#BudgetHeadID').val();
+        BudgetHeadID = budgetHead;
+        $.ajax({
+            type: 'POST',
+            url: RootURl + 'BudgetAllocationCircle/GetBudgetSubHead',
+            dataType: 'json',
+            data: { budgetHead: budgetHead },
+            success: function (data) {
+                $.each(data, function (i, items) {
+
+                    $("#SubBudgetHeadID").append('<option value="' + items.Value + '">' +
+                     items.Text + '</option>');
+
+                });
+                $("#SubBudgetHeadID option").each(function () {
+                    if ($(this).text().trim().toLowerCase() == 'none') {
+                        $(this).attr("selected", "selected");
+                    }
+                });
+
+            },
+
+        });
+    }
+
+    var SchemeID;
+    function GetActivity() {
+
+        $("#ActivityID").empty();
+        var option = $("<option />");
+        option.attr("value", '0').text('--Select--');
+        $('#ActivityID').append(option);
+        if ($('#SchemeID').val() != '') {
+            SchemeID = $('#SchemeID').val();
+            $.ajax({
+                type: 'POST',
+                url: RootURl + "BudgetAllocationCircle/GetMasterActivity",
+                dataType: 'json',
+                data: { Action: 'Activity', ID: '0' },
+                success: function (data) {
+                    $.each(data, function (i, items) {
+
+                        $("#ActivityID").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+
+                    });
+                },
+
+            });
+        }
+    }
+
+    var ActivityId;
+    function GetSubActivity() {
+        $("#SubActivityID").empty();
+        var ActivityID = $('#ActivityID').val();
+        ActivityId = ActivityID;
+        if (ActivityID != '') {
+            var option = $("<option />");
+            option.attr("value", '0').text('--Select--');
+            $('#SubActivityID').append(option);
+            $.ajax({
+                type: 'POST',
+                url: RootURl + "BudgetAllocationCircle/GetMasterActivity",
+                dataType: 'json',
+                data: { Action: 'SubActivity', ID: ActivityID },
+                success: function (data) {
+                    $.each(data, function (i, items) {
+
+                        $("#SubActivityID").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+
+                    });
+                    $("#SubActivityID option").each(function () {
+                        if ($(this).text().trim().toLowerCase() == 'none') {
+                            $(this).attr("selected", "selected");
+                        }
+                    });
+                },
+
+            });
+        }
+    }
+    function GetSantauary() {
+        $("#Sanctuary").empty();
+        $("#Sanctuary").append('<option value="0">--Select--</option>');
+        if ($(".ISCircleDivision:checked").val() == "Sanctuary" && $("#Division").val() != "" && $("#Division").val() != "0") {
+            var DIV_CODE = $("#Division").val();
+            $.ajax({
+                type: 'GET',
+                url: RootURl + 'BudgetAllocationCircle/GetSanctuaryList',
+                dataType: 'json',
+                data: { Div_Code: DIV_CODE },
+                success: function (result) {
+                    $.each(result, function (i, items) {
+                        $("#Sanctuary").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+
+                    });
+                },
+
+            });
+        }
+        else {
+            $("#Sanctuary").append('<option value="0">--Select--</option>');
+
+        }
+    }
+    function TableList() {
+
+        $.ajax({
+            type: 'POST',
+            url: RootURl + "BudgetAllocationCircle/BudgetAllocationCircleList",
+            dataType: 'json',
+            data: {},
+            success: function (data) {
+
+                $.each(data, function (i, item) {
+
+                    var id = "'" + item.rowid + "'";
+                    var rowdata = "<tr><td style=display:none;>" + item.rowid + "</td><td style=display:none;>" + item.ISCircleDivision + "</td><td>" + 'BUDGETALLOCATION-' + item.BudgetHeadAllocationID + "</td><td>" + item.CIRCLE_NAME + "</td><td>" + item.SchemeName + "</td><td>" + item.ActivityName + "</td><td>" + item.BudgetHead + "</td><td>" + parseFloat(item.AllocatedAmount).toFixed(2) + "</td><td>" + "<button type=button class='btn btn-danger btn-circle btndelete' style=cursor:pointer ><i class='fa fa-times'></i></button>" + "</td></tr>";
+                    $("#tblDetails").append(rowdata);
+                });
+            },
+
+        });
+    }
+    function AvaliableAmount() {
+
+        var values = {
+            FY_ID: $('#FY_ID').val(),
+            BudgetHeadID: $('#BudgetHeadID').val(),
+            SubBudgetHeadID: $('#SubBudgetHeadID').val(),
+
+            SchemeID: $('#SchemeID').val(),
+            ActivityID: $('#ActivityID').val(),
+            SubActivityID: $('#SubActivityID').val()
+
+        }
+        $.ajax({
+            type: 'POST',
+            url: RootURl + 'BudgetAllocationCircle/GetAllocatedAmtDetails',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(values),
+            success: function (data) {
+
+                $('#AvailableAmount').val(parseFloat(data.AvaliableAmount).toFixed(2));
+                $('#RemaningAmount').val(parseFloat(data.RemaningAmount).toFixed(2));
+                $('#BudgetHeadAllocationID').val(data.BudgetAllocationHeadId);
+
+            },
+
+        });
+
+    }
+    function reload() {
+        location.reload(true);
+    }
+
+    $(".ISCircleDivision").change(function () {
+        $("#CIRCLE_CODE").val('');
+        if ($(".ISCircleDivision:checked").val() == "Sanctuary") {
+            $("#divisions").attr("style", "display:block");
+            $("#SanctuaryVal").removeClass('hide');
+            $("#CIRCLE_CODE").removeClass('hide');
+            $("#CircleHQ").addClass('hide');
+
+        }
+
+        else if ($(".ISCircleDivision:checked").val() == "HQ") {
+
+            $("#divisions").attr("style", "display:none");
+            $("#CIRCLE_CODE").addClass('hide');
+            $("#CircleHQ").removeClass('hide');
+            $("#SanctuaryVal").addClass('hide');
+
+        }
+        else if ($(".ISCircleDivision:checked").val() == "Division") {
+            $("#divisions").attr("style", "display:block");
+            $("#CircleHQ").addClass('hide');
+            $("#CIRCLE_CODE").removeClass('hide');
+            $("#SanctuaryVal").addClass('hide');
+        }
+        else {
+            $("#divisions").attr("style", "display:none");
+            $("#CircleHQ").addClass('hide');
+            $("#CIRCLE_CODE").removeClass('hide');
+            $("#SanctuaryVal").addClass('hide');
+        }
+
+    });
+    var RootUrl = '@Url.Content("~/")';
+    $('#CIRCLE_CODE').change(function (e) {
+        if ($(".ISCircleDivision:checked").val() == "Division" || $(".ISCircleDivision:checked").val() == "Sanctuary") {
+            $("#Division").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MISCitizen/DivisionData', // we are calling json method
+                dataType: 'json',
+                data: { circleCode: $("#CIRCLE_CODE").val() },
+                success: function (circle) {
+                    $.each(circle, function (i, items) {
+                        $("#Division").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        }
+    });
+
+
+
+
+
+
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#SubBudgetHeadID").append("<option value='0'>None</option>");
+        if ($("#SubBudgetHeadID").val() == "") {
+            $("#SubBudgetHeadID").val("0");
+        }
+
+        if ($(".ISCircleDivision:checked").val() == "Sanctuary") {
+            $("#divisions").attr("style", "display:block");
+            $("#SanctuaryVal").removeClass('hide');
+            $("#CIRCLE_CODE").removeClass('hide');
+            $("#CircleHQ").addClass('hide');
+
+        }
+
+        else if ($(".ISCircleDivision:checked").val() == "HQ") {
+
+            $("#divisions").attr("style", "display:none");
+            $("#CIRCLE_CODE").addClass('hide');
+            $("#CircleHQ").removeClass('hide');
+            $("#SanctuaryVal").addClass('hide');
+
+        }
+        else if ($(".ISCircleDivision:checked").val() == "Division") {
+            $("#divisions").attr("style", "display:block");
+            $("#CircleHQ").addClass('hide');
+            $("#CIRCLE_CODE").removeClass('hide');
+            $("#SanctuaryVal").addClass('hide');
+        }
+        else {
+            $("#divisions").attr("style", "display:none");
+            $("#CircleHQ").addClass('hide');
+            $("#CIRCLE_CODE").removeClass('hide');
+            $("#SanctuaryVal").addClass('hide');
+        }
+
+    });
+</script>

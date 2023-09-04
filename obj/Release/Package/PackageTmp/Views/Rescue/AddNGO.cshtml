@@ -1,0 +1,423 @@
+﻿@model FMDSS.Models.Rescue.NGOModel
+
+@{
+    ViewBag.Title = "AddNGO";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var objectID = string.IsNullOrEmpty(Model.WaterHoleVendorDetailsID) ? 0 : Convert.ToInt64(Model.WaterHoleVendorDetailsID);
+}
+
+
+@using (Html.BeginForm("AddNGO", "Rescue", FormMethod.Post, new { enctype = "multipart/form-data", id = "main" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    <div id="mainDiv" class="col-lg-9">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                @if (string.IsNullOrEmpty(Model.WaterHoleVendorDetailsID))
+                {
+                    <span>Add NGO</span>
+                }
+                else
+                {
+                    @Html.HiddenFor(m => m.WaterHoleVendorDetailsID)
+                    @Html.HiddenFor(m => m.RegNumber)
+                    <span>Edit NGO</span>
+                }
+            </div>
+            <div class="panel-body">
+                @Html.Partial("_ErrorMsg")
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Circle Name:<span class="mandatory">*</span></label>
+                        @Html.DropDownListFor(d => d.Circle_Code, (IEnumerable<SelectListItem>)ViewBag.CCODE, "--Select--", new { @class = "form-control required", id = "ddl_circleCode", onchange = "Circle_Onchange(this);" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.Circle_Code)</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Division Name:<span class="mandatory">*</span></label>
+                        @if (ViewBag.DivisionCode == null)
+                        {
+                            @Html.DropDownListFor(d => d.Division_Code, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control required", id = "ddl_divisionCode", onchange = "Division_Onchange(this);" })
+                        }
+                        else
+                        {
+                            @Html.DropDownListFor(d => d.Division_Code, (IEnumerable<SelectListItem>)ViewBag.DivisionCode, "--Select--", new { @class = "form-control required", id = "ddl_divisionCode", onchange = "Division_Onchange(this);" })
+                        }
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.Division_Code)</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Range Name:<span class="mandatory">*</span></label>
+                        @if (ViewBag.RangeCode == null)
+                        {
+                            @Html.DropDownListFor(d => d.Range_Code, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control required", id = "ddlRange" })
+                        }
+                        else
+                        {
+                            @Html.DropDownListFor(d => d.Range_Code, (IEnumerable<SelectListItem>)ViewBag.RangeCode, "--Select--", new { @class = "form-control required", id = "ddlRange" })
+                        }
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.Range_Code)</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 hide">
+                    <div class="form-group">
+                        <label>Village Name:</label>
+                        @Html.DropDownListFor(d => d.Village_Code, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "ddlVillageCode", @class = "form-control" })
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Animal Category<span class="mandatory">*</span></label>
+                        @Html.DropDownList("ddlAnimalID", (IEnumerable<SelectListItem>)ViewBag.Animals, new { @class = "form-control common multi-ddl-height-102 required", multiple = "multiple", onchange = "ddlAnimalID_Change(this)" })
+                        @Html.HiddenFor(X => X.AnimalID, new { id = "hdnAnimalID" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.AnimalID)</div>
+                    </div>
+                </div>
+                <div id="divChildAnimal" class="col-lg-4">
+                    <div class="form-group">
+                        <label>Animal Name<span class="mandatory">*</span></label>
+                        @Html.DropDownList("ddlChildAnimalID", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control common multi-ddl-height-102 required", multiple = "multiple", onchange = "ddlChildAnimalID_Change(this)" })
+                        @Html.HiddenFor(X => X.ChildAnimalID, new { id = "hdnChildAnimalID" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.ChildAnimalID)</div>
+
+                    </div>
+                </div>
+                <div id="divOtherAnimal" class="col-lg-4 hide">
+                    <div class="form-group">
+                        <label>Animal Name<span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.OtherAnimalName, new { @class = "form-control common" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.OtherAnimalName)</div>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <label>Staff Details:</label>
+                    <div class="form-group">
+                        <table id="tblStaffDetails" class="table table-striped table-bordered table-hover notranslate">
+                            <thead>
+                                <tr style="color:#999; background-color:#ddd;">
+                                    <td colspan="4"><i>NGO Staff Details</i></td>
+                                </tr>
+                                <tr>
+                                    <th>Name<span class="mandatory">*</span></th>
+                                    <th>Mobile</th>
+                                    <th>Age</th>
+                                    <th>Photo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbStaffDetails" class="tbviewdet">
+
+                                @if (Model.StaffList != null)
+                                {
+                                    for (int i = 0; i < Model.StaffList.Count; i++)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @Html.HiddenFor(x => Model.StaffList[i].ID)
+                                                @Html.TextBoxFor(s => Model.StaffList[i].Name, new { id = "txtName_" + i, size = "15", @readonly = "readonly" })
+                                            </td>
+                                            <td>@Html.TextBoxFor(s => Model.StaffList[i].Mobile, new { id = "txtMobile_" + i, size = "15", @readonly = "readonly", onkeypress = "AllowNumberOnly(event)", maxlength = "10" })</td>
+                                            <td>@Html.TextBoxFor(s => Model.StaffList[i].Age, new { id = "txtAge_" + i, size = "15", @readonly = "readonly", onkeypress = "AllowNumberOnly(event)", maxlength = "2" })</td>
+                                            <td><a target="_blank" href="@Url.Content(Model.StaffList[i].DisplayPhotoURL)">View Photo</a></td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr class="rowSkip">
+                                        <td colspan="4">No record found.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            @if (Model.StaffList == null)
+                            {
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="4"><div class="previewModehide"><a onclick='AddNewRowNGO(@Convert.ToInt64(Model.WaterHoleVendorDetailsID))' href="javascript:void(0)">Add New Row</a></div></td>
+                                    </tr>
+                                </tfoot>
+                            }
+                        </table>
+
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Upload Documents</label>
+                        <input type="file" multiple="" class="form-control common " name="UploadNGODocuments" id="UploadNGODocuments" />
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Upload Affidavit</label>
+                        <input type="file" multiple="" class="form-control common" name="UploadNGOAffidavit" id="UploadNGOAffidavit" />
+                    </div>
+                </div>
+
+                <div class="col-lg-4 ">
+                    <div class="form-group">
+                        <label>Pincode:<span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.PinCode, new { @class = "form-control required" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.PinCode)</div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>NGO Name<span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.NameofVendor, new { @class = "form-control required" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.NameofVendor)</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 ">
+                    <div class="form-group">
+                        <label>Representative Name:<span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.RepresentativeName, new { @class = "form-control required" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.RepresentativeName)</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 ">
+                    <div class="form-group">
+                        <label>Mobile No:</label><span class="mandatory">*</span>
+                        @Html.TextBoxFor(model => model.MobileNumber, new { @class = "form-control required" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.MobileNumber)</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 ">
+                    <div class="form-group">
+                        <label>NGO SSOID:<span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.VendorSSOId, new { @class = "form-control required" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.VendorSSOId)</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 ">
+                    <div class="form-group">
+                        <label>Registration Purpose:<span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.PurposeforRegistration, new { @class = "form-control required" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.PurposeforRegistration)</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="form-group" style="padding-top:29px;">
+                        <label>IsActive:</label>
+                        @Html.CheckBox("isActive", true)
+                    </div>
+                </div>
+
+                <div class="col-lg-6 un-bold">
+                    <label></label>
+                    <div class="input-group">
+                        <div class="form-group">
+                            <input type="submit" class="btn btn-success" value="Submit" name="buttonType" />
+                            @*@if (!string.IsNullOrEmpty(Model.WaterHoleVendorDetailsID))
+                                {
+                                <input type="button" class="btn btn-danger" value="Reject" name="buttonType" onclick="@("location.href='" + @Url.Action("RejectNGO", "Rescue", new { ObjectID = Model.WaterHoleVendorDetailsID }) + "'");" />
+                                }*@
+                            <input type="button" class="btn btn-info" value="Back to List" name="buttonType" onclick="location.href='@Url.Action("NGOIndex")'" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script src="~/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js" type="text/javascript"></script>
+<script src="~/js/bootstrap-multiselect.js"></script>
+<link href="~/css/bootstrap-multiselect.css" rel="stylesheet" />
+<script src="~/Scripts/Controller/Common.js"></script>
+<script>
+    var RootUrl = '@Url.Content("~/")';
+    $('#ddlAnimalID,#ddlChildAnimalID').multiselect({
+        includeSelectAllOption: true,
+        maxHeight: 250
+    });
+    if ('@Model.AnimalID' != '0' && '@Model.AnimalID' != '') {
+        var oCatList = '@Model.AnimalID'.split(',');
+        $.each(oCatList, function (i, cntrlVal) {
+            $("#ddlAnimalID").find("option[value=" + cntrlVal + "]").prop("selected", "selected");
+        });
+        $("#ddlAnimalID").multiselect('refresh');
+
+        if ('@Model.ChildAnimalID' != '0' && '@Model.ChildAnimalID' != '') {
+            BindChildAnimalMultiple_Edit('@Model.AnimalID', '@Model.ChildAnimalID');
+        }
+    }
+
+    function BindChildAnimalMultiple_Edit(parentID, selectedValue) {
+        var strDropdown = '';
+        if (parentID != '') {
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + "Rescue/GetChildAnimalByParentAnimalId",
+                dataType: 'json',
+                async: true,
+                data: { "parentId": parentID, selectedValue: selectedValue },
+                success: function (response) {
+                    $.each(response, function (i, j) {
+                        strDropdown += "<option value='" + j.Value + "'>" + j.Text + "</option>";
+                    });
+
+                    $("#ddlChildAnimalID").html(strDropdown);
+                    $.each(selectedValue.split(','), function (i, cntrlVal) {
+                        $("#ddlChildAnimalID").find("option[value=" + cntrlVal + "]").prop("selected", "selected");
+                    });
+                    $('#ddlChildAnimalID').multiselect('rebuild');
+                }
+            });
+        }
+        else {
+            $("#ddlChildAnimalID").html(strDropdown);
+            $('#ddlChildAnimalID').multiselect('rebuild');
+        }
+    }
+
+
+
+    function ddlAnimalID_Change(cntrl) {
+        $('#hdnAnimalID').val($(cntrl).val().toString());
+        var strChildAnimalID = '';
+        if ($(cntrl).val()!=null && $(cntrl).val().indexOf("4") != -1) {
+            $('#divChildAnimal').hide();
+            $('#divOtherAnimal').removeClass("hide");
+        }
+        else {
+            $('#divChildAnimal').show();
+            $('#divOtherAnimal').addClass("hide");
+        }
+
+        if (cntrl.value != '') {
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + "Rescue/GetChildAnimalByParentAnimalId",
+                dataType: 'json',
+                async: true,
+                data: { "parentId": $(cntrl).val().toString() },
+                success: function (response) {
+                    $.each(response, function (i, j) {
+                        strChildAnimalID += "<option value='" + j.Value + "'>" + j.Text + "</option>";
+                    });
+
+                    $("#ddlChildAnimalID").html(strChildAnimalID);
+                    $('#ddlChildAnimalID').multiselect('rebuild');
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve data.' + ex);
+                }
+            });
+        }
+        else {
+            $("#ddlChildAnimalID").html(strChildAnimalID);
+            $('#ddlChildAnimalID').multiselect('rebuild');
+        }
+
+    }
+
+    function ddlChildAnimalID_Change(cntrl) {
+        $('#hdnChildAnimalID').val($(cntrl).val().toString());
+    }
+
+    function Circle_Onchange(cntrl) {
+        $("#ddl_divisionCode").empty();
+        $.ajax({
+            type: 'POST',
+            url: 'DivisionData', // we are calling json method
+            dataType: 'json',
+            data: { circleCode: cntrl.value },
+            success: function (response) {
+                $.each(response, function (i, items) {
+                    $("#ddl_divisionCode").append('<option value="' + items.Value + '">' +
+                        items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve data.' + ex);
+            }
+        });
+    }
+
+
+    function Division_Onchange(cntrl) {
+        $("#ddlRange").empty();
+        $.ajax({
+            type: 'POST',
+            url: 'RangeData', // we are calling json method
+            dataType: 'json',
+            data: { divisionCode: cntrl.value },
+            success: function (response) {
+                $.each(response, function (i, items) {
+                    $("#ddlRange").append('<option value="' + items.Value + '">' +
+                        items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve data.' + ex);
+            }
+        });
+    }
+
+    $("#ddlRange").bind("change", function () {
+        //$('#ddlVillages').empty();
+        //$("#ddlVillages").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+
+        //$('#NurseryInchargeSSOID').empty();
+        //$("#NurseryInchargeSSOID").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+
+        //var values = {
+        //    RangeCode: $("#ddlRange option:selected").val()
+        //};
+
+        //$.ajax({
+        //    type: 'POST',
+        //    contentType: 'application/json; charset=utf-8',
+        //    url: RootUrl + 'ManageNursery/GetSSOIDbyRange',
+        //    data: JSON.stringify(values),
+        //    success: function (data) {
+        //        $.each(data, function (i, items) {
+        //            $("#NurseryInchargeSSOID").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+        //        });
+        //    },
+        //    traditional: true,
+        //    error: function (data) { console.log(data) }
+    });
+
+    function AddNewRowNGO(objectID) {
+        var isValid = true;
+        $('#tblStaffDetails').find('input[id^="txtName_"]').each(function () {
+            if ($(this).val() == '') {
+                alert('Please enter current row details first.');
+                isValid = false;
+                return false;
+            }
+        })
+
+        if (isValid) {
+            var cIndx = $('#tbStaffDetails').find('tr:not(.rowSkip)').length;
+
+            $.ajax({
+                type: 'GET',
+                data: { "currentRowIndex": cIndx, "objectID": objectID },
+                url: RootUrl + "Rescue/AddNewRowForNGO",
+                dataType: 'html',
+                success: function (data) {
+                    $('#tbStaffDetails').find('.rowSkip').remove();
+                    $('#tbStaffDetails').append(data);
+                },
+                error: function (ex) {
+                    console.log(ex.error);
+                }
+            });
+        }
+    }
+</script>

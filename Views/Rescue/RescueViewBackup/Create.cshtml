@@ -1,0 +1,561 @@
+﻿@model FMDSS.Models.Rescue.RescueModel
+
+@{
+    ViewBag.Title = "Create Rescue Request";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style type="text/css">
+    .field-validation-error {
+        color: #a94442;
+    }
+
+    .required-input {
+        color: red;
+    }
+</style>
+<div class="row">
+    <div class="col-lg-9">
+        <h1 class="page-header">New Rescue Report</h1>
+    </div>
+    <div>
+        @if (!string.IsNullOrEmpty(Convert.ToString(ViewBag.ErrorMsg)))
+        {
+            <label>@Convert.ToString(ViewBag.ErrorMsg)</label>
+        }
+    </div>
+    <!-- /.col-lg-12 -->
+    @using (Html.BeginForm("Create", "Rescue", FormMethod.Post, new { enctype = "multipart/form-data", id = "main" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true)
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    New Rescue Report
+                </div>
+                <div class="panel-body">
+                    <!-- Institute/Organizational Details -->
+                    <div class="col-lg-12 Institutional">
+                        <label>Applicant Details:</label>
+                        <div class="divider"></div>
+                    </div>
+                    @if (Convert.ToString(ViewBag.RoleName) != "CITIZEN")
+                {
+                        <div class="col-lg-12 un-bold">
+                            <div class="form-group">
+                                <label>Reported By</label>
+
+                                <div class="input-group">
+
+                                    <input type="radio" class="reportedby_me required" checked="checked" name="ReportedBy" value="Citizen" id="rbCitizen" /> <label for="rbCitizen">Citizen</label>
+                                    <input type="radio" class="reportedby_me required" name="ReportedBy" value="Officer" id="rbOfficer" /> <label for="rbOfficer">Officer</label>
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <input type="hidden" name="ReportedBy" value="Citizen" />
+
+                    }
+                    <div id="applicantdetails">
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Citizen Name</label><span class="required-input">*</span>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                    
+                                    @Html.TextBoxFor(model => model.CitizenName, new { @class = "form-control required", @readonly = "readonly" })
+                                </div>
+                                @Html.ValidationMessageFor(model => model.CitizenName)
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Citizen EmailID</label><span class="required-input">*</span>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-envelope"></i></span>
+                                    @Html.TextBoxFor(model => model.CitizenEmailID, new { @class = "form-control required", type = "email", @readonly = "readonly" })
+                                </div>
+                                @Html.ValidationMessageFor(model => model.CitizenEmailID)
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Citizen Mobile</label><span class="required-input">*</span>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-phone"></i></span>
+                                    @Html.TextBoxFor(model => model.CitizenMobileNo, new { @class = "form-control required", @maxlength = "10", @readonly = "readonly" })
+                                </div>
+                                @Html.ValidationMessageFor(model => model.CitizenMobileNo)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 Institutional">
+                        <label>Animal Details:</label>
+                        <div class="divider"></div>
+                    </div>
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Address Type</label>
+                            <div class="radio">
+                                <span class=""></span>
+                                <label>
+                                    @Html.RadioButtonFor(model => model.Rural, true, new { id = "rbRural" })  Rural
+                                </label>
+                                <label>
+                                    @Html.RadioButtonFor(model => model.Rural, false, new { id = "rbUrban", @disabled = "disabled", @readonly = "readonly" }) Urban
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>District</label><span class="required-input">*</span>
+                            @Html.DropDownListFor(model => model.DistrictID, (IEnumerable<SelectListItem>)ViewBag.Districts, "--Select--", new { @class = "form-control common required" })
+                            @Html.ValidationMessageFor(model => model.DistrictID)
+                        </div>
+                    </div>
+                    <div class="col-lg-12 Institutional">
+                        <div class="divider"></div>
+                    </div>
+                    <div id="divUrban">
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>City</label>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                    @Html.DropDownListFor(model => model.CityID, (IEnumerable<SelectListItem>)ViewBag.City, new { @class = "form-control common" })
+                                </div>
+                                <div class="alert-danger1">@Html.ValidationMessageFor(model => model.CityID)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Ward</label>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                    @Html.DropDownListFor(model => model.WardID, (IEnumerable<SelectListItem>)ViewBag.Ward, new { @class = "form-control common" })
+                                </div>
+                                <div class="alert-danger1">@Html.ValidationMessageFor(model => model.WardID)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divRural">
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Block</label><span class="required-input">*</span>
+                                @Html.DropDownListFor(model => model.BlockID, (IEnumerable<SelectListItem>)ViewBag.Blocks, new { @class = "form-control common required" })
+                                @Html.ValidationMessageFor(model => model.BlockID)
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Gram Panchayat</label><span class="required-input">*</span>
+                                @Html.DropDownListFor(model => model.GPID, (IEnumerable<SelectListItem>)ViewBag.GPs, new { @class = "form-control common required" })
+                                @Html.ValidationMessageFor(model => model.GPID)
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Village</label><span class="required-input">*</span>
+                                @Html.DropDownListFor(model => model.VillageID, (IEnumerable<SelectListItem>)ViewBag.Villages, new { @class = "form-control common required" })
+                                @Html.ValidationMessageFor(model => model.VillageID)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Location</label><span class="required-input">*</span>
+                            @Html.TextBoxFor(model => model.Location, new { @class = "form-control required" })
+                            @Html.ValidationMessageFor(model => model.Location)
+                        </div>
+                    </div>
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Animal Name</label><span class="required-input">*</span>
+                            @Html.DropDownListFor(model => model.AnimalID, (IEnumerable<SelectListItem>)ViewBag.Animals, new { @class = "form-control common required" })
+                            @Html.ValidationMessageFor(model => model.AnimalID)
+                        </div>
+                    </div>
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Description</label>
+                            @Html.TextAreaFor(model => model.RegistrationDescription, new { @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Upload Picture</label>
+                            <input type="file" multiple="" class="form-control common" name="ImageDataRegistration" id="ImageDataRegistration" />
+                        </div>
+                    </div>
+                    @if (Convert.ToString(ViewBag.RoleName) != "CITIZEN")
+                    {
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>First Reporting Time</label>
+
+                                @Html.TextBoxFor(model => model.ReportingTime, new { @class = "form-control", autocomplete = "off" })
+
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                    }
+                    else
+                    {
+                        <input type="hidden" name="ReportingTime" value="@DateTime.Now.ToString("dd/MM/yyyy HH:mm")" />
+                    }
+
+                    
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>To whom reported</label>
+                            @Html.TextBoxFor(model => model.WhomReported, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    @if (Convert.ToString(ViewBag.RoleName) != "CITIZEN")
+                    {
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Mode of Communication</label>
+
+                                @Html.DropDownListFor(model => model.ModeOfCommunication, new List<SelectListItem> {
+                                     new SelectListItem { Text="Telephone",Value="Telephone"},
+                                     new SelectListItem { Text="SMS",Value="SMS"},
+                                     new SelectListItem { Text="Email",Value="Email"},
+                                     new SelectListItem { Text="In-Person",Value="InPerson"},
+                                }, "--Select--", new { @class = "form-control" })
+
+
+
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <input type="hidden" name="ModeOfCommunication" value="Online" />
+                    }
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Injuries Added</label>
+
+                            @Html.DropDownListFor(model => model.InjuriesAdded, new List<SelectListItem> {
+                new SelectListItem { Text="Minor Injuries",Value="MinorInjuries"},
+                new SelectListItem { Text="Permanent Disability / Death",Value="PermanentDisability"},
+                }, "--Select--", new { @class = "form-control" })
+
+
+
+                        </div>
+                    </div>
+                    <div class="col-lg-12 Institutional">
+                        <label>Any Harm Reported:</label>
+                        <div class="divider"></div>
+                    </div>
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+
+                            <div class="radio">
+                                <span class=""></span>
+                                <label>
+                                    @Html.RadioButtonFor(model => model.Casualty, true, new { id = "rbCasualty" })  Yes
+                                </label>
+                                <label>
+                                    @Html.RadioButtonFor(model => model.Casualty, false, new { id = "rbNoCasualty" }) No
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divCasuality" style="display: none;">
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Harm Caused to</label>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                    @Html.DropDownListFor(model => model.CasualtyType, (IEnumerable<SelectListItem>)ViewBag.CasualtyTypes, new { @class = "form-control common" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Medical Assistance Required</label>
+                                <div class="radio">
+                                    <span class=""></span>
+                                    <label>
+                                        @Html.RadioButtonFor(model => model.MediAssistRequired, true, new { id = "rbAssistRequired" })  Yes
+                                    </label>
+                                    <label>
+                                        @Html.RadioButtonFor(model => model.MediAssistRequired, false, new { id = "rbNoAssistRequired" }) No
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="divAssistance" style="display: none;">
+                            <div class="col-lg-6 un-bold">
+                                <div class="form-group">
+                                    <label>Assistance Type</label>
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                        @Html.DropDownListFor(model => model.MediAssistType, (IEnumerable<SelectListItem>)ViewBag.MediAssistTypes, new { @class = "form-control common" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 un-bold">
+                                <div class="form-group">
+                                    <label>No Of Person Injured</label>
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                        @Html.TextBoxFor(model => model.NoOfPersonInjured, new { @class = "form-control" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 un-bold">
+                                <div class="form-group">
+                                    <label>Casualty Description</label>
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                        @Html.TextAreaFor(model => model.CasualtyDescription, new { @class = "form-control" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 Institutional">
+                        <div class="divider"></div>
+                    </div>
+                    <div class="col-lg-6 un-bold">
+                        <label></label>
+                        <div class="form-group">
+
+                            <input type="submit" class="btn btn-success" value="Create" />
+                            @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-default" })
+                            @*<input type="button" id="create" class="btn btn-success" value="Create" />*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<script src="~/Scripts/jquery-ui.js"></script>
+<!--Use for validation-->
+<script src="~/Scripts/jquery.validate.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+@*<script src="~/Content/jquery.validate.js"></script>
+    <script src="~/Content/jquery.validate.unobtrusive.js"></script>*@
+<!--END-->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.js"></script>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+    var ddlVillage = 0;
+    var educount = 1;
+    var castcount = 1;
+
+
+    $("#ImageDataRegistration").change(function () {
+        var fileExtension = ['jpeg', 'jpg', 'png', 'gif', 'bmp'];
+        if ($.inArray($(this).val().split('.').pop().toLowerCase(), fileExtension) == -1) {
+            alert("Only " + fileExtension.join(', ') + " formats are allowed : ");
+            $("#ImageDataRegistration").val('');
+        }
+    });
+
+    $('#DistrictID').change(function (e) {
+        var ddldist = $("#DistrictID option:selected").val();
+        $("#BlockID").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'Rescue/GetBlockName',
+            dataType: 'json',
+            data: { District: ddldist },
+            success: function (range) {
+                $.each(range, function (i, items) {
+                    if (i == 1) {
+                        bindGP(ddldist, items.Value);
+                    }
+                    $("#BlockID").append('<option value="' + items.Value + '">  ' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    });
+
+    $('#BlockID').change(function (e) {
+        var ddldist = $("#DistrictID option:selected").val();
+        var ddlblockname = $("#BlockID option:selected").val();
+        bindGP(ddldist, ddlblockname);
+    });
+
+    $('#GPID').change(function (e) {
+        var ddldist = $("#DistrictID option:selected").val();
+        var ddlblockname = $("#BlockID option:selected").val();
+        var ddlGPName = $("#GPID option:selected").val();
+        bindVillage(ddldist, ddlblockname, ddlGPName);
+    });
+
+    function bindGP(ddldist, ddlblockname) {
+        $("#GPID").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'Rescue/GetGramPName',
+            dataType: 'json',
+            data: { District: ddldist, BlockName: ddlblockname },
+            success: function (range) {
+                $.each(range, function (i, items) {
+                    if (i == 1) {
+                        bindVillage(ddldist, ddlblockname, items.Value);
+                    }
+                    $("#GPID").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    }
+
+    function bindVillage(ddldist, ddlblockname, ddlGPName) {
+        $("#VillageID").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'Rescue/GetVillageName',
+            dataType: 'json',
+            data: { District: ddldist, BlockName: ddlblockname, GPName: ddlGPName },
+            success: function (range) {
+                $.each(range, function (i, items) {
+                    $("#VillageID").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    }
+    $('#rbCasualty').on('change', function () {
+        if ($(this.checked)) {
+            $('#divCasuality').show();
+        }
+    }).change();
+    $('#rbNoCasualty').on('change', function () {
+        if ($(this.checked)) {
+            $('#divCasuality').hide();
+        }
+    }).change();
+    $('#rbAssistRequired').on('change', function () {
+        if ($(this.checked)) {
+            $('#divAssistance').show();
+        }
+    }).change();
+    $('#rbNoAssistRequired').on('change', function () {
+        if ($(this.checked)) {
+            $('#divAssistance').hide();
+        }
+    }).change();
+    $('#rbRural').on('change', function () {
+        if ($(this.checked)) {
+            $('#divRural').show();
+            $('#divUrban').hide();
+        }
+    }).change();
+    $('#rbUrban').on('change', function () {
+        if ($(this.checked)) {
+            $('#divUrban').show();
+            $('#divRural').hide();
+        }
+    }).change();
+    if ($('#rbUrban').is(':checked')) {
+        $('#divUrban').show();
+        $('#divRural').hide();
+    } else {
+        $('#divRural').show();
+        $('#divUrban').hide();
+    }
+    if ($('#rbCasualty').is(':checked')) {
+        $('#divCasuality').show();
+    } else {
+        $('#divCasuality').hide();
+    }
+    if ($('#rbAssistRequired').is(':checked')) {
+        $('#divAssistance').show();
+    } else {
+        $('#divAssistance').hide();
+    }
+    $('input').on('keypress', function (event) {
+        var regex = new RegExp(/^[a-zA-Z0-9\s,._]*$/);
+        if (this.id == "CitizenEmailID") {
+            regex = new RegExp(/^[a-zA-Z0-9\s,._@@]*$/);
+        }
+        if (this.id == "CitizenName") {
+            regex = new RegExp(/^[a-zA-Z\s,.]*$/);
+        }
+        if (this.id == "CitizenMobileNo") {
+            regex = new RegExp(/^[0-9\s+\-]*$/);
+        }
+        var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+        if (!regex.test(key)) {
+            event.preventDefault();
+            return false;
+        }
+    });
+    $('.reportedby_me').on("click", function () {
+        var value = $(this).val();
+        if (value.toLowerCase() == "citizen") {
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'Rescue/GetUserDetail',
+                dataType: 'json',
+                async: false,
+                data: {},
+                success: function (data) {
+                    $('#CitizenName').val(data.CitizenName);
+                    $('#CitizenName').attr("readonly", "readonly");
+                    $('#CitizenEmailID').val(data.CitizenEmailID);
+                    $('#CitizenEmailID').attr("readonly", "readonly");
+                    $('#CitizenMobileNo').val(data.CitizenMobileNo);
+                    $('#CitizenMobileNo').attr("readonly", "readonly");
+
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        }
+        else if (value.toLowerCase() == "officer") {
+            $('#CitizenName').val('');
+            $('#CitizenName').removeAttr("readonly");
+            $('#CitizenEmailID').val('');
+            $('#CitizenEmailID').removeAttr("readonly");
+            $('#CitizenMobileNo').val('');
+            $('#CitizenMobileNo').removeAttr("readonly");
+        }
+        $('#applicantdetails').show();
+    });
+    $('#ReportingTime').datetimepicker({
+        gotoCurrent: true
+    });
+
+
+</script>
+@*<script>
+    $("#create").click(function () {
+    var RootUrl = 'http://10.68.128.101/fmdsstest/';
+    var form = $('#main');
+    $.ajax({
+    cache: false,
+    async: true,
+    type: "POST",
+    url: RootUrl + 'Rescue/CreateByMobile',
+    data: form.serialize(),
+    success: function (data) {
+    alert(data);
+    }
+    });
+    });
+    </script>*@

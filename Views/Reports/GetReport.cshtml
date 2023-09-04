@@ -1,0 +1,159 @@
+﻿@model FMDSS.Models.Reports.Report
+@using System.Data;
+
+@{
+    ViewBag.Title = "Reports";
+    Layout = "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<!-- Form design -->
+<div id="page-wrapper-inn">
+
+    <div class="col-lg-12 pad">
+        <h1 class="page-header"> MIS Reports</h1>
+    </div>
+
+    @using (Html.BeginForm("GetReport", "Reports", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <div class="modal-body">
+            <div class="form-horizontal" role="form">
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label for="Proposed">
+                            Financial Year:<span class="mandatory">*</span>
+                        </label>
+                        @Html.DropDownList("ddlFinancialYear", (IEnumerable<SelectListItem>)ViewBag.Finyear, "--Select--", new { @class = "form-control input-width", id = "ddlFinancialYear" })
+                        <div id="errordiv01" style="display:none" class="alert-danger1"></div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label for="Proposed">
+                            Report Name:<span class="mandatory">*</span>
+                        </label>
+                        @Html.DropDownList("ddlReports", (IEnumerable<SelectListItem>)ViewBag.Reports, "--Select--", new { @class = "form-control ", id = "ddlReports" })
+                        <div id="errordiv02" style="display:none" class="alert-danger1"></div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label for="Tehsil">
+                            Month :<span class="mandatory">*</span>
+                        </label>
+                        <select class="form-control" name="ddlMonths" id="ddlMonths">
+                            <option value="0">--Select--</option>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                        <input type="hidden" name="hdnMonth" value="" id="hdnMonth">
+                        <div id="errordiv03" style="display:none" class="alert-danger1"></div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label for="Proposed">
+                            Circle :<span class="mandatory"></span>
+                        </label>
+                        @Html.DropDownList("ddlCircles", (IEnumerable<SelectListItem>)ViewBag.Circles, "--Select--", new { @class = "form-control ", id = "ddlCircles" })
+                    </div>
+                </div>
+                <!-- Btn Groping -->
+                <div class="btn-padd">
+                    <div id="btn" class="col-lg-12">
+                        <button type="submit" class="btn btn-success" name="Command" value="" id="btn_Show">
+                            <i class="fa fa-check"></i> Submit
+                        </button>
+                        <button type="button" name="Command" id="btnCancel" value="Cancel" data-dismiss="modal" class="btn btn-danger" title="Cancel">
+                            <i class="fa fa-times fa-fw"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-lg-12">
+                    <div class="form-group">
+
+                        <div id="tbl" class="table-responsive">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script src="~/js/jquery.min.js"></script>
+
+<script type="text/javascript">
+
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        $('#ddlMonths').change(function (e) {
+            $('#hdnMonth').val($('#ddlMonths option:selected').text());
+            alert($('#hdnMonth').val());
+        });
+
+        $('#dataTableReport').DataTable({
+            responsive: true
+        });
+
+        $('#ddlPermissionType').change(function (e) {
+            var ModuleID = $("#ddlPermissionType option:selected").val();
+            $("#ddlSubPermissionType").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'Reports/Get_SubPremission', // we are calling json method
+                dataType: 'json',
+                data: { ModuleID: ModuleID },
+                success: function (range) {
+                    $("#ddlSubPermissionType").append('<option value=0>Select Sub permission Type</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlSubPermissionType").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    $("#ddlSubPermissionType").append('<option value=0>Select Sub permission Type</option>');
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+
+        });
+
+
+        $('#btn_Show').click(function (e) {
+            if ($('#ddlFinancialYear option:selected').index() <= 0) {
+                alert('Please select Financial Year');
+                $('#ddlFinancialYear').focus();
+                e.preventDefault();
+            }
+            else if ($('#ddlReports option:selected').index() <= 0) {
+                alert('Please select Permission Type');
+                $('#ddlReports').focus();
+                e.preventDefault();
+            }
+            else if ($('#ddlMonths option:selected').index() <= 0) {
+                alert('Please select Sub Permission Type');
+                $('#ddlMonths').focus();
+                e.preventDefault();
+            }
+        });
+    });
+
+</script>

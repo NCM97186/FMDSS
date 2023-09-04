@@ -1,0 +1,373 @@
+﻿@model FMDSS.Models.ForestProtection.ForestReleases
+@{
+    ViewBag.Title = "Seized Item";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+    $(function (e) {
+        $('.AddNew').on('click', function () {
+            $(".NewForm").show();
+            $('html, body').animate({ scrollTop: $(".NewForm").offset().top - 120 }, 'slow');
+        });
+        
+        $('#btn_submit1').click(function () {
+            var flag = 1;
+            $(".hdChk").each(function () {
+                if ($(this).prop('checked')) {
+                    flag = 0;
+                }
+            });
+            if ($('#fileappseized').val() == '') {
+                alert('Upload valid application for seized item');
+                $('#fileappseized').focus();
+                return false;
+            }
+            if ($('#filedocOwnership').val() == '') {
+                alert('Upload valid Ownership document');
+                $('#filedocOwnership').focus();
+                return false;
+            }
+            if (flag == 1) {
+                alert('select check box');
+                return false;
+            }
+            else {
+
+            }
+        });
+
+        $("#fileappseized").change(function (e) {
+            // var iSize = ($("#UploadId")[0].files[0].size / 1048576);
+            var iSize = parseFloat($("#fileappseized")[0].files[0].size / 1024).toFixed(2);
+            if (iSize > 100) {
+                $('#fileappseized').val('');
+                $('#errordivfileappseized').show();
+                $('#errordivfileappseized').html("Upload ID should not be larger than 100kb!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#fileappseized').focus();
+                return false;
+            }
+            var file = $("#fileappseized").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+            if (file) {
+                var get_ext = file.split('.');
+                get_ext = get_ext.reverse();
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#fileappseized').val('');
+                    $('#errordivfileappseized').show();
+                    $('#errordivfileappseized').html("Please upload only jpeg or jpg or pdf or png or gif file format in Upload ID Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#fileappseized').focus();
+                    return false;
+                } else {
+                    $('#errordivfileappseized').hide();
+                }
+            }
+            else { $('#errordivfileappseized').hide(); }
+        });
+
+        $("#filedocOwnership").change(function (e) {
+            //var iSize = ($("#UploadId")[0].files[0].size / 1048576);
+            var iSize = parseFloat($("#filedocOwnership")[0].files[0].size / 1024).toFixed(2);
+            if (iSize > 100) {
+                $('#filedocOwnership').val('');
+                $('#errordivfiledocOwnership').show();
+                $('#errordivfiledocOwnership').html("Upload ID should not be larger than 100kb!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#filedocOwnership').focus();
+                return false;
+            }
+            var file = $("#filedocOwnership").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+            if (file) {
+                var get_ext = file.split('.');
+                get_ext = get_ext.reverse();
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#filedocOwnership').val('');
+                    $('#errordivfiledocOwnership').show();
+                    $('#errordivfiledocOwnership').html("Please upload only jpeg or jpg or pdf or png or gif file format in Upload ID Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#filedocOwnership').focus();
+                    return false;
+                } else {
+                    $('#errordivfiledocOwnership').hide();
+                }
+            }
+            else { $('#errordivfiledocOwnership').hide(); }
+        });
+
+
+
+    });
+
+
+    
+
+    $(document).on('change', '.hdChk', function (e) {
+        //  $('.chksubactvity').change(function () {
+
+        
+        
+        if (this.checked) {
+
+            
+        var val = $(this).val();
+        var rowid = $(this).attr("id");
+        var tablename = $(this).attr("tablename");
+        var Status = $(this).attr("Status");
+        
+            
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'FPMRelease/SaveSeizedItemMapping', // we are calling json method
+                dataType: 'json',
+                data: { rowID: rowid, TableName: tablename, Status: Status },
+                success: function (data) {
+
+                },
+                //error: function (ex) {
+                //    alert('Failed to retrieve states.' + ex);
+                //}
+
+            });
+        }
+        else {
+
+            
+            var ids = $(this).attr("id");
+           
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'FPMRelease/DeleteMapping', // we are calling json method
+                dataType: 'json',
+                data: { rowID: id },
+                success: function (data) {
+
+                },
+                //error: function (ex) {
+                //    alert('Failed to retrieve states.' + ex);
+                //}
+
+            });
+        }
+    })
+   
+ 
+        function EditSurvey(OffenseCode) {            
+            $('#hdSeized').val(OffenseCode);
+        
+            $("#activityTable").empty();
+          
+            var OffenceCode = { OffenceCode: OffenseCode }
+     
+            $.ajax({
+                type: 'POST',
+                url: RootUrl +'FPMRelease/GetIteams', // we are calling json method
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(OffenceCode),
+                success: function (data) {
+                    
+                    for (var i = 0; i < data.list2.length; i++) {
+                        
+                        var bardata = "<tr class='rowid'><td>" + data.list2[i].ArticalName + "</td><td>" + data.list2[i].ArticalDetail + "</td><td>" + data.list2[i].Quantity + "</td><td>" + data.list2[i].Status + "</td><td> <input name='hdchk' class='hdChk' type='checkbox' Status=" + data.list2[i].Status + " tablename='" + data.list2[i].TableName + "' id=" + data.list2[i].ID + " value=" + data.list2[i].chkStatus + " /> </td> </tr>";
+                     
+                        //check(data.list2[i].ID, data.list2[i].chkStatus);
+                        $("#activityTable").append(bardata);
+                   
+                    }
+                    $(".hdChk").each(function () {
+                        if ($(this).attr("value") == "true") {
+                            $(this).attr("checked", "checked");
+                        }
+                        else {
+                            $(this).removeAttr("checked");
+                        }
+                    });
+                    $("#temp").show();
+                    $('#lblCode').text($('#hdSeized').val());
+                    $('#divlblCode').show();
+                    $('#divSeizedItem').show();
+                    $('#divOwnershipDoc').show();
+                }
+            });
+        }
+ 
+
+   
+</script>
+    
+        <!-- /.navbar-static-side -->
+        <!-- Form design -->
+        <div id="page-wrapper-inn">
+ 
+            <div class="col-lg-12 pad">
+                <h1 class="page-header">Apply for Release of Seized Item</h1>
+            </div>
+            <div class="col-lg-12 pad">
+                <div class="col-lg-10 pad">
+           
+                    @if (@TempData["SizedIteamStatus"] != null)
+                    {
+                        <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["SizedIteamStatus"]</div>
+                       
+                        //Session["Status"] = null;
+                    }
+                </div>
+                
+
+            </div>
+            <!-- /.col-lg-12 -->
+            <!-- Row -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <!--<div class="panel-heading"></div>
+                        <!-- /.panel-heading -->
+@using (Html.BeginForm("SubmitSeziedItemRequest", "FPMRelease", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+                        <div class="panel-body">
+                            <input type="hidden" id="hdSeized" name="hdSeized" />                                    
+                            <!--Table-->
+                            <div id="tbl" class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Offense Code</th>
+                                            <th>Offense Category</th>
+                                            <th>Sub Category</th>
+                                            <th>First Officer</th>
+                                            <th>Second Officer</th>
+                                            <th>Total Seized Item</th>
+                                      
+                                            <th>Action</th>
+
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in ViewData["SeizedIteam"] as IEnumerable<FMDSS.Models.ForestProtection.ForestReleases>)
+                                        {
+
+                                            <tr>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.OffenseCode)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.OffenceCategory)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.OffenseSubCategoryWildLife)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.FirstOfficerID)
+
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.SecondOfficerID)
+
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Total)
+
+                                                </td>
+                                   
+                                                <td>
+                                                  
+                                                                   <button type="button" class="btn btn-warning btn-circle AddNew" title="Edit" id="@item.OffenseCode" value="@item.OffenseCode" onclick="EditSurvey('@item.OffenseCode')">
+                                                        <i class="fa fa-edit"></i>
+                                                    </button>
+                                                        
+                                                   
+                                               
+                                                </td>
+
+                                              
+                                            </tr>
+                                        }
+
+
+                                    </tbody>
+                                </table>
+
+                            </div>
+                            <!--./Table-->
+                            <!-- New Scheme Form -->
+                            <div class="col-lg-6">
+                                <div id="divlblCode" class="form-group" style="display:none;">
+                                    <label for="Offense Code">
+                                        Offense Code :
+                                    </label>
+                                    @Html.Label("lblCode", new { @class = "form-control", id = "lblCode" })
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                               <div id="divSeizedItem" class="form-group" style="display:none;">
+                                    <label>Upload application of seized item:<span class="mandatory">*</span></label>
+                                   <input type="file" class="form-control" id="fileappseized" title="" name="fileappseized" />
+                                    <label><span class="l-p">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 100kb.</span></label>
+                                   <div id="errordivfileappseized" style="display:none" class="alert-danger1"></div>        
+                               </div>
+                              </div>
+                            <div class="col-lg-6">
+                                <div id="divOwnershipDoc" class="form-group" style="display:none;">
+                                    <label>Ownership document:<span class="mandatory">*</span></label>
+                                    <input type="file" class="form-control" id="filedocOwnership" title="" name="filedocOwnership" />
+                                    <label><span class="l-p">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 100kb.</span></label>
+                                    <div id="errordivfiledocOwnership" style="display:none" class="alert-danger1"></div>     
+                                 </div>
+                            </div>
+                            <div class="pull-left NewForm" style="display:none">
+
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <table id="temp" class="table table-bordered" style="display:none; width:100%">
+                                            <thead>
+                                                <tr>
+                                                    <th width="15%">Article Name</th>
+                                                    <th width="15%">Description</th>
+                                                    <th width="15%">Quantity</th>
+                                                  
+                                                    <th width="15%">Status</th>
+                                                    <th width="15%">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="activityTable"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                              
+
+                                <div class="col-lg-12"></div>
+
+                                <!-- Btn Groping -->
+                                <div class="btn-padd">
+                                    <div id="btn" class="col-lg-12">
+                                        <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_submit1">
+                                            <i class="fa fa-check"></i> Submit
+                                        </button>
+                                        <button type="reset" class="btn btn-warning">
+                                            <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                        </button>
+                                        <button type="submit" name="Command" value="Cancel" class="btn btn-danger">
+                                            <i class="fa fa-times fa-fw"></i> Cancel
+                                        </button>
+
+                                    </div>
+                                </div>
+                                <!-- /.Btn Groping -->
+                            </div>
+                            <!-- /.Form -->
+
+                        </div>
+}
+                        <!-- /.panel-body -->
+
+                    </div>
+                    <!-- /.panel -->
+
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+        </div>
+        <!-- /.Row -->
+
+   

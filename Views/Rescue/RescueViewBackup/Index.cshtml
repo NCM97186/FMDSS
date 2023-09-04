@@ -1,0 +1,260 @@
+﻿@model IEnumerable<FMDSS.Models.Rescue.RescueModel>
+
+@{
+    ViewBag.Title = "Rescue List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-lg-9">
+        <h1 class="page-header">Animal Rescue</h1>
+        @if (!string.IsNullOrEmpty(Convert.ToString(TempData["SuccessMsg"])))
+        {
+            <div class="alert alert-success alert-dismissable">
+                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                @Convert.ToString(TempData["SuccessMsg"])
+            </div>
+        }
+        <b><span class="pull-right">#To add new rescue report, click on Create button.It will take you to a new form.</span></b>
+    </div>
+
+    <div class="col-lg-9">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Animal Rescue Report List
+                <select id="demo" multiple="multiple">
+                    <option data-column="0" selected="selected">Sr. No.</option>
+                    <option data-column="1" selected="selected">Citizen Name</option>
+                    <option data-column="2" selected="selected">Citizen Mobile No</option>
+                    <option data-column="3" selected="selected">District</option>
+                    <option data-column="4" selected="selected">Block</option>
+                    <option data-column="5" selected="selected">Gram Panchayat</option>
+                    <option data-column="6" selected="selected">Village</option>
+                    <option data-column="7" selected="selected">Location</option>
+                    <option data-column="8" selected="selected">Animal Name</option>
+                    <option data-column="9" selected="selected">Rescue Status</option>
+                    <option data-column="10" selected="selected">View</option>
+                    @if (ViewBag.Roles.ToString().Contains("Animal Rescue Reviewer") || ViewBag.Roles.ToString().Contains("Animal Rescue Approver"))
+                    {
+                        <option data-column="11" selected="selected">Capture Form</option>
+                        <option data-column="12" selected="selected">Release Form</option>
+                        <option data-column="12" selected="selected">Approve</option>
+                    }
+                </select>
+                @if (ViewBag.Roles.ToString().Contains("CITIZEN"))
+                {
+                    <button type="button" class="btn btn-success pull-right" id="btnAddModel" onclick="@("window.location.href='" + @Url.Action("Create", "Rescue") + "'");" data-target="#myModal" data-toggle="modal" title="Create Registration">
+                        <i class="fa fa-plus"></i> Create
+                    </button>
+                }
+            </div>
+            <div class="panel-body">
+                <div class="dataTable_wrapper">
+                    <div id="tbl">
+                        <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+                            <thead>
+                                <tr>
+                                    <th width="3%">Sr. No.</th>
+                                    <th width="3%">Citizen Name</th>
+                                    <th width="3%">Citizen Mobile No</th>
+                                    <th width="3%">District</th>
+                                    <th width="3%">Block</th>
+                                    <th width="3%">Gram Panchayat</th>
+                                    <th width="3%">Village</th>
+                                    <th width="3%">Location</th>
+                                    <th width="3%">Animal Name</th>
+                                    <th width="3%">Rescue Status</th>
+                                    <th width="3%">View</th>
+                                    @if (ViewBag.Roles.ToString().Contains("Animal Rescue Reviewer"))
+                                    {
+                                        <th width="3%">Capture Form</th>
+                                        <th width="3%">Release Form</th>
+                                    }
+                                    @if (ViewBag.Roles.ToString().Contains("Animal Rescue Approver"))
+                                    {
+                                        <th width="3%">Approve</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td width="3%">
+                                            @Html.DisplayFor(model => item.RegistrationID)
+                                        </td>
+                                        <td width="3%">
+                                            @Html.DisplayFor(model => item.CitizenName)
+                                        </td>
+                                        <td width="3%">
+                                            @Html.DisplayFor(model => item.CitizenMobileNo)
+                                        </td>
+                                        <td width="3%">
+                                            @Html.DisplayFor(model => item.District)
+                                        </td>
+                                        <td width="3%">
+                                            @Html.DisplayFor(model => item.Block)
+                                        </td>
+                                        <td width="3%">
+                                            @Html.DisplayFor(model => item.GP)
+                                        </td>
+                                        <td width="3%">
+                                            @Html.DisplayFor(model => item.Village)
+                                        </td>
+                                        <td width="3%">
+                                            @Html.DisplayFor(model => item.Location)
+                                        </td>
+                                        <td width="3%">
+                                            @Html.DisplayFor(model => item.AnimalName)
+                                        </td>
+                                        <td width="3%">
+                                            @Html.DisplayFor(model => item.RescueStatus)
+                                        </td>
+                                        <td width="3%">
+                                            <button type="button" class="btn btn-info btn-circle" data-toggle="modal" data-target="#myModal" title="View" onclick="@("window.location.href='" + @Url.Action("View", "Rescue", new { registrationID = item.RegistrationID }) + "'");">
+                                                <i class="fa fa-edit"></i>
+                                            </button>
+                                        </td>
+                                        @if (ViewBag.Roles.ToString().Contains("Animal Rescue Reviewer"))
+                                        {
+                                            <td width="3%">
+                                                @if (item.RescueStatus == "New" || item.RescueStatus == "Approved")
+                                                {
+                                                    <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#myModal" title="Capture Form" onclick="@("window.location.href='" + @Url.Action("Capture", "Rescue", new { registrationID = item.RegistrationID }) + "'");">
+                                                        <i class="fa fa-edit"></i>
+                                                    </button>
+                                                }
+                                                else if (item.RescueStatus == "Captured" || item.RescueStatus == "Released")
+                                                {
+                                                    <label>Captured</label>
+                                                }
+
+                                            </td>
+                                            <td width="3%">
+                                                @if (item.RescueStatus == "Captured")
+                                                {
+                                                    <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#myModal" title="Release Form" onclick="@("window.location.href='" + @Url.Action("Release", "Rescue", new { registrationID = item.RegistrationID }) + "'");">
+                                                        <i class="fa fa-edit"></i>
+                                                    </button>
+                                                }
+                                                else if (item.RescueStatus == "Released")
+                                                {
+                                                    <label>Released</label>
+                                                }
+                                            </td>
+                                        }
+                                        @if (ViewBag.Roles.ToString().Contains("Animal Rescue Approver"))
+                                        {
+                                            <td width="3%">
+                                                @if (item.RescueStatus == "New")
+                                                {
+                                                    <button type="button" class="btn btn-success btn-circle" data-toggle="modal" data-target="#myModal" title="Approve Form" onclick="@("window.location.href='" + @Url.Action("Approve", "Rescue", new { registrationID = item.RegistrationID }) + "'");">
+                                                        <i class="fa fa-edit"></i>
+                                                    </button>
+                                                }
+                                                @if (item.RescueStatus == "Released")
+                                                {
+                                                    <button type="button" class="btn btn-success btn-circle" data-toggle="modal" data-target="#myModal" title="Officer Review" onclick="@("window.location.href='" + @Url.Action("Officer", "Rescue", new { registrationID = item.RegistrationID }) + "'");">
+                                                        <i class="fa fa-edit"></i>
+                                                    </button>
+                                                }
+                                                else if (item.RescueStatus == "Closed")
+                                                {
+                                                    <label>Closed</label>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/css/bootstrap-multiselect.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+<script src="~/js/bootstrap-multiselect.js"></script>
+
+<script type="text/javascript">
+    var table;
+    $(document).ready(function () {
+        table = $('#dataTables-example').DataTable({
+            "scrollX": true,
+            "aaSorting": [],
+            "iDisplayLength": 25,
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'excelHtml5',
+                    title: 'Rescue Report',
+                    exportOptions: {
+                        columns: ':visible'
+
+                    }
+                }
+            //    ,
+            //{
+            //    extend: 'pdfHtml5',
+            //    title: 'Rescue Report',
+            //    orientation: 'landscape',
+            //    //pageSize: 'LEGAL',
+            //    exportOptions: {
+            //        columns: ':visible'
+
+            //    }
+            //}
+
+            ]
+        });
+
+    });
+    $('#demo').multiselect({
+        enableFiltering: true,
+        enableCaseInsensitiveFiltering: true,
+        includeSelectAllOption: true,
+        includeSelectAllIfMoreThan: 0,
+
+        maxHeight: 250,
+        onChange: function (element, checked) {
+            var column = table.column($(element).attr('data-column'));
+            if (checked) {
+                column.visible(true);
+            }
+            else {
+                column.visible(false);
+            }
+        },
+        onSelectAll: function () {
+            table.columns().every(function () {
+                var data = this.visible(true);
+            });
+        },
+        onDeselectAll: function () {
+            table.columns().every(function () {
+                var data = this.visible(false);
+            });
+        }
+    });
+</script>
+@*<script>
+        $(document).ready(function () {
+            $('#dataTables-example').DataTable({
+
+                "aaSorting": [],
+                "iDisplayLength": 25,
+                dom: 'Bfrtip',
+                buttons: [
+                        'copy', 'csv', 'excel', 'pdf', 'print'
+                ],
+            });
+
+        });
+    </script>*@

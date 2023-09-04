@@ -1,0 +1,42 @@
+﻿@model IEnumerable<FMDSS.Models.Admin.ResearchPlace>
+<div class="panel panel-primary">
+    <table id="tbl_@ViewBag.ParentID" name="tblPlace" cellpadding="0" cellspacing="0" class="table table-striped table-bordered table-hover table-responsive">
+        <thead><tr><th>#</th><th>Place Name</th><th>Count</th></thead>
+        <tbody>
+            @if (Model != null)
+            {
+                foreach (var item in Model)
+                {
+            <tr>
+                <td>@item.SNo</td>
+                <td>@item.PlaceName</td>
+                <td><a href="javascript:void(0);" onclick="ShowResearchList('Research', @item.PlaceID, 'ResearchListByPlace', this)">@item.TotalCount</a></td>
+            </tr>
+                }
+            }
+        </tbody>
+    </table> 
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#tbl_@ViewBag.ParentID').DataTable({
+            responsive: true,
+            "bSort": true
+        });
+    });
+
+    function ShowResearchList(moduleName, parentID, type, cntrlID) {
+        if ($(cntrlID).closest('div').find('table[name="tblResearchList"]').length == 0) {
+            //string moduleName, string parentID, string type, string status, string fromDate, string toDate, int OffenceId
+            $.ajax({
+                type: 'GET',
+                url: RootUrl + 'SystemAdmin/GetDashboardDetails',  
+                dataType: 'html',
+                data: { moduleName: moduleName, parentID: parentID, type: type, status: '', fromDate: '', toDate: '', OffenceId:0},
+                success: function (data) {
+                    $(cntrlID).closest('table').after(data);
+                }
+            })
+        }
+    }
+</script>

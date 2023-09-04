@@ -1,0 +1,333 @@
+﻿@{
+    ViewBag.Title = "LCEstimation";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<!-- Form design -->
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Letter Of Credit Estimation</h1>
+        @if (@TempData["ViewSuccessMessage"] != null)
+        {
+            <div class="alert alert-success divmsg"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["ViewSuccessMessage"]</div>
+        }
+        @if (@TempData["ViewErrorMessage"] != null)
+        {
+            <div class="alert alert-danger2 divmsg diverror"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["ViewErrorMessage"]</div>
+        }
+        <div id="warningmessage" style="display:none" class="alert alert-warning1 divmsg"></div>
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+
+
+
+            <!-- /.panel-heading -->
+            <!--From Start-->
+            @using (Html.BeginForm("SaveDCFBudgetData", "CreditLetter", FormMethod.Post, new { data_behavior = "confirm" }))
+            {
+
+                
+
+                <table class="table  table-bordered  table-responsive" id="mainTable">
+                    @*<thead id="thead_Budget">
+
+                        </thead>
+
+                        <tbody id="tbody_Budget"></tbody>*@
+
+
+                </table>
+
+                <div class="col-lg-12"></div>
+
+            <!-- Btn Groping -->
+                <div class="btn-padd">
+                    <div id="btn" class="col-lg-12">
+                        <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_submit1">
+                            <i class="fa fa-check"></i> Submit
+                        </button>
+
+
+                    </div>
+                </div>
+
+
+                <div class="form-group" id="btn-cont1">
+                    <div class="col-sm-offset-2 col-sm-10">
+
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+
+</div>
+<!-- /.Row -->
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<style>
+    .alert-danger2 {
+        color: white;
+        background-color: #ff704d;
+        border-color: #ff9999;
+    }
+
+    .alert-warning1 {
+        color: #fff;
+        background-color: #f0ad4e;
+        border-color: #eea236;
+    }
+</style>
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+    $(document).ready(function (e) {
+        $("#warningmessage").hide();
+        $('.divmsg').delay(3000).fadeOut();
+        
+        
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'CreditLetter/GetEstimateData', // we are calling json method
+            success: function (value) {
+                    var theadHTML;
+                    var tbodyHTML;
+
+                    if (value.data2 == 1 || value.data2 == 2) {
+                        theadHTML = "<tr class='tr1'><th>Index</th><th>State Name</th><th>Estimated Amount</th><th>Allocation Amount</th><th>Requested Amount</th>";
+
+                        for (var i = 0; i < value.data.length; i++) {
+                            tbodyHTML += "<tr class='tr-bg' id='trsid_" + i + "'><td>" + value.data[i].Index + "</td><td><a id='trsid_" + i + "' value='" + value.data[i].STATE_CODE + "' class='ahid link'>" + value.data[i].STATE_NAME + "</a></td>";
+                            tbodyHTML += "<td>" + value.data[i].EstAmount + "</td><td>" + value.data[i].AllocAmount + "</td><td>" + value.data[i].RequestedAmount + "</td></tr>";
+
+                        }
+                        $("#mainTable").append(theadHTML + tbodyHTML);
+                    }
+                    else if (value.data2 == 4) {
+                        theadHTML = "<tr class='header tr2'><th class='fontbold'>+</th><th>Circle Name</th><th>Estimated Amount</th><th>Allocation Amount</th><th>Requested Amount</th>";
+
+                        for (var i = 0; i < value.data.length; i++) {
+                            tbodyHTML += "<tr class='tr-bg' id='trcid_" + i + "'><td>" + value.data[i].Index + "</td><td><a id='trcid_" + i + "' value='" + value.data[i].CIRCLE_CODE + "' class='acid link'>" + value.data[i].CIRCLE_NAME + "</a></td>";
+                            tbodyHTML += "<td>" + value.data[i].EstAmount + "</td><td>" + value.data[i].AllocAmount + "</td><td>" + value.data[i].RequestedAmount + "</td></tr>";
+
+                        }
+                        $("#mainTable").append(theadHTML + tbodyHTML);
+                    }
+                       
+
+                        calculateTotal();
+                    }
+
+        });
+
+        $("#btn_submit1").click(function () {
+
+            
+
+
+            if ($("#tbody_Budget").html() == '') {
+
+                $("#warningmessage").html('No Requested data for this division' + "<i class='fa fa-thumbs-o-down fa-fw' style='float: left;padding: 2px;'></i>");
+                $("#warningmessage").show();
+                setTimeout(function () { $("#warningmessage").hide(); }, 3000);
+                $('#warningmessage').focus();
+
+                return false;
+            }
+        })
+
+            });
+
+        
+
+    $(document).on('click', '.ahid', function () {
+        if ($(this).attr("disabled")) {
+
+            return false;
+        }
+        
+
+
+        var trid = $(this).attr('id');
+
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'CreditLetter/GetBudgetByUserDesignation', // we are calling json method
+            data: { designationID: 1 },
+            success: function (data) {
+                var theadHTML = "";
+                var tbodyHTML = "";
+
+                theadHTML = "<tr id='trchildnode'><td colspan='3'><table id='tblHOF' class='table  table-bordered  table-responsive'><tr class='header1 tr2'><th class='fontbold'>+</th><th>Circle Name</th><th>Estimated Amount</th><th>Allocation Amount</th><th>Requested Amount</th></tr>";
+                
+                for (var i = 0; i < data.length; i++) {
+                    tbodyHTML += "<tr class='tr-bg' id='trcid_" + i + "'><td>" + data[i].Index + "</td><td><a id='trcid_" + i + "' value='" + data[i].CIRCLE_CODE + "' class='acid link'>" + data[i].CIRCLE_NAME + "</a></td>";
+                    tbodyHTML += "<td>" + data[i].EstAmount + "</td><td>" + data[i].AllocAmount + "</td><td>" + data[i].RequestedAmount + "</td></tr>";
+
+                }
+                tbodyHTML += "</table></td></tr>";
+              
+                $("#" + trid).after(theadHTML + tbodyHTML);
+                $("a#" + trid).attr('disabled', 'disabled');
+                calculateTotal();
+            }
+
+        });
+
+    });
+    $(document).on('click', '.acid', function () {
+
+        if ($(this).attr("disabled")) {
+
+            return false;
+        }
+
+
+        var ddlfm = $("#ddlFinancialYear option:selected").val();
+        var code = $(this).attr('value');
+        var DesignationID = $(this).attr('code');
+        var trid = $(this).attr('id');
+
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'CreditLetter/GetBudgetByUserDesignation', // we are calling json method
+            data: { designationID: 4 },
+            success: function (data) {
+                var theadHTML = "";
+                var tbodyHTML = "";
+
+                theadHTML = "<tr class='header tr3' id='trchildnode1'><th  class='fontbold'>+</th><th>Division Name</th><th>Estimated Amount</th><th>Allocation Amount</th><th>Requested Amount</th><th>Release Amount</th></tr>";
+
+                for (var i = 0; i < data.length; i++) {
+                    tbodyHTML += "<tr class='tr-bg' id='" + trid + "_trdid_" + i + "'><td>" + data[i].Index + "</td><td><a id='" + trid + "_trdid_" + i + "' value='" + data[i].Div_Code + "' class='adid link'>" + data[i].DIV_NAME + "</a></td>";
+                    tbodyHTML += "<td>" + data[i].EstAmount + "</td><td>" + data[i].AllocAmount + "</td><td>" + data[i].RequestedAmount + "</td><td><input type='text' class='abc txt_clsBudget' name='hdReleaseAmount' value='" + data[i].ReleaseAmount + "'</input><input type='hidden' name='hdDivCode' value='" + data[i].Div_Code + "'/></td></tr>";
+
+                }
+
+                $("#" + trid).after("<tr id='trdid'><td colspan='3'><table class='table  table-bordered  table-responsive'>" + (theadHTML + tbodyHTML) + "</table></td></tr>");
+                $("a#" + trid).attr('disabled', 'disabled');
+                calculateTotal();
+            }
+
+        });
+
+    });
+    $(document).on('keypress', '.txt_clsBudget', function (e) {
+
+        var kc = e.which;
+        //alert(kc);
+        if (kc >= 46 && kc <= 57) {
+
+        }
+        else {
+            e.preventDefault();
+        }
+
+    })
+
+    $(document).on('click', '.header,.header1', function () {
+        $(this).nextAll().slideToggle(500);
+
+    });
+
+    function isNumber(evt, element) {
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+
+        if (
+             (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+            (charCode < 48 || charCode > 57))
+            return false;
+
+
+    }
+
+    function calculateTotal() {
+        var valamt = 0;
+        var index;
+        $(".txtamt").each(function (i) {
+            index = (parseInt(i + 1));
+            if ($("#txt_amount_" + index).val() == '') {
+                $("#txt_amount_" + index).val(0);
+            }
+            valamt += parseInt($("#txt_amount_" + index).val());
+        });
+        $("#lblamt").text(valamt);
+    }
+
+
+</script>
+<style>
+    tr.header {
+        cursor: pointer;
+    }
+
+    tr.header1 {
+        cursor: pointer;
+    }
+
+    .fontbold {
+        font-size: 15px;
+        font-weight: bold;
+    }
+
+    .link {
+        text-decoration: none !important;
+        cursor: pointer;
+    }
+
+    .tr1 {
+        background: #145214 !important;
+        color: #fff;
+    }
+
+        .tr1 th {
+            background: none !important;
+        }
+
+    .tr2 {
+        background: #196719 !important;
+        color: #fff;
+    }
+
+        .tr2 th {
+            background: none !important;
+        }
+
+    .tr3 {
+        background: #1e7b1e !important;
+        color: #fff;
+    }
+
+        .tr3 th {
+            background: none !important;
+        }
+
+    .tr4 {
+        background: #239023 !important;
+        color: #fff;
+    }
+
+        .tr4 th {
+            background: none !important;
+        }
+
+    .tr5 {
+        background: #28a428 !important;
+        color: #fff;
+    }
+
+        .tr5 th {
+            background: none !important;
+        }
+
+    .tr-bg {
+        background: #eafaea;
+    }
+</style>

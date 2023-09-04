@@ -1,0 +1,383 @@
+﻿@{
+    ViewBag.Title = "ReleaseItems";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //"~/Views/Shared/Forestlayout.cshtml";
+}
+<style>
+    .l-p {
+        padding: 10px 0 0 0;
+        display: block;
+    }
+
+</style>
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Apply for Compounding </h1>
+    </div>
+    <div class="row">      
+        <div class="col-lg-12">
+            @if (TempData["SizedIteamStatus"] != null)
+            {
+                <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["SizedIteamStatus"]</div>
+            }
+                @using (Html.BeginForm("SaveReleaseData", "FPMRelease", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data" }))
+                {
+
+                    <div class="col-lg-6 pad">
+                        <div class="form-group">
+                            <label>
+                                Range Name:<span class="mandatory">*</span>
+                            </label>
+                            @Html.DropDownList("ddlRange", (IEnumerable<SelectListItem>)ViewBag.ddlRange, "--Select--", new { @class = "form-control input-width", id = "ddlRange" })
+                            <div id="errordiv03" style="display:none" class="alert-danger1"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 pad">
+                        <div class="form-group">
+                            <label>
+                                Offense Id:<span class="mandatory">*</span>
+                            </label>
+                            @Html.DropDownList("ddlOffenseCode", (IEnumerable<SelectListItem>)ViewBag.ddlOffenseCode, "--Select--", new { @class = "form-control input-width", @id = "ddlOffense", @name = "ddlOffenseCode" })
+                            <div id="errordiv03" style="display:none" class="alert-danger1"></div>
+                        </div>
+                    </div>
+                    <label id="lbl1" style="display: none">Offense Detail :</label>
+                    <table id="temp1" class="table table-striped table-bordered table-hover" style="display:none;">
+                        <thead>
+                            <tr>                             
+                                <th style="width:10%" >Fine Amount</th>                     
+                                <th style="width:20%">Description</th>
+                                <th style="width:10%">Offense Date</th>
+                                <th style="width:10%">Offense Place</th>
+                                <th style="width:10%">Offense Time</th>
+                                <th style="width:10%">Division Name</th>
+                                <th style="width:10%">Case Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbdyScart1"></tbody>
+                    </table>
+                    @*<div class="col-lg-6" id="divoption" style="display:none">
+                        <div class="form-group">
+                            <label>Option:</label>
+                            <div class="form-group">
+                                <input type="radio" id="PayNCompound" name="Amount" checked="" value="Compound"><span> Compounding</span>
+                                <input type="radio" id="PayLCompound" name="Amount" value="Seized"><span>Seized Item</span>
+                            </div>
+                        </div>
+                    </div>*@
+                    <br />
+                    <div id="divCompound" style="display:none">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <label>Amount to be Paid:<span class="mandatory">*</span></label>
+                                <input type="text" id="CompAmount" class="form-control" name="CompAmount" value="" style="width:auto" />
+                                <div id="errordiv03" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <label>Upload application of compounding:<span class="mandatory">*</span></label>
+                            <input type="file" class="form-control" id="fileappcompound" title="" name="fileappcompound" />
+                            <label><span class="l-p">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 100kb.</span></label>
+                            <div id="errordivappcompound" style="display:none" class="alert-danger1"></div>
+                        </div>
+                        <div class="col-lg-6">
+                            <label>Upload receipt of amount:<span class="mandatory">*</span></label>
+                            <input type="file" class="form-control" id="filereceipt" title="" name="filereceipt" />
+                            <label><span class="l-p">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 100kb.</span></label>
+                            <div id="errordivfilereceipt" style="display:none" class="alert-danger1"></div>
+                        </div>
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <button  class="btn btn-success" name="Command" type="submit" id="btn_SaveEstimation">
+                                    <i class="fa fa-check"></i> Pay Cash
+                                </button>
+                                <button type="submit" name="Command" value="Cancel" class="btn btn-danger">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                }
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+
+    </div>
+
+    <!-- /.col-lg-12 -->
+</div>
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+
+    var RootUrl = '@Url.Content("~/")';
+    $(document).ready(function () {
+
+
+
+
+        $('#CompAmount').bind('keypress', function (evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode
+            // var charCode = evt.which;
+
+            if ((charCode == 46) || (charCode >= 97 && charCode <= 122) || (charCode >= 65 && charCode <= 90)) {
+                return false;
+            }
+            else {
+                if (charCode >= 48 && charCode <= 57 || charCode == 46) {
+                    return true;
+                }
+                else {
+                    evt.preventDefault();
+                }
+            }
+        });
+
+        $('.gridtable').DataTable({
+            responsive: true
+        });
+
+
+
+        $("#ddlRange").bind("change", function () {
+            $("#ddlOffense").empty();
+            $("#ddlOffense").append('<option value= 0> Select Offense </option>');
+            var values = {
+                RangeCode: $("#ddlRange option:selected").val()
+            };
+
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'FPMRelease/GetOffenseCode',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    $.each(data, function (i, items) {
+
+                        $("#ddlOffense").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+
+
+        $(document).on('change', '#ddlOffense', function (e) {
+
+
+            var tblinfo = {
+
+                OffenseCode: $("#ddlOffense option:selected").val()
+            }
+
+
+
+
+            $.ajax({
+
+                type: 'POST',
+                url: RootUrl + 'OffenseAssign/ViewDetailsOnClick',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(tblinfo),
+                success: function (data) {
+
+                    $("#tbdyScart1").empty();
+                    $("#tbdyScart6").empty();
+                    $("#tbdyScart7").empty();
+                    $("#tbdyScart8").empty();
+                    $("#tbdyScart9").empty();
+
+
+
+
+
+                    var bardata = "<tr class='rowid'> <td>" + data.list1.FineAmount + "</td> <td>" + data.list1.Description + "</td><td>" + data.list1.OffenseDate + "</td><td>" + data.list1.OffensePlace + "</td><td>" + data.list1.OffenseTime + "</td><td>" + data.list1.DIV_NAME + "</td><td>" + data.list1.CaseStatus + "</td></tr>";
+                    $("#tbdyScart1").append(bardata);
+
+
+
+                    $("#lbl1,#temp1,#divCompound,#divoption").css("display", "block");
+                    if (data.list6.length > 0) {
+                        for (var i = 0; i < data.list6.length; i++) {
+                            var bardata = "<tr class='rowid'><td>" + data.list6[i].EquipmentName + "</td><td>" + data.list6[i].Make + "</td><td>" + data.list6[i].Model + "</td><td>" + data.list6[i].Caliber + "</td><td>" + data.list6[i].IdentificationNo + "</td><td>" + data.list6[i].size + "</td> </tr>";
+                            $("#tbdyScart6").append(bardata);
+                        }
+                        $("#temp6").show();
+                        $("#lbl6").show();
+                    }
+                    else {
+                        $("#temp6").hide();
+                        $("#lbl6").hide();
+                    }
+
+                    if (data.list7.length > 0) {
+                        for (var i = 0; i < data.list7.length; i++) {
+                            var bardata = "<tr class='rowid'><td>" + data.list7[i].SpeciesName + "</td><td>" + data.list7[i].ProduceType + "</td><td>" + data.list7[i].Quantity + "</td> </tr>";
+                            $("#tbdyScart7").append(bardata);
+                        }
+                        $("#temp7").hide();
+                        $("#lbl7").hide();
+                    }
+                    else {
+                        $("#temp7").hide();
+                        $("#lbl7").hide();
+
+                    }
+
+
+                    if (data.list8.length > 0) {
+                        for (var i = 0; i < data.list8.length; i++) {
+                            var bardata = "<tr class='rowid'> <td>" + data.list8[i].CategoryName + "</td><td>" + data.list8[i].VehicleRegistrationNo + "</td><td>" + data.list8[i].OwnerName + "</td><td>" + data.list8[i].VehicleMake + "</td><td>" + data.list8[i].VehicleModel + "</td><td>" + data.list8[i].ChassisNo + "</td> <td>" + data.list8[i].EngineNo + "</td><td>" + data.list8[i].PastOffenses + "</td>   </tr>";
+                            $("#tbdyScart8").append(bardata);
+                        }
+                        $("#temp8").show();
+                        $("#lbl8").show();
+                    }
+                    else {
+                        $("#temp8").hide();
+                        $("#lbl8").hide();
+                    }
+
+
+
+                    if (data.list9.length > 0) {
+
+                        for (var i = 0; i < data.list9.length; i++) {
+                            var bardata = "<tr class='rowid'><td>" + data.list9[i].Name + "</td><td>" + data.list9[i].AnimalScientificName + "</td><td>" + data.list9[i].AnimalDescription + "</td><td>" + data.list9[i].AnimalWeight + "</td>   </tr>";
+                            $("#tbdyScart9").append(bardata);
+                        }
+                        $("#temp9").hide();
+                        $("#lbl9").hide();
+                    }
+                    else {
+                        $("#temp9").hide();
+                        $("#lbl9").hide();
+                    }
+
+
+
+
+
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+
+
+        });
+
+        //$(document).on('change', '#PayNCompound', function (e) {
+        //    $("#divCompound").show();
+        //    $("#divSeized").hide();
+        //})
+        //$(document).on('change', '#PayLCompound', function (e) {
+        //    $("#divSeized").show();
+        //    $("#divCompound").hide();
+        //})
+        $('#btn_SaveEstimation').click(function (e) {
+
+            if ($('#CompAmount').val() == '') {
+                $('#CompAmount').focus();
+                return false;
+            }
+            if ($('#fileappcompound').val() == '') {
+                $('#fileappcompound').focus();
+                return false;
+            }
+            if ($('#filereceipt').val() == '') {
+                $('#filereceipt').focus();
+                return false;
+            }
+            else {
+
+            }
+
+        });
+
+        $("#fileappcompound").change(function (e) {
+            // var iSize = ($("#UploadId")[0].files[0].size / 1048576);
+            var iSize = parseFloat($("#fileappcompound")[0].files[0].size / 1024).toFixed(2);
+            if (iSize > 100) {
+                $('#fileappcompound').val('');
+                $('#errordivappcompound').show();
+                $('#errordivappcompound').html("Upload ID should not be larger than 100kb!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#fileappcompound').focus();
+                return false;
+            }
+            var file = $("#fileappcompound").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+            if (file) {
+                var get_ext = file.split('.');
+                get_ext = get_ext.reverse();
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#fileappcompound').val('');
+                    $('#errordivappcompound').show();
+                    $('#errordivappcompound').html("Please upload only jpeg or jpg or pdf or png or gif file format in Upload ID Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#fileappcompound').focus();
+                    return false;
+                } else {
+                    $('#errordivappcompound').hide();
+                }
+            }
+            else { $('#errordivappcompound').hide(); }
+        });
+
+        $("#filereceipt").change(function (e) {
+            // var iSize = ($("#UploadId")[0].files[0].size / 1048576);
+            var iSize = parseFloat($("#filereceipt")[0].files[0].size / 1024).toFixed(2);
+            if (iSize > 100) {
+                $('#filereceipt').val('');
+                $('#errordivfilereceipt').show();
+                $('#errordivfilereceipt').html("Upload ID should not be larger than 100kb!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#filereceipt').focus();
+                return false;
+            }
+            var file = $("#filereceipt").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+            if (file) {
+                var get_ext = file.split('.');
+                get_ext = get_ext.reverse();
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#filereceipt').val('');
+                    $('#errordivfilereceipt').show();
+                    $('#errordivfilereceipt').html("Please upload only jpeg or jpg or pdf or png or gif file format in Upload ID Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#filereceipt').focus();
+                    return false;
+                } else {
+                    $('#errordivfilereceipt').hide();
+                }
+            }
+            else { $('#errordivfilereceipt').hide(); }
+        });
+
+
+    });
+
+
+
+
+
+
+
+    function isNumber(evt, element) {
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+
+        if (
+             (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+            (charCode < 48 || charCode > 57))
+            return false;
+
+
+    }
+
+
+
+
+</script>
+
+

@@ -1,0 +1,190 @@
+﻿@model FMDSS.Models.Master.CoordinatorRegistration
+
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+
+    $('#Pincode').bind('keypress', function (evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode
+        // var charCode = evt.which;
+        if (charCode != 8) {
+
+            if ((charCode == 46) || (charCode >= 97 && charCode <= 122) || (charCode >= 65 && charCode <= 90)) {
+                return false;
+            }
+            else {
+                if (charCode >= 48 && charCode <= 57 || charCode == 46) {
+                    return true;
+                }
+                else {
+                    evt.preventDefault();
+                }
+            }
+        }
+    });
+
+
+
+
+
+
+
+
+
+
+        $('#btn_submit1').click(function (e) {
+
+            if ($('option:selected', $('#DIST_CODE')).index() == 0) {
+                $("#errDIST_CODE").css("display", "block");
+                $('#errDIST_CODE').focus();
+                return false;
+            }
+            else {
+                $("#errDIST_CODE").css("display", "none");
+            }
+
+            if ($('#Name').val().trim() == "") {
+                $('#errName').css("display", "block");
+                $('#errName').focus();
+                return false;
+            }
+            else {
+                $('#errName').css("display", "none");
+            }
+
+            if ($('#SSOID').val().trim() == "") {
+                $('#errSSOID').css("display", "block");
+                $('#errSSOID').focus();
+                return false;
+            }
+            else {
+                $('#errSSOID').css("display", "none");
+            }
+
+            if ($('#Address').val().trim() == "") {
+                $('#errAddress').css("display", "block");
+                $('#errAddress').focus();
+                return false;
+            }
+            else {
+                $('#errAddress').css("display", "none");
+            }
+
+            if ($('#Pincode').val().trim() == "") {
+                $('#errPincode').css("display", "block");
+                $('#errPincode').focus();
+                return false;
+            }
+            else {
+                $('#errPincode').css("display", "none");
+            }
+
+            if ($('option:selected', $('#Isactive')).index() == 0) {
+                $("#errIsactive").css("display", "block");
+                $('#errIsactive').focus();
+                return false;
+            }
+            else {
+                $("#errIsactive").css("display", "none");
+            }
+
+
+
+        });
+
+    
+
+
+</script>
+
+@using (Html.BeginForm("ADDUpdateCoordinatorRegistration", "Master", FormMethod.Post))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @*<label id="lbl_dpt">Add/Edit Place</label>*@
+                @ViewBag.OpType
+            </h4>
+        </div>
+
+        <div class="modal-body">
+            @Html.HiddenFor(model => model.ID)
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>District Name: <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.DIST_CODE, (IEnumerable<SelectListItem>)ViewBag.ddlDistrict1, "--Select--", new { @class = "form-control common", id = "DIST_CODE" })
+                    <div id="errDIST_CODE" style="display:none" class="alert-danger1">District Name is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Co-Ordinator/Supervisor Name: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Name, new { @class = "form-control common", @maxlength = "100" })
+                    <div id="errPlaceName" style="display:none" class="alert-danger1">Co-Ordinator/Supervisor Name is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>SSOID: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.SSOID, new { @class = "form-control common", @maxlength = "50" })
+                    <div id="errSSOID" style="display:none" class="alert-danger1">SSOID is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Address: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Address, new { @class = "form-control common", @maxlength = "200" })
+                    <div id="errAddress" style="display:none" class="alert-danger1">Address is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Pin code: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Pincode, new { @class = "form-control common", @maxlength = "6" })
+                    <div id="errPincode" style="display:none" class="alert-danger1">Pin code is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Active / Deactive : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.Isactive, (IEnumerable<SelectListItem>)ViewBag.ISactivelst, "--Select--", new { @class = "form-control common", id = "Isactive" })
+                    <div id="errIsactive" style="display:none" class="alert-danger1">Active / Deactive  is Required.</div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-12"></div>
+
+
+            <!-- /.Btn Groping -->
+
+
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success" value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+}

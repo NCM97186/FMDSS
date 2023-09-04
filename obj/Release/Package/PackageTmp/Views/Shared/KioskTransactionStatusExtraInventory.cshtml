@@ -1,0 +1,261 @@
+﻿@model FMDSS.Models.eMitraObjForPayment
+@{
+    ViewBag.Title = "KioskTransactionStatus";
+    //if (HttpContext.Current.Session["IsKioskUser"].ToString().ToUpperInvariant() == "TRUE")
+    //{
+    //    Layout = "~/Views/Shared/_kiosklayout.cshtml";
+    //}
+    //else
+    //{
+    //    Layout = "~/Views/Shared/_Layout.cshtml";
+    //}
+
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //
+}
+
+<style>
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 5px;
+        text-align: left;
+    }
+
+    table#tblScart tr:nth-child(even) {
+        background-color: #eee;
+    }
+
+    table#tblScart tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    table th {
+        background-color: dimgrey;
+        color: white;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #eee;
+    }
+
+    table tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    table th {
+        background-color: dimgrey;
+        color: white;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #eee;
+    }
+
+    table tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    table th {
+        background-color: dimgrey;
+        color: white;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #eee;
+    }
+
+    table tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    table th {
+        background-color: dimgrey;
+        color: white;
+    }
+</style>
+<script type="text/javascript" language="javascript">
+
+    $(document).ready(function () {
+
+        function disableBack() { window.history.forward() }
+
+        window.onload = disableBack();
+        window.onpageshow = function (evt) {
+            if (evt.persisted) disableBack()
+        }
+
+    });
+
+
+    function printDiv(divID) {
+        //Get the HTML of div
+        var divElements = document.getElementById(divID).innerHTML;
+        //Get the HTML of whole page
+        var oldPage = document.body.innerHTML;
+
+        //Reset the page's HTML with div's HTML only
+        document.body.innerHTML =
+          "<html><head><title>Transaction Status</title></head><body>" +
+          divElements + "</body>";
+
+        //Print Page
+        window.print();
+
+        //Restore orignal HTML
+        document.body.innerHTML = oldPage;
+
+
+    }
+
+</script>
+
+<div id="page-wrapper-inn">
+
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Kiosk Transaction Status</h1>
+        <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@Model.MSG</div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <br /><br /><br /><br />
+                <div id="Print_table">
+                    <table style="text-align: right; border-width: 1px; height: 350px; width: 70%; margin: auto;" bordercolor="blue" cellpadding="2" cellspacing="5">
+                        <tr>
+                            <td>Transaction ID:</td>
+                            <td>@Model.TRANSACTIONID </td>
+                        </tr>
+                        <tr>
+                            <td>Request ID:</td>
+                            <td>@Model.REQUESTID</td>
+                        </tr>
+                        <tr>
+                            <td>Name:</td>
+                            <td>@Convert.ToString(Session["KioskCtznName"])</td>
+                        </tr>
+                        <tr>
+                            <td>Emitra Request Timestamp:</td>
+                            <td>@Model.EMITRATIMESTAMP</td>
+                        </tr>
+                        <tr>
+                            <td>Transaction Amount:</td>
+                            <td>@Model.TRANSAMT</td>
+                        </tr>
+                        <tr>
+                            <td>Payment Status:</td>
+                            <td>@Model.TRANSACTIONSTATUS</td>
+                        </tr>
+
+                        <tr>
+                            <td>Receipt NO:</td>
+                            <td>@Model.RECEIPTNO</td>
+                        </tr>
+
+
+                    </table>
+                </div>
+                <br />
+
+                @*@if (ViewBag.IsTicketBooking)
+                    {*@
+                @using (Html.BeginForm("", "", FormMethod.Post, new { id = "pay" }))
+                {
+                    <div style="text-align:center;" class="form-horizontal" role="form">
+
+                        @if (Model.COMMTYPE == "True")
+                        {
+                            if (Model.TRANSACTIONSTATUS == "SUCCESS")
+                            {
+                                <div style=" text-align center;">
+                                    @*<a class="PrintTicketclassZoox btn btn-success" id="PrintTicketx" target="_blank" style="float: none;width:30%; text-align: center;" href='/ZooTicketReport/ZooTicketView.aspx?ID=@Encryption.encrypt(Model.CHECKSUM)'>
+                                            Print ticket
+                                        </a>*@
+
+                                    <button type="button" name="Command" class="btn btn-success" style="width:10%;" onclick="javascript: Print(@Model.CHECKSUM); return false;">Print Tickets</button>
+                                </div>
+
+                            }
+                        }
+                        else
+                        {
+
+                            <button id="btnPrint" type="submit" name="Command" class="btn btn-success" style="width:10%;" value=" print" onclick="javascript: printDiv('Print_table'); return false;">Print Receipt</button>
+                        }
+
+                        @if (HttpContext.Current.Session["IsKioskUser"].ToString().ToUpperInvariant() == "TRUE")
+                        {
+                            <a href='@Url.Action("KioskDashboard", "KioskDashboard")'>
+                                Home
+                            </a>
+                        }
+                        else
+                        {
+                            <a href='@Url.Action("dashboard", "dashboard")'>
+                                Home
+                            </a>
+                        }
+
+                    </div>
+                }
+                @*}*@
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div style="display:none" id="dvContainer"></div>
+    <script>
+    var RootURl = '@Url.Content("~/")';
+    function Print(id)
+    {
+        $.ajax({
+            type: 'POST',
+            url: RootURl + 'BookOnlineZoo/PrintTicketExtraInventory',
+            data: { ticketid: id },
+            success: function (data) {
+
+                $("#dvContainer").html(data);
+
+                var contents = $("#dvContainer").html();
+                var frame1 = $('<iframe />');
+                frame1[0].name = "frame1";
+                //frame1.css({ "position": "absolute", "top": "-1000000px" });
+                $("body").append(frame1);
+                var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+                frameDoc.document.open();
+                //Create a new HTML document.
+                frameDoc.document.write('<html><head><title>E-Ticket - Forest Department Rajasthan </title>');
+                //Append the external CSS file.
+                frameDoc.document.write('<link href="/css/bootstrap.min.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="/css/mobile.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="/css/main.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="/css/dashboard/dashboard.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="/css/dashboard/font-awesome.min.css" rel="stylesheet" />');
+                frameDoc.document.write('</head><body>');
+                //Append the DIV contents.
+                frameDoc.document.write(contents);
+                frameDoc.document.write('</body></html>');
+                frameDoc.document.close();
+                setTimeout(function () {
+                    window.frames["frame1"].focus();
+                    window.frames["frame1"].print();
+                    frame1.remove();
+                }, 500);
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+        //var aa = "<div class='wrapper'><section class='print-invoice'> <div class='row border-divider'><div class='col-sm-2'>" +
+        //           "<a href='#' id='myLogo'><img src='../images/logo.png' width='100' alt='Forest Department, Government of Rajasthan' title='Logo' class=''></a></div>" +
+        //          "<div class='col-sm-4 centr'><span class='pdate'>E-Ticket - Rajasthan Wildlife</span></div>" +
+        //    	  "<div class='col-sm-4'><span class='pull-right pdate'>Space of QR BAR Code</span></div>" +
+        //          "<div class='divider'></div></div> </section></div>";
+        //e.preventDefault();
+    }
+    </script>

@@ -1,0 +1,642 @@
+﻿@model IEnumerable<FMDSS.Models.Master.AuctionRevenueMaster>
+
+
+@{
+    ViewBag.Title = "RevenueDataManage";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<style>
+    #page-wrapper-inn .table > thead > tr > th:last-child {
+        width: 170px !important;
+    }
+
+    #myModal {
+        z-index: 1050;
+    }
+
+    .ad-srl {
+        overflow-y: auto;
+        height: auto;
+    }
+</style>
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script type="text/javascript">
+
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        $('#dataTables-example').DataTable({
+            responsive: true
+        });
+
+        $("#btn_update").hide();
+
+        $(".datefield").datepicker({ maxDate: new Date(), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        var currentDate = new Date();
+        $("#meatingDate").datepicker("setDate", currentDate);
+
+
+        $('#collectionRate').keypress(function (event) {
+            return isNumber(event, this)
+        });
+
+        $('#meatingDate').keydown(function (event)
+        { return cancelBackspace(event) });
+
+
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+        $('#depotId').change(function (e) {
+            $("#producetype").empty();
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/getForesProduce', // we are calling json method
+                dataType: 'json',
+                data: { depotId: $("#depotId").val() },
+                success: function (produce) {
+
+                    $.each(produce.list3, function (i, items) {
+                        $("#producetype").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+
+        });
+
+        $('#ddl_rangeCode').change(function (e) {
+            //$("#producetype").empty();
+
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'RevenueDataManage/getDepot', // we are calling json method
+                dataType: 'json',
+                data: { rangeCode: $("#ddl_rangeCode").val() },
+                success: function (produce) {
+
+                    $.each(produce, function (i, items) {
+                        $("#depotId").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+
+        });
+
+        $('#producetype').change(function (e) {
+
+            $("#forestProductID").empty();
+
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/getForesProduct', // we are calling json method
+                dataType: 'json',
+                data: { rangeCode: $("#ddl_rangeCode").val(), depotId: $("#depotId").val(), producetype: $("#producetype").val() },
+                success: function (produce) {
+                    $.each(produce, function (i, items) {
+                        $("#forestProductID").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+
+        });
+
+        $('#forestProductID').change(function (e) {
+
+            $("#produceUnit").val('');
+            $("#produceUnit").text('');
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/getForesProduceqty', // we are calling json method
+                dataType: 'json',
+                data: { depotId: $("#depotId").val(), producetype: $("#producetype").val(), product: $("#forestProductID").val() },
+                success: function (stockqty) {
+
+                    $("#produceUnit").val(stockqty.list1.ProduceUnit);
+                    $("#hdn_avQty").val(stockqty.list1.Qty);
+                    $("#hdn_productRate").val(stockqty.list1.ProductRate);
+                    $("#lbl_availableQty").text("Available Quantity:" + stockqty.list1.Qty);
+                    $("#unitspan").text("(In " + stockqty.list1.ProduceUnit + ")");
+                    $("#lbl_baserate").html("Rate per " + '</b>' + stockqty.list1.ProduceUnit + '(INR) </b>: ' + stockqty.list1.ProductRate);
+
+
+
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            }); 
+
+            return false;
+        });
+
+        function isNumber(evt, element) {
+
+            var charCode = (evt.which) ? evt.which : event.keyCode
+
+            if (
+                 (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+                (charCode < 48 || charCode > 57))
+                return false;
+        }
+
+        $('.addtoDB').click(function () {
+
+          
+            if ($('option:selected', $('#ddl_rangeCode')).index() == 0) {
+                alert('Kindkly select Range!');
+                $('#ddl_rangeCode').focus();
+                return false;
+            }
+            else {
+                if ($('option:selected', $('#depotId')).index() == 0) {
+                    alert('Kindkly select Depot!');
+                    $('#depotId').focus();
+                    return false;
+                }
+                else {
+                    if ($('option:selected', $('#producetype')).index() == 0) {
+                        alert('Kindkly select Product Type!');
+                        $('#producetype').focus();
+                        return false;
+                    }
+                    else {
+                        if ($('option:selected', $('#forestProductID')).index() == 0) {
+                            alert('Kindkly select Product!');
+                            $('#forestProductID').focus();
+                            return false;
+                        }
+                        else {
+                            if ($('#collectionRate').val() == "" || $('#collectionRate').val()== ".") {
+                                alert('Kindkly enter valid Collection Rate!');
+                                $('#collectionRate').focus();
+                              
+                                return false;
+                            }
+                            else {
+                                if ($('#DocMOM').val() == "") {
+                                    alert('Kindly MOM should not be  empty or larger than 100kb!');
+                                    $('#docMOM').focus();
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+
+    function EditMeating(noticeId, actionLog) {
+
+        $("#lbl_header").text('Update MOM');
+        $("#depotId").empty();
+        $("#producetype").empty();
+        $("#forestProductID").empty();
+
+
+        var collectionID = {
+            collectionID: $.trim(noticeId)
+        }
+
+        //$("#tbdyScart").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'MeatingCollection/EditDetails',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(collectionID),
+            success: function (data) {
+
+                var selectObj = document.getElementById('ddl_rangeCode');
+
+                for (var i = 0; i < selectObj.options.length; i++) {
+                    if (selectObj.options[i].value == data.RangeCode) {
+
+                        selectObj.options[i].selected = true;
+                        // return;
+                    }
+                }
+
+                var r_Code = data.RangeCode;
+                var p_Code = data.DepotId;
+                var p_produce = data.ForestProduceID;
+                var p_product = data.ForestProductID;
+
+
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'RevenueDataManage/getDepot', // we are calling json method
+                    dataType: 'json',
+                    data: { rangeCode: r_Code },
+                    success: function (produce) {
+
+                        $.each(produce, function (i, items) {
+                            $("#depotId").append('<option value="' + items.Value + '">' +
+                             items.Text + '</option>');
+                            if (items.Value == p_Code) {
+                                $('#depotId option').filter(function () { return $(this).val() == p_Code }).attr('selected', true);
+                                return;
+                            }
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve states.' + ex);
+                    }
+
+                });
+
+
+
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'ManageNotice/getForesProduce', // we are calling json method
+                    dataType: 'json',
+                    data: { depotId: p_Code },
+                    success: function (produce) {
+
+                        $.each(produce.list3, function (i, items) {
+                            $("#producetype").append('<option value="' + items.Value + '">' +
+                             items.Text + '</option>');
+                            if (items.Value == p_produce) {
+                                $('#producetype option').filter(function () { return $(this).val() == p_produce }).attr('selected', true);
+                                return;
+                            }
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve states.' + ex);
+                    }
+
+                });
+
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'ManageNotice/getForesProduct', // we are calling json method
+                    dataType: 'json',
+                    data: { depotId: p_Code, producetype: p_produce },
+                    success: function (produce) {
+                        $.each(produce, function (i, items) {
+                            $("#forestProductID").append('<option value="' + items.Value + '">' +
+                             items.Text + '</option>');
+                            if (items.Value == p_product) {
+                                $('#forestProductID option').filter(function () { return $(this).val() == p_product }).attr('selected', true);
+                                return;
+                            }
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve states.' + ex);
+                    }
+
+                });
+
+                $("#btn_update").show();
+
+                $("#btn_Save").hide();
+                $("#collectionID").val(data.RowID);
+                $("#produceUnit").val(data.ProduceUnit);
+                $("#collectionRate").val(data.CollectionRate);
+                $("#meatingDate").val(data.MeatingDates);
+
+
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    }
+
+
+  
+
+    var _validFileExtensions = [".pdf"];
+    function ValidateSingleInput(oInput) {
+        if (oInput.type == "file") {
+            var sFileName = oInput.value;
+            if (sFileName.length > 0) {
+                var blnValid = false;
+                for (var j = 0; j < _validFileExtensions.length; j++) {
+                    var sCurExtension = _validFileExtensions[j];
+                    if (sFileName.substr(sFileName.length - sCurExtension.length, sCurExtension.length).toLowerCase() == sCurExtension.toLowerCase()) {
+                        blnValid = true;
+                        break;
+                    }
+                }
+
+                if (!blnValid) {
+                    alert("Sorry, " + sFileName + " is invalid, allowed extensions are: " + _validFileExtensions.join(", "));
+                    oInput.value = "";
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+</script>
+<script type="text/javascript">
+
+    function ClearField() {
+        $("#lbl_header").text('Add MOM');
+        $("#ddl_rangeCode").val('');
+        $("#depotId").empty();
+        $("#producetype").empty();
+        $("#forestProductID").empty();
+        $("#produceUnit").val('');
+        $("#meatingDate").val('');
+
+        var currentDate = new Date();
+        $("#meatingDate").datepicker("setDate", currentDate);
+        $("#btn_Save").show();
+        $("#btn_update").hide();
+
+    }
+
+</script>
+
+@using (Html.BeginForm("SubmitMeatingCollection", "MeatingCollection", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <div id="page-wrapper-inn">
+        <div class="col-lg-12 pad">
+            <h1 class="page-header"><span>Manage Collection Rates</span></h1>
+
+            @if (@TempData["Revenue_Status"] != null)
+            {
+                <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["Revenue_Status"]</div>
+            }
+        </div>
+        <!-- /.col-lg-12 -->
+        <!-- Row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <!--./Search-->
+                        <!--Add New Btn-->
+                        <div class="col-lg-3 rgt pull-right">
+                            <button type="button" class="btn btn-success AddNewAuction pull-right" data-toggle="modal" id="addNewnotice" data-target="#myModal" title="Add New Notice" onclick="ClearField()">
+                                <i class="fa fa-plus"></i> Add New Collection Rate
+                            </button>
+                        </div>
+                        <!--./Add New Btn-->
+                        <div class="dataTable_wrapper">
+                            <div id="tbl" class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+
+                                    <thead>
+                                        <tr>
+                                            <th style="width:7%;display:none;" >S. No</th>
+                                            <th>Range</th>
+                                            <th>Depot</th>
+                                            <th>Product</th>
+                                            <th>Product Type</th>
+                                            <th>Unit</th>
+                                            <th>Collection Rate</th>
+                                            <th>Meeting Date</th>
+                                            <th>Uploaded MOM</th>
+                                            <th style="width:100px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+
+                                            <tr>
+                                                <td style="display:none;">
+                                                    @Html.DisplayFor(model => item.RowID)
+
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.RangeCode)
+                                                </td>
+
+
+                                                <td>
+                                                    @Html.DisplayFor(model => item.DepotName)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.ForestProducename)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.ForestProductName)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.ProduceUnit)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.CollectionRate)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.MeatingDates)
+                                                </td>
+                                                <td>
+                                                    <a href="@Url.Content(item.DocMOMfilepath)" target='_blank'><img src='../images/pdfIcon.jpg' width='30' /></a>
+                                                </td>
+                                                <td>
+
+                                                    <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#myModal" style="cursor:pointer" title="Edit" onclick="EditMeating('@Html.DisplayFor(model => item.RowID)','Update')">
+                                                        <i class="fa fa-edit"></i>
+                                                    </button>
+
+
+                                                    <a class="btn btn-danger btn-circle" title="Delete" onclick="return confirm('Are you absolutely sure you want to delete?')" href="@Url.Action("DeletMeatingData", "MeatingCollection", new { id = item.RowID })">
+
+                                                        <i class="fa fa-times"></i>
+                                                    </a>
+
+                                                </td>
+
+
+                                            </tr>
+
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+                <!-- /.panel -->
+                <div class="modal fade" id="myModal" role="dialog">
+                    <div class="modal-dialog modal-lg">
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">
+                                    &times;
+                                </button>
+                                <h4 class="modal-title">
+                                    <label id="lbl_header"> </label>
+                                </h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Range Name: <span class="mandatory">*</span></label>
+                                        @Html.DropDownList("RangeCode", (IEnumerable<SelectListItem>)ViewBag.RegionCode, "--Select--", new { @class = "form-control", id = "ddl_rangeCode" })
+                                        <input type="hidden" id="collectionID" name="CollectionID" value="0" />
+                                        <div id="rangeerrordiv" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Place/Depot of Auction: <span class="mandatory">*</span></label>
+                                        @Html.DropDownList("DepotId", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "depotId" })
+                                        <input type="hidden" id="hd_depotId" name="Hd_DepotId" />
+                                        <div id="depoterrordiv" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Product Type: <span class="mandatory">*</span></label>
+
+                                        @Html.DropDownList("ForestProduceID", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "producetype" })
+                                        <input type="hidden" id="hd_producetype" name="Hd_ForestProduceID" />
+
+
+                                        <div id="produceerrordiv" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Product: <span class="mandatory">*</span></label>
+
+                                        @Html.DropDownList("ForestProductID", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "forestProductID" })
+
+                                        <input type="hidden" id="hd_forestProductID" name="Hd_ForestProductID" />
+
+                                        <div id="producterrordiv" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Name of Unit: <span class="mandatory">*</span></label>
+                                        <input class="form-control" id="produceUnit" name="ProduceUnit" readonly="readonly">
+
+
+                                        <div id="produceerrordiv" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Decided Collection Rate<span id="unitspan"></span>:<span class="mandatory">*</span></label>
+                                        <input class="form-control" id="collectionRate" name="CollectionRate">
+                                        <input type="hidden" id="hd_Qty" name="Hd_Qty" />
+                                        <input type="hidden" id="hdn_avQty" />
+
+                                        <label style="display:none" id="lbl_availableQty" for="email" class="pull-left"></label>
+                                        <label id="lbl_baserate" for="email" class="pull-right"></label>
+                                        <div id="textqtyerrordiv" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+
+                                        <label>Date of Meeting Held: <span class="mandatory">*</span></label>
+                                        <input type="text" class="form-control datefield" id="meatingDate" name="MeatingDate" />
+
+                                        <div id="errordiv6" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Upload option for Meeting Minutes:<span class="mandatory">*</span><span> (Only.pdf allowed with max size 100kb)</span></label>
+                                        <input type="file" class="form-control" id="DocMOM" name="DocMOM" onchange="ValidateSingleInput(this);" />
+
+                                        <div id="errordivUpload" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                    <div id="errorUploadMediv" style="display:none" class="alert-danger1"></div>
+                                </div>
+
+                                <div class="col-lg-12"></div>
+
+
+
+
+
+
+                                <div class="form-group" id="btn-cont1">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <button type="button" class="btn btn-success" id="procedId" style="display:none">
+                                            Proceed
+                                        </button>
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!--/.model body-->
+
+                            <div class="modal-footer" style="clear: both">
+
+                                <div id="btn" class="col-lg-12">
+                                    <button type="submit" class="btn btn-success addtoDB" name="Command" value="Submit" id="btn_Save">
+                                        <i class="fa fa-check"></i>Submit
+                                    </button>
+
+                                    <button type="submit" class="btn btn-success addtoDB" name="Command" value="Update" id="btn_update">
+                                        <i class="fa fa-check"></i>Update
+                                    </button>
+
+                                    <button type="reset" class="btn btn-warning" value="reset">
+                                        <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                    </button>
+                                    <button type="button" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                                        <i class="fa fa-times fa-fw"></i> Cancel
+                                    </button>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+
+}

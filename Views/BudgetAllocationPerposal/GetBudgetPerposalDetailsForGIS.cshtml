@@ -1,0 +1,323 @@
+﻿@model FMDSS.Models.ForesterDevelopment.BudgetAllocation.ViewModel.BudgetAllocationGISInformation
+@{
+    ViewBag.Title = "GetBudgetPerposalDetailsForGIS";
+}
+
+<!--Upload KML File-->
+<script type="text/javascript">
+    function GetBudgetExpenditureUploadKML(ID) {
+        if (ID > 0) {
+            $.ajax({
+                type: 'GET',
+                url: RootURl + 'BudgetExpenditure/BudgetExpenditureAllocationDetails',
+                contentType: 'application/json; charset=utf-8',
+                data: { ID: ID },
+                success: function (result) {
+                    $("#BudgetExpenditureModels_FY_ID").val(result.FY_ID);
+                    $("#BudgetExpenditureModels_SchemeID").val(result.SchemeID);
+                    $("#BudgetExpenditureModels_BudgetHeadID").val(result.BudgetHeadID);
+                    $("#BudgetExpenditureModels_SubBudgetHeadID").val(result.SubBudgetHeadID);
+                    $("#BudgetExpenditureModels_ActivityID").val(result.ActivityID);
+                    $("#BudgetExpenditureModels_SubActivityID").val(result.SubActivityID);
+                    $("#BudgetExpenditureModels_AllocatedAmount").val(result.AllocatedAmount.toFixed(2));
+                    $("#ExpFY_ID").val(result.FinancialYear);
+                    $("#ExpSchemeID").val(result.SchemeName);
+                    $("#ExpBudgetHeadID").val(result.BudgetHead);
+                    $("#ExpSubBudgetHeadID").val(result.SubBudgetHead);
+                    $("#ExpActivityID").val(result.ActivityName);
+                    $("#ExpSubActivityID").val(result.SubActivityName);
+
+                    $("#AllocatedAmount").val(result.AllocatedAmount.toFixed(2));
+                    $("#BudgetExpenditureModels_CIRCLE_CODE").val(result.CIRCLE_CODE);
+                    $("#ExpCircle").val(result.CIRCLE_NAME);
+                    $("#BudgetExpenditureModels_Division").val(result.Div_Code);
+                    $("#ExpDivision").val(result.Division);
+                    $("#BudgetExpenditureModels_ISCircleDivision").val(result.ISCircleDivision);
+                    $("#ExpSiteName").val(result.SiteName);
+                    $("#ExpRecurring").val(result.RecurringName);
+                    $("#BudgetExpenditureModels_BudgetHeadAllocationID").val(result.BudgetHeadAllocationID);
+                    $("#BudgetExpenditureModels_SanctuaryCode").val(result.SanctuaryCode);
+
+                    AvaliableExpAmount();
+
+
+                    $("#modal-window").modal("show");
+
+                },
+
+            });
+
+        }
+    }
+
+    var origin = document.location.origin;
+
+
+    $(function () {
+        $(document).ready(function () {
+
+            $("#returnurl").val(origin + "/BudgetAllocationPerposal/GISDataBudgetModule");
+
+        });
+    });
+
+    $(function () {
+        $("#btnUploadSHPKML").click(function () {
+            if ($("#NOCType").val() != '0') {
+                var strname = GISPerName();
+                var ssoid = $("#hdSSOID").val();
+
+                $("#ssoId").val(ssoid);
+                $("#requestFor").val(strname);
+                var actionUrl = origin + "/FMDSSGIS/permitlocation/GetRequest.aspx";
+
+
+                document.getElementById("form12").action = actionUrl;
+                document.getElementById("form12").submit();
+
+
+            }
+            else { alert('Kindly select NOC Type first!!'); return; }
+        });
+    });
+    function GISPerName() {
+        var GisName = "AmritaDevi";
+        return GisName;
+    }
+
+</script>
+<!--GIS Data Post 22-04-2016-->
+<form id="form12" name="form12" method="post">
+    <input type="hidden" id="portalid" name="portalid" value="rajcomp123" />
+    <input type="hidden" id="ssoId" name="ssoId" value="" />
+    <input type="hidden" id="requestFor" name="requestFor" value="" />
+    @* <input type="hidden" id="returnurl" name="returnurl" value="http://localhost:17105/AmritaDeviAward/getGISData" />*@
+    <input type="hidden" id="returnurl" name="returnurl" value="" />
+</form>
+
+<div id="page-wrapper-inn">
+
+    @if (TempData["Message"] != null)
+    {
+
+        <script type="text/javascript" language="javascript">
+            alert('@TempData["Message"]');
+        </script>
+    }
+    @Html.Partial("_PartialBudgetLink")
+    <div class="col-lg-12 pad">
+        <div class="col-lg-10">
+            <h1 class="page-header">Budget Perposal (@Session["User"].ToString())</h1>
+        </div>
+        <div class="col-lg-2">
+            <button type="button" class="btn btn-success confirm-toggle" name="Command" value="0" id="AddMaster">
+                <i class="fa fa-check"></i> Show Master
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="panel panel-default col-lg-12">
+            @using (Html.BeginForm("GetBudgetPerposalDetailsForGIS", "BudgetAllocationPerposal", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data", id = "IdFor" }))
+            {
+                <div class="panel-body">
+                    @Html.Hidden("hdSSOID", "" + Session["SSOID"] + "", new { @id = "hdSSOID" })
+                    @Html.HiddenFor(x => x.BudgetAllocationDetails.ID)
+                    @Html.HiddenFor(x => x.BudgetAllocationDetails.FY_ID)
+                    @Html.HiddenFor(x => x.BudgetAllocationDetails.SchemeID)
+                    @Html.HiddenFor(x => x.BudgetAllocationDetails.BudgetHeadID)
+                    @Html.HiddenFor(x => x.BudgetAllocationDetails.SubBudgetHeadID)
+                    @Html.HiddenFor(x => x.BudgetAllocationDetails.ActivityID)
+                    @Html.HiddenFor(x => x.BudgetAllocationDetails.SubActivityID)
+                    @Html.HiddenFor(x => x.BudgetAllocationDetails.CIRCLE_CODE)
+                    @Html.HiddenFor(x => x.BudgetAllocationDetails.Division)
+                    @Html.HiddenFor(x => x.BudgetAllocationDetails.ISCircleDivision)
+                    @Html.HiddenFor(x => x.BudgetAllocationDetails.AllocatedAmount)
+                    @Html.HiddenFor(x => x.BudgetAllocationDetails.BudgetHeadAllocationID)
+                    @Html.HiddenFor(x => x.BudgetAllocationDetails.SanctuaryCode)
+                    @Html.HiddenFor(s => s.ID)
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Financial Year: <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.BudgetAllocationDetails.FinancialYear, new { @class = "form-control", @id = "ExpFY_ID", name = "ExpFY_ID", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Scheme: <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.BudgetAllocationDetails.SchemeName, new { @class = "form-control", @id = "ExpSchemeID", name = "ExpSchemeID", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Budget Head: <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.BudgetAllocationDetails.BudgetHead, new { @class = "form-control", @id = "ExpBudgetHeadID", name = "ExpBudgetHeadID", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Budget Sub Head: <span class="mandatory"></span></label>
+                            @Html.TextBoxFor(model => model.BudgetAllocationDetails.SubBudgetHead, new { @class = "form-control", @id = "ExpSubBudgetHeadID", name = "ExpSubBudgetHeadID", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Activity : <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.BudgetAllocationDetails.ActivityName, new { @class = "form-control", @id = "ExpActivityID", name = "ExpActivityID", @readonly = "readonly" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Sub Activity: <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.BudgetAllocationDetails.SubActivityName, new { @class = "form-control", @id = "ExpSubActivityID", name = "ExpSubActivityID", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Site Name: <span class="mandatory"></span></label>
+                                @Html.TextBoxFor(model => model.BudgetAllocationDetails.SiteName, new { @class = "form-control", @id = "ExpSiteName", name = "ExpSiteName", @readonly = "readonly" })
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Recurring Or Non Recurring:<span class="mandatory"></span></label><br />
+                                @Html.TextBoxFor(model => model.BudgetAllocationDetails.RecurringName, new { @class = "form-control", @id = "ExpRecurring", name = "ExpRecurring", @readonly = "readonly" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Office: <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.BudgetAllocationDetails.CIRCLE_NAME, new { @class = "form-control", @id = "ExpCircle", name = "ExpCircle", @readonly = "readonly" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6" id="divisions">
+                        <div class="form-group">
+                            <label>Division: <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.BudgetAllocationDetails.Division, new { @class = "form-control", @id = "ExpDivision", name = "ExpDivision", @readonly = "readonly" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Allocated Amount: (lakh)<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(x => x.BudgetAllocationDetails.AllocatedAmount, new { @class = "form-control", @id = "AllocatedAmount", name = "AvailableAmount", @readonly = "@readonly" })
+
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Remaning Amount: (lakh)<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(x => x.BudgetAllocationDetails.RemaningAmount, new { @class = "form-control", @id = "RemaningAmount", name = "RemaningAmount", @readonly = "@readonly" })
+                            <div id="errorRemaining" class="alert-danger1"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12 edithide">
+                        <div class="form-group">
+                            <label>
+                                Upload KML/SHP:<span class="mandatory">* All details will be generated automatically by uploading KML file.</span>
+                            </label>
+
+                            <div class="col-lg-3 col-md-3 col-xs-3 col-sm-3">
+                                <button type="button" class="btn btn-warning btn-block" name="" value="" id="btnUploadSHPKML">
+                                    <i class="fa fa-check"></i> Upload
+                                </button>
+                            </div>
+                            <div id="errordiv88" style="display:none; position:initial; right:0px;" class="alert-danger1"></div>
+                            @Html.Hidden("hdSSOID", "" + Session["SSOID"] + "", new { @id = "hdSSOID" })
+                        </div>
+                    </div>
+                    <div class="table-responsive request-id col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <table id="tbldistmapping" class="table table-striped table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Division</th>
+                                    <th>District</th>
+                                    <th>Tehsil</th>
+                                    <th>Panchayat Samiti</th>
+                                    <th>Gram Panchayat</th>
+                                    <th>Village</th>
+                                    <th>Name of Area</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.GISInformationName)
+                                {
+                                    <tr>
+                                        <td>
+
+                                            @Html.DisplayFor(model => item.Div_NM)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.Dist_NM)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.Tehsil_NM)
+
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.Block_NM)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.Gp_NM)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.Village_NM)
+
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.areaName)
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <div class="col-lg-12 Edithide">
+                        <label>GPS Address:</label>
+                        <div class="divider"></div>
+                    </div>
+                    <div class="col-lg-6 un-bold Edithide">
+                        <div class="form-group">
+                            <label>Latitude</label>
+                            @Html.TextBoxFor(x => x.Latitude, new { @class = "form-control", @readonly = "@readonly" })
+
+                        </div>
+                    </div>
+                    <div class="col-lg-6 un-bold Edithide">
+                        <div class="form-group">
+                            <label>Longitude:</label>
+                            @Html.TextBoxFor(x => x.Longitude, new { @class = "form-control", @readonly = "@readonly" })
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="col-lg-4">
+                    <button type="submit" class="btn btn-success" id="Savepermission">Submit</button>
+
+                </div>
+                <div class="col-lg-4">
+                    <button type="button" id="btn-close" class="btn btn-danger">@Html.ActionLink("Cancel", "AddBudgetPerposal", "BudgetAllocationPerposal") </button>
+                </div>
+
+            }
+            <!-- /.Row -->
+        </div>
+
+        <!-- /.panel-body -->
+        <!-- /.panel -->
+
+    </div>
+
+
+</div>

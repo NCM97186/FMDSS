@@ -1,0 +1,335 @@
+﻿@model FMDSS.Models.Master.PlaceBookingDuration
+
+
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/js/bootstrap.min.js"></script>
+<script src="~/js/Common.js"></script>
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+
+    // date validation ========================================================================
+
+    $(document).ready(function () {
+        // date validation ========================================================================
+        var currentYear = (new Date).getFullYear();
+
+        var Range = '2008:' + (currentYear + 1)
+
+        $("#FromDate,#ToDate,#TicketFromDate,#TicketToDate").datepicker({ yearRange: Range, dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        var currentDate = new Date();
+        //$("#txt_fromdate").datepicker("setDate", currentDate);
+        //$("#txt_todate").datepicker("setDate", currentDate);
+
+        $("#FromDate").change(function () {
+            $("#ToDate").val('');
+        });
+        $("#TicketFromDate").change(function () {
+            $("#TicketToDate").val('');
+        });
+        $(document).on('keypress', '#FromDate,#ToDate,#TicketToDate,#TicketFromDate', function (event) {
+
+            event.preventDefault();
+            return false;
+
+        });
+
+        $('#FromDate,#ToDate,#TicketToDate,#TicketFromDate').keydown(function (event)
+        { return cancelBackspace(event) });
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+        $("#ToDate").change(function () {
+            var str1 = $("#FromDate").val();
+            var str2 = $("#ToDate").val();
+
+            var L = 3, d1 = $("#FromDate").val().split('/'), d2 = $("#ToDate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#ToDate").val('');
+                alert('Date Must be GreaterThen From Date');
+            }
+        });
+        $("#TicketToDate").change(function () {
+            var str1 = $("##TicketFromDate").val();
+            var str2 = $("##TicketToDate").val();
+
+            var L = 3, d1 = $("##TicketFromDate").val().split('/'), d2 = $("##TicketToDate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("##TicketToDate").val('');
+                alert('Date Must be GreaterThen From Date');
+            }
+        });
+        // date validation ========================================================================
+
+
+
+
+
+        ////// date validation ========================================================================
+
+
+        ////$(".datefield").datepicker({  dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true,  onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        ////var currentDate = new Date();
+        //////$("#txt_fromdate").datepicker("setDate", currentDate);
+        //////$("#txt_todate").datepicker("setDate", currentDate);
+
+        ////$("#DurationFromDate").change(function () {
+        ////    $("#DurationToDate").val('');
+        ////});
+
+        ////$(document).on('keypress', '#DurationFromDate,#DurationToDate', function (event) {
+
+        ////    event.preventDefault();
+        ////    return false;
+
+        ////});
+
+        ////$('#DurationFromDate,#DurationToDate').keydown(function (event)
+        ////{ return cancelBackspace(event) });
+        ////function cancelBackspace(event) {
+        ////    if (event.keyCode == 8 || event.keyCode == 46) {
+        ////        return false;
+        ////    }
+        ////}
+
+        ////$("#DurationToDate").change(function () {
+        ////    var str1 = $("#DurationFromDate").val();
+        ////    var str2 = $("#DurationToDate").val();
+
+        ////    var L = 3, d1 = $("#DurationFromDate").val().split('/'), d2 = $("#DurationToDate").val().split('/');
+        ////    d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+        ////    d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+        ////    if (new Date(d1) <= new Date(d2)) {
+        ////        // parseDate(str1, str2);
+        ////    }
+        ////    else {
+        ////        $("#DurationToDate").val('');
+        ////        alert('Date Must be GreaterThen From Date');
+        ////    }
+        ////});
+
+        ////// date validation ========================================================================
+
+
+
+        $('#btn_submit1').click(function (e) {
+            if ($('option:selected', $('#PlaceID')).index() == 0) {
+                $("#errPlaceID").css("display", "block");
+                $('#errPlaceID').focus();
+                return false;
+            }
+            else {
+                $("#errPlaceID").css("display", "none");
+            }
+
+            //if ($('option:selected', $('#ZoneID')).index() == 0) {
+            //    $("#errZoneID").css("display", "block");
+            //    $('#errZoneID').focus();
+            //    return false;
+            //}
+            //else {
+            //    $("#errZoneID").css("display", "none");
+            //}
+
+            if ($('option:selected', $('#BookingTypeName')).index() == 0) {
+                $("#errBookingTypeName").css("display", "block");
+                $('#errBookingTypeName').focus();
+                return false;
+            }
+            else {
+                $("#errBookingTypeName").css("display", "none");
+            }
+
+            if ($('#FromDate').val().trim() == "") {
+                $("#errDurationFromDate").css("display", "block");
+                $('#errDurationFromDate').focus();
+                return false;
+            }
+            else {
+                $("#errDurationFromDate").css("display", "none");
+            }
+
+            if ($('#ToDate').val().trim() == "") {
+                $("#errDurationToDate").css("display", "block");
+                $('#errDurationToDate').focus();
+                return false;
+            }
+            else {
+                $("#errDurationToDate").css("display", "none");
+            }
+
+            if ($("#TicketFromDate").val().trim() == "") {
+                $("#errTicketDurationFromDate").css("display", "block");
+                $('#errTicketDurationFromDate').focus();
+                return false;
+            } else {
+                $("#errTicketDurationFromDate").css("display", "none");
+            }
+            if ($("#TicketToDate").val().trim() == "") {
+                $("#errTicketDurationToDate").css("display", "block");
+                $('#errTicketDurationToDate').focus();
+                return false;
+            } else {
+                $("#errTicketDurationToDate").css("display", "none");
+            }
+
+            if ($('option:selected', $('#Isactive')).index() == 0) {
+                $("#errIsactive").css("display", "block");
+                $('#errIsactive').focus();
+                return false;
+            }
+            else {
+                $("#errIsactive").css("display", "none");
+            }
+
+
+
+        });
+
+
+
+        $('#PlaceID1').change(function (e) {
+
+            $("#ZoneID").empty();
+            $("#ZoneID").append('<option value="0">--Select--</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'Master/ZoneByPlaceBookingDuration', // we are calling json method
+                dataType: 'json',
+                data: { PlaceID: $("#PlaceID").val() },
+                success: function (circle) {
+                    $.each(circle, function (i, items) {
+                        $("#ZoneID").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+    });
+
+
+
+
+
+
+
+</script>
+
+@using (Html.BeginForm("ADDUpdatePlaceBookingDuration", "Master", FormMethod.Post))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @*<label id="lbl_dpt">Add/Edit Place</label>*@
+                @ViewBag.OpType
+            </h4>
+        </div>
+        <div class="modal-body">
+            @Html.HiddenFor(model => model.ID)
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Place Name: <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.PlaceID, (IEnumerable<SelectListItem>)ViewBag.ddlPlace1, "--Select--", new { @class = "form-control common", id = "PlaceID" })
+                    <div id="errPlaceID" style="display:none" class="alert-danger1">Place Name is Required.</div>
+
+                </div>
+            </div>
+            @*<div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Zone Name: <span class="mandatory">*</span></label>
+                        @Html.DropDownListFor(Model => Model.ZoneID, (IEnumerable<SelectListItem>)ViewBag.ddlZones1, "--Select--", new { @class = "form-control common", id = "ZoneID" })
+                        <div id="errZoneID" style="display:none" class="alert-danger1">Zone Name is Required.</div>
+                    </div>
+                </div>*@
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Booking Type : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.BookingTypeName, (IEnumerable<SelectListItem>)ViewBag.ddlLstBookingTypeName1, "--Select--", new { @class = "form-control common", id = "BookingTypeName" })
+                    <div id="errBookingTypeName" style="display:none" class="alert-danger1">Booking Type is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Duration From Date: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.DurationFromDate, new { @class = "form-control common datefield", @maxlength = "15", id = "FromDate" })
+                    <div id="errDurationFromDate" style="display:none" class="alert-danger1">Duration From Date is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Duration To Date: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.DurationToDate, new { @class = "form-control common datefield", @maxlength = "15", id = "ToDate" })
+                    <div id="errDurationToDate" style="display:none" class="alert-danger1">Duration To Date is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Ticket Duration From Date: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.TicketDurationFromDate, new { @class = "form-control common datefield", @maxlength = "15", id = "TicketFromDate" })
+                    <div id="errTicketDurationFromDate" style="display:none" class="alert-danger1">Ticket Duration From Date is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Ticket Duration To Date: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.TicketDurationToDate, new { @class = "form-control common datefield", @maxlength = "15", id = "TicketToDate" })
+                    <div id="errTicketDurationToDate" style="display:none" class="alert-danger1">Ticket Duration To Date is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Active / Deactive : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.Isactive, (IEnumerable<SelectListItem>)ViewBag.ISactivelst, "--Select--", new { @class = "form-control common", id = "Isactive" })
+                    <div id="errIsactive" style="display:none" class="alert-danger1">Active / Deactive  is Required.</div>
+
+                </div>
+            </div>
+
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success" value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+}

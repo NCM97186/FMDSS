@@ -1,0 +1,595 @@
+﻿@model FMDSS.Models.FinanceManagement.LCGenration
+@{
+    ViewBag.Title = "CreditLetter";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //  "~/Views/Shared/Forestlayout.cshtml";
+}
+<!-- Form design -->
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Letter of Credit</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+
+
+                    <!--Add New Btn-->
+                    <div class="col-lg-3 pull-right">
+                        <button type="button" class="btn btn-success AddNewAsset" name="" value="" title="Add New" style="margin-bottom:10px">
+                            <i class="fa fa-plus"></i> Add New
+                        </button>
+                    </div>
+                    <!--./Add New Btn-->
+                    <!--Table-->
+                    <div id="tbl" class="table-responsive">
+                        <table class="table table-striped table-bordered table-hover">
+
+                            <thead>
+                                <tr>
+                                    <th style="width:6%;">S. No</th>
+                                    <th>Office</th>
+                                    <th>Bank Name</th>
+                                    <th>Head No</th>
+                                    <th>Budget Type</th>
+                                    <th style="width:6%;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in ViewData["LCdataList"] as IEnumerable<FMDSS.Models.FinanceManagement.LCGenration>)
+                                {
+                                    <tr>
+                                        <td class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                            @Html.DisplayFor(model => item.Index)
+                                        </td>
+                                        <td class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                            @Html.DisplayFor(model => item.OfficeName)
+                                        </td>
+                                        <td class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                            @Html.DisplayFor(model => item.BankBranch_Name)
+                                        </td>
+                                        <td class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                            @Html.DisplayFor(model => item.Budget_HeadNumber)
+                                        </td>
+                                        <td class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                            @Html.DisplayFor(model => item.BudgetTypeName)
+                                        </td>
+
+                                        <td>
+                                            <button type="button" class="btn btn-success btn-circle" title="View" id="btnView_@item.LCreditID" value="@item.LCreditID" data-toggle="modal" data-target="#myAssetManagement">
+                                                <i class="fa fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+
+                    </div>
+                    <!--./Table-->
+                    <!--Popup Model-->
+                    <div class="modal fade" id="myAssetManagement" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+                        <div class="modal-dialog mdw">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                    <h4 class="modal-title" id="myModalLabel">
+                                        Letter of Credit
+                                    </h4>
+                                </div>
+
+                                <div class="modal-body">
+                                    <!-- From URL Get -->
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Name Of Office:</label>
+                                            <div id="OName" class="un-bold"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Office Id Number:</label>
+                                            <div id="OIDNumber" class="un-bold"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Name Of Treasury office:</label>
+                                            <div id="OTOffice" class="un-bold"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Treasury Office Code No:</label>
+                                            <div id="OTOCode" class="un-bold"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Name Of Bank's Branch:</label>
+                                            <div id="BankName" class="un-bold"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Bank Branch's IFSC Code:</label>
+                                            <div id="IFSCCode" class="un-bold"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Full Budget Head No(Including Major Head No.):</label><br>
+                                            <div id="BHeadNo" class="un-bold"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Type Of Budget:</label>
+                                            <div id="BudgetType" class="un-bold"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Total Amount Of Approved(Credit Amount)(In Rs.):</label>
+                                            <div id="ApprovedAmount" class="un-bold"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Requested Amount(In Rs.):</label>
+                                            <div id="RequestAmount" class="un-bold"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Total Assigned Budget(In Rs.):</label>
+                                            <div id="AssignedAmount" class="un-bold"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Remaining Budget:</label>
+                                            <div id="RBudgetAmount" class="un-bold"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Amount Of Credit Given to Offices In Past:</label>
+                                            <div id="COfcPast" class="un-bold"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Remaining Credit Amount:</label>
+                                            <div id="RCreditAmount" class="un-bold"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Total Amount Spent in Officers:</label>
+                                            <div id="TotalSpentAmount" class="un-bold"></div>
+                                        </div>
+                                    </div>
+
+                                    @*<div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Current Situation of Form-51:</label>
+                                                <div class="un-bold">Auto fatch</div>
+                                            </div>
+                                        </div>*@
+
+                                    <!-- /. From URL Get -->
+                                </div>
+
+                                <!-- /.modal-body -->
+
+                                <div class="modal-footer">
+                                    <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal">
+                                        <i class="fa fa-times fa-fw"></i> Close
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- /.modal-content -->
+                        </div>
+                        <!-- /.modal-dialog -->
+                    </div>
+                    <!--./Popup Model-->
+                    <!-- New AssetForm Form -->
+                    @using (Html.BeginForm("SaveLCData", "CreditLetter", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data" }))
+                    {
+                        <div id="NewAssetForm" class="pull-left" style="display:none">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Office Name: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.OfficeName, new { @class = "form-control", @id = "txt_OfficeName", name = "OfficeName", @maxlength = 50, @readonly = "readonly" })
+                                    <div id="errordivOName" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Office Id Number: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.OfficeIDNumber, new { @class = "form-control", @id = "txt_OfficeIDNumber", name = "OfficeIDNumber", @maxlength = 50, @readonly = "readonly" })
+                                    <div id="errordivOIDNumber" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Name Of Treasury office: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.TOfficeName, new { @class = "form-control", @id = "TOfficeName", @maxlength = 50, name = "TOfficeName" })
+                                    <div id="errordivTOName" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Treasury Office Code No: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.TOfficeCode, new { @class = "form-control", @id = "txt_TOfficeCode", @maxlength = 50, name = "TOfficeCode" })
+                                    <div id="errordivTOCodeNo" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Name Of Bank's Branch: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.BankBranch_Name, new { @class = "form-control", @id = "txt_BankBranch_Name", @maxlength = 250, name = "BankBranch_Name" })
+                                    <div id="errordivBankBranchName" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Bank Branch's IFSC Code: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.IFSC_Code, new { @class = "form-control", @id = "txt_IFSC_Code", @maxlength = 15, name = "IFSC_Code" })
+                                    <div id="errordivIFSC_Code" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Full Budget Head No(Including Major Head No.): <span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(x => x.Budget_HeadNumber, (IEnumerable<SelectListItem>)ViewBag.BudgetHeadNumber, "--Select--", new { @class = "form-control", id = "ddl_Budget_HeadNumber" })
+
+                                    <div id="errordivBudgetHeadNumber" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Type Of Budget: <span class="mandatory">*</span></label>
+
+                                    @Html.DropDownListFor(x => x.BudgetTypeID, (IEnumerable<SelectListItem>)ViewBag.BudgetTypeID1, "--Select--", new { @class = "form-control", id = "ddl_BudgetTypeID" })
+                                    <div id="errordivBudgetTypeID" style="display:none" class="alert-danger1"></div>
+
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Month and Year:</label>
+
+                                    <div id="datepicker" class="input-group date input-width">
+                                        @Html.TextBoxFor(x => x.Month_Year, new { @class = "form-control datefield", @id = "txt_Month_Year" })
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <div id="errordivMonthYear" style="display:none" class="alert-danger1"></div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Total Amount Of Approved(Credit Amount)(In Rs.): <span class="mandatory"></span></label>
+                                    @Html.TextBoxFor(x => x.Approved_BudgetAmount, new { @class = "form-control", @id = "txt_Approved_BudgetAmount", @readonly = "readonly", name = "Approved_BudgetAmount" })
+                                    <div id="errordivApprovedBudgetAmount" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Requested Amount(In Rs.): <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.Requested_BudgetAmount, new { @class = "form-control", @id = "txt_Requested_BudgetAmount", @maxlength = 15, name = "Requested_BudgetAmount" })
+                                    <div id="errordivRequestedBudgetAmount" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Total Assigned Budget(In Rs.): <span class="mandatory"></span></label>
+                                    @Html.TextBoxFor(x => x.Assigned_BudgetAmount, new { @class = "form-control", @id = "txt_Assigned_BudgetAmount", @readonly = "readonly", name = "Assigned_BudgetAmount" })
+                                    <div id="errordivAssignedBudgetAmount" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Remaining Budget: <span class="mandatory"></span></label>
+                                    @Html.TextBoxFor(x => x.RemainingBudget_Amount, new { @class = "form-control", @id = "txt_RemainingBudget_Amount", @readonly = "readonly", name = "RemainingBudget_Amount" })
+                                    <div id="errordivRemainingBudgetAmount" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Amount Of Credit Given to Offices In Past: <span class="mandatory"></span></label>
+                                    @Html.TextBoxFor(x => x.Past_Credit_Amount, new { @class = "form-control", @id = "txt_Past_Credit_Amount", @readonly = "readonly", name = "Past_Credit_Amount" })
+                                    <div id="errordivPastCredit_Amount" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Remaining Credit Amount: <span class="mandatory"></span></label>
+                                    @Html.TextBoxFor(x => x.Remaining_Credit_Amount, new { @class = "form-control", @id = "txt_Remaining_Credit_Amount", @readonly = "readonly", name = "Remaining_Credit_Amount" })
+                                    <div id="errordivRemainingCreditAmount" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Total Amount Spent in Officers: <span class="mandatory"></span></label>
+                                    @Html.TextBoxFor(x => x.Offices_SpentAmount, new { @class = "form-control", @id = "txt_Offices_SpentAmount", @readonly = "readonly", name = "Offices_SpentAmount" })
+                                    @Html.Hidden("hdDivCode", Model.Div_Code)
+                                    <div id="errordivOfficesSpentAmount" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+
+
+                            <div class="col-lg-12"></div>
+
+                            <!-- Btn Groping -->
+                            <div class="btn-padd">
+                                <div id="btn" class="col-lg-12">
+                                    <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_submit1">
+                                        <i class="fa fa-check"></i> Save
+                                    </button>
+                                    <button type="reset" class="btn btn-warning">
+                                        <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                    </button>
+                                    <button type="submit" name="Command" value="Cancel" class="btn btn-danger">
+                                        <i class="fa fa-times fa-fw"></i> Cancel
+                                    </button>
+
+                                </div>
+                            </div>
+                            <!-- /.Btn Groping -->
+
+                        </div>
+                    }
+                    <!-- /.panel-body -->
+                </div>
+                <!-- ./New AssetForm Form -->
+                <!-- /.panel -->
+
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+    </div>
+    <!-- /.Row -->
+
+</div>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/js/bootstrap.min.js"></script>
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+    $('.AddNewAsset').on('click', function () {
+        $("#NewAssetForm").show();
+        $('html, body').animate({ scrollTop: $("#NewAssetForm").offset().top - 120 }, 'slow');
+    });
+    $(document).ready(function () {
+        $(".datefield").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: 'MM yy',
+
+            onClose: function () {
+                var iMonth = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+                var iYear = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+                $(this).datepicker('setDate', new Date(iYear, iMonth, 1));
+            },
+
+            beforeShow: function () {
+                if ((selDate = $(this).val()).length > 0) {
+                    iYear = selDate.substring(selDate.length - 4, selDate.length);
+                    iMonth = jQuery.inArray(selDate.substring(0, selDate.length - 5),
+                             $(this).datepicker('option', 'monthNames'));
+                    $(this).datepicker('option', 'defaultDate', new Date(iYear, iMonth, 1));
+                    $(this).datepicker('setDate', new Date(iYear, iMonth, 1));
+                }
+            }
+        });
+
+
+        $('[id^=btnView_]').click(function () {
+            var ID = { ID: $(this).val() };
+
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(ID),
+                url: RootUrl + "CreditLetter/ViewLOC",
+                success: function (data) {
+
+
+                    $("#OName").val('');
+                    $("#OIDNumber").val('');
+                    $("#OTOffice").val('');
+                    $("#OTOCode").val('');
+                    $("#BankName").val('');
+                    $("#IFSCCode").val('');
+                    $("#BHeadNo").val('');
+                    $("#BudgetType").val('');
+                    $("#ApprovedAmount").val('');
+                    $("#RequestAmount").val('');
+                    $("#AssignedAmount").val('');
+                    $("#RBudgetAmount").val('');
+                    $("#COfcPast").val('');
+                    $("#RCreditAmount").val('');
+                    $("#TotalSpentAmount").val('');
+
+                    $("#OName").html(data.OfficeName);
+                    $("#OIDNumber").html(data.OfficeIDNumber);
+                    $("#OTOffice").html(data.TOfficeName);
+                    $("#OTOCode").html(data.TOfficeCode);
+                    $("#BankName").html(data.BankBranch_Name);
+                    $("#IFSCCode").html(data.IFSC_Code);
+                    $("#BHeadNo").html(data.Budget_HeadNumber);
+                    $("#BudgetType").html(data.BudgetTypeID);
+                    $("#ApprovedAmount").html(data.Approved_BudgetAmount);
+                    $("#RequestAmount").html(data.Requested_BudgetAmount);
+                    $("#AssignedAmount").html(data.Assigned_BudgetAmount);
+                    $("#RBudgetAmount").html(data.RemainingBudget_Amount);
+                    $("#COfcPast").html(data.Past_Credit_Amount);
+                    $("#RCreditAmount").html(data.Remaining_Credit_Amount);
+                    $("#TotalSpentAmount").html(data.Offices_SpentAmount);
+                }
+            });
+        })
+        $(".datefield").keypress(function (event) { event.preventDefault(); });
+    });
+
+    $(document).on('click', '#btn_submit1', function () {
+
+        if ($('#TOfficeName').val() == '') {
+            $('#errordivTOName').show();
+            $('#errordivTOName').html("Please enter the Name Of Treasury office!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#TOfficeName').focus();
+            return false;
+        }
+        else { $('#errordivTOName').hide(); }
+        if ($('#txt_TOfficeCode').val() == '') {
+            $('#errordivTOCodeNo').show();
+            $('#errordivTOCodeNo').html("Please enter the Treasury office code number!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#txt_TOfficeCode').focus();
+            return false;
+        }
+        else { $('#errordivTOCodeNo').hide(); }
+        if ($('#txt_BankBranch_Name').val() == '') {
+            $('#errordivBankBranchName').show();
+            $('#errordivBankBranchName').html("Please enter the Name Of Bank Branch!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#txt_BankBranch_Name').focus();
+            return false;
+        }
+        else { $('#errordivBankBranchName').hide(); }
+        if ($('#txt_IFSC_Code').val() == '') {
+            $('#errordivIFSC_Code').show();
+            $('#errordivIFSC_Code').html("Please enter the Bank Branch's IFSC Code!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#txt_IFSC_Code').focus();
+            return false;
+        }
+        else { $('#errordivIFSC_Code').hide(); }
+
+        if ($('#ddl_Budget_HeadNumber').val() == '' || $('#ddl_Budget_HeadNumber').val() == null || $('#ddl_Budget_HeadNumber').val() == '0') {
+            $('#errordivBudgetHeadNumber').show();
+            $('#errordivBudgetHeadNumber').html("Please fill the Full Budget Head No.!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#ddl_Budget_HeadNumber').focus();
+            return false;
+        }
+        else { $('#errordivBudgetHeadNumber').hide(); }
+        if ($('#ddl_BudgetTypeID').val() == '' || $('#ddl_BudgetTypeID').val() == null || $('#ddl_BudgetTypeID').val() == '0') {
+            $('#errordivBudgetTypeID').show();
+            $('#errordivBudgetTypeID').html("Please fill the Type Of Budget!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#ddl_BudgetTypeID').focus();
+            return false;
+        }
+        else { $('#errordivBudgetTypeID').hide(); }
+
+        if ($('#txt_Month_Year').val() == '') {
+            $('#errordivMonthYear').show();
+            $('#errordivMonthYear').html("Please Select the Month and Year!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#txt_Month_Year').focus();
+            return false;
+        }
+        else { $('#errordivMonthYear').hide(); }
+        if ($('#txt_Requested_BudgetAmount').val() == '') {
+            $('#errordivRequestedBudgetAmount').show();
+            $('#errordivRequestedBudgetAmount').html("Please enter the Requested Amount!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#txt_Requested_BudgetAmount').focus();
+            return false;
+        }
+        else { $('#errordivRequestedBudgetAmount').hide(); }
+        if ((($('#txt_Requested_BudgetAmount').val().substr(0, 1) == '.') && ($('#txt_Requested_BudgetAmount').val().length <= 1)) || ($('#txt_Requested_BudgetAmount').val().substr(0, 1) == '.')) {
+            $('#errordivRequestedBudgetAmount').show();
+            $('#errordivRequestedBudgetAmount').html("Please enter the valid Requested Amount!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#txt_Requested_BudgetAmount').focus();
+            return false;
+        }
+        else { $('#errordivRequestedBudgetAmount').hide(); }
+
+        if ((parseFloat($('#txt_Requested_BudgetAmount').val())) <= 0) {
+            $('#errordivRequestedBudgetAmount').show();
+            $('#errordivRequestedBudgetAmount').html("Please enter the valid Requested Amount!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#txt_Requested_BudgetAmount').focus();
+            return false;
+        }
+        else { $('#errordivRequestedBudgetAmount').hide(); }
+    })
+
+    $(document).on('keypress', '#txt_TOfficeCode,#TOfficeName', function (event) {
+        var regex = new RegExp("^[a-zA-Z0-9 ]+$");
+        var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+        if (!regex.test(key)) {
+            event.preventDefault();
+            return false;
+        }
+    });
+    $(document).on('keypress', '#txt_IFSC_Code', function (event) {
+        var regex = new RegExp("^[a-zA-Z0-9]+$");
+        var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+        if (!regex.test(key)) {
+            event.preventDefault();
+            return false;
+        }
+    });
+    $(document).on('keypress', '#txt_BankBranch_Name', function (event) {
+        var regex = new RegExp("^[a-zA-Z0-9|/|& ]+$");
+        var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+        if (!regex.test(key)) {
+            event.preventDefault();
+            return false;
+        }
+    });
+    $(document).on('keypress', '#txt_Requested_BudgetAmount', function (event) {
+        return isNumber(event, this)
+
+    });
+    function isNumber(evt, element) {
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+
+        if (
+            (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+            (charCode < 48 || charCode > 57))
+            return false;
+
+        //return true;
+    }
+</script>
+<style>
+    .ui-datepicker-calendar {
+        display: none;
+    }
+
+    .modal-body {
+        padding: 0px;
+    }
+</style>
+<script language=JavaScript>
+
+    document.oncontextmenu = function () { return false; };
+
+
+</script>
+
+

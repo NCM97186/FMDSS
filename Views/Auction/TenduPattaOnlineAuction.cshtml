@@ -1,0 +1,441 @@
+﻿@{
+    ViewBag.Title = "TenduPattaOnlineAuction";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+@model FMDSS.Models.CitizenService.ProductionServices.Auction 
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+    $(function () {
+
+        $(".datefield").datepicker({ minDate: new Date(), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        $('#RangeCode').change(function (e) {
+            $("#NoticeNo").empty();
+
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'Auction/getNoticeRangeWise', // we are calling json method
+                dataType: 'json',
+                data: { RangeCode: $("#RangeCode").val() },
+                success: function (data) {
+                    $("#NoticeNo").append('<option value="0">--Select--</option>');
+                    $.each(data, function (i, items) {
+                        $("#NoticeNo").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+
+        });
+
+
+        //$('#NoticeNo').change(function (e) {
+        //    $("#NoticeTable").empty();
+        //    $.ajax({
+        //        type: 'POST',
+        //        url: RootUrl + 'Auction/getNoticeDetails', // we are calling json method
+        //        dataType: 'json',
+        //        data: { RangeCode: $("#NoticeNo").val() },
+        //        success: function (data) {
+
+        //            $.each(data, function (i, items) {
+        //                var bardata = "<tr><td>" + items.SiteId + "</td><td>" + items.SiteName + "</td><td>" + items.VillageName + "</td><td>" + items.ReservedPrice + "</td></tr>";                        
+        //                $("#NoticeTable").append(bardata);
+        //            });
+        //        },
+        //        error: function (ex) {
+        //            alert('Failed to retrieve states.' + ex);
+        //        }
+
+        //    });
+        //    return false;
+
+        //});
+
+
+        $('#NoticeNo').change(function () {
+            var NoticeId = $("#NoticeNo option:selected").val();
+            if (!NoticeId) { NoticeId = 0; }
+            var values = {
+                NoticeId: NoticeId
+            };
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootUrl + 'Auction/ShowPartialView',
+                success: function (data) {
+
+                    $('#NoticeDIV').html(data.TenduPattaPartialView);
+                    $('#reservedPrice').val(data.list1);
+                    $('#emdPaybleAmount').val(data.list2);
+                }
+            });
+        });
+
+
+
+        if ($("#rbl_OnlinePayment").is(":checked")) {
+            $('#dvPaymentmode').hide();
+        }
+
+        $("#rbl_OnlinePayment, #rbl_OfflinePayment").change(function () {
+            if ($("#rbl_OnlinePayment").is(":checked")) {
+                $('#dvPaymentmode').hide();
+            }
+            else if ($("#rbl_OfflinePayment").is(":checked")) {
+                $('#dvPaymentmode').show();
+            }
+
+        });
+
+        if ($("#rbl_OfflinePaymentbydd").is(":checked")) {
+            $('#dvofflinePaymentmode').show();
+        }
+
+        $("#rbl_OfflinePaymentbydd, #rbl_OfflinePaymentbychk").change(function () {
+            if ($("#rbl_OfflinePaymentbydd").is(":checked")) {
+                $('#dvofflinePaymentmode').show();
+            }
+            else if ($("#rbl_OfflinePaymentbychk").is(":checked")) {
+                $('#dvofflinePaymentmode').show();
+            }
+
+        });
+
+
+        $('#biddingAmount').keypress(function (event) {
+            return isNumber(event, this);
+        });
+
+
+        $('#btn_Save').click(function (e) {
+            
+            if ($('#Applicant_type').val() == '0') {
+                $('#aplerrordiv').show();
+                $('#aplerrordiv').html("Please Select Applicant Type." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#Applicant_type").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#aplerrordiv').hide(); }
+
+            if ($('#RangeCode').val() == '') {
+                $('#rangeerrordiv').show();
+                $('#rangeerrordiv').html("Please Select Notice Number." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#RangeCode").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#rangeerrordiv').hide(); }
+
+            if ($('#NoticeNo').val() == '0') {
+                $('#noticeerrordiv').show();
+                $('#noticeerrordiv').html("Please Select Notice Number." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#NoticeNo").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#noticeerrordiv').hide(); }
+
+            if ($('#BiddingPrice0').val() == '') {
+
+                alert('Enter bidding amount');
+                $('#BiddingPrice0').focus();
+                return false;
+            }
+
+
+            if ($("#rbl_OfflinePayment").is(":checked")) {
+
+                if ($('#bankName').val().trim() == '') {
+
+                    $('#bankerrordiv').show();
+                    $('#bankerrordiv').html("Please Enter Bank Name." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('html, body').animate({
+                        scrollTop: $("#bankName").offset().top
+                    }, 600);
+                    return false;
+                }
+                else { $('#bankerrordiv').hide(); }
+
+                if ($('#branchName').val().trim() == '') {
+                    $('#brancherrordiv').show();
+                    $('#brancherrordiv').html("Please Enter Branch Name." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('html, body').animate({
+                        scrollTop: $("#branchName").offset().top
+                    }, 600);
+                    return false;
+                }
+                else { $('#brancherrordiv').hide(); }
+
+                if ($('#ddchkIssuesDate').val() == '') {
+                    $('#dddateerrordiv').show();
+                    $('#dddateerrordiv').html("Please Select  DD/Check Issue Date." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('html, body').animate({
+                        scrollTop: $("#ddchkIssuesDate").offset().top
+                    }, 600);
+                    return false;
+                }
+                else { $('#dddateerrordiv').hide(); }
+
+                if ($('#ddChkNumber').val().trim() == '') {
+                    $('#ddnumbererrordiv').show();
+                    $('#ddnumbererrordiv').html("Please Enter  DD/Check Number." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('html, body').animate({
+                        scrollTop: $("#ddChkNumber").offset().top
+                    }, 600);
+                    return false;
+                }
+                else { $('#ddnumbererrordiv').hide(); }
+
+                if ($('#ddchkFile').val() == '') {
+                    $('#uploaddderrordiv').show();
+                    $('#uploaddderrordiv').html("Please Upload  DD/Check ." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('html, body').animate({
+                        scrollTop: $("#ddchkFile").offset().top
+                    }, 600);
+                    return false;
+                }
+                else { $('#uploaddderrordiv').hide(); }
+
+            }
+
+
+            //if ($('#biddingAmount').val().trim() == '') {
+            //    $('#bdamterrordiv').show();
+            //    $('#bdamterrordiv').html("Please Enter Bidding Amount." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            //    $('html, body').animate({
+            //        scrollTop: $("#biddingAmount").offset().top
+            //    }, 600);
+            //    return false;
+            //}
+            //else { $('#bdamterrordiv').hide(); }
+
+        });
+
+
+    });
+
+
+</script>
+
+@using (Html.BeginForm("SubmitTenduPattaOnline", "Auction", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <div id="page-wrapper-inn">
+        <div class="col-lg-12 pad">
+            <h1 class="page-header"><span>TenduPatta Online Auction</span></h1>
+            @if (@TempData["Status"] != null)
+            {
+                <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["Status"]</div>
+            }
+        </div>
+        <!-- /.col-lg-12 -->
+        <!-- Row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+
+                    <div class="panel-body">
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Application Type: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.Applicant_Type, (IEnumerable<SelectListItem>)ViewBag.Applicant_Type, new { @class = "form-control common", id = "Applicant_type" })
+
+                                <div id="aplerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Bidder Name: </label>
+                                <input class="form-control" id="bidderName" name="BidderName" readonly="readonly" value="@ViewData["Name"]">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Select Range: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.RangeCode, (IEnumerable<SelectListItem>)ViewBag.ddlRange,"--Select--", new { @class = "form-control", id = "RangeCode" })
+                                <input type="hidden" name="Hd_NO" id="hd_No" />
+                                <div id="rangeerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Select Notice: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.NoticeNo, new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "NoticeNo" })
+                                <input type="hidden" name="Hd_NO" id="hd_No" />
+                                <div id="noticeerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        @*<div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Region Name.:</label>
+                                <input class="form-control" id="regionName" readonly="readonly">
+                            </div>
+                        </div>*@
+                        <div id="NoticeDIV" class="col-lg-12">
+                         
+                        </div>
+                        <div class="col-lg-12">
+                            <label class="form-group">Payment Mode<span class="mandatory">*</span></label>
+
+
+                            <input type="radio" id="rbl_OnlinePayment" name="PaymentMode" value="Online" checked>Online
+                            <input type="radio" id="rbl_OfflinePayment" name="PaymentMode" value="Offline">Offline
+
+                        </div>
+                        <div class="border-add" id="dvPaymentmode">
+                            <div class="col-lg-12 ">
+                                <label class="form-group">Payment By <span class="mandatory">*</span></label>
+
+
+                                <input type="radio" id="rbl_OfflinePaymentbydd" name="OfflinePaymentMode" value="DD" checked onclick="ShowOfflinePaymentmode();">Demand Draft(DD)
+                                <input type="radio" id="rbl_OfflinePaymentbychk" name="OfflinePaymentMode" value="Check" onclick="ShowOfflinePaymentmode();">Bank Check
+                                <input type="radio" id="rbl_OfflinePaymentbybg" name="OfflinePaymentMode" value="BG" onclick="ShowOfflinePaymentmode();">Bank Granter
+
+                            </div>
+                            <div class="border-add" id="dvofflinePaymentmode">
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Bank Name:<span class="mandatory">*</span></label>
+                                        <input type="text" class="form-control" id="bankName" name="BankName" maxlength="25" />
+                                        <div id="bankerrordiv" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Branch Name: <span class="mandatory">*</span></label>
+                                        <input type="text" class="form-control" id="branchName" name="BranchName" maxlength="25" />
+                                        <div id="brancherrordiv" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>DD/Check Issues Date: <span class="mandatory">*</span></label>
+                                        <input type="text" class="form-control datefield" id="ddchkIssuesDate" name="DdchkIssuesDate" />
+                                        <div id="dddateerrordiv" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>DD/Check Number:<span class="mandatory">*</span></label>
+                                        <input type="text" class="form-control" id="ddChkNumber" name="DdChkNumber" maxlength="15" />
+                                        <div id="ddnumbererrordiv" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Upload DD/Check: <span class="mandatory">*</span></label>
+                                        <input type="file" class="form-control" id="ddchkFile" name="DdchkFile" />
+                                        <div id="uploaddderrordiv" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-lg-12"></div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Reserved Price(INR): </label>
+                                <input class="form-control" id="reservedPrice" readonly="readonly">
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>EMD Amount (INR): </label>
+                                <input class="form-control" id="emdPaybleAmount" name="EmdPaybleAmount" readonly="readonly">
+                            </div>
+                        </div>
+                    
+                        <div class="col-lg-6" style="display:none">
+                            <div class="form-group">
+                                <label>Bidding Amount (INR): <span class="mandatory">*</span></label>
+                                <input class="form-control" id="BiddingAmount" name="BiddingAmount" maxlength="10">
+                            </div>
+                            <div id="bdamterrordiv" style="display:none" class="alert-danger1"></div>
+                        </div>
+                      
+
+                        <div class="col-lg-12"></div>
+
+
+
+                        <!-- Btn Groping -->
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_Save">
+                                    <i class="fa fa-check"></i> Save
+                                </button>
+                                <button type="reset" class="btn btn-warning">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+                                <button type="button" value="Cancel" class="btn btn-danger" onclick="reload(); return false;">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+
+                            </div>
+                        </div>
+                        <!-- /.Btn Groping -->
+
+                    </div>
+                    <!-- /.panel-body -->
+
+                </div>
+                <!-- /.panel -->
+
+            </div>
+            <!-- /.col-lg-12 -->
+
+            <div class="modal fade in" id="myViewNoticeModal2" tabindex="-1" role="dialog" aria-hidden="false">
+                <div class="modal-dialog mdw">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                            <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> </label></h4>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- From URL Get -->
+                            <input type="hidden" id="pHdn_No" name="PHdn_No" />
+                            <div id="divPublish"></div>
+
+                            <!-- /. From URL Get -->
+                        </div>
+                        <!-- /.modal-body -->
+                        <div class="modal-footer" id="fot-f">
+                            <div id="btn" class="col-lg-12">
+
+                                <button name="button" class="btn btn-danger" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                                    <i class="fa fa-times fa-fw"></i> Close
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- /.modal-content -->
+                </div>
+                <!-- /.modal-dialog -->
+            </div>
+        </div>
+    </div>
+
+}

@@ -1,0 +1,106 @@
+﻿@model FMDSS.Models.ForestProduction.InventoryManagement
+@{
+    ViewBag.Title = "ManageInventory"; 
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString());
+}
+
+<style>
+    .table > thead > tr > th:first-child {
+        width: 50px !important;
+    }
+
+    #page-wrapper-inn .table > thead > tr > th {
+        width: auto;
+    }
+
+    #dvAddInventory, #dvUpdateInventory {
+        z-index: 99994;
+    }
+
+
+    .dataTables_wrapper > div:first-child {
+        border-top: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+        padding: 10px 0 5px;
+        margin: 0;
+    }
+    .padding-bottom10 {
+        padding-bottom: 10px;
+    }
+
+    .help {
+        float: right;
+        margin-right: 18px;
+        font-style: italic;
+    }
+</style>
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Manage Depot Inventory</h1>
+       @Html.Partial("_ErrorMsg")
+    </div>
+
+    <div class="row">
+        <div class="help"><a href="~/PDFFolder/User Manual_Auction_Department.pdf" target="_blank">Help Document</a></div>
+        <div class="col-lg-12">
+            <div class="panel with-nav-tabs panel-default">
+                <div class="panel-heading">
+                    <ul class="nav nav-tabs"> 
+                        <li class=""><a href="#tab1default" data-toggle="tab"><i class="fa fa-truck fa-fw"></i> Items Available</a></li> 
+                    </ul>
+                </div>
+
+                <div class="panel-body">
+                    <div class="tab-content"> 
+                        <div class="tab-pane fade active in" id="tab1default">
+                            @Html.Partial("_UpdateInventoryList")
+                        </div> 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> 
+
+    <div class="modal fade" id="myModalAddItemDOD" role="dialog">
+        <div class="modal-dialog modal-lg" id="divLoadTabData"></div>
+    </div>  
+</div>
+ 
+<script type="text/javascript">
+
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+        $('#dataTableInventory').DataTable({
+            responsive: true
+        }); 
+    }); 
+
+    function OpenDialogCommon(partialViewName, objID, type, targetControlID) {
+        switch (type)
+        {
+            case type:
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'ManageInventory/LoadPartialCommon',
+                    dataType: 'html',
+                    data: { partialViewName: partialViewName, objID: objID, type: type },
+                    success: function (response) {
+                        $('#' + targetControlID).html(response);
+                    }
+                });
+                break;
+        } 
+    } 
+</script>
+
+
+
+<script type="text/javascript">
+    $.noConflict(true);
+</script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/Scripts/Controller/Common.js"></script> 

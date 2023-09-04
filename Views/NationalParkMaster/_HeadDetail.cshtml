@@ -1,0 +1,63 @@
+﻿@model List<FMDSS.Models.NationalPark.HeadRequired>
+@if (Model != null)
+{
+    <div class="dataTable_wrapper">
+        <div id="tbl" class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:10%;">Sr No.</th>
+                        <th>Is Required</th>
+                        <th>Head Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (FMDSS.Models.NationalPark.HeadRequired item in Model)
+                    {
+                        <tr>
+                            <td>@item.Id </td>
+                            <td>@item.Name </td>
+                            <td>
+                                @if (item.IsRequired)
+                                {
+                                    <input class="chkreq" rel="@item.Id" type="checkbox" checked="checked" />
+                                }
+                                else
+                                {
+                                    <input class="chkreq" rel="@item.Id" type="checkbox" />
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <script type="text/javascript">
+                $(document).ready(function () {
+                    $('.chkreq').on('click', function () {  
+                        var ids = '';
+                        $('.chkreq').each(function () {
+                            if ($(this).is(':checked')) {
+                                ids +=','+ $(this).attr('rel');
+                            }
+                        });
+                        if (ids.length > 1) {
+                            $('#hid').val(ids.substr(1, ids.length - 1));
+                        }
+                    });
+
+                    $('.btnsubmit').on('click', function () {
+                        if (confirm("Are you sure to change head details ?")) {
+                            $("form").submit();
+                        } else { return; }
+
+                    });
+                });
+            </script>
+            <div>
+                <button type="button" class="btn btnsubmit" title="Submit">
+                    Submit
+                </button>
+            </div>
+        </div> 
+    </div>
+}

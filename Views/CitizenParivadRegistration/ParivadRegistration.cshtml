@@ -1,0 +1,1028 @@
+﻿@model FMDSS.Models.ForestProtection.CitizenParivad
+@{
+    ViewBag.Title = "ParivadRegistration";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<script src="~/Scripts/jquery-1.8.2.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/js/ParivadRegistration.js"></script>
+<script type="text/javascript">
+    var RootURl = '@Url.Content("~/")';
+</script>
+<style>
+    .known h4 {
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        padding: 5px;
+       
+    }
+
+    .Unknown h4 {
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        padding: 5px;
+      
+    }
+     .sml{
+        font-size: 12px;
+        font-weight: normal;
+    }
+    .ComplainFound {
+        padding-bottom: 15px;
+    }
+    .alert-danger1 {
+        color: #a94442;
+        position: relative;
+        background: #fff;
+        padding: 5px;
+        z-index: 999;
+        border: 1px solid;
+        right: 0;
+    }
+
+    
+</style>
+<script type="text/javascript">
+
+    $(function () {
+
+        var hdOffenderType1 = $('#hdOffenderType').val();       
+        if (hdOffenderType1 == "Unknown") {           
+            $(".Unknown").show();
+            $(".known").hide();
+            $('#Unknown-Offender').attr('checked', true);
+            $('#UnknownOffender').collapse('show');
+        }
+        else if (hdOffenderType1 == "UnKnown") {
+            $(".Unknown").show();
+            $(".known").hide();
+            $('#Unknown-Offender').attr('checked', true);
+            $('#UnknownOffender').collapse('show');
+        }
+        else if (hdOffenderType1 == "Known") {
+            $('#Addknown-Offender').attr('checked', true);
+            $(".Unknown").hide();
+            $(".known").show();
+            $('#knownOffender').collapse('show');
+        }
+       
+        if ($('#hdMokaPunchnama').val() != '~') {
+            $('#viewdoc1').show();
+            $('#viewdoc1').attr('target', '_blank');
+            $('#viewdoc1').attr('href', '@Url.Content(Model.MokaPunchnama)');
+        }
+        else {
+            $('#viewdoc1').hide();
+        }
+
+        if ($('#hdNagriNaka').val() != '~') {
+            $('#viewdoc2').show();
+            $('#viewdoc2').attr('target', '_blank');
+            $('#viewdoc2').attr('href', '@Url.Content(Model.NagriNaka)');
+        }
+        else {
+            $('#viewdoc2').hide();
+        }
+
+        if ($('#hdWitnessRecord1').val() != '~') {
+            $('#viewdoc3').show();
+            $('#viewdoc3').attr('target', '_blank');
+            $('#viewdoc3').attr('href', '@Url.Content(Model.WitnessRecord1)');
+        }
+        else {
+            $('#viewdoc3').hide();
+        }
+
+        if ($('#hdWitnessRecord2').val() != '~') {
+            $('#viewdoc4').show();
+            $('#viewdoc4').attr('target', '_blank');
+            $('#viewdoc4').attr('href', '@Url.Content(Model.WitnessRecord2)');
+
+        }
+        else {
+            $('#viewdoc4').hide();
+        }
+
+       
+        if ($('#hdWitnessRecord3').val() != '~') {
+           
+            $('#viewdoc5').show();
+            $('#viewdoc5').attr('target', '_blank');
+            $('#viewdoc5').attr('href', '@Url.Content(Model.WitnessRecord3)');
+
+        }
+        else {
+            $('#viewdoc5').hide();
+        }
+
+        if ($('#hdFieldInspection').val() != '~') {
+
+            $('#viewdoc6').show();
+            $('#viewdoc6').attr('target', '_blank');
+            $('#viewdoc6').attr('href', '@Url.Content(Model.FieldInspection)');
+        }
+        
+        else {
+            $('#viewdoc6').hide();
+        }
+
+        if ($('#hdRecomendation').val() != '~') {
+
+            $('#viewdoc7').show();
+            $('#viewdoc7').attr('target', '_blank');
+            $('#viewdoc7').attr('href', '@Url.Content(Model.Recomendation)');
+        }
+        else {
+            $('#viewdoc7').hide();
+        }
+        
+        
+        if ($('#ComplainFound').val() == 'Yes') {
+            $('#collapse2').collapse('show');
+            $('.ComplainFound').show();
+            $('.ComplainNotFound').hide();
+        }
+        else if ($('#ComplainFound').val() == 'No')
+        {
+            $('#collapse2').collapse('show');
+            $('.ComplainNotFound').show();
+            $('.ComplainFound').hide();
+        }
+
+        if ($('#VehicleSeized').val() == 'Yes') {
+            $('#DivVechile').show();
+        }
+       else if ($('#VehicleSeized').val() == 'No') {
+           $('#DivVechile').hide();
+        }
+
+        if ($('#ddl_OffenceCategory').val() == "2") {
+            $('#collapse3').collapse('show');
+            $("#Wildlife-Data").hide();
+            $("#Both-Data").hide();
+            $("#Forest-Data").show();
+            $("#ddl_BWOffenseSubCategoryForest").val($("#ddl_BWOffenseSubCategoryForest option:first").val());
+            $("#ddl_BFOffenseSubCategoryForest").val($("#ddl_BFOffenseSubCategoryForest option:first").val());
+            $("#ddl_BForestProtectionAct").val($("#ddl_BForestProtectionAct option:first").val());
+            $("#ddl_BWildlifeProtectionAct").val($("#ddl_BWildlifeProtectionAct option:first").val());
+            $("#ddl_WOffenseSubCategoryForest").val($("#ddl_WOffenseSubCategoryForest option:first").val());
+            $("#ddl_WWildlifeProtectionAct").val($("#ddl_WWildlifeProtectionAct option:first").val());
+        }
+        else if ($('#ddl_OffenceCategory').val() == "3") {
+            $('#collapse3').collapse('show');
+            $("#Wildlife-Data").hide();
+            $("#Forest-Data").hide();
+            $("#Both-Data").show();
+            $("#ddl_FOffenseSubCategoryForest").val($("#ddl_FOffenseSubCategoryForest option:first").val());
+            $("#ddl_FForestProtectionAct").val($("#ddl_FForestProtectionAct option:first").val());
+            $("#ddl_WOffenseSubCategoryForest").val($("#ddl_WOffenseSubCategoryForest option:first").val());
+            $("#ddl_WWildlifeProtectionAct").val($("#ddl_WWildlifeProtectionAct option:first").val());
+        }
+        else if ($('#ddl_OffenceCategory').val() == "1") {
+            $('#collapse3').collapse('show');
+            $("#Forest-Data").hide();
+            $("#Both-Data").hide();
+            $("#Wildlife-Data").show();
+            $("#ddl_BWOffenseSubCategoryForest").val($("#ddl_BWOffenseSubCategoryForest option:first").val());
+            $("#ddl_BFOffenseSubCategoryForest").val($("#ddl_BFOffenseSubCategoryForest option:first").val());
+            $("#ddl_FOffenseSubCategoryForest").val($("#ddl_FOffenseSubCategoryForest option:first").val());
+            $("#ddl_FForestProtectionAct").val($("#ddl_FForestProtectionAct option:first").val());
+            $("#ddl_BForestProtectionAct").val($("#ddl_BForestProtectionAct option:first").val());
+            $("#ddl_BWildlifeProtectionAct").val($("#ddl_BWildlifeProtectionAct option:first").val());
+        }
+        else {
+
+        }
+
+
+        var OffenseCode = $("#hdFPMOffenseCode").val();
+        if (!OffenseCode) { PlaceId = 0; }
+        var values = {
+            OffenseCode: OffenseCode
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(values),
+            url: RootURl + 'ForesterParivadRegistration/GetParivadeDetails',
+            success: function (data) {
+
+                $('#OffenseDetails').html(data.OffenderPartialView);
+
+            }
+        });
+    });
+
+</script>
+@Html.Hidden("hdFPMOffenseCode", Model.OffenseCode)
+@Html.Hidden("hdOffenderType", Model.OffenderType)
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Offense/Parivad</h1>
+    </div>
+    <div id="OffenseDetails" class="col-lg-12"></div> 
+
+    <div id="ViewDetails" class="col-lg-12"></div> 
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                 @using (Html.BeginForm("SubmitParivad", "CitizenParivadRegistration", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data",id="Parivadform" }))
+                    {
+                    
+                     @Html.Hidden("hdMokaPunchnama",Model.MokaPunchnama)
+                     @Html.Hidden("hdNagriNaka", Model.NagriNaka)
+                     @Html.Hidden("hdWitnessRecord1", Model.WitnessRecord1)
+                     @Html.Hidden("hdWitnessRecord2", Model.WitnessRecord2)
+                     @Html.Hidden("hdWitnessRecord3", Model.WitnessRecord3)
+                     @Html.Hidden("hdFieldInspection", Model.FieldInspection)
+                     @Html.Hidden("hdRecomendation", Model.Recomendation)
+                 <div class="panel-body">
+                        <div class="col-lg-12">
+                            <label>Parivad Details:</label>
+                            <div class="divider"></div>
+                        </div>    
+                        <div class="col-lg-12">
+                        <div class="panel panel-default" style="display: block;">
+                        <div class="panel-heading">
+                            <h2 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse3" aria-expanded="false" class="collapsed">
+                                    <i class="fa  fa-angle-double-right"></i> Offense Category
+                                </a>
+                            </h2>
+                        </div>
+              
+                <div class="panel-body">
+                    <div id="collapse3" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Offense Severity: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.OffenseSeverity, (IEnumerable<SelectListItem>)ViewBag.OffenseSeverity1, "--Select--", new { id = "ddl_OffenseSeverity", @class = "form-control" })
+                                <div id="errordivOSeverity" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Type of Forest / Village (Reserved/Protected/Unclassified): <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.ForestType, (IEnumerable<SelectListItem>)ViewBag.ForestType1, "--Select--", new { id = "ddl_ForestType", @class = "form-control" })
+                                <div id="errordivForestType" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Offense Category:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.OffenceCategory, (IEnumerable<SelectListItem>)ViewBag.OffenseCategory, "--Select--", new { id = "ddl_OffenceCategory", @class = "form-control" })
+                                <div id="errordivOffenseCategory" style="display: none; position: initial !important" class="alert-danger1"></div>
+                            </div>
+                        </div>      
+                        <!--Wildlife Data-->
+                        <div style="display:none;" id="Wildlife-Data">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Section under Wildlife Protection Act 1972:<span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(x => x.WildlifeProtectionSection, (IEnumerable<SelectListItem>)ViewBag.WildlifeProtectionAct, "--Select--", new { id = "ddl_WWildlifeProtectionAct", @class = "form-control", @name = "WildlifeProtectionSection" })
+                                    <div id="errordivSectionWildLife" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Offense Sub-Category (as per rajasthan wildlife ACT):<span class="mandatory">*</span></label>
+                                    @*@Html.DropDownListFor(x => x.OffenseSubCategoryWildLife, (IEnumerable<SelectListItem>)ViewBag.WildLifeSubCategory, "--Select--", new { id = "ddl_WOffenseSubCategoryForest", @class = "form-control", @name = "OffenseSubCategoryWildLife" })*@
+                                    @Html.TextBoxFor(x => x.OffenseSubCategoryWildLife, new { @class = "form-control", @title = "", @placeholder = "", @name = "OffenseSubCategoryWildLife", @maxlength = 50, @id = "ddl_WOffenseSubCategoryForest" })
+                                    <div id="errordivOWildLife" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <!--/.Wildlife Data-->
+                        <!--Forest Data-->
+                        <div style="display:none;" id="Forest-Data">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Section under Forest Protection Act 1953:<span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(x => x.ForestProtectionSection, (IEnumerable<SelectListItem>)ViewBag.ForestProtectionAct, "--Select--", new { id = "ddl_FForestProtectionAct", @class = "form-control", @name = "ForestProtectionSection" })
+                                    <div id="errordivOFSection" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Offense Sub-Category (as per rajasthan forest ACT):<span class="mandatory">*</span></label>
+                                    @*@Html.DropDownListFor(x => x.OffenseSubCategoryForest, (IEnumerable<SelectListItem>)ViewBag.ForestSubCategory, "--Select--", new { id = "ddl_FOffenseSubCategoryForest", @class = "form-control", @name = "OffenseSubCategoryForest" })*@
+                                    @Html.TextBoxFor(x => x.OffenseSubCategoryForest, new { @class = "form-control", @title = "", @placeholder = "", @name = "OffenseSubCategoryForest", @maxlength = 50, @id = "ddl_FOffenseSubCategoryForest" })
+                                    <div id="errordivOFCategory" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--/.Forest Data-->
+                        <!--Both Data-->
+                        <div style="display:none;" class="col-lg-12" id="Both-Data">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Section under Wildlife Protection Act 1972:<span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(x => x.WildlifeProtectionSection, (IEnumerable<SelectListItem>)ViewBag.WildlifeProtectionAct, "--Select--", new { id = "ddl_BWildlifeProtectionAct", @class = "form-control", @name = "WildlifeProtectionSection" })
+                                    <div id="errordivOBWildSection" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Offense Sub-Category (as per rajasthan wildlife ACT):<span class="mandatory">*</span></label>
+                                    @*@Html.DropDownListFor(x => x.OffenseSubCategoryWildLife, (IEnumerable<SelectListItem>)ViewBag.WildLifeSubCategory, "--Select--", new { id = "ddl_BWOffenseSubCategoryForest", @class = "form-control", @name = "OffenseSubCategoryWildLife" })*@
+                                    @Html.TextBoxFor(x => x.OffenseSubCategoryWildLife, new { @class = "form-control", @title = "", @placeholder = "", @name = "OffenseSubCategoryWildLife", @maxlength = 50, @id = "ddl_BWOffenseSubCategoryForest" })
+                                    <div id="errordivOBWCategory" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Section under Forest Protection Act 1953:<span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(x => x.ForestProtectionSection, (IEnumerable<SelectListItem>)ViewBag.ForestProtectionAct, "--Select--", new { id = "ddl_BForestProtectionAct", @class = "form-control", @name = "ForestProtectionSection" })
+                                    <div id="errordivOBForestSection" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Offense Sub-Category (as per rajasthan forest ACT):<span class="mandatory">*</span></label>
+                                    @*@Html.DropDownListFor(x => x.OffenseSubCategoryForest, (IEnumerable<SelectListItem>)ViewBag.ForestSubCategory, "--Select--", new { id = "ddl_BFOffenseSubCategoryForest", @class = "form-control", @name = "OffenseSubCategoryForest" })*@
+                                    @Html.TextBoxFor(x => x.OffenseSubCategoryForest, new { @class = "form-control", @title = "", @placeholder = "", @name = "OffenseSubCategoryForest", @maxlength = 50, @id = "ddl_BFOffenseSubCategoryForest" })
+                                    <div id="errordivOBFCategory" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+           @*<div class="col-lg-12">
+            <div class="form-group">
+                <div id="errordivOUOffender" style="display:none" class="alert-danger1"></div>
+                <label class="radio-inline">
+                    <input type="radio" id="Addknown-Offender" value="Known" name="Offender">Known Offender
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" id="Unknown-Offender" value="Unknown" name="Offender">Unknown Offender
+                </label>
+            </div>
+        </div>
+
+           <div class="col-lg-12">
+
+            <div class="panel-group" id="accordion">
+                <!--Tab For Known Offender-->
+                <div class="panel panel-default known" style="display:none">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion" href="#knownOffender" aria-expanded="false" class="collapsed">
+                                <i class="fa  fa-angle-double-right fa-fw"></i> Offender Details
+                            </a>
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+                        <div id="knownOffender" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+
+                            <div class="col-lg-12"></div>
+                            <input type="hidden" id="hdnOOffenderrowid" name="hdnOOffenderrowid">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>
+                                        Name of the Offender:<span class="mandatory">*</span>
+                                    </label>
+                                    @Html.TextBoxFor(x => x.OffenderName, new { @class = "form-control", @title = "", @placeholder = "", @name = "OffenderName", @maxlength = 50, @id = "txt_OffenderName" })
+                                    <div id="errordivOffenderName" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>
+                                        Father Name:<span class="mandatory">*</span>
+                                    </label>
+                                    @Html.TextBoxFor(x => x.OFatherName, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OFatherName", @name = "OFatherName" })
+
+                                    <div id="errordivOFatherName" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>
+                                        Residential Address1:<span class="mandatory">*</span>
+                                    </label>
+                                    @Html.TextBoxFor(x => x.OAddress1, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OAddress1", @name = "OAddress1" })
+                                    <div id="errordivOAddress1" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>State: <span class="mandatory">*</span></label>
+                                    @Html.DropDownList("ddlOState", (IEnumerable<SelectListItem>)ViewBag.ddlOState, new { @class = "form-control", title = "Select District", @id = "ddlOState", @name = "OStateCode" })
+                                    <div id="errordivddlDistrict" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6" id="divDDlDistrict">
+                                <div class="form-group">
+                                    <label>District: <span class="mandatory">*</span></label>
+                                    @Html.DropDownList("ddlODistrict", (IEnumerable<SelectListItem>)ViewBag.ddlODistrict, "--Select--", new { @class = "form-control", title = "Select District", @id = "ddlODistrict", @name = "ODistrictCode" })
+                                    <div id="errordivddlDistrict" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6" id="divtxtDistrict" style="display:none">
+                                <div class="form-group">
+                                    <label>District: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.txtdistrict, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txtdistrict", @name = "txtdistrict" })
+                                    <div id="errordivddlODistrict1" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6" id="divDDlVillage">
+                                <div class="form-group">
+                                    <label>
+                                        City/Village Name:<span class="mandatory">*</span>
+                                    </label>
+                                    @Html.DropDownListFor(x => x.OVillageCode, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "txt_OVillageCode", name = "OVillageCode", @class = "form-control" })                             
+                                    <div id="errordivddlVillName" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6" id="divtxtVillage" style="display:none">
+                                <div class="form-group">
+                                    <label>City/Village Name: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.txtvillage, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txtvillage", @name = "txtvillage" })
+                                    <div id="errordivddlVillName1" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Statement from offender:</label>
+                                    @Html.TextAreaFor(x => x.OffenderStatement, new { @class = "form-control known", @title = "", @placeholder = "", @maxlength = 300, @id = "txt_OffenderStatement" })
+                                    <div id="errordivOffenderStatement" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <!--/.Both Data-->
+                            <div class="col-lg-12" style="margin-top:10px">
+                                <div class="form-group">
+                                    <label>Add Offender:</label><br>
+                                    <button type="button" class="btn btn-success" title="Save" name="Command" value="Submit" id="btn_addOffender" style="width:auto">
+                                        <i class="fa fa-plus"></i> Add Offender
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-lg-12" style="margin-top:10px;">
+                                <table id="tbl_Offenderinfo" class="table table-striped table-bordered table-hover" style="display:none">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Father Name</th>
+                                            <th>Address</th>
+                                            <th>View</th>
+                                            <th>Edit</th>
+                                            <th>Delete</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tb_OffenderInfo"></tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>*
+
+                <div class="panel panel-default Unknown" style="display:none">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion" href="#UnknownOffender" aria-expanded="false" class="collapsed">
+                                <i class="fa  fa-angle-double-right fa-fw"></i> Offender Details
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="UnknownOffender" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+                        <div class="panel-body">
+                            <div class="" role="form">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Number of Offenders: <span class="mandatory">*</span></label>
+                                        @Html.TextBoxFor(x => x.ONumberOfOffender, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 2, @id = "txt_ONumberOfOffender" })
+                                        @Html.Hidden("hdOffenseID", Model.OffenseID)
+                                        <div id="errordivUNumberOffenders" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Description of the offenders:</label>
+                                        @Html.TextBoxFor(x => x.OffenderDescription, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OffenderDescription" })
+                                        <div id="errordivUOffendersDesc" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                        <label>Upload ID:</label>
+                                        <input type="file" class="form-control" id="OPhotoIDURL" style="width:50%" title="" value="@Model.OPhotoIDURL" name="OPhotoIDURL" />
+                                        <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                                        <div id="errordivUOPhotoIDURL" style="display:none" class="alert-danger1"></div>
+
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>*@
+                               
+                        <div class="col-lg-12">
+
+                                       <div class="panel panel-default" style="display: block;">
+                                           <div class="panel-heading">
+                                               <h2 class="panel-title">
+                                                   <a data-toggle="collapse" data-parent="#accordion" href="#collapse2" aria-expanded="false" class="collapsed">
+                                                       <i class="fa  fa-angle-double-right"></i> Inspection Details
+                                                   </a>
+                                               </h2>
+                                           </div>
+
+                                           <div class="panel-body">
+                                               <div class="form-group">
+                                                   <div id="errordivOUOffender" style="display:none" class="alert-danger1"></div>
+                                                   <label class="radio-inline">
+                                                       <input type="radio" id="Addknown-Offender" value="Known" name="Offender">Known Offender
+                                                   </label>
+                                                   <label class="radio-inline">
+                                                       <input type="radio" id="Unknown-Offender" value="Unknown" name="Offender">Unknown Offender
+                                                   </label>
+                                               </div>
+
+                                               <div class="panel-group" id="accordion">
+                                                   <!--Tab For Known Offender-->
+                                                   <div class= "known" style="display:none">
+                                                       <div class="panel-heading">
+                                                           <h4 class="panel-title">
+                                                               <a data-toggle="collapse" data-parent="#accordion" href="#knownOffender" aria-expanded="false" class="collapsed">
+                                                                   <i class="fa  fa-angle-double-right fa-fw"></i> Offender Details
+                                                               </a>
+                                                           </h4>
+                                                       </div>
+                                                       <div class="panel-body">
+                                                           <div id="knownOffender" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+
+                                                               <div class="col-lg-12"></div>
+                                                               <input type="hidden" id="hdnOOffenderrowid" name="hdnOOffenderrowid">
+                                                               <div class="col-lg-6">
+                                                                   <div class="form-group">
+                                                                       <label>
+                                                                           Name of the Offender:<span class="mandatory">*</span>
+                                                                       </label>
+                                                                       @Html.TextBoxFor(x => x.OffenderName, new { @class = "form-control", @title = "", @placeholder = "", @name = "OffenderName", @maxlength = 50, @id = "txt_OffenderName" })
+                                                                       <div id="errordivOffenderName" style="display:none" class="alert-danger1"></div>
+                                                                   </div>
+                                                               </div>
+                                                               <div class="col-lg-6">
+                                                                   <div class="form-group">
+                                                                       <label>
+                                                                           Father Name:<span class="mandatory">*</span>
+                                                                       </label>
+                                                                       @Html.TextBoxFor(x => x.OFatherName, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OFatherName", @name = "OFatherName" })
+
+                                                                       <div id="errordivOFatherName" style="display:none" class="alert-danger1"></div>
+                                                                   </div>
+                                                               </div>
+                                                               <div class="col-lg-6">
+                                                                   <div class="form-group">
+                                                                       <label>
+                                                                           Residential Address1:<span class="mandatory">*</span>
+                                                                       </label>
+                                                                       @Html.TextBoxFor(x => x.OAddress1, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OAddress1", @name = "OAddress1" })
+                                                                       <div id="errordivOAddress1" style="display:none" class="alert-danger1"></div>
+                                                                   </div>
+                                                               </div>
+                                                               <div class="col-lg-6">
+                                                                   <div class="form-group">
+                                                                       <label>State: <span class="mandatory">*</span></label>
+                                                                       @Html.DropDownList("ddlOState", (IEnumerable<SelectListItem>)ViewBag.ddlOState, new { @class = "form-control", title = "Select District", @id = "ddlOState", @name = "OStateCode" })
+                                                                       <div id="errordivddlDistrict" style="display:none" class="alert-danger1"></div>
+                                                                   </div>
+                                                               </div>
+                                                               <div class="col-lg-6" id="divDDlDistrict">
+                                                                   <div class="form-group">
+                                                                       <label>District: <span class="mandatory">*</span></label>
+                                                                       @Html.DropDownList("ddlODistrict", (IEnumerable<SelectListItem>)ViewBag.ddlODistrict, "--Select--", new { @class = "form-control", title = "Select District", @id = "ddlODistrict", @name = "ODistrictCode" })
+                                                                       <div id="errordivddlDistrict" style="display:none" class="alert-danger1"></div>
+                                                                   </div>
+                                                               </div>
+                                                               <div class="col-lg-6" id="divtxtDistrict" style="display:none">
+                                                                   <div class="form-group">
+                                                                       <label>District: <span class="mandatory">*</span></label>
+                                                                       @Html.TextBoxFor(x => x.txtdistrict, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txtdistrict", @name = "txtdistrict" })
+                                                                       <div id="errordivddlODistrict1" style="display:none" class="alert-danger1"></div>
+                                                                   </div>
+                                                               </div>
+                                                               <div class="col-lg-6" id="divDDlVillage">
+                                                                   <div class="form-group">
+                                                                       <label>
+                                                                           City/Village Name:<span class="mandatory">*</span>
+                                                                       </label>
+                                                                       @Html.DropDownListFor(x => x.OVillageCode, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "txt_OVillageCode", name = "OVillageCode", @class = "form-control" })
+                                                                       @*@Html.TextBoxFor(x => x.OVillageCode, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OVillageCode", @name = "OVillageCode" })*@
+                                                                       <div id="errordivddlVillName" style="display:none" class="alert-danger1"></div>
+                                                                   </div>
+                                                               </div>
+                                                               <div class="col-lg-6" id="divtxtVillage" style="display:none">
+                                                                   <div class="form-group">
+                                                                       <label>City/Village Name: <span class="mandatory">*</span></label>
+                                                                       @Html.TextBoxFor(x => x.txtvillage, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txtvillage", @name = "txtvillage" })
+                                                                       <div id="errordivddlVillName1" style="display:none" class="alert-danger1"></div>
+                                                                   </div>
+                                                               </div>
+                                                               <div class="col-lg-6">
+                                                                   <div class="form-group">
+                                                                       <label>Statement from offender:</label>
+                                                                       @Html.TextAreaFor(x => x.OffenderStatement, new { @class = "form-control known", @title = "", @placeholder = "", @maxlength = 300, @id = "txt_OffenderStatement" })
+                                                                       <div id="errordivOffenderStatement" style="display:none" class="alert-danger1"></div>
+                                                                   </div>
+                                                               </div>
+                                                               <div class="col-lg-6">
+                                                                   <div class="form-group">
+                                                                       <div class="col-lg-6" style="padding: 0;">
+                                                                           <label>Upload Offender Statement:<a style="display: none; font-size: smaller;" id="ViewStatementdoc">view document</a></label>
+                                                                           <input type="file" class="form-control" id="OffenderStatementDoc" title="" name="OffenderStatementDoc" />
+                                                                           <input type="hidden" id="hdOffenderStatementDoc" name="hdOffenderStatementDoc" />
+                                                                           <div id="errordivOffenderStatementDoc" style="display:none" class="alert-danger1"></div>
+                                                                       </div>
+                                                                       <div class="col-lg-6">
+                                                                           <div class="form-group">
+                                                                               <br/>
+                                                                                   <button type="button" id="btnUploadStatement" name="Command" value="Cancel" style="width:50%" class="btn btn-danger" title="Cancel">
+                                                                                       <i class="fa fa-times fa-fw"></i> Upload
+                                                                                   </button></div>
+                                                                           <label style="font-size:smaller;"><span class="spanmark">Only jpg/pdf/png/gif with max size:100kb.</span></label>
+                                                                       </div>
+                                                                   </div>
+                                                               </div>
+                                                               <!--/.Both Data-->
+                                                               <div class="col-lg-12" style="margin-top:10px">
+                                                                   <div class="form-group">
+                                                                       <label>Add Offender:</label><br>
+                                                                       <button type="button" class="btn btn-success" title="Save" name="Command" value="Submit" id="btn_addOffender" style="width:auto">
+                                                                           <i class="fa fa-plus"></i> Add Offender
+                                                                       </button>
+                                                                   </div>
+                                                               </div>
+                                                               <div class="col-lg-12" style="margin-top:10px;">
+                                                                   <table id="tbl_Offenderinfo" class="table table-striped table-bordered table-hover" style="display:none">
+                                                                       <thead>
+                                                                           <tr>
+                                                                               <th>Name</th>
+                                                                               <th>Father Name</th>
+                                                                               <th>Address</th>
+                                                                               <th>View</th>
+                                                                               <th>Edit</th>
+                                                                               <th>Delete</th>
+                                                                           </tr>
+                                                                       </thead>
+                                                                       <tbody id="tb_OffenderInfo"></tbody>
+                                                                   </table>
+                                                               </div>
+
+                                                           </div>
+                                                       </div>
+                                                   </div>
+
+                                                   <div class="Unknown" style="display:none">
+                                                       <div class="panel-heading">
+                                                           <h4 class="panel-title">
+                                                               <a data-toggle="collapse" data-parent="#accordion" href="#UnknownOffender" aria-expanded="false" class="collapsed">
+                                                                   <i class="fa  fa-angle-double-right fa-fw"></i> Offender Details
+                                                               </a>
+                                                           </h4>
+                                                       </div>
+                                                       <div id="UnknownOffender" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+                                                           <div class="panel-body">
+                                                               <div class="" role="form">
+                                                                   <div class="col-lg-6">
+                                                                       <div class="form-group">
+                                                                           <label>Number of Suspects: <span class="mandatory">*</span></label>
+                                                                           @Html.TextBoxFor(x => x.ONumberOfOffender, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 2, @id = "txt_ONumberOfOffender" })
+                                                                           @Html.Hidden("hdOffenseID", Model.OffenseID)
+                                                                           <div id="errordivUNumberOffenders" style="display:none" class="alert-danger1"></div>
+                                                                       </div>
+                                                                   </div>
+
+                                                                   <div class="col-lg-6">
+                                                                       <div class="form-group">
+                                                                           <label>Description of the Suspects:</label>
+                                                                           @Html.TextBoxFor(x => x.OffenderDescription, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OffenderDescription" })
+                                                                           <div id="errordivUOffendersDesc" style="display:none" class="alert-danger1"></div>
+                                                                       </div>
+                                                                   </div>
+
+                                                                   @*<div class="col-lg-6">
+                                                                            <label>Upload ID:</label>
+                                                                            <input type="file" class="form-control" id="OPhotoIDURL" style="width:50%" title="" value="@Model.OPhotoIDURL" name="OPhotoIDURL" />
+                                                                            <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                                                                            <div id="errordivUOPhotoIDURL" style="display:none" class="alert-danger1"></div>
+                                                                        </div>*@
+                                                                       
+                                                               
+                                                               </div>
+                                                           </div>
+                                                       </div>
+                                                   </div>
+
+                                               </div>
+                                              @*<div id="collapse2" class="panel-collapse collapse" aria-expanded="true" style="height: 0px;">*@
+                                                  <div>
+                                                      <div class="col-lg-6">
+                                                          <div class="form-group">
+                                                              <label>Date of Visit: <span class="mandatory">*</span></label>
+                                                              @Html.TextBoxFor(x => x.VisitDate, new { @class = "form-control datefield", @title = "", @placeholder = "", @id = "VisitDate", name = "VisitDate" })
+                                                              <div id="errordivDateOfVisit" style="display:none" class="alert-danger1"></div>
+
+                                                          </div>
+                                                      </div>
+
+                                                      <div class="col-lg-6">
+                                                          <div class="form-group">
+                                                              <label>Place of Visit: <span class="mandatory">*</span></label>
+                                                              @Html.TextBoxFor(x => x.VisitPlace, new { @class = "form-control", @title = "", @maxlength = 200, @id = "VisitPlace", name = "VisitPlace" })
+                                                              <div id="errordivVisitPlace" style="display:none" class="alert-danger1"></div>
+                                                          </div>
+                                                      </div>
+
+                                                      <div class="col-lg-6">
+                                                          <div class="form-group">
+                                                              <label>
+                                                                  Complaint Status:<span class="mandatory">*</span>
+                                                              </label>
+                                                              @Html.DropDownListFor(x => x.ComplainFound, new List<SelectListItem>
+                                                                    {
+                                                                        new SelectListItem { Text = "--Select--", Value = ""},
+                                                                        new SelectListItem { Text = "True", Value = "Yes"},
+                                                                        new SelectListItem { Text = "False", Value = "No"},
+                                                                    },
+                                                                    new
+                                                                    {
+                                                                        @id = "ComplainFound",
+                                                                        @name = "ComplainFound",
+                                                                        @class = "form-control"
+                                                                    })
+                                                              <div id="errordivComplain" style="display:none" class="alert-danger1"></div>
+                                                          </div>
+                                                      </div>
+                                                      <div class="col-lg-12"></div>
+
+                                                      <div class="col-lg-4 ComplainFound">
+                                                          <label>Moka Punchnama: <span class="sml">(Only jpg / pdf /png / gif with max size:2 MB)</span></label>
+                                                          @Html.TextBoxFor(x => x.MokaPunchnama, new { @class = "form-control", @id = "MokaPunchnama", type = "file" })
+                                                          <a style="display:none;" id="viewdoc1">view document</a>
+                                                          <div id="errordivGriftariPunchnamaDoc" style="display:none" class="alert-danger1"></div>
+                                                      </div>
+
+                                                      <div class="col-lg-4 ComplainFound">
+                                                          <label>Nagri Naka: <span class="sml">(Only jpg/pdf/png/gif with max size:2 MB)</span><br /><br /></label>
+                                                          @Html.TextBoxFor(x => x.NagriNaka, new { @class = "form-control", @id = "NagriNaka", type = "file" })
+                                                          <a style="display:none;" id="viewdoc2">view document</a>
+                                                          <div id="errordivNagriNakaDoc" style="display:none" class="alert-danger1"></div>
+                                                      </div>
+
+                                                      <div class="col-lg-4 ComplainFound">
+                                                          <label>Witness Recorded1: <span class="sml">(Only jpg/pdf/png/gif with max size:2 MB)</span></label>
+                                                          @Html.TextBoxFor(x => x.WitnessRecord1, new { @class = "form-control", @id = "WitnessRecord1", type = "file" })
+                                                          <a style="display:none;" id="viewdoc3">view document</a>
+                                                          <div id="errordivWitnessRecord1" style="display:none" class="alert-danger1"></div>
+                                                      </div>
+
+                                                      <div class="col-lg-4 ComplainFound">
+                                                          <label>Witness Recorded2: <span class="sml">(Only jpg/pdf/png/gif with max size:2 MB)</span></label>
+                                                          @Html.TextBoxFor(x => x.WitnessRecord2, new { @class = "form-control", @id = "WitnessRecord2", type = "file" })
+                                                          <a style="display:none;" id="viewdoc4">view document</a>
+                                                          <div id="errordivWitnessRecord2" style="display:none" class="alert-danger1"></div>
+                                                      </div>
+
+                                                      <div class="col-lg-4 ComplainFound">
+                                                          <label>Witness Recorded3: <span class="sml">(Only jpg/pdf/png/gif with max size:2 MB)</span></label>
+                                                          @Html.TextBoxFor(x => x.WitnessRecord3, new { @class = "form-control", @id = "WitnessRecord3", type = "file" })
+                                                          <a style="display:none;" id="viewdoc5">view document</a>
+                                                          <div id="errordivWitnessRecord3" style="display:none" class="alert-danger1"></div>
+                                                      </div>
+
+                                                      <div class="col-lg-4 ComplainFound">
+                                                          <div class="form-group">
+                                                              <div class="col-lg-12" style="padding: 0;">
+                                                                  <label>List of item seized:</label>
+                                                                  @Html.TextAreaFor(x => x.ListOfItemSeized, new { @class = "form-control", @id = "ListOfItemSeized", @maxlength = "200", name = "ListOfItemSeized" })
+                                                                  <div id="errordivItemSeized" style="display:none" class="alert-danger1"></div>
+                                                              </div>
+                                                          </div>
+                                                      </div>
+
+                                                      <div class="col-lg-4 ComplainFound" style="clear: both">
+                                                          <div class="form-group">
+                                                              <label>
+                                                                  Vehicle Seized:
+                                                              </label>
+                                                              @Html.DropDownListFor(x => x.VehicleSeized, new List<SelectListItem>
+                                                            {
+                                                                new SelectListItem { Text = "--Select--", Value = ""},
+                                                                new SelectListItem { Text = "Yes", Value = "Yes"},
+                                                                new SelectListItem { Text = "No", Value = "No"},
+                                                            },
+                                                            new
+                                                            {
+                                                                @id = "VehicleSeized",
+                                                                @name = "VehicleSeized",
+                                                                @class = "form-control"
+                                                            })
+                                                              <div id="errordivVehicleSeized" style="display:none" class="alert-danger1"></div>
+                                                          </div>
+                                                      </div>
+
+
+                                                      <div id="DivVechile" style="display:none">
+                                                          <div class="col-lg-12">
+                                                              <label>Vechicle Details:</label>
+                                                              <div class="divider"></div>
+                                                          </div>
+                                                          <div class="col-lg-2">
+                                                              <div class="form-group">
+                                                                  <label>RTO Services:</label>
+                                                                  @Html.DropDownListFor(x => x.VechileRTO, new List<SelectListItem>
+                                                                           {
+                                                                             new SelectListItem { Text = "--Select--", Value = ""},
+                                                                             new SelectListItem { Text = "YES", Value = "YES"},
+                                                                             new SelectListItem { Text = "NO", Value = "NO"},
+                                                                          },
+                                                                          new
+                                                                          {
+                                                                              @id = "VechileRTO",
+                                                                              @name = "VechileRTO",
+                                                                              @class = "form-control"
+                                                                          })
+                                                              </div>
+                                                          </div>
+                                                          <div class="col-lg-12"></div>
+                                                          <div class="col-lg-6">
+                                                              <div class="form-group">
+                                                                  <label>Vehicle registration no:<span class="mandatory">*</span></label>
+                                                                  @Html.TextBoxFor(x => x.VechileRegistrationNo, new { @class = "form-control", @id = "VechileRegistrationNo", @maxlength = "15" })
+                                                              </div>
+
+                                                              <div class="form-group">
+                                                                  <button type="button" class="btn btn-success" title="Save" style="width:30%" name="Command" onclick="GetRTODetails()" value="Get RTO Details" id="BtnGetRTODetails">
+                                                                      <i class="fa fa-plus"></i> Get RTO Details
+                                                                  </button>
+                                                              </div>
+                                                          </div>
+                                                          <div class="col-lg-6">
+                                                              <div class="form-group">
+                                                                  <label>Owner’s Name:<span class="mandatory">*</span></label>
+                                                                  @Html.TextBoxFor(x => x.VechileOwnerName, new { @class = "form-control", @id = "VechileOwnerName", @maxlength = "100" })
+                                                              </div>
+                                                          </div>
+
+                                                          <div class="col-lg-6">
+                                                              <div class="form-group">
+                                                                  <label>Vehicle type:<span class="mandatory">*</span></label>
+                                                                  @Html.DropDownListFor(x => x.VechileType, (IEnumerable<SelectListItem>)ViewBag.VechileType, "--Select--", new { id = "VechileType", @class = "form-control" })
+                                                              </div>
+                                                          </div>
+
+                                                          <div class="col-lg-6">
+                                                              <div class="form-group">
+                                                                  <label>Vehicle Make:<span class="mandatory">*</span></label>
+                                                                  @Html.TextBoxFor(x => x.VechileMake, new { @class = "form-control", @id = "VechileMake", @maxlength = "100" })
+                                                              </div>
+                                                          </div>
+
+                                                          <div class="col-lg-6">
+                                                              <div class="form-group">
+                                                                  <label>Vehicle Model:<span class="mandatory">*</span></label>
+                                                                  @Html.TextBoxFor(x => x.VechileModel, new { @class = "form-control", @id = "VechileModel", @maxlength = "100" })
+                                                              </div>
+                                                          </div>
+
+                                                          <div class="col-lg-6">
+                                                              <div class="form-group">
+                                                                  <label>Vehicle Chassis number:<span class="mandatory"></span></label>
+                                                                  @Html.TextBoxFor(x => x.VechileChassisNo, new { @class = "form-control", @id = "VechileChassisNo", @maxlength = "100" })
+                                                              </div>
+                                                          </div>
+
+                                                          <div class="col-lg-6">
+                                                              <div class="form-group">
+                                                                  <label>Vehicle Engine Number:<span class="mandatory">*</span></label>
+                                                                  @Html.TextBoxFor(x => x.VechileEngineNo, new { @class = "form-control", @id = "VechileEngineNo", @maxlength = "100" })
+                                                              </div>
+                                                          </div>
+
+                                                          @*<div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label>Upload Doc:<span class="mandatory">*</span><span> (Only.jpg/.pdf/.png/.gif allowed with max size 100kb)</span></label>
+                                                                @Html.TextBoxFor(x => x.VechileUploadDoc, new { @class = "form-control", @id = "VechileUploadDoc", @type = "file" })
+                                                                <input type="hidden" id="hdVechileDoc" value="" name="hdVechileDoc" />
+                                                                <div id="errordivUpload" style="display:none" class="alert-danger1"></div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <button type="button" id="btnVechileUpload" name="Command" value="Cancel" style="width:30%" class="btn btn-danger" title="Cancel">
+                                                                    <i class="fa fa-times fa-fw"></i> Upload
+                                                                </button>
+                                                            </div>
+                                                        </div>*@
+                                                          <div class="col-lg-12"></div>
+                                                          <div class="col-lg-2">
+                                                              <div class="form-group">
+                                                                  <label>Add Vehicle:</label><br>
+                                                                  <button type="button" class="btn btn-success" title="Add Vehicle" name="btn_addVechile" onclick="AddVechile();" value="">
+                                                                      <i class="fa fa-plus"></i> Add Vehicle
+                                                                  </button>
+                                                              </div>
+                                                          </div>
+
+                                                          <div id="tbl" class="table-responsive">
+                                                              <!--Table grid-->
+                                                              <table class="table table-striped table-bordered table-hover">
+                                                                  <thead>
+                                                                      <tr>
+                                                                          <th style="width:7%;">S.No</th>
+                                                                          <th>Vehicle Registration No.</th>
+                                                                          <th>Owner Name</th>
+                                                                          <th>Vehicle Chassis Number</th>
+                                                                          <th>Vehicle Engine Number</th>
+                                                                          <th style="width:9%;">Delete</th>
+                                                                      </tr>
+                                                                  </thead>
+                                                                  <tbody id="tblAddVechile"></tbody>
+                                                              </table>
+                                                          </div>
+                                                      </div>
+
+                                                      <div class="ComplainNotFound">
+
+                                                          <div class="col-lg-4">
+                                                              <div class="form-group">
+                                                                  <label>Field Inspection:</label>                                                              
+                                                                  @Html.TextBoxFor(x => x.FieldInspection, new { @class = "form-control", @id = "FieldInspection", type = "file" })
+                                                                  <a style="display:none;" id="viewdoc6">view document</a>
+                                                                  <div id="errordivFieldInspection" style="display:none" class="alert-danger1"></div>
+                                                              </div>
+
+                                                          </div>
+                                                      </div>
+
+                                                      <div class="ComplainNotFound">
+                                                          <div class="col-lg-4">
+                                                              <div class="form-group">
+                                                                  <label>Recomendation:</label>                                                                 
+                                                                  @Html.TextBoxFor(x => x.Recomendation, new { @class = "form-control", @id = "Recomendation", type = "file" })
+                                                                  <a style="display:none;" id="viewdoc7">view document</a>
+                                                                  <div id="errordivRecomendation" style="display:none" class="alert-danger1"></div>
+                                                              </div>
+
+                                                          </div>
+                                                      </div>
+
+                                                  </div>
+                                           </div>
+                                       </div>
+                                   </div>
+
+                                  <div class="col-lg-12" id="btn">
+                                       <button type="submit" class="btn btn-success btnSubmit" name="Command" value="Save" title="Submit">
+                                           <i class="fa fa-check"></i> Sumit
+                                       </button>                                      
+                                       <button type="button" name="Command" value="Cancel" class="btn btn-danger" title="Cancel" onclick="reload()">
+                                           <i class="fa fa-times fa-fw"></i> Cancel
+                                       </button>
+
+                                   </div>
+                </div>
+                    }
+            </div>
+         </div>
+     </div>
+         
+   <div class="modal fade in" id="myModalOffender" tabindex="-1" role="dialog" aria-hidden="false">
+            <div class="modal-dialog mdw">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel">
+                            Offender Details
+                        </h4>
+                    </div>
+                    <br />
+                    <div class="modal-body tbl-scroll">
+                        <!-- From URL Get -->
+                        <table class="table table-striped table-bordered table-hover">
+                            <tbody id="tbdyOffender"></tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer" id="fot-f">
+                        <div id="btn" class="col-lg-12">
+                            <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                                <i class="fa fa-times fa-fw"></i> Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal-dialog -->
+        </div> 
+
+ </div>

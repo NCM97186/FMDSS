@@ -1,0 +1,1348 @@
+@model FMDSS.Models.CitizenService.PermissionServices.FixedLandUsage
+@{
+    ViewBag.Title = "FixedPermission";   
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); 
+}
+<style>
+    #tbldistmapping {
+        margin: 15px;
+        width: 97%;
+    }
+    #page-wrapper-inn #tbldistmapping > thead > tr > th {
+        width: auto;
+        background-color: #dff0d8;
+        border-color: #d6e9c6;
+    }
+    #page-wrapper-inn #btnUploadSHPKML {
+        width: auto;
+    }
+    .spanmark {
+        color: #222;
+        font-size: 12px;
+        font-weight: normal;
+    }
+    #Industrial_Type {
+        width: 49%;
+    }
+    .fix-tbl {
+        height: 154px !important;
+        display: block;
+        overflow: auto;
+        width: 100%;
+    }
+    #page-wrapper-inn .fix-tbl > thead > tr > th {
+        width: 16%;
+    }
+</style>
+<!-- /.navbar-static-side -->
+<!--GIS Data Post 22-04-2016-->
+<form id="form11" name="form11" method="post">
+    <input type="hidden" id="portalid" name="portalid" value="rajcomp123" />
+    <input type="hidden" id="ssoId" name="ssoId" value="" />
+    <input type="hidden" id="requestFor" name="requestFor" value="" />    
+    <input type="hidden" id="returnurl" name="returnurl" value="" />
+</form>
+<!--Gis Data Post End-->
+<!-- Form design -->
+
+<div class="row">
+    <div class="col-lg-8">
+        <h1 class="page-header">@Model.PermissionType</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+
+    
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-primary">
+                <div class="panel-heading">NOC Detail</div>
+                <div class="panel-body">
+                    <div class="col-lg-4 Edithide">
+                        <div class="form-group">
+                            <label>
+                                NOC For:<span class="mandatory">*</span>
+                            </label>
+                            @if (HttpContext.Current.Session["NOCPurpose"] != null && HttpContext.Current.Session["NOCPurpose"] != "")
+                            {
+                                <input type="text" class="form-control common" id="txtNOCPurpose" readonly value="@Session["NOCPurpose"].ToString()" />
+                            }
+                            else
+                            {  @Html.DropDownList("NOCPurpose", (IEnumerable<SelectListItem>)ViewBag.NOCPurpose, "--Select--", new { @class = "form-control common", id = "NOCPurpose" })}
+                            <div id="errordiv" style="display: none; position: initial !important" class="alert-danger1"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 Edithide">
+                        <div class="form-group">
+                            <label>
+                                NOC Purpose:<span class="mandatory">*</span>
+                            </label>
+                            @if (HttpContext.Current.Session["NOCType"] != null && HttpContext.Current.Session["NOCType"] != "")
+                            {
+                                <input type="text" class="form-control common" id="txtNOCType" readonly value="@Session["NOCType"].ToString()" />
+                            }
+                            else
+                            {
+                                @Html.DropDownList("NOCType", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "NOCType" })
+                            }
+                            <div id="errordiv" style="display: none; position: initial !important" class="alert-danger1"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label></label>
+                            <button type="button" class="btn btn-warning btn-block" name="" value="" id="btnUploadSHPKML">
+                                <i class="fa fa-upload"></i> Upload
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.panel-heading -->
+                <!--From Start-->
+                @using (Html.BeginForm("FixedLandPermissions", "FixedPermission", FormMethod.Post, new { enctype = "multipart/form-data", data_behavior = "confirm" }))
+                {
+                    if (Model.PermissionId != null)
+                    {
+                        @Html.Hidden("hdMenuId", Model.PermissionId)
+                    }
+                    if (Model.ConditionFileEditMode)
+                    {
+                        @Html.Hidden("hdfileEditModeId", Model.ConditionFileEditMode)
+                    }
+                    else
+                    {
+                        @Html.Hidden("hdfileEditModeId", "")
+                    }
+                    if (Model.GISID != null)
+                    {
+                        @Html.Hidden("hdGISID", Model.GISID)
+                    }
+                    else
+                    {
+                        @Html.Hidden("hdGISID", "")
+                    }
+                    if (Model.SSOID != null)
+                    {
+                        @Html.Hidden("hdSSOID", Model.SSOID, new { @id = "hdSSOID" })
+                    }
+                    else
+                    {
+                        @Html.Hidden("hdSSOID", "", new { @id = "hdSSOID" })
+                    }
+                    <div class="panel-body">
+                        <div id="reviewForm">
+                            <label class="Edithide" id="lblDisclaimer" style="width:100%;display:none">
+                                <marquee id="test" behavior="scroll" direction="left" scrolldelay="100" scrollamount="10" onmouseover="this.stop();" onmouseout="this.start();"> *Permission is only applicable for non forest area which do not include in wildlife area.</marquee>
+                                <input type="hidden" id="hdTreeCount" value="0" />
+                            </label>
+                            <label class="lblhide">
+                                <label>&nbsp;</label>
+                                <label>&nbsp;</label>
+                                   Request ID:- @Model.RequestedID
+                            </label>
+                            <div class="col-lg-12 Edithide">
+                                <div class="form-group">
+                                    <label style="color:red">
+                                        Upload KML/SHP:<span class="mandatory">* All details will be generated automatically by uploading KML file, Applicant will enter only Khasra number(s).</span>
+                                    </label>
+                                    @*<button type="button" class="btn btn-warning btn-block" name="" value="" id="btnUploadSHPKML">
+                                        <i class="fa fa-check"></i> Upload
+                                    </button>*@
+                                    <div id="errordiv88" style="display:none; position:initial; right:0px;" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                            </div>
+                            <fieldset id="fieldLocation" class="corner" id="" style="margin: 10px; min-height: 300px; width:99%; border: 1px Solid #ccc;">
+                                <label style="font-weight:normal; padding:10px">
+                                </label>
+                                <div class="col-lg-12">
+                                    <label>Location Details:</label>
+                                    <div class="divider"></div>
+                                </div>
+                                <div class="table-responsive request-id">
+                                    <table id="tbldistmapping" class="table table-striped table-bordered table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Division</th>
+                                                <th>District</th>
+                                                <th>Tehsil</th>
+                                                <th>Panchayat Samiti</th>
+                                                <th>Gram Panchayat</th>
+                                                <th>Village</th>
+                                                <th>Name of Area</th>
+                                                <th>Khasra No.<span class="mandatory">*</span></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbodydistmap">
+                                            @foreach (var item in ViewData["fixedlandlist"] as IEnumerable<FMDSS.Models.CitizenService.PermissionServices.clsPermission>)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Div_NM)
+                                                        @Html.Hidden("hdDiv_Cd", item.Div_Cd)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Dist_NM)
+                                                        @Html.Hidden("hdDist_Cd", item.Dist_Cd)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Tehsil_NM)
+                                                        @Html.Hidden("hdTehsil_Cd", item.Tehsil_Cd)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Block_NM)
+                                                        @Html.Hidden("hdBlk_Cd", item.Blk_Cd)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Gp_NM)
+                                                        @Html.Hidden("hdGp_Cd", item.Gp_Cd)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Village_NM)
+                                                        @Html.Hidden("hdVlg_Cd", item.Vlg_Cd)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.areaName)
+                                                    </td>
+                                                    <td>
+                                                        @Html.TextAreaFor(x => x.khasra_no, new { @class = "form-control common kno", @title = "Enter the Khasra number(s) of the area. Each Khasra number length should not greater than 8.E.G. 7/12,12345678", @placeholder = "Enter Khasra No. comma separated", @id = "khasra_no", @maxlength = 500 })
+                                                    </td>
+                                                    <td style="display:none">
+                                                        @Html.Hidden("FOREST_DIVCODE", item.FOREST_DIVCODE)
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-lg-12" id="fix">
+                                    <div id="errordiv85" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </fieldset>
+                            <div class="col-lg-12"></div>
+                            <div class="col-lg-12"></div>
+                            <div class="col-lg-4 Edithide">
+                                <div class="form-group">
+                                    <label>
+                                        Applicant Type:<span class="mandatory">*</span>
+                                    </label>
+                                    @Html.DropDownList("Applicant_type", (IEnumerable<SelectListItem>)ViewBag.ApplicantType, new { @class = "form-control common", id = "Applicant_type" })
+                                    <div id="errordiv" style="display: none; position: initial !important" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group Edithide">
+                                    <label for="Areainha1">
+                                        Area (In Sq.Km):
+                                    </label>
+                                    @Html.TextBoxFor(x => x.Area_Size, new { @class = "form-control common", @title = "Enter the total area of the field under activity in square kilometer. E.G. 1400 sqkm", @placeholder = "Enter Area ", @maxlength = 50, @id = "Areainha1", @readonly = "readonly" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group Edithide">
+                                    <label for="Areainha">
+                                        Perposed Area (In Sq.Km):<span class="mandatory">*</span>
+                                    </label>
+                                    @Html.TextBoxFor(x => x.PerposedArea, new { @class = "form-control common", @title = "Enter the total area of the field under activity in square kilometer. E.G. 1400 sqkm", @placeholder = "Enter Perposed Area ", @maxlength = 50, @id = "Areainha" })
+                                    <div id="errordiv7" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 Edithide">
+                                <label>GPS Address:</label>
+                                <div class="divider"></div>
+                            </div>
+                            <div class="col-lg-4 un-bold Edithide">
+                                <div class="form-group">
+                                    <label>Latitude</label>
+                                    @Html.TextBoxFor(x => x.GPSLat, new { @class = "form-control common", @title = "Enter the GPS latitude in the range of 26° - 27°. E.G. 26.52°", @placeholder = "Latitude", @maxlength = 10, @id = "txt_lat", @readonly = "readonly" })
+                                    <div id="errordiv8" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 un-bold Edithide">
+                                <div class="form-group">
+                                    <label>Longitude:</label>
+                                    @Html.TextBoxFor(x => x.GPSLong, new { @class = "form-control common", @title = "Enter the GPS longitude in the range of 69° - 78°. E.G. 75.52°", @placeholder = "Longitude", @maxlength = 10, @id = "txt_long", @readonly = "readonly" })
+                                    <div id="errordiv9" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 Edithide" id="OpermissionId">
+                                <div class="form-group">
+                                    <label>
+                                        Other Permission:<span class="mandatory">*</span>
+                                    </label>
+                                    @Html.TextBoxFor(x => x.OtherPermission, new { @class = "form-control common", @title = "Enter the permission required for any other activity not mentioned in the list", @placeholder = "Enter Other Permission", @maxlength = 100, @id = "otherpermission" })
+                                    <div id="errordiv10" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12"></div>
+                            <fieldset class="corner Edithide" id="miningId" style="margin: 10px; min-height: 300px; width:99%; border: 1px Solid #ccc;">
+                                <label for="GT_Sheet" style="margin: 10px;">
+                                    <u>Natural features details from Uploaded KML:</u> <span style="color:red;">* Not valid for Legal Purposes.</span>
+                                </label>
+                                <div class="divider"></div>
+                                <div class="col-lg-4">
+                                    <div class="form-group">
+                                        <label for="Nearest_WaterSource">
+                                            Water Source:
+                                        </label>
+                                        @Html.TextBoxFor(x => x.Nearest_WaterSource, new { @class = "form-control", @readonly = "readonly" })
+                                        <div id="errordiv11" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="form-group">
+                                        <label for="WaterSource_Distance">
+                                            Distance From Nearest Water Source(Kms.):
+                                        </label>
+                                        @Html.TextBoxFor(x => x.WaterSource_Distance, new { @class = "form-control", @readonly = "readonly", @id = "WaterSource_Distance" })
+                                        <div id="errordiv12" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="form-group">
+                                        
+                                        <label for="Forest_Distance">
+                                         Distance From Nearest Forest boundary(Kms):
+                                        </label>
+                                        @Html.TextBoxFor(x => x.Forest_Distance, new { @class = "form-control", @readonly = "readonly", @id = "Forest_Distance" })
+                                        <div id="errordiv13" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="form-group">
+                                        <label for="Wildlife_Distance">
+                                            Distance From Wildlife Sanctuary@*/NP/ES Zone Area(Kms.)*@:
+                                        </label>
+                                        @Html.TextBoxFor(x => x.Wildlife_Distance, new { @class = "form-control", @readonly = "readonly", @id = "Wildlife_Distance" })
+                                        <div id="errordiv14" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="form-group">
+                                        <label for="Tree_species">
+                                            Number of Trees in Proposed Area:<span class="mandatory"></span>
+                                        </label>
+                                        @Html.TextBoxFor(x => x.Tree_species, new { @class = "form-control", @title = "Enter the number of tress falling in the entire area along with the name of species. E.G. 780 Dhok trees", @maxlength = 15, @id = "Tree_species" })
+                                        <div id="errordiv151" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+                                
+
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="Tree_species">
+                                                Density of Forest (In Hectare) :
+                                            </label>
+                                            <input class="form-control" type="text" id="txtForestDensity" name="txtForestDensity" readonly />
+                                        </div>
+                                    </div>
+                               
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="AravalliHills">
+                                                Whether the Area Falls in Aravali Hills:<span class="mandatory">*</span>
+                                            </label>
+                                            @Html.RadioButtonFor(x => x.AravalliHills, "1", new { @id = "yesAravalliHills", @disabled = "disabled" }) Yes
+                                            &nbsp;&nbsp;&nbsp;&nbsp;
+                                            @Html.RadioButtonFor(x => x.AravalliHills, "0", new { @checked = "checked", @id = "noAravalliHills", @disabled = "disabled" }) No
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="ForestLand">
+                                                Whether the area is a Part of Forest Land:<span class="mandatory">*</span>
+                                            </label>
+                                            @Html.RadioButtonFor(x => x.ForestLand, "1", new { @id = "yesForestLand", @disabled = "disabled" }) Yes
+                                            &nbsp;&nbsp;&nbsp;&nbsp;
+                                            @Html.RadioButtonFor(x => x.ForestLand, "0", new { @checked = "checked", @id = "noForestLand", @disabled = "disabled" }) No
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="Proposed">
+                                                Whether the Area Falls in Plantation Area:<span class="mandatory">*</span>
+                                            </label>
+                                            @Html.RadioButtonFor(x => x.Plantation_Area, "1", new { @id = "yesPlantation_Area", @disabled = "disabled" }) Yes
+                                            &nbsp;&nbsp;&nbsp;&nbsp;
+                                            @Html.RadioButtonFor(x => x.Plantation_Area, "0", new { @checked = "checked", @id = "noPlantation_Area", @disabled = "disabled" }) No
+                                        </div>
+                                    </div>
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <label></label>
+                                        @*<label>Species Details:<span class="mandatory">*</span></label>*@
+                                        <div class="divider"></div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="table-responsive">
+                                            <label>Species Details:<span class="mandatory">*</span></label>
+                                            <table class="table table-striped table-bordered table-hover fix-tbl" id="tblSubActivityList">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Species Name</th>
+                                                        <th>Number</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="datatable">
+                                                    @foreach (var item in ViewData["PlantList"] as IEnumerable<FMDSS.Models.CitizenService.PermissionServices.PlantFixedPermission>)
+                                                    {
+                                                        <tr>
+                                                            <td>
+                                                                @Html.DisplayFor(model => item.PlantName)
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="plantmap" name="plantcount" id="txtplant_@item.PlantID" value="0" />
+                                                                <input type="hidden" id="pm_@item.PlantID" name="hdplant" value="@item.PlantID" />
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                    <tr>
+                                                        <td>
+                                                            <label>
+                                                                OTHERS
+                                                            </label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                            <input type="text" class="plantmap" name="txtplantOthers" id="txtplantOthers" value="" />
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="plantmap" name="txtplantOthersNo" id="txtplantOthersNo" value="0" />
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                            <div class="col-lg-4 Edithide">
+                                <div class="form-group" id="showsawmilltype">
+                                    <label for="Sawmill_Type">
+                                        Type of Sawmill:<span class="mandatory">*</span>
+                                    </label>
+                                    @Html.DropDownList("Sawmill_Type", (IEnumerable<SelectListItem>)ViewBag.Sawmill_Type, "--Select--", new { @class = "form-control", id = "Sawmill_Type" })
+                                    <div id="errordiv16" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 Edithide">
+                                <div class="form-group" id="showsawmillsize">
+                                    <label for="Sawmill_Size">
+                                        Size of Sawmill:<span class="mandatory">*</span>
+                                    </label>
+                                    @Html.TextBoxFor(x => x.Sawmill_Size, new { @class = "form-control", @maxlength = 15, @id = "Sawmill_Size", @title = "Enter the Size of Sawmill in millimeters. E.G. 710mm", @placeholder = "Enter Size of Sawmill" })
+                                    <div id="errordiv17" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                                    </div>
+                            <div class="col-lg-4 Edithide">
+                                <div class="form-group" id="Industry">
+                                    <label for="Industrial_Type">
+                                        Industry Type:<span class="mandatory">*</span>
+                                    </label>
+                                    @Html.DropDownList("Industrial_Type", (IEnumerable<SelectListItem>)ViewBag.Industrial_Type, "--Select--", new { @class = "form-control", id = "Industrial_Type" })
+                                    <div id="errordiv18" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            @if (@Model.ConditionFileEditMode)
+                            {
+                                <div class="col-lg-4 padn-rem">
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="Revenue_Record">
+                                                Revenue Record:<span class="mandatory">*</span>
+                                            </label>
+                                            <input type="file" class="form-control common" id="Revenue_Record" style="width:50%" title="Enter the Revenue Record number(s) of the area" value="@Model.Revenue_Record_Path" name="Revenue_Record" />
+                                            @Html.Hidden("hdRevRecPath", @Model.Revenue_Record_Path)
+                                            <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <button type="button" class="btn btn-default btn-block mar-btn" name="" value="" id="btnRevViewFile">
+                                            <i class="fa fa-check"></i> View
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 padn-rem">
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="Revenue_Record">
+                                                Revenue Map:<span class="mandatory">*</span>
+                                            </label>
+                                            <input type="file" class="form-control common" id="Revenue_Map" style="width:50%" title="Upload the Revenue map of the area" value="@Model.Revenue_Map_Path" name="Revenue_Map" />
+                                            @Html.Hidden("hdRevMapPath", @Model.Revenue_Map_Path)
+                                            <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <button type="button" class="btn btn-default btn-block mar-btn" name="" value="" id="btnRevMapViewFile">
+                                            <i class="fa fa-check"></i> View
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                @Html.Hidden("hdKMLFile", Model.KML_Path)
+                                <div class="col-lg-4">
+                                    <div class="form-group">
+                                        <label for="Revenue_Record">
+                                            Revenue Record:<span class="mandatory">*</span>
+                                        </label>
+                                        <input type="file" class="form-control common" id="Revenue_Record" title="Enter the Revenue Record number(s) of the area" name="Revenue_Record" />
+                                        <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                                        <div id="errordiv20" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="form-group">
+                                        <label for="Revenue_Map">
+                                            Revenue Map:<span class="mandatory">*</span>
+                                        </label>
+                                        <input type="file" class="form-control common" id="Revenue_Map" title="Upload the Revenue map of the area" name="Revenue_Map" />
+                                        <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                                        <div id="errordiv21" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                            }
+                            <div class="col-lg-4 Edithide">
+                                <div class="form-group">
+                                    <label for="Revenue_Map_Signed">
+                                        @*<br />*@
+                                        Revenue Map-Signed By <span class="mandatory"></span>
+                                    </label>
+                                    <br />
+                                    <label>Tehsildar: *</label>
+                        
+                                    @{if (Model.ConditionRevenueMapSigned == "Yes")
+                                    {
+                                        <input type="radio" name="Revenue_Map_Signed" id="yesRevenue_Map_Signed" checked="checked" value="1" /><span> Yes</span>
+                                        <input type="radio" name="Revenue_Map_Signed" id="yesRevenue_Map_Signed" value="1" /><span> No</span>
+                                    }
+                                    else if (Model.ConditionRevenueMapSigned == "No")
+                                    {
+                                        <input type="radio" name="Revenue_Map_Signed" id="yesRevenue_Map_Signed" value="1" /><span> Yes</span>
+                                        <input type="radio" name="Revenue_Map_Signed" id="yesRevenue_Map_Signed" value="1" checked="checked" /><span> No</span>
+                                    }
+                                    else
+                                    {
+                                        <input type="radio" name="Revenue_Map_Signed" id="yesRevenue_Map_Signed" value="1" /><span> Yes</span>
+                                        <input type="radio" name="Revenue_Map_Signed" id="yesRevenue_Map_Signed" value="1" checked="checked" /><span> No</span>
+                                    }
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-lg-12 Edithide" style="display:none">
+                                <label>Duration:<span class="mandatory">*</span></label>
+                                <div id="errordivDuration" style="display:none" class="alert-danger1"></div>
+                                <div class="divider"></div>
+                            </div>
+                            <div class="col-lg-6 un-bold Edithide" style="display:none">
+                                <div class="form-group">
+                                    <label>From:</label>
+                                    <div id="errordiv22" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 un-bold Edithide" style="display:none">
+                                <div class="form-group">
+                                    <label>To:</label>
+                                    <div id="errordiv23" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 Edithide">
+                                <div class="form-group">
+                                    <label>
+                                        Project Description:
+                                    </label>
+                                    @Html.TextAreaFor(x => x.Citizen_Comment, new { @class = "form-control", @maxlength = 250, @id = "Citizen_Comment", @title = "Enter the specific remarks.", @placeholder = "Enter the Project Description" })
+                                    <div id="errordiv25" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 Edithide">
+                                <div class="form-group">
+                                    <label for="Additional">  Detailed Project Report (DPR):</label>
+                                    <input type="file" class="form-control common" title="Upload the DPR" id="Additional_Document" name="Additional_Document">
+                                    <label><span class="spanmark"> Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                                    <div id="errordiv26" style="display: none; color: #a94442;"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12"></div>
+                            <div id="divPayment" class="Edithide" style="display:none">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="Amount">
+                                            Fee Amount (in INR):
+                                        </label>
+                                        @Html.TextBoxFor(x => x.Final_Amount, new { @class = "form-control", @id = "Final_Amount", @readonly = "readonly" })
+                                        <input type="hidden" class="form-control" id="hdAmount" readonly name="Amount" value="@Model.Amount" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-group">
+                                        </label>
+                                        <label class="form-group">
+                                            <span class="mandatory">* The fee is non-transferable and non-refundable.</span>
+                                        </label>
+                                        <input type="hidden" class="form-control" id="hdDiscount" readonly name="Discount" value="@Model.Discount" />
+                                        <input type="hidden" class="form-control" id="hdTax" readonly name="Tax" value="@Model.Tax" />
+                                        <input type="hidden" class="form-control" id="hdFinal_Amount" readonly name="Final_Amount" value="@Model.Final_Amount" />
+                                        <input type="hidden" class="form-control" id="hdDuration_To" readonly name="Duration_To" value="" />
+                                        <input type="hidden" class="form-control" id="hdDuration_From" readonly name="Duration_From" value="" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6" style="display:none">
+                                    <div class="form-group">
+                                        <label for="Discount">
+                                            Discount : %
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6" style="display:none">
+                                    <div class="form-group">
+                                        <label for="Final_Amount">
+                                            Tax Calculated : %
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6" style="display:none">
+                                    <div class="form-group">
+                                        <label for="Final_Amount">
+                                            Final Amount :
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Btn Groping -->
+                        <div class="btn-padd">
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label for="Discount" style="color:darkblue">
+                                        ** Hardcopy of the application needs to be submitted with in 7 days of online submission of the application to the concerning DCF/DFO office.
+                                    </label>
+                                </div>
+                            </div>
+                            <div id="btn" class="col-lg-12">
+                                <button type="Submit" class="btn btn-success confirm-toggle" name="command" value="@Model.RequestedID" id="Savepermission">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+                                <button type="reset" class="btn btn-warning Edithide">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+                                    <button type="button" name="Command" value="Cancel" class="btn btn-danger" onclick=" reload(); return false;">
+                                        <i class="fa fa-times fa-fw"></i> Cancel
+                                    </button>
+                            </div>
+                        </div>
+                        <!-- ./Btn Groping -->
+                    </div>
+                }
+            </div>
+            <!-- /.panel-body -->
+        </div>
+        <!-- /.panel -->
+    </div>
+ 
+ <!-- Placed at the end of the document so the pages load faster -->
+<script src="~/js/jquery.min.js" type="text/javascript"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<script type="text/javascript">
+    if ('@ViewData["Message"]' != '') {
+        alert('@ViewData["Message"]');
+    }
+    var RootUrl = '@Url.Content("~/")';
+    $(document).ready(function () {
+        $(".datefield").datepicker({ minDate: new Date(), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        var currentDate = new Date();
+        $("#txt_Dfrom").datepicker("setDate", currentDate);
+        $("#txt_Dfrom").change(function () {
+            $("#txt_Dto").val('');
+        });
+        $("#txt_Dto").change(function () {
+            var str1 = $("#txt_Dfrom").val();
+            var str2 = $("#txt_Dto").val();
+            var L = 3, d1 = $("#txt_Dfrom").val().split('/'), d2 = $("#txt_Dto").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#txt_Dto").val('');
+                $('#errordivDuration').show();
+                $('#errordivDuration').html("Date Must be Greater then From Date" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $("#txt_Dto").focus();
+                return false;
+            }
+        });
+        $("#NOCPurpose").bind("change", function () {
+            var NOCcategory = $("#NOCPurpose").val();
+            $('#NOCType').empty();
+            var values = {
+                NOCPuproseId: NOCcategory
+            };
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootUrl + 'FixedPermission/GetNOCType',
+                success: function (data) {
+                    $("#NOCType").append('<option value="' + "" + '">' + "--Select--" + '</option>');
+                    $.each(data, function (i, NOCPurpose) {
+                        $("#NOCType").append('<option value="' + NOCPurpose.Value + '">' + NOCPurpose.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+        $("#NOCType").bind("change", function () {
+            var aid = $("#NOCType").val();
+            $("#hdMenuId").val(aid);
+            var values = {
+                aid: aid,
+                messagetype: "NOC",
+                NOCType: $("#NOCPurpose option:selected").text(),
+                NOCName: $("#NOCType option:selected").text(),
+                NOCTypeId: $("#NOCPurpose").val()
+            };
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootUrl + 'FixedPermission/FixedPermission',
+                success: function (data) {
+                    manageDivHideShow(aid);
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+        var origin = document.location.origin;
+        $(document).ready(function () {
+            $("#returnurl").val(origin + "/FixedPermission/getGISData");
+        });
+        $("#btnUploadSHPKML").click(function () {
+            if ($("#NOCType").val() != '' && $("#NOCType").val() != '0') {
+                var strname = GISPerName();
+                var ssoid = $("#hdSSOID").val();
+                $("#ssoId").val(ssoid);
+                $("#requestFor").val(strname);
+                var actionUrl = "@System.Web.Configuration.WebConfigurationManager.AppSettings["GISPATH"].ToString()"; 
+                document.getElementById("form11").action = actionUrl;
+                document.getElementById("form11").submit();
+            }
+            else { alert('Kindly select NOC Perpose first!!'); return; }
+        });
+        $("#btnKMLViewFile").click(function (e) {
+            var path = $("#KML_file")[0].defaultValue; 
+            var path = RootUrl + $("#KML_file")[0].defaultValue;
+            var pathurl = path.replace('~/', '');
+            window.open(pathurl, 'download');
+        });
+        $("#btnRevViewFile").click(function () {
+            var path = RootUrl + $("#Revenue_Record")[0].defaultValue;
+            var pathurl = path.replace('~/', '');
+            window.open(pathurl, '_blank');
+        });
+        $("#btnRevMapViewFile").click(function () {
+            var path = RootUrl + $("#Revenue_Map")[0].defaultValue;
+            var pathurl = path.replace('~/', '');
+            window.open(pathurl, '_blank');
+        });
+        if ('@ViewData["disablecontrols"]' != '') {
+            $('input, select').css("display", "none");
+            $('#khasra_no,.Edithide').css("display", "none");
+            $('#fieldLocation').hide();
+            $('#Revenue_Record,#Revenue_Map,#hdRevRecPath,#hdRevMapPath').css("display", "block");
+        }
+        else {
+            $("#txt_Dto").val('');
+            $('.lblhide').css("display", "none");
+        }
+        $('#khasra_no').keypress(function (event) {
+            return isNumberComma(event, this)
+        });
+        $('.kno').keypress(function (event) {
+            return isNumberComma(event, this)
+        });
+        $('#Areainha').keypress(function (event) {
+            return isNumber(event, this)
+        });
+        $('#Tree_species').keypress(function (event) {
+            return isOnlyNumber(event, this);
+        });
+        $('#Tree_species').keyup(function (event) {
+            if ($('#Tree_species').val() != "" && $('#Tree_species').val() != "0")
+            {
+                var density = $('#Tree_species').val() / $('#Areainha').val();
+                $('#txtForestDensity').val(density);
+            }
+            else
+            {
+                $('#txtForestDensity').val(0);
+            }
+        });
+        $('#Sawmill_Size').keypress(function (event) {
+            return isNumber(event, this)
+        });
+        $('#txtplantOthersNo').keypress(function (event) {
+            return isNumber(event, this)
+        });
+        $('#txt_Dfrom,#txt_Dto').keydown(function (event)
+        { return cancelBackspace(event) });
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+        $("#Revenue_Record").change(function (e) {
+            if ($("#hdTreeCount") == "0" && ($('#hdMenuId').val() == "4")) {
+                alert("Total Number of Trees can not be greator than Number of Tree!!");
+                $('#Tree_species').focus();
+                return false;
+            }
+            var iSize = ($("#Revenue_Record")[0].files[0].size / 1048576);
+            if (iSize > 2) {
+                $("#Revenue_Record").val('');
+                $('#errordiv20').show();
+                $('#errordiv20').html("Revenue Record file size should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Revenue_Record').focus();
+                return false;
+            }
+            else { $('#errordiv20').hide(); }
+            var file = $("#Revenue_Record").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $("#Revenue_Record").val('');
+                    $('#errordiv20').show();
+                    $('#errordiv20').html("Please upload only jpeg or jpg or pdf or png or gif file format Revenue Record Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Revenue_Record').focus();
+                    return false;
+                } else {
+                    $('#errordiv20').hide();
+                }
+            }
+            else { $('#errordiv20').hide(); }
+        });
+        $("#Revenue_Map").change(function (e) {
+            var iSize = ($("#Revenue_Map")[0].files[0].size / 1048576);
+            if (iSize > 2) {
+                $("#Revenue_Map").val('');
+                $('#errordiv21').show();
+                $('#errordiv21').html("Revenue_Map file size should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Revenue_Map').focus();
+                return false;
+            }
+            else { $('#errordiv21').hide(); }
+            var file = $("#Revenue_Map").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $("#Revenue_Map").val('');
+                    $('#errordiv21').show();
+                    $('#errordiv21').html("Please upload only jpeg or jpg or pdf or png or gif file format Revenue Record Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Revenue_Map').focus();
+                    return false;
+                } else {
+                    $('#errordiv21').hide();
+                }
+            }
+            else { $('#errordiv21').hide(); }
+        });
+        $(document).on('change', '.plantmap', function (e) {
+            var treetotalcount = parseInt($("#Tree_species").val());
+            if (treetotalcount > 0) {
+                var val = 0;
+                $(".plantmap").each(function () {
+                    val += parseInt($(this).val());
+                })
+                if (val > treetotalcount) {
+                    $("#hdTreeCount").val(val);
+                    alert("Species quantity can not be greator than Total Number of Tree with Species!!");
+                    return false;
+                }
+                else {
+                    $("#hdTreeCount").val('0');
+                }
+            }
+        })
+        $("#Additional_Document").change(function (e) {
+            var iSize = ($("#Additional_Document")[0].files[0].size / 1048576);
+            if (iSize > 2) {
+                $('#Additional_Document').val('');
+                $('#errordiv26').show();
+                $('#errordiv26').html("DPR should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Additional_Document').focus();
+                return false;
+            }
+            var file = $("#Additional_Document").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#Additional_Document').val('');
+                    $('#errordiv26').show();
+                    $('#errordiv26').html("Please upload only jpeg or jpg or pdf or png or gif file format in DPR Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Additional_Document').focus();
+                    return false;
+                } else {
+                    $('#errordiv26').hide();
+                }
+            }
+            else { $('#errordiv26').hide(); }
+        });
+        var id = $('#hdMenuId').val();
+        manageDivHideShow(id);
+        $(function () {
+            $("#txt_Dfrom").datepicker();
+            $("#txt_Dto").datepicker();
+        });
+    })
+    function manageDivHideShow(id) {
+        if (id != '') {
+            $("#PermissionServices ul").addClass("in");
+            $("#MyDashboar").removeClass("active");
+        }
+        if (id == '4') {
+            $("#OpermissionId").hide();
+            $("#showsawmilltype").hide();
+            $("#showsawmillsize").hide();
+            $("#Industry").hide();
+            $('#divPayment').show();
+            $("#miningId").show();
+        }
+        else if (id == '9') {
+            $("#OpermissionId").hide();
+            $("#showsawmilltype").show();
+            $("#showsawmillsize").show();
+            $("#miningId").show();
+            $("#Industry").hide();
+        }
+        else if (id == '11') {
+            $("#OpermissionId").show();
+            $("#showsawmilltype").hide();
+            $("#showsawmillsize").hide();
+            $("#miningId").show();
+            $("#Industry").hide();
+        }
+        else if (id == '3') {
+            $("#OpermissionId").hide();
+            $("#showsawmilltype").hide();
+            $("#showsawmillsize").hide();
+            $("#miningId").show();
+            $("#Industry").show();
+        }
+        else if (id == '12') {
+            $("#OpermissionId").hide();
+            $("#showsawmilltype").hide();
+            $("#showsawmillsize").hide();
+            $("#miningId").show();
+            $("#Industry").hide();
+            $('#lblDisclaimer').css("display", "none");
+        }
+        else {
+            $("#OpermissionId").hide();
+            $("#otherpermission").removeAttr('required');
+            $("#otherpermission").attr("disabled", "disable");
+            $("#showsawmilltype").hide();
+            $("#showsawmillsize").hide();
+            $("#miningId").show();
+            $("#Industry").hide();
+        }
+    }
+    $('#Sawmill_Type').change(function (e) {
+        var val = $('#Sawmill_Type').val();
+        if (val == "1") {
+            $('#divPayment').hide();
+            $('#Amount').val("0");
+            $('#Discount').val("0");
+            $('#Tax').val("0");
+            $('#Final_Amount').val("0");
+        }
+        else if (val == "") {
+            $('#divPayment').hide();
+            $('#Amount').val("0");
+            $('#Discount').val("0");
+            $('#Tax').val("0");
+            $('#Final_Amount').val("0");
+        }
+        else {
+            $('#divPayment').show();
+            $('#Amount').val($('#hdAmount').val());
+            $('#Discount').val($('#hdDiscount').val());
+            $('#Tax').val($('#hdTax').val());
+            $('#Final_Amount').val($('#hdFinal_Amount').val());
+        }
+    })
+    $(document).on('change', '#khasra_no', function (e) {
+        var str = $('#khasra_no').val();
+        var length = str.length;
+        for (var i = 0; i < length; i++) {
+            var newchar = '/';
+            var newchar1 = ',';
+            str = str.split('//').join(newchar);
+            str = str.split('/,').join(newchar1);
+            str = str.split(',/').join(newchar1);
+            str = str.split(',,').join(newchar1);
+        };
+        var lastChar = str.slice(-1);
+        var FirstChar = str.slice(1);
+        if (lastChar == ',') {
+            str = str.slice(0, -1);
+        }
+        if (lastChar == '/') {
+            str = str.slice(0, -1);
+        }
+        if (FirstChar == ',') {
+            str = str.slice(0, -1);
+        }
+        if (FirstChar == '/') {
+            str = str.slice(0, -1);
+        }
+        $('#khasra_no').val(str);
+        var str = $('#khasra_no').val();
+        var str1 = str.match(/.{1,9}/g);
+        var length = str1.length;
+        for (var i = 0; i < length; i++) {
+            if ((str1[i].indexOf("/") == -1 && str1[i].indexOf(",") == -1)) {
+                if (str1[i].length > 8) {
+                    $('#errordiv5').show();
+                    $('#errordiv5').html("Please enter the valid khasra no!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#khasra_no').focus();
+                    $('#khasra_no').val('');
+                    return false;
+                }
+            }
+        }
+    });
+    $(document).on('change', '#khasra_no', function (e) {
+        var $row = jQuery(this).closest('tr');
+        var $columns = $row.find('td');
+        var DIV_CODE = $(this).parent('td').parent('tr').find('td:eq(0)').find('input[type="hidden"]').val();
+        var DIST_CODE = $(this).parent('td').parent('tr').find('td:eq(1)').find('input[type="hidden"]').val();
+        var tehsilCode = $(this).parent('td').parent('tr').find('td:eq(2)').find('input[type="hidden"]').val();
+        var BLK_CODE = $(this).parent('td').parent('tr').find('td:eq(3)').find('input[type="hidden"]').val();
+        var GP_CODE = $(this).parent('td').parent('tr').find('td:eq(4)').find('input[type="hidden"]').val();
+        var VILL_CODE = $(this).parent('td').parent('tr').find('td:eq(5)').find('input[type="hidden"]').val();
+        var areaName = $(this).parent('td').parent('tr').find('td:eq(6)').html();
+        var KhasraNo = $(this).parent('td').parent('tr').find('td:eq(7)').find('textarea').val();
+        var FOREST_DIVCODE = $(this).parent('td').parent('tr').find('td:eq(8)').find('input[type="hidden"]').val();
+        //var DistInfo = {
+        //    Div_Cd: DivCode,
+        //    Dist_Cd: DistCode,
+        //    Blk_Cd: BlkCode,
+        //    Gp_Cd: GpCode,
+        //    Vlg_Cd: VillCode,
+        //    areaName: AreaName,
+        //    khasraNo: KhasraNumber,
+        //    FOREST_DIVCODE: FOREST_DIVCODE
+        //};
+        var DistInfo = {
+            DIV_CODE: DIV_CODE,
+            DIST_CODE: DIST_CODE,
+            tehsilCode: tehsilCode,
+            BLK_CODE: BLK_CODE,
+            GP_CODE: GP_CODE,
+            VILL_CODE: VILL_CODE,
+            areaName: $.trim(areaName),
+            KhasraNo: KhasraNo,
+            FOREST_DIVCODE: FOREST_DIVCODE
+        }
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            url: RootUrl + 'FixedPermission/SaveDistMapping', // we are calling json method
+            data: JSON.stringify(DistInfo),
+            success: function (data) {
+                //  alert('sucess');
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    })
+    $('#Savepermission').click(function () {
+        var exitsubmit = true;
+        if ($(this).val() == "") {
+            var tblrowCount = $("#tbodydistmap tr").length;
+            if (tblrowCount == 0) {
+                $('#errordiv88').show();
+                $('#errordiv88').html("Please Upload the KML/SHP file!" + "<i class='fa fa-times fa-fw' style='padding: 2px;'></i>");
+                $('#btnUploadSHPKML').focus();
+                return false;
+            }
+            $("#tbldistmapping tbody tr").each(function () {
+                var valkNo = $(this).find("textarea").val();
+                if (valkNo == '') {
+                    exitsubmit = false;
+                    return false;
+                }
+                else {
+                    var str = $(this).find("textarea").val();
+                    var length = str.length;
+                    for (var i = 0; i < length; i++) {
+                        var newchar = '/';
+                        var newchar1 = ',';
+                        str = str.split('//').join(newchar);
+                        str = str.split('/,').join(newchar1);
+                        str = str.split(',/').join(newchar1);
+                        str = str.split(',,').join(newchar1);
+                    };
+                    var lastChar = str.slice(-1);
+                    var FirstChar = str.slice(1);
+                    if (lastChar == ',') {
+                        str = str.slice(0, -1);
+                    }
+                    if (lastChar == '/') {
+                        str = str.slice(0, -1);
+                    }
+                    if (FirstChar == ',') {
+                        str = str.slice(0, -1);
+                    }
+                    if (FirstChar == '/') {
+                        str = str.slice(0, -1);
+                    }
+                    $(this).find("textarea").val(str);
+                    var str = $(this).find("textarea").val();
+                    var str1 = str.match(/.{1,9}/g);
+                    var length = str1.length;
+                    for (var i = 0; i < length; i++) {
+                        if ((str1[i].indexOf("/") == -1 && str1[i].indexOf(",") == -1)) {
+                            if (str1[i].length > 8) {
+                                $('#errordiv85').show();
+                                $('#errordiv85').html("Please enter the valid khasra no!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                                $('#khasra_no').focus();
+                                $(this).find("textarea").val('');
+                                return false;
+                            }
+                        }
+                    }
+                }
+            });
+            if (!exitsubmit) {
+                $('#errordiv85').show();
+                $('#errordiv85').html("Please enter the valid Khasra No!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#khasra_no').focus();
+                return false;
+            }
+            else { $('#errordiv85').hide(); }
+            if ($('#Applicant_type').val() == '' || $('#Applicant_type').val() == null || $('#Applicant_type').val() == '0') {
+                $('#errordiv').show();
+                $('#errordiv').html("Please fill the Applicant Type!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Applicant_type').focus();
+                return false;
+            }
+            else { $('#errordiv').hide(); }
+            if ($('#Areainha').val() == '') {
+                $('#errordiv7').show();
+                $('#errordiv7').html("Please enter the Area(In sqKm.) field!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Areainha').focus();
+                return false;
+            }
+            else { $('#errordiv7').hide(); }
+            if (($('#Areainha').val().substr(0, 1) == '.') && ($('#Areainha').val().length <= 1)) {
+                $('#errordiv7').show();
+                $('#errordiv7').html("Please enter the Area(In sqKm.) field greator than 0.0001!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Areainha').focus();
+                return false;
+            }
+            else { $('#errordiv7').hide(); }
+            if ((parseFloat($('#Areainha').val())) < 0.0001) {
+                $('#errordiv7').show();
+                $('#errordiv7').html("Please enter the Area(In sqKm.) field greator than 0.0001!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Areainha').focus();
+                return false;
+            }
+            else { $('#errordiv7').hide(); }
+            var id = $('#hdMenuId').val();
+            if (id == 3) {
+                if ($('#Industrial_Type').val() == '' || $('#Industrial_Type').val() == null || $('#Industrial_Type').val() == '0') {
+                    $('#errordiv18').show();
+                    $('#errordiv18').html("Please fill the Industry Type!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Industrial_Type').focus();
+                    return false;
+                }
+                else { $('#errordiv18').hide(); }
+            }
+            if (id == 9) {
+                if ($('#Sawmill_Type').val() == '' || $('#Sawmill_Type').val() == null || $('#Sawmill_Type').val() == '0') {
+                    $('#errordiv16').show();
+                    $('#errordiv16').html("Please fill the Type of Sawmills!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Sawmill_Type').focus();
+                    return false;
+                }
+                else { $('#errordiv16').hide(); }
+                if ($('#Sawmill_Size').val() == '') {
+                    $('#errordiv17').show();
+                    $('#errordiv17').html("Please enter the Size of Sawmill field!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Sawmill_Size').focus();
+                    return false;
+                }
+                else { $('#errordiv17').hide(); }
+                if (($('#Sawmill_Size').val().substr(0, 1) == '.') && ($('#Sawmill_Size').val().length <= 1)) {
+                    $('#errordiv17').show();
+                    $('#errordiv17').html("Please enter the Size of Sawmill field greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Sawmill_Size').focus();
+                    return false;
+                }
+                else { $('#errordiv17').hide(); }
+                if ((parseFloat($('#Sawmill_Size').val())) == 0) {
+                    $('#errordiv17').show();
+                    $('#errordiv17').html("Please enter the Size of Sawmill field greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Sawmill_Size').focus();
+                    return false;
+                }
+                else { $('#errordiv17').hide(); }
+            }
+            if (id == 4) {
+                //if ($('#Tree_species').val() == '') {
+                //    $('#errordiv15').show();
+                //    $('#errordiv15').html("Please enter the Number of Trees with Species field!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                //    $('#Tree_species').focus();
+                //    return false;
+                //}
+                //else { $('#errordiv15').hide(); }
+                //if ((parseFloat($('#Tree_species').val())) == 0) {
+                //    $('#errordiv15').show();
+                //    $('#errordiv15').html("Please enter the Number of Trees with Species field greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                //    $('#Tree_species').focus();
+                //    return false;
+                //}
+                //else { $('#errordiv15').hide(); }
+                //if (($("#hdTreeCount") == "0") && ($('#hdMenuId').val() == "4")) {
+                //    alert("Species quantity can not be greator than Total Number of Tree with Species!!");
+                //    $('#Tree_species').focus();
+                //    return false;
+                //}
+                //if (($("#hdTreeCount") == "0") && ($('#hdMenuId').val() == "4")) {
+                //    alert("Species quantity can not be greator than Total Number of Tree with Species!!");
+                //    $('#Tree_species').focus();
+                //    return false;
+                //}
+            }
+            if (id == 11) {
+                if ($('#otherpermission').val() == '') {
+                    $('#errordiv10').show();
+                    $('#errordiv10').html("Please enter the Other Permission!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#otherpermission').focus();
+                    return false;
+                }
+                else { $('#errordiv10').hide(); }
+            }
+            if ($('#Revenue_Record').val().length == 0 && $('#hdfileEditModeId').val() == '') {
+                $('#errordiv20').show();
+                $('#errordiv20').html("Please upload the file Revenue Record Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Revenue_Record').focus();
+                return false;
+            }
+            else { $('#errordiv20').hide(); }
+            if ($('#Revenue_Map').val().length == 0 && $('#hdfileEditModeId').val() == '') {
+                $('#errordiv21').show();
+                $('#errordiv21').html("Please upload the file Revenue Map Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Revenue_Map').focus();
+                return false;
+            }
+            else { $('#errordiv21').hide(); }
+            if ($('#txt_Dfrom').val() == '') {
+                $('#errordiv22').show();
+                $('#errordiv22').html("Please enter the date in From field!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txt_Dfrom').focus();
+                return false;
+            }
+            else { $('#errordiv22').hide(); }
+            if ($('#txt_Dto').val() == '') {
+                $('#errordiv23').show();
+                $('#errordiv23').html("Please enter the date in To field!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txt_Dto').focus();
+                return false;
+            }
+            else { $('#errordiv23').hide(); }
+        }
+    });
+    function isOnlyNumber(evt, element) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode == 8) { return true; }
+        if (charCode < 48 || charCode > 57)
+            return false;
+    }
+    function isNumber(evt, element) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode == 8) { return true; }
+        if (
+             (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+            (charCode < 48 || charCode > 57))
+            return false;
+    }
+    function isNumberComma(evt, element) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode == 8) { return true; }
+        if (
+            (charCode != 44) && // “-” CHECK Comma, AND ONLY ONE.
+            (charCode < 47 || charCode > 57))
+            return false;
+    }
+    $(document).on('keypress', '#Citizen_Comment', function (event) {
+        var regex = new RegExp("^[a-zA-Z0-9 ]+$");
+        var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+        if (!regex.test(key)) {
+            event.preventDefault();
+            return false;
+        }
+    });
+    $(document).on('keypress', '#txt_Dfrom,#txt_Dto', function (event) {
+        event.preventDefault();
+        return false;
+    });
+    function preventBackspace(e) {
+        var evt = e || window.event;
+        if (evt) {
+            var keyCode = evt.charCode || evt.keyCode;
+            if (keyCode === 8) {
+                if (evt.preventDefault) {
+                    evt.preventDefault();
+                } else {
+                    evt.returnValue = false;
+                }
+            }
+        }
+    }
+    function reload() {
+        var r = confirm("Do you want to leave page!");
+        if (r) {
+            window.location = RootUrl + "Dashboard/dashboard";
+        }
+        else {
+        }
+    }
+    function GISPerName() {
+        var GisName = "";
+        var id = $('#hdMenuId').val();
+        if (id == 1) { GisName = "Cable" }
+        else if (id == 2) { GisName = "Transmission" }
+        else if (id == 3) { GisName = "Industry" }
+        else if (id == 4) { GisName = "Mines" }
+        else if (id == 5) { GisName = "Hospital" }
+        else if (id == 6) { GisName = "Power" }
+        else if (id == 7) { GisName = "School" }
+        else if (id == 8) { GisName = "Roads" }
+        else if (id == 9) { GisName = "Sawmill" }
+        else if (id == 10) { GisName = "Telephone" }
+        else if (id == 11) { GisName = "Other" }
+        else if (id == 12) { GisName = "Forest" }
+        return GisName;
+    }
+</script>

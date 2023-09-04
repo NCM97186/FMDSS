@@ -1,0 +1,341 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title></title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/3.15/dijit/themes/tundra/tundra.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/3.15/esri/css/esri.css">
+    <style>
+      html, body { height: 100%; width: 100%; margin: 0; padding: 0; }
+      #map{ margin: 0; padding: 0; }
+      #Go, #SubmitData{width : 100px; width : 60%; font-size: 12px;}
+      #controls {
+        position: absolute;
+        height: 120px;
+        font-family: arial;
+        bottom: 10px;
+        margin: 5px;
+        padding: 5px;
+        z-index: 40;
+        background: #fff;
+        color: #444;
+        width: 440px;
+        left: 10px;
+        -moz-box-shadow: 0 0 5px #888;
+        -webkit-box-shadow: 0 0 5px #888;
+        box-shadow: 0 0 5px #888;
+      }
+      h3 { margin: 0 0 5px 0; border-bottom: 1px solid #444; }
+      .label { display: inline-block; width: 140px; }
+    </style>
+
+    <script src="https://js.arcgis.com/3.15/"></script>
+    <script>
+      var app = {};
+
+      require([
+        "dijit/form/Button",
+        "dojo/_base/connect",
+        "dojo/parser", "dojo/promise/all", "dojo/_base/connect", 
+        "esri/Color", "dojo/_base/array", "dojo/dom",
+        "esri/config", "esri/map", "esri/geometry/Extent",
+        "esri/symbols/SimpleFillSymbol", "esri/layers/ArcGISDynamicMapServiceLayer",
+        "esri/tasks/query", "esri/tasks/QueryTask", 
+        "esri/layers/FeatureLayer",
+        "esri/layers/ImageParameters",
+        "esri/toolbars/draw",
+        "esri/toolbars/edit",
+        "esri/tasks/GeometryService",
+        "esri/graphic",
+        "esri/symbols/SimpleLineSymbol",
+        "esri/symbols/PictureMarkerSymbol",
+        "dojo/request",
+        "esri/geometry/Point",
+
+        "dojo/_base/lang",
+        "dojo/dom-construct",
+        "dojo/on",
+        "dojo/query!css3",
+        "esri/dijit/AttributeInspector",
+        "esri/dijit/Geocoder",
+        "esri/dijit/HomeButton",
+        "esri/dijit/LocateButton",
+        "esri/dijit/PopupMobile",
+        "esri/geometry/webMercatorUtils",
+        "esri/InfoTemplate",
+        "esri/symbols/SimpleMarkerSymbol",
+        "esri/tasks/locator",
+
+        "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
+        "dojo/domReady!"
+      ], function(
+        uButton, connect,
+        parser, all, connect, 
+        Color, arrayUtils, dom,
+        esriConfig, Map, Extent,
+        SimpleFillSymbol, ArcGISDynamicMapServiceLayer,
+        Query, QueryTask, FeatureLayer, ImageParameters, Draw, Edit, GeometryService, Graphic, SimpleLineSymbol, PictureMarkerSymbol, request, Point,
+        lang, domConstruct, on, query, AttributeInspector, Geocoder,
+        HomeButton, LocateButton, PopupMobile, webMercatorUtils, InfoTemplate, SimpleMarkerSymbol, Locator
+      ) {
+          /*
+            // Put your code here to get the object Id using HTTP methods or URL query string. Store the data in app.dataID
+          */ 
+          var qs = (function (a) {
+            if (a == "") return {};
+            var b = {};
+            for (var i = 0; i < a.length; ++i) {
+                    var p = a[i].split('=', 2);
+                    if (p.length == 1)
+                        b[p[0]] = "";
+                    else
+                        b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+                }
+                return b;
+          })(window.location.search.substr(1).split('&'));
+
+          console.log(qs['par1']);
+          console.log(qs['par2']);
+
+          app.dataID = qs['par1'];
+          app.selectMethod = qs['par2'];
+          // create layout dijits
+          parser.parse();
+          // specify proxy for request with URL lengths > 2k characters
+          esriConfig.defaults.io.proxyUrl = "/proxy/";
+          app.baseURL = "https://gistest1.rajasthan.gov.in/rajasthan/rest/services/CMVisits/CMVisits/MapServer";
+          app.queryURL = "https://gistest1.rajasthan.gov.in/rajasthan/rest/services/CMVisits/CMVisits/MapServer/1";
+          app.featureURL ="http://win-5o752c24p3l.doitgis.gov.in/rajasthangis/rest/services/RajGIS/ForestOperational/FeatureServer/10/addFeatures";
+
+          app.map = new Map("map"); 
+
+          var imageParameters = new ImageParameters();
+          imageParameters.format = "jpeg"; //set the image type to PNG24, note default is PNG8.
+
+          var layerDefs = [];
+          // layerDefs[0] = "state_name='RAJASTHAN'";
+          imageParameters.layerDefinitions = layerDefs;
+          imageParameters.layerIds = [0, 1];
+          imageParameters.layerOption = ImageParameters.LAYER_OPTION_SHOW;
+          imageParameters.transparent = true;
+
+          var basemap = new ArcGISDynamicMapServiceLayer(app.baseURL, {
+                    "opacity" : 0.5,
+                    "imageParameters" : imageParameters
+                  });
+          app.map.addLayer(basemap);
+
+          // query task and query for execution
+          app.queryTask = new QueryTask(app.queryURL);
+          app.query = new Query();
+          app.query.returnGeometry = true;
+          // app.query.outFields = app.qBuildings.outFields = ["*"];
+          app.query.outFields = ["*"];
+
+
+
+          app.query.where = "objectid = " + app.dataID;
+          execution = app.queryTask.execute(app.query);
+          app.promises = all([execution]);
+          app.promises.then(function(data) {
+            app.map.setExtent(data[0]['features'][0].geometry.getExtent());
+            app.featureLayer.setDefinitionExpression("objectid =" + app.dataID);
+            // app.handle = connect.connect(app.map, "onClick", executeQueries);
+            if (app.selectMethod = qs['par2'] == "point") {
+              app.graphicsType = "point";
+              app.handle = connect.connect(app.map, "onClick", function(e) {
+                app.pt = e.mapPoint;
+                point = e.mapPoint;
+                app.pointx = point['x'];
+                app.pointy = point['y'];
+                // console.dir(point['x']);
+                // console.dir(point['y']);
+                app.latitude = point.getLatitude();
+                app.longitude = point.getLongitude();
+
+                app.map.graphics.clear();
+                symbl = new PictureMarkerSymbol({"angle":0,"xoffset":2,"yoffset":8,"type":"esriPMS","url":"http://static.arcgis.com/images/Symbols/Basic/ShinyPin.png","contentType":"image/png","width":24,"height":24});
+                app.graphicAddSymbol = new Graphic(point, symbl);
+                app.map.graphics.add(app.graphicAddSymbol);
+
+
+                if (data[0]['features'][0].geometry.contains(point) == true) {
+                  latLongString = "Latitude :- " +  app.latitude + "</br>Longitude :- " + app.longitude + " ";
+                }
+                else
+                {
+                  latLongString = "Please select point within Area."
+                }
+                dom.byId("results").innerHTML = latLongString;
+              });
+            }
+            else if (app.selectMethod = qs['par2'] == "line") {
+              // app.polyDraw = new Draw(evtObj.map);
+              app.graphicsType = "line";
+              // app.drawToolbar.activate(Draw.POLYLINE);
+
+              // app.drawToolbar.on("draw-end", function(evt) {
+              //   app.drawToolbar.deactivate();
+              //   app.editToolbar.deactivate();
+              //   // var newAttributes = lang.mixin({}, selectedTemplate.template.prototype.attributes);
+              //   var newGraphic = new Graphic(evt.geometry, null);
+              //   console.dir(newGraphic);
+              //   // selectedTemplate.featureLayer.applyEdits([newGraphic], null, null);
+              // });
+
+              app.polyDraw.on("draw-end", executePolgonQueries);
+              app.polyDraw.activate("line");
+            }
+            else if (app.selectMethod = qs['par2'] == "polygon") {
+              // app.polyDraw = new Draw(evtObj.map);
+              console.log("Its polygon");
+              app.graphicsType = "polygon";
+              app.polyDraw.on("draw-end", executePolgonQueries);
+              app.polyDraw.activate("polygon");
+            }
+          });
+
+        function executePolgonQueries(evtObj) {
+          app.polyDraw.deactivate();
+          if (app.graphicsType == "polygon") {
+            console.log("Its polygon");
+            // console.dir(evtObj);
+            app.pointsArray = evtObj['geometry']['rings'][0];
+          }
+          else if (app.graphicsType == "line") {
+            console.log("Its line");
+            console.dir(evtObj);
+            app.pointsArray = evtObj['geometry']['paths'][0];
+          }
+
+          app.geometry = evtObj.geometry;
+          console.dir(app.geometry);
+          app.symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NONE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255,0,0]), 2), new Color([255,255,0,0.25]));
+          app.graphic = new Graphic(app.geometry, app.symbol);
+          app.map.graphics.add(app.graphic);
+        }
+
+        function ajaxPost(data, url) {
+          var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function() {
+            console.log("Seens like state changed .......");
+            if (xhttp.readyState == 4 && xhttp.status == 200) {
+              var json = JSON.parse(xhttp.responseText);
+              console.log(json);
+              console.log("Posted successfully .......1.1");
+            }
+            else
+            {
+              console.log("Seens like something missing .......");
+            }
+          };
+          xhttp.open("POST", url, true);
+          // xhttp.open("POST", app.featureURL, true);
+          xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+          // xhttp.setRequestHeader("Content-type", "application/json;charset=UTF-8");
+          console.log("Please wait while Posting Data.......");
+          xhttp.send(data);
+        }
+
+          app.featureLayer = new FeatureLayer(app.queryURL,{
+              mode: FeatureLayer.MODE_ONDEMAND,
+              outFields: ["*"],
+              opacity: 1.0,
+          });
+          app.featureLayer2 = new FeatureLayer(app.featureURL,{
+              mode: FeatureLayer.MODE_ONDEMAND,
+              outFields: ["*"],
+              opacity: 1.0,
+          });
+
+          app.featureLayer.setDefinitionExpression("pc_code = 113");
+          app.map.on("load", function (evtObj) {
+              app.polyDraw = new Draw(evtObj.map);
+
+              app.drawToolbar = new Draw(app.map);
+              app.editToolbar = new Edit(app.map);
+
+              app.map.addLayers([app.featureLayer, app.featureLayer2]);
+              // app.map.addLayer(app.featureLayer);
+              // app.map.addLayer(app.featureLayer2);
+          });
+          
+          // Initialize Buttons
+
+          var SubmitData = new uButton({
+              onClick: function(){
+                if (app.graphicsType == "point") {
+                  console.log("SubmitData " + "lat - " + app.latitude + "long - " + app.longitude);
+                  app.ajaxData = "features=[{'geometry' : {'x' : " + app.pointx + ", 'y' : " + app.pointy + "}}]&f=pjson";
+                  console.log("X: " + app.pointx + ", Y: " + app.pointy);
+                  // ajaxPost(app.ajaxData);
+                  console.dir(app.featureLayer);
+                }
+                else if (app.graphicsType == "line") {
+                  app.featureURL = "http://win-5o752c24p3l.doitgis.gov.in/rajasthangis/rest/services/RajGIS/ForestOperational/FeatureServer/0/addFeatures";
+                  // // app.featureURL = "http://win-5o752c24p3l.doitgis.gov.in/rajasthangis/rest/services/RajGIS/ForestOperational/FeatureServer/9/addFeatures";
+                  app.ajaxData = "features=[{'geometry' : {'paths' : [[";
+                  var i = 0;
+                  app.pointsArray.forEach(function (pA) {
+                    app.ajaxData += "[" + pA[0] + ", " + pA[1] + "]";
+                    i++;
+                    if (i < app.pointsArray.length) {
+                      app.ajaxData += ", ";
+                    }
+                  });
+                  app.ajaxData += "]] }";
+                  // app.ajaxData += ", 'attributes' : {'DIVISION_CODE' : '1'}";
+                  app.ajaxData += "}]&f=pjson";
+
+                  console.log(app.ajaxData);
+
+                  ajaxPost(app.ajaxData, app.featureURL);
+                }
+                else if (app.graphicsType == "polygon") {
+                  console.dir(app.pointsArray);
+                  console.dir(app.pointsArray.length);
+                  app.featureURL = "http://win-5o752c24p3l.doitgis.gov.in/rajasthangis/rest/services/RajGIS/ForestOperational/FeatureServer/11/addFeatures";
+                  app.ajaxData = "features=[{'geometry' : {'rings' : [["; 
+                  // {'geometry' : {'x' : " + pA[0] + ", 'y' : " + pA[1] + "}}
+                  // [{"geometry" : {"paths" : [ [ [-97.06138,32.837], [-97.06133,32.836] ]] }}]
+                  var i = 0;
+                  app.pointsArray.forEach(function (pA) {
+                    app.ajaxData += "[" + pA[0] + ", " + pA[1] + "]";
+                    i++;
+                    if (i < app.pointsArray.length) {
+                      app.ajaxData += ", ";
+                    }
+                  });
+                  app.ajaxData += "]] }";
+                  app.ajaxData += "}]&f=pjson";
+
+                  console.log(app.ajaxData);
+                  ajaxPost(app.ajaxData, app.featureURL);
+                }
+              }
+          }, "SubmitData").startup();
+      });
+    </script>
+  </head>
+  
+  <body class="tundra">
+    <div data-dojo-type="dijit.layout.BorderContainer" 
+         data-dojo-props="design:'headline',gutters:false" 
+         style="width: 100%; height: 100%; margin: 0;">
+      <div id="map" 
+           data-dojo-type="dijit.layout.ContentPane" 
+           data-dojo-props="region:'center'">
+        
+        <div id="controls">
+          <!-- <button id="button1" type="button"></button> -->
+          <!-- <button id="Go">Go</button> -->
+          <h3>Latitude and Longitude of point of interest :</h3>
+          <div id="results"></div>
+          <button id="SubmitData">Submit</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

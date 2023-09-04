@@ -1,0 +1,129 @@
+﻿@model  List<FMDSS.Models.MemberDetailViewModel>
+<div class="col-lg-12 pad">
+    <h4 id="hdMember" style="display:none;">Member Details</h4>
+    <span id="hdmessage" style="display:none;" class="mandatory">Please carry original photo ID at the time of entry. Any wrong Id will be treated as fake booking and will be prosecuted as per Law.</span>
+    <br /> <div id="hdGSTmessage" style=" color #337ab7;">  </div>
+
+
+</div>
+
+<div class="form-group un-bold">
+    <table id="tblMemberInfoGroup" class="table table-striped table-bordered table-hover">
+        <thead>
+            <tr>
+                <th style="width:1%">#.</th>
+                <th style="width:10%">Nationality</th>
+                <th style="width:10%">Leader Name</th>
+                <th style="width:5%">No Of Persons</th>
+                <th style="width:10%">ID Type</th>
+                <th style="width:10%">ID No</th>
+                <th style="width:5%">No of Video Camera</th>
+                <th style="width:4%">Fees Per Member(INR)</th>
+                <th style="width:4%">Total Camera Fees(INR)</th>
+                <th style="width:4%">Total Guide & Vehicle Rent(INR)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int count = 1;
+            }
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                <tr>
+                    <td>
+                        @count
+                    </td>
+                    <td>
+                        @Html.HiddenFor(model => model[i].NationalityId)
+                        @Model[i].Nationality
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model[i].LeaderName, new { id = "MemberName" + i, @maxlength = "50", @class = "form-control" })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model[i].TotalPersons, new { id = "TotalPerson" + i, @class = "form-control person_me" })
+                    </td>
+                    <td>
+
+                        @if (Model[i].NationalityId == "1")
+                        {
+                            @Html.DropDownListFor(model => model[i].IdType, (IEnumerable<SelectListItem>)ViewBag.IndianId, "-- Select --", new { id = "MemberIdType" + i, @class = "MemberIdType form-control" })
+                        }
+                        else if (Model[i].NationalityId == "2")
+                        {
+                            @Html.DropDownListFor(model => model[i].IdType, (IEnumerable<SelectListItem>)ViewBag.ForeignerId, "-- Select --", new { id = "MemberIdType" + i, @class = "MemberIdType form-control" })
+                        }
+                        else if (Model[i].NationalityId == "3")
+                        {
+                            @Html.DropDownListFor(model => model[i].IdType, (IEnumerable<SelectListItem>)ViewBag.StudentId, "-- Select --", new { id = "MemberIdType" + i, @class = "MemberIdType form-control" })
+                        }
+
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model[i].IdNo, new { id = "MemberIdNo" + i, @class = "MemberIdNo form-control", @maxlength = "50" })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model[i].NoOfVideoCamera, new { @class = "form-control txtVideoCamra" })
+                        @Html.HiddenFor(model => model[i].CameraFees, new { @class = "form-control" })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model[i].FeesPerMember, new { @class = "form-control", @readonly = "readonly" })
+                    </td>
+
+                    <td>
+
+                        @Html.TextBox("TotalCameraFees", null, new { @class = "form-control", @readonly = "readonly" })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model[i].GuideFees, new { @class = "form-control", @readonly = "readonly" })
+                    </td>
+                </tr>
+                count++;
+            }
+        </tbody>
+    </table>
+</div>
+
+<script type="text/javascript">
+        $(document).ready(function () {
+            $('.txtVideoCamra').on('keyup', function (e) {
+                var amount = parseFloat($(this).closest("td").find('input[type=hidden]').val());
+                var quantity = parseInt($(this).val());
+                $(this).closest('tr').find('td').eq(8).find('input[type=text]').val(amount * quantity);
+            });
+            $('.person_me').on('keyup', function (e) {
+                var vehiclecount = 0;
+                var vehicle = $("#ddl_vehicle option:selected").text();
+                var totalSeats = parseInt($('#lbl_NumberofMembersavailable').html().split(':')[1]);
+                if (vehicle == "Gypsy") {
+                    vehiclecount = parseInt(6);
+                    var sum = 0;
+                    $(".person_me").each(function () {
+                        if ($(this).val() != "")
+                            sum += parseInt($(this).val());
+                    });
+                    if (sum > vehiclecount || sum > totalSeats) {
+                        alert("No of persons can't be grater then 6 or available seats.");
+                        $(this).val(0);
+                        return false;
+                    }
+                }
+                else if (vehicle == "Canter") {
+                    vehiclecount = parseInt(20);
+                    var sum = 0;
+                    $(".person_me").each(function () {
+                        if ($(this).val() != "")
+                            sum += parseInt($(this).val());
+                    });
+                    if (sum > vehiclecount || sum > totalSeats) {
+                        alert("No of persons can't be grater then 20 or available seats.");
+                        $(this).val(0);
+                        return false;
+                    }
+                }
+
+
+            });
+        });
+
+</script>

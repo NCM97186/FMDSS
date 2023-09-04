@@ -1,0 +1,1166 @@
+﻿@model FMDSS.Models.ForesterDevelopment.BudgetAllocation.ViewModel.BudgetExpenditureModel
+@{
+    ViewBag.Title = "BudgetExpenditureReport";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script>
+    var RootURl = '@Url.Content("~/")';
+</script>
+<style>
+    .hide {
+        display: none;
+    }
+
+    .center {
+        margin-top: 50%;
+    }
+
+    #tab1default, #tab2default, #tab3default {
+        min-height: 700px;
+    }
+
+    th.dt-center, td.dt-center {
+        text-align: center;
+    }
+</style>
+<script type="text/javascript">
+    var $ = jQuery.noConflict();
+
+    $(function () {
+
+        $(document).ready(function () {
+
+            $("#ExpenditureTilldate").val("0.00");
+        });
+
+        $("#ExpenditureTilldate").change(function () {
+            if (parseFloat($("#ExpenditureTilldate").val()).toFixed(2) == "0.00") {
+                $("#ExpenditureTilldate").val("0.00");
+            }
+        });
+
+        $("#modal-window").on("click", "#btn-close", function () {
+            $("#modal-window").modal("hide");
+        });
+
+
+        $('.gridtable').DataTable({
+            responsive: true,
+            "lengthMenu": [10, 25, 50, 100, 200, 500],
+            "bSort": true,
+            dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+   "<'row'<'col-sm-12'tr>>" +
+   "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            "columnDefs": [
+       { "className": "dt-center", "targets": "_all" }
+            ]
+        });
+
+        $("#Savepermission").click(function () {
+
+            if ($("#BudgetList > tbody >tr").length < 1) {
+                alert('Please add atleast one record');
+                return false;
+            }
+        });
+        $('#btnDetails').click(function () {
+
+            if ($('#ExpenditureTilldate').val() == '' || parseFloat($('#ExpenditureTilldate').val()) == 0) {
+                $('#ExpenditureTilldate').focus();
+                return false;
+            }
+            if ($('#ExpenditureMonths').val() == '') {
+
+                $('#ExpenditureMonths').focus();
+                return false;
+            }
+            else {
+
+                if (parseFloat($('#ExpenditureTilldate').val()) > parseFloat($('#RemaningAmount').val())) {
+                    alert('Expenditure amount cannot exceeds allocated amount!!!');
+                    $('#ExpenditureTilldate').focus();
+                    return false;
+                }
+
+                var values = {
+
+                    FY_ID: $('#BudgetExpenditureModels_FY_ID').val(),
+                    BudgetHeadID: $('#BudgetExpenditureModels_BudgetHeadID').val(),
+                    SubBudgetHeadID: $('#BudgetExpenditureModels_SubBudgetHeadID').val(),
+                    BudgetHeadName: $('#ExpBudgetHeadID').val(),
+                    SubBudgetHeadName: $('#ExpSubBudgetHeadID').val(),
+                    SchemeID: $('#BudgetExpenditureModels_SchemeID').val(),
+                    SchemeName: $('#ExpSchemeID').val(),
+                    ActivityID: $('#BudgetExpenditureModels_ActivityID').val(),
+                    ActivityName: $('#ExpActivityID').val(),
+                    SubActivityID: $('#BudgetExpenditureModels_SubActivityID').val(),
+                    SubActivityName: $('#ExpSubActivityID').val(),
+                    CIRCLE_CODE: $("#BudgetExpenditureModels_CIRCLE_CODE").val(),
+                    CIRCLE_Name: $("#ExpCircle").val(),
+                    Division_Name: $("#ExpDivision").val(),
+                    ISCircleDivision: $("#BudgetExpenditureModels_ISCircleDivision").val(),
+                    Division: $("#BudgetExpenditureModels_Division").val(),
+                    AllocatedAmount: $('#AllocatedAmount').val(),
+                    ExpenditureTilldate: $('#ExpenditureTilldate').val(),
+                    ExpenditureMonths: $('#ExpenditureMonths').val(),
+                    BudgetHeadAllocationID: $("#BudgetExpenditureModels_BudgetHeadAllocationID").val(),
+                    SanctuaryCode: $("#BudgetExpenditureModels_SanctuaryCode").val(),
+                    SiteName: $("#ExpSiteName").val(),
+                    FinancialYear: $("#ExpFY_ID").val()
+                };
+                $.ajax({
+                    type: 'POST',
+                    url: RootURl + 'BudgetExpenditure/AddExpenditureDetails',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(values),
+                    success: function (data) {
+                        console.log(data);
+                        if (data.rowid != "D") {
+                            var id = "'" + data.rowid + "'";
+                            var rowdata = "<tr><td style=display:none;>" + data.rowid + "</td><td style=display:none;>" + data.ISCircleDivision + "</td><td>" + 'BUDGETALLOCATION-' + data.BudgetHeadAllocationID + "</td><td>" + values.ExpenditureMonths + " (" + values.FinancialYear + ")</td><td>" + values.CIRCLE_Name + " / " + values.Division_Name + "</td><td>" + data.SchemeName + "</td><td>" + data.ActivityName + "/" + data.SubActivityName + "</td><td>" + values.BudgetHeadName + " / " + values.SubBudgetHeadName + "</td><td>" + parseFloat(data.AllocatedAmount).toFixed(2) + "</td><td class='CountAmt'>" + parseFloat(data.ExpenditureTilldate).toFixed(2) + "</td><td>" + "<button type=button class='btn btn-danger btn-circle btndelete' style=cursor:pointer ><i class='fa fa-times'></i></button>" + "</td></tr>";
+                            $("#tblDetails").append(rowdata);
+                            $("#tblDetailsAdd").append(rowdata);
+
+                            //var previousAmount = parseFloat($('#AllocatedAmount').val());
+                            //$('#AllocatedAmount').val(parseFloat(previousAmount) + parseFloat(data.ExpenditureTilldate));
+                            CheckRemainingAmount();
+                        }
+                        else {
+                            alert("Records already added!!");
+                        }
+
+                    }
+                });
+            }
+
+        });
+
+
+
+        function CheckRemainingAmount() {
+            var ExpenditureTilldate = 0;
+            if ($('.CountAmt').length > 0) {
+
+                $.each($('.CountAmt'), function (k, v) {
+                    ExpenditureTilldate = parseFloat(ExpenditureTilldate) + parseFloat($(this).text().trim());
+                });
+                $('#RemaningAmount').val((parseFloat($('#AllocatedAmount').val()) - parseFloat(ExpenditureTilldate)).toFixed(2));
+            }
+            else {
+                $('#RemaningAmount').val(parseFloat($('#AllocatedAmount').val()).toFixed(2));
+            }
+
+
+
+            $('#ExpenditureTilldate').val('0.00');
+            $('#ExpenditureMonths').val('');
+        }
+
+        $(document).on('click', '.btndelete', function () {
+
+            if (confirm("Are you sure you want to delete this?")) {
+                var $item = $(this).closest("tr").find('td');
+                var i = 0;
+                var ID;
+                var ISCircleDivision;
+                $.each($item, function (key, value) {
+                    if (i == 0) {
+                        ID = $(value).text();
+                    }
+                    if (i == 1) {
+                        ISCircleDivision = $(value).text();
+                        $(this).closest('tr').remove();
+                    }
+                    i++;
+                });
+
+                $.ajax({
+                    type: 'POST',
+                    url: RootURl + 'BudgetExpenditure/DeleteExpenditureDetailsCurrentSession',
+                    dataType: 'json',
+                    data: { Id: ID, ISCircleDivision: ISCircleDivision },
+                    success: function (data) {
+
+                        if (data == '1') {
+                            CheckRemainingAmount();
+                            alert('Data deleted from table');
+
+                        }
+                        else {
+                            alert('Data not deleted from table please check!!!!');
+                        }
+                    },
+                    traditional: true,
+                    error: function (data) { console.log(data) }
+                });
+            }
+            else {
+                return false;
+            }
+
+        });
+
+
+    });
+
+
+
+
+    function CheckRemainingAmountUsingFunction(BtnNumber, ExpenditureTilldateAmount) {
+        var ExpenditureTilldate = 0;
+        if ($('.CountAmt').length > 0) {
+            ExpenditureTilldate = parseFloat(ExpenditureTilldate) + parseFloat(ExpenditureTilldateAmount);
+            //$.each($('.CountAmt'), function (k, v) {
+
+            //    ExpenditureTilldate = parseFloat(ExpenditureTilldate) + parseFloat($(this).text().trim());
+            //});
+
+            $('#RemaningAmount').val((parseFloat($('#RemaningAmount').val()) - parseFloat(ExpenditureTilldate)).toFixed(2));
+        }
+        else {
+            $('#RemaningAmount').val(parseFloat($('#AllocatedAmount').val()).toFixed(2));
+        }
+
+        $('#ExpenditureTilldate' + BtnNumber).val('0.00');
+    }
+    function AddExpEntry(BtnNumber) {
+        if ($('#WorkProgressDetails').val() == '' || $('#WorkProgressDetails').val() == 'undefined')
+            {
+            $('#WorkProgressDetails').focus();
+            return false;
+        }
+        if ($('#Months' + BtnNumber).val() == '') {
+
+            $('#Months' + BtnNumber).focus();
+            return false;
+        }
+        else {
+
+            if (parseFloat($('#ExpenditureTilldate' + BtnNumber).val()) > parseFloat($('#RemaningAmount').val())) {
+                alert('Expenditure amount cannot exceeds allocated amount!!!');
+                $('#ExpenditureTilldate').focus();
+                return false;
+            }
+
+            var values = {
+
+                FY_ID: $('#BudgetExpenditureModels_FY_ID').val(),
+                BudgetHeadID: $('#BudgetExpenditureModels_BudgetHeadID').val(),
+                SubBudgetHeadID: $('#BudgetExpenditureModels_SubBudgetHeadID').val(),
+                BudgetHeadName: $('#ExpBudgetHeadID').val(),
+                SubBudgetHeadName: $('#ExpSubBudgetHeadID').val(),
+                SchemeID: $('#BudgetExpenditureModels_SchemeID').val(),
+                SchemeName: $('#ExpSchemeID').val(),
+                ActivityID: $('#BudgetExpenditureModels_ActivityID').val(),
+                ActivityName: $('#ExpActivityID').val(),
+                SubActivityID: $('#BudgetExpenditureModels_SubActivityID').val(),
+                SubActivityName: $('#ExpSubActivityID').val(),
+                CIRCLE_CODE: $("#BudgetExpenditureModels_CIRCLE_CODE").val(),
+                CIRCLE_Name: $("#ExpCircle").val(),
+                Division_Name: $("#ExpDivision").val(),
+                ISCircleDivision: $("#BudgetExpenditureModels_ISCircleDivision").val(),
+                Division: $("#BudgetExpenditureModels_Division").val(),
+                AllocatedAmount: $('#AllocatedAmount').val(),
+                ExpenditureTilldate: $('#ExpenditureTilldate' + BtnNumber).val(),
+                ExpenditureMonths: $('#Months' + BtnNumber).val(),
+                BudgetHeadAllocationID: $("#BudgetExpenditureModels_BudgetHeadAllocationID").val(),
+                SanctuaryCode: $("#BudgetExpenditureModels_SanctuaryCode").val(),
+                WorkProgressDetails: $('#WorkProgressDetails').val(),
+                SiteName: $("#BudgetExpenditureModels_SiteName").val(),
+                FinancialYear: $("#ExpFY_ID").val()
+            };
+            $.ajax({
+                type: 'POST',
+                url: RootURl + 'BudgetExpenditure/AddExpenditureDetails',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    if (data.rowid != "D") {
+
+                        var id = "'" + data.rowid + "'";
+                        var rowdata = "<tr><td style=display:none;>" + data.rowid + "</td><td style=display:none;>" + data.ISCircleDivision + "</td><td>" + 'BUDGETALLOCATION-' + data.BudgetHeadAllocationID + "</td><td>" + values.ExpenditureMonths + " (" + values.FinancialYear + ")</td><td>" + values.CIRCLE_Name + " / " + values.Division_Name + "</td><td>" + data.SchemeName + "</td><td>" + data.ActivityName + "/" + data.SubActivityName + "</td><td>" + values.BudgetHeadName + " / " + values.SubBudgetHeadName + "</td><td>" + parseFloat(data.AllocatedAmount).toFixed(2) + "</td><td class='CountAmt'>" + parseFloat(data.ExpenditureTilldate).toFixed(2) + "</td><td>" + "<button type=button class='btn btn-danger btn-circle btndelete' style=cursor:pointer ><i class='fa fa-times'></i></button>" + "</td></tr>";
+                        $("#tblDetails").append(rowdata);
+                        $("#tblDetailsAdd").append(rowdata);
+                        CheckRemainingAmountUsingFunction(BtnNumber, values.ExpenditureTilldate);
+                        //var previousAmount = parseFloat($('#AllocatedAmount').val());
+                        //$('#AllocatedAmount').val(parseFloat(previousAmount) + parseFloat(data.ExpenditureTilldate));
+
+                    }
+                    else {
+                        alert("Records already added!!");
+                    }
+
+                }
+            });
+        }
+    }
+    function reload() {
+        location.reload(true);
+    }
+
+    function AvaliableExpAmount() {
+        var Div_Code = $("#BudgetExpenditureModels_Division").val();
+        var Cir_Code = $("#BudgetExpenditureModels_CIRCLE_CODE").val();
+        var SanctuaryCode = $("#BudgetExpenditureModels_SanctuaryCode").val();
+        if (Div_Code == 'N/A') { Div_Code = 0; }
+        if (!Cir_Code) { Cir_Code = 0; }
+        if (Div_Code == 0 && Cir_Code == 0) {
+            Cir_Code = $('#CircleHQ').val();
+        }
+        var values = {
+            FY_ID: $('#BudgetExpenditureModels_FY_ID').val(),
+            BudgetHeadID: $('#BudgetExpenditureModels_BudgetHeadID').val(),
+            SubBudgetHeadID: $('#BudgetExpenditureModels_SubBudgetHeadID').val(),
+            SchemeID: $('#BudgetExpenditureModels_SchemeID').val(),
+            ActivityID: $('#BudgetExpenditureModels_ActivityID').val(),
+            SubActivityID: $('#BudgetExpenditureModels_SubActivityID').val(),
+            SiteName: $('#BudgetExpenditureModels_SiteName').val(),
+            CIRCLE_CODE: Cir_Code,
+            Division: Div_Code,
+            SanctuaryCode: SanctuaryCode,
+            ISCircleDivision: $("#BudgetExpenditureModels_ISCircleDivision").val()
+        }
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("GetExpAmtDetails", "BudgetExpenditure")',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(values),
+            success: function (result) {
+                console.log(result);
+                if (parseFloat(result.RemaningAmount) == 0) {
+                    $('#RemaningAmount').val("0.00");
+                    $("#errorRemaining").text("All Amount has been Allocated");
+                    $("#Savepermission").addClass('hide');
+                }
+                else if (result.RemaningAmount == '' || result.RemaningAmount == null) {
+                    $('#RemaningAmount').val(parseFloat($('#AllocatedAmount').val()).toFixed(2));
+                    $("#errorRemaining").text("");
+                    $("#Savepermission").removeClass('hide');
+                }
+                else {
+                    $('#RemaningAmount').val(result.RemaningAmount.toFixed(2));
+                    $("#errorRemaining").text("");
+                    $("#Savepermission").removeClass('hide');
+                }
+            },
+        });
+    }
+
+    function isObjectEmpty(obj) {
+        if (obj !== null) {
+            return '<p style="color: red;">' + parseFloat(obj).toFixed(2) + '</p>';
+        }
+        else {
+            return parseFloat(0).toFixed(2);
+        }
+    }
+
+
+    function GetMonthlyStatus(ID) {
+        $("#tblMonthly").empty();
+        var tblInfo = null;
+        if (ID > 0) {
+            $.ajax({
+                type: 'GET',
+                url: RootURl + 'BudgetExpenditure/BudgetExpenditureAllocationDetails',
+                contentType: 'application/json; charset=utf-8',
+                data: { ID: ID },
+                success: function (result) {
+
+                    tblInfo = {
+                        FinancialYear: result.FY_ID,
+                        Scheme_Name: result.SchemeID,
+                        BudgetHead: result.BudgetHeadID,
+                        SubBudgetHead: result.SubBudgetHeadID,
+                        Activity_Name: result.ActivityID,
+                        SubActivity_Name: result.SubActivityID,
+                        ISCircleDivision: result.ISCircleDivision,
+                        Circle_Code: result.CIRCLE_CODE,
+                        Division_Code: result.Div_Code,
+                        FromDate: null,
+                        ToDate: null,
+                    }
+
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '@Url.Action("GetMonthStatusReport", "BudgetMnthProgReport")',
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify(tblInfo),
+                        success: function (data) {
+                            for (var i = 0; i < data.list1.length; i++) {
+                                var rowdata = "<tr><td>" + data.list1[i].Year + "</td><td>"
+                                           + isObjectEmpty(data.list1[i].January) + "</td><td>"
+                                           + isObjectEmpty(data.list1[i].February) + "</td><td>"
+                                           + isObjectEmpty(data.list1[i].March) + "</td><td>"
+                                           + isObjectEmpty(data.list1[i].April) + "</td><td>"
+                                           + isObjectEmpty(data.list1[i].May) + "</td><td>"
+                                           + isObjectEmpty(data.list1[i].June) + "</td><td>"
+                                           + isObjectEmpty(data.list1[i].July) + "</td><td>"
+                                           + isObjectEmpty(data.list1[i].August) + "</td><td>"
+                                           + isObjectEmpty(data.list1[i].September) + "</td><td>"
+                                           + isObjectEmpty(data.list1[i].October) + "</td><td>"
+                                           + isObjectEmpty(data.list1[i].November) + "</td><td>"
+                                           + isObjectEmpty(data.list1[i].December) + "</td></tr>";
+
+                                $("#tblMonthly").append(rowdata);
+                            }
+                            $('#myModalReport').modal('show');
+                        },
+                        traditional: true,
+                        error: function (data) { console.log(data) }
+                    });
+
+                },
+
+            });
+
+
+        }
+    }
+
+    function isObjectEmptyTOFillAmount(Index, obj) {
+        if (obj !== null && obj !== 0) {
+            $("#ExpenditureTilldate" + Index).val(parseFloat(obj).toFixed(2));
+            $("#ExpenditureTilldate" + Index).attr("disabled", "disabled");
+            return $("#ExpenditureTilldatebtn" + Index).attr("disabled", "disabled");
+        }
+        else {
+            $("#ExpenditureTilldate" + Index).val(parseFloat(0).toFixed(2));
+            $("#ExpenditureTilldate" + Index).removeAttr("disabled");
+            return $("#ExpenditureTilldatebtn" + Index).removeAttr("disabled");
+        }
+    }
+
+    function GetBudgetExpenditure(ID) {
+        if (ID > 0) {
+            $.ajax({
+                type: 'GET',
+                url: RootURl + 'BudgetExpenditure/BudgetExpenditureAllocationDetails',
+                contentType: 'application/json; charset=utf-8',
+                data: { ID: ID },
+                success: function (result) {
+                    $("#BudgetExpenditureModels_FY_ID").val(result.FY_ID);
+                    $("#BudgetExpenditureModels_SchemeID").val(result.SchemeID);
+                    $("#BudgetExpenditureModels_BudgetHeadID").val(result.BudgetHeadID);
+                    $("#BudgetExpenditureModels_SubBudgetHeadID").val(result.SubBudgetHeadID);
+                    $("#BudgetExpenditureModels_ActivityID").val(result.ActivityID);
+                    $("#BudgetExpenditureModels_SubActivityID").val(result.SubActivityID);
+                    $("#BudgetExpenditureModels_AllocatedAmount").val(result.AllocatedAmount.toFixed(2));
+                    $("#ExpFY_ID").val(result.FinancialYear);
+                    $("#ExpSchemeID").val(result.SchemeName);
+                    $("#ExpBudgetHeadID").val(result.BudgetHead);
+                    $("#ExpSubBudgetHeadID").val(result.SubBudgetHead);
+                    $("#ExpActivityID").val(result.ActivityName);
+                    $("#ExpSubActivityID").val(result.SubActivityName);
+
+                    $("#AllocatedAmount").val(result.AllocatedAmount.toFixed(2));
+                    $("#BudgetExpenditureModels_CIRCLE_CODE").val(result.CIRCLE_CODE);
+                    $("#ExpCircle").val(result.CIRCLE_NAME);
+                    $("#BudgetExpenditureModels_Division").val(result.Div_Code);
+                    $("#ExpDivision").val(result.Division);
+                    $("#BudgetExpenditureModels_ISCircleDivision").val(result.ISCircleDivision);
+                    $("#BudgetExpenditureModels_SiteName").val(result.SiteName);
+                    $("#ExpSiteName").val(result.SiteName);
+                    $("#ExpRecurring").val(result.RecurringName);
+                    $("#BudgetExpenditureModels_BudgetHeadAllocationID").val(result.BudgetHeadAllocationID);
+                    $("#BudgetExpenditureModels_SanctuaryCode").val(result.SanctuaryCode);
+
+                    AvaliableExpAmount();
+
+                    // GET All Expentiture Month
+                    tblInfo = {
+                        FinancialYear: result.FY_ID,
+                        Scheme_Name: result.SchemeID,
+                        BudgetHead: result.BudgetHeadID,
+                        SubBudgetHead: result.SubBudgetHeadID,
+                        Activity_Name: result.ActivityID,
+                        SubActivity_Name: result.SubActivityID,
+                        ISCircleDivision: result.ISCircleDivision,
+                        Circle_Code: result.CIRCLE_CODE,
+                        Division_Code: result.Div_Code,
+                        SiteName: result.SiteName,
+                        FromDate: null,
+                        ToDate: null,
+                    }
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '@Url.Action("GetMonthStatusReport", "BudgetMnthProgReport")',
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify(tblInfo),
+                        success: function (data) {
+                            console.log(data.list1);
+                            for (var i = 0; i < data.list1.length; i++) {
+                                if (data != null && data.list1[i] != null) {
+                                    var rowdata = "<tr><td>" + + "</td><td>"
+                                               + isObjectEmptyTOFillAmount(1, data.list1[i].January) + "</td><td>"
+                                               + isObjectEmptyTOFillAmount(2, data.list1[i].February) + "</td><td>"
+                                               + isObjectEmptyTOFillAmount(3, data.list1[i].March) + "</td><td>"
+                                               + isObjectEmptyTOFillAmount(4, data.list1[i].April) + "</td><td>"
+                                               + isObjectEmptyTOFillAmount(5, data.list1[i].May) + "</td><td>"
+                                               + isObjectEmptyTOFillAmount(6, data.list1[i].June) + "</td><td>"
+                                               + isObjectEmptyTOFillAmount(7, data.list1[i].July) + "</td><td>"
+                                               + isObjectEmptyTOFillAmount(8, data.list1[i].August) + "</td><td>"
+                                               + isObjectEmptyTOFillAmount(9, data.list1[i].September) + "</td><td>"
+                                               + isObjectEmptyTOFillAmount(10, data.list1[i].October) + "</td><td>"
+                                               + isObjectEmptyTOFillAmount(11, data.list1[i].November) + "</td><td>"
+                                               + isObjectEmptyTOFillAmount(12, data.list1[i].December) + "</td></tr>";
+
+                                    $("#tblMonthly").append(rowdata);
+                                }
+                            }
+                            $('#myModalReport').modal('show');
+                        },
+                        traditional: true,
+                        error: function (data) { console.log(data) }
+                    });
+
+                    //END
+                    $("#modal-window").modal("show");
+
+                },
+
+            });
+
+        }
+    }
+    function DeleteBudgetExpenditure(ID) {
+        if (confirm("Are you sure you want to delete this?")) {
+
+            if (ID != null && ID > 0) {
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("DeleteBudgetExpenditureEntry", "BudgetExpenditure")',
+                    dataType: 'json',
+                    data: { Id: ID },
+                    success: function (data) {
+                        if (data == '1') {
+                            alert('Data deleted successfully');
+                            reload();
+                        }
+                        else {
+                            alert('Data not deleted from table please check!!!!');
+                        }
+                    },
+                    traditional: true,
+                    error: function (data) { console.log(data) }
+                });
+            }
+        }
+        else {
+
+            return false;
+        }
+    }
+</script>
+<script type="text/javascript">
+    function ViewFile(reqFor, reqType, code, service) {
+        //reqFor="Division OR Circle OR HQ OR Santatury"
+        //reqType="Forest" Or "Wildlife"
+        //Code= Circle Code Or Division Code
+        var strname = "AmritaDevi";
+        var ssoid = "@Convert.ToString(Session["SSOID"])";
+        $("#ssoId").val(ssoid);
+        $("#reqFor").val(reqFor);
+        $("#reqType").val(reqType);
+        $("#code").val(code);
+        $("#Service").val(service); //Service Means Allocation Or Expenditure
+        //var actionUrl = origin + "/FMDSSGIS/budgethead/budgethead.aspx";
+        var actionUrl = "@System.Web.Configuration.WebConfigurationManager.AppSettings["GisBugetPath"].ToString()";
+        document.getElementById("form11").action = actionUrl;
+        document.getElementById("form11").submit();
+
+    }
+
+
+</script>
+<!--GIS Data Post 22-04-2016-->
+<form id="form11" name="form11" method="post">
+    <input type="hidden" id="portalid" name="portalid" value="rajcomp123" />
+    <input type="hidden" id="ssoId" name="ssoId" value="" />
+    <input type="hidden" id="reqFor" name="reqFor" value="" />
+    <input type="hidden" id="reqType" name="reqType" value="" />
+    <input type="hidden" id="Service" name="Service" value="" />
+    <input type="hidden" id="code" name="code" value="" />
+    <input type="hidden" id="returnurl1" name="returnurl" value="http://localhost:17105/AmritaDeviAward/getGISData" />
+    @*<input type="hidden" id="returnurl" name="returnurl" value="" />*@
+</form>
+
+<!--Filter Data from both Table-->
+<script type="text/javascript">
+    $(function () {
+        $("#BudgetHeadList").bind("change", function (e) {
+
+            var budgetHead = $("#BudgetHeadList option:Selected").val();
+            if (budgetHead != '') {
+
+                $("#SubBudgetHeadList").empty();
+                var option = "<option value=''>--Select--</option>";
+                $('#SubBudgetHeadList').append(option);
+                $.ajax({
+                    type: 'POST',
+                    url: RootURl + 'BudgetExpenditure/GetBudgetSubHeadAccordingAllocation',
+                    dataType: 'json',
+                    data: { budgetHead: budgetHead },
+                    success: function (data) {
+                        $.each(data, function (i, items) {
+
+                            $("#SubBudgetHeadList").append('<option value="' + items.Value + '">' +
+                                items.Text + '</option>');
+                        });
+
+                        $("#SubBudgetHeadList option").each(function () {
+                            if ($(this).text().trim().toLowerCase() == 'none') {
+                                $(this).attr("selected", "selected");
+                            }
+                        });
+                    },
+                });
+
+            }
+            else {
+                $("#SubBudgetHeadList").empty();
+                var option = "<option value=''>--Select--<option />";
+                $('#SubBudgetHeadID').append(option);
+            }
+
+        });
+
+        $("#ActivityList").bind("change", function (e) {
+
+            var ActivityID = $('#ActivityList option:Selected').val();
+
+            $("#SubActivityList").empty();
+            if (ActivityID != '') {
+                var option = "<option value=''>--Select--</option>";
+                $('#SubActivityList').append(option);
+                $.ajax({
+                    type: 'POST',
+                    url: RootURl + 'BudgetExpenditure/GetSubActivityAccordingAllocation',
+                    dataType: 'json',
+                    data: { ActivityID: ActivityID },
+                    success: function (data) {
+                        $.each(data, function (i, items) {
+
+                            $("#SubActivityList").append('<option value="' + items.Value + '">' +
+                             items.Text + '</option>');
+
+                        });
+                        $("#SubActivityList option").each(function () {
+                            if ($(this).text().trim().toLowerCase() == 'none') {
+                                $(this).attr("selected", "selected");
+                            }
+                        });
+                    },
+
+                });
+            }
+            else {
+                var option = $("<option />");
+                option.attr("value", '').text('--Select--');
+                $('#SubActivityID').append(option);
+            }
+
+        });
+
+        $('#Division_Code').change(function (e) {
+            $("#Sanctuary").empty();
+            $("#Sanctuary").append('<option value="">--Select--</option>');
+            if ($("#Division_Code").val() != "" && $("#Division_Code").val() != "0") {
+                var DIV_CODE = $("#Division_Code").val();
+                $.ajax({
+                    type: 'GET',
+                    url: RootURl + 'BudgetAllocationCircle/GetSanctuaryList',
+                    dataType: 'json',
+                    data: { Div_Code: DIV_CODE },
+                    success: function (result) {
+                        $.each(result, function (i, items) {
+                            $("#Sanctuary").append('<option value="' + items.Value + '">' +
+                             items.Text + '</option>');
+
+                        });
+                    },
+
+                });
+            }
+            else {
+                $("#Sanctuary").append('<option value="">--Select--</option>');
+
+            }
+
+        });
+
+        $('#Circle_Code').change(function (e) {
+            var Circle_Code = $('#Circle_Code option:Selected').val();
+            $("#Division_Code").empty();
+            var option = $("<option />");
+            option.attr("value", '').text('--Select--');
+            $('#Division_Code').append(option);
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("GetDivision","BudgetExpenditure")',
+                dataType: 'json',
+                data: { circleCode: Circle_Code },
+                success: function (circle) {
+                    $.each(circle, function (i, items) {
+                        $("#Division_Code").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+
+        });
+
+
+        $("#FilterSubmit").click(function () {
+            console.log($('.gridtable').DataTable());
+            //$('.gridtable').DataTable().clear().destroy();
+            var values = {
+                FinancialYear: $("#FinancialYearId option:Selected").val(),
+                SchemeName: $("#SchemeID option:Selected").val(),
+                BudgetHead: $("#BudgetHeadList option:Selected").val(),
+                SubBudgetHead: $("#SubBudgetHeadList option:Selected").val(),
+                ActivityName: $("#ActivityList option:Selected").val(),
+                SubActivityName: $("#SubActivityList option:Selected").val(),
+                CIRCLE_CODE: $("#Circle_Code option:Selected").val(),
+                Division: $("#Division_Code option:Selected").val(),
+                SanctuaryCode: $("#Sanctuary option:Selected").val()
+            };
+            $.ajax({
+                type: 'POST',
+                url: RootURl + 'BudgetExpenditure/FilterBudgetExpenditure',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    if (data.length > 0) {
+                        console.log(data[1]);
+
+                        $("#dataTablesAllocation tbody tr").empty();
+
+                        FilterDataHTML('dataTablesAllocation', data[0]);
+
+                        $("#dataTablesExpenditure tbody tr").empty();
+                        FilterDataHTML('dataTablesExpenditure', data[1]);
+
+                        ReinitializeDatatable();
+                    }
+                    else {
+                        alert("some error occur please try after some time!!!");
+                    }
+
+
+                }
+            });
+
+
+        });
+
+
+    });
+    function ReinitializeDatatable() {
+        // $('.gridtable').DataTable().clear().destroy();
+        //$('.gridtable').DataTable().clear().destroy();
+
+
+
+        $('.gridtable').DataTable({
+            responsive: true,
+            "lengthMenu": [10, 25, 50, 100, 200, 500],
+            "bSort": true,
+            dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+   "<'row'<'col-sm-12'tr>>" +
+   "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            "columnDefs": [
+       { "className": "dt-center", "targets": "_all" }
+            ]
+        });
+
+    }
+
+    function FilterDataHTML(TableName, Data) {
+
+        if (TableName == 'dataTablesAllocation') {
+            $.each(Data, function (i, v) {
+                var rowdata = "<tr>";
+                rowdata = rowdata + "<td>BUDGETALLOCATION-" + v.BudgetHeadAllocationID + "(" + v.FinancialYear + ")</td>";
+                rowdata = rowdata + "<td>" + v.SchemeName + "</td>";
+                rowdata = rowdata + "<td>" + v.BudgetHead + " / " + v.SubBudgetHead + "</td>";
+                rowdata = rowdata + "<td>" + v.ActivityName + " / " + v.SubActivityName + "</td>";
+                rowdata = rowdata + "<td>" + v.ISCircleDivision + "</td>";
+                rowdata = rowdata + "<td>" + v.CIRCLE_NAME + " / " + v.Division + " / " + v.SanctuaryName + "</td>";
+                rowdata = rowdata + "<td>" + v.AllocatedAmount + "</td>";
+                var Code = v.ISCircleDivision.toLowerCase() == "circle" ? v.CIRCLE_CODE : v.ISCircleDivision.toLowerCase() == "division" ? v.Div_Code : v.ISCircleDivision.toLowerCase() == "hq" ? v.CIRCLE_CODE : v.ISCircleDivision.toLowerCase() == "sanctuary" ? v.Div_Code : "";
+                rowdata = rowdata + "<td><a id='aViewKMLFile' target='_blank' onclick=ViewFile('" + v.ISCircleDivision.trim() + "','Wildlife','" + Code + "','Allocation'); href='javascript:void(0)'><img src='../images/globe.png' width='30'></a></td>";
+                rowdata = rowdata + "<td> <i style='cursor:pointer;color:blue' onclick=GetBudgetExpenditure('" + v.ID + "') class='fa'>Budget Expenditure</i></td>";
+                rowdata = rowdata + "</tr>";
+                $("#" + TableName).append(rowdata);
+            });
+        }
+
+        if (TableName == 'dataTablesExpenditure') {
+            $.each(Data, function (i, v) {
+                var rowdata = "<tr>";
+                rowdata = rowdata + "<td>BUDGETALLOCATION-" + v.BudgetHeadAllocationID + "(" + v.FinancialYear + ")</td>";
+                rowdata = rowdata + "<td>" + v.SchemeName + "</td>";
+                rowdata = rowdata + "<td>" + v.BudgetHead + " / " + v.SubBudgetHead + "</td>";
+                rowdata = rowdata + "<td>" + v.ActivityName + " / " + v.SubActivityName + "</td>";
+                rowdata = rowdata + "<td>" + v.ISCircleDivision + "</td>";
+                rowdata = rowdata + "<td>" + v.CIRCLE_NAME + " / " + v.Division + " / " + v.SanctuaryName + "</td>";
+                rowdata = rowdata + "<td>" + v.ExpenditureMonths + "</td>";
+                rowdata = rowdata + "<td>" + v.AllocatedAmount + "</td>";
+                rowdata = rowdata + "<td>" + v.ExpenditureTilldate + "</td>";
+                var Code = v.ISCircleDivision.toLowerCase() == "circle" ? v.CIRCLE_CODE : v.ISCircleDivision.toLowerCase() == "division" ? v.Div_Code : v.ISCircleDivision.toLowerCase() == "hq" ? v.CIRCLE_CODE : v.ISCircleDivision.toLowerCase() == "sanctuary" ? v.Div_Code : "";
+                rowdata = rowdata + "<td><a id='aViewKMLFile' target='_blank' onclick=ViewFile('" + v.ISCircleDivision.trim() + "','Wildlife','" + Code + "','Expenditure'); href='javascript:void(0)'><img src='../images/globe.png' width='30'></a></td>";
+                rowdata = rowdata + "<button type=button class='btn btn-danger btn-circle' onclick=DeleteBudgetExpenditure('" + v.rowid + "') style=cursor:pointer><i class='fa fa-times'></i></button>";
+                rowdata = rowdata + "</tr>";
+                $("#" + TableName).append(rowdata);
+            });
+        }
+    }
+
+</script>
+
+
+
+
+<div class="panel-heading"> <span>@Html.Raw(TempData["Message"]) </span> </div>
+
+<div class="col-lg-9 pad">
+    <div class="col-lg-10">
+        <h1 class="page-header">Monthly Report Program (@Session["User"].ToString())</h1>
+    </div>
+
+</div>
+
+
+
+
+<div class="row">
+
+    <div class="col-md-9">
+        @using (Html.BeginForm("ExpenditureReport", "BudgetExpenditure", FormMethod.Post, new { enctype = "multipart/form-data", data_behavior = "confirm" }))
+        {
+            <div class="col-xs-12">
+
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Financial Year: <span class="mandatory"></span></label>
+                        @Html.DropDownListFor(x => x.BudgetExpenditureModels.FinancialYear, (IEnumerable<SelectListItem>)ViewBag.Financial, "--Select--", new { @class = "form-control", @id = "FinancialYearId" })
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Scheme: <span class="mandatory"></span></label>
+                        @Html.DropDownListFor(x => x.BudgetExpenditureModels.SchemeName, (IEnumerable<SelectListItem>)ViewBag.SchemeList, "--Select--", new { @class = "form-control", @id = "SchemeID" })
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Budget Head: <span class="mandatory"></span></label>
+                        @Html.DropDownListFor(x => x.BudgetExpenditureModels.BudgetHead, (IEnumerable<SelectListItem>)ViewBag.BudgetHead, "--Select--", new { @class = "form-control", @id = "BudgetHeadList" })
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Budget Sub-Head: <span class="mandatory"></span></label>
+                        @Html.DropDownListFor(x => x.BudgetExpenditureModels.SubBudgetHead, (IEnumerable<SelectListItem>)ViewBag.SubBudgetHeadList, "--Select--", new { @class = "form-control", @id = "SubBudgetHeadList", name = "SubBudgetHeadId" })
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Activity: <span class="mandatory"></span></label>
+                        @Html.DropDownListFor(x => x.BudgetExpenditureModels.ActivityName, (IEnumerable<SelectListItem>)ViewBag.Activity, "--Select--", new { @class = "form-control", @id = "ActivityList" })
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Sub-Activity: <span class="mandatory"></span></label>
+                        @Html.DropDownListFor(x => x.BudgetExpenditureModels.SubActivityName, (IEnumerable<SelectListItem>)ViewBag.SubActivityList, "--Select--", new { @class = "form-control", @id = "SubActivityList" })
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Circle: <span class="mandatory"></span></label>
+                        @Html.DropDownListFor(x => x.BudgetExpenditureModels.CIRCLE_CODE, (IEnumerable<SelectListItem>)ViewBag.Circle,  new { @class = "form-control", @id = "Circle_Code" })
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Division: <span class="mandatory"></span></label>
+                        @Html.DropDownListFor(x => x.BudgetExpenditureModels.Division, (IEnumerable<SelectListItem>)ViewBag.DivisionLists,"--Select--" , new { @class = "form-control", @id = "Division_Code" })
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Sanctuary: <span class="mandatory"></span></label>
+                        @Html.DropDownListFor(model => model.BudgetExpenditureModels.SanctuaryCode, (IEnumerable<SelectListItem>)ViewBag.SantauryList, "--Select--", new { @class = "form-control", @id = "Sanctuary" })
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Month: <span class="mandatory"></span></label>
+                        @Html.DropDownListFor(model => model.BudgetExpenditureModels.ExpenditureMonths, (IEnumerable<SelectListItem>)ViewBag.Months, "--Select--", new { @class = "form-control", @id = "Months" })
+                    </div>
+                </div>
+
+                <div class="col-lg-2">
+                    <div class="form-group">
+                        <label><span class="mandatory"></span></label>
+                        <button type="submit" class="btn btn-success confirm-toggle" name="Save">
+                            <i class="fa fa-check"></i> Submit
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <div class="form-group">
+                        <label><span class="mandatory"></span></label>
+                        <button type="reset" class="btn btn-danger" name="Cancel">
+                            <i class="fa fa-arrow-circle-right"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-2">
+            <div class="form-group">
+                <label><span class="mandatory"></span></label>
+                <button class="btn btn-info pull-right" onclick="tablesToExcel(['dataTablesExpenditure'], ['dataTablesExpenditure'], 'BudgetExpenditure', 'Excel')">Export to Excel</button>
+            </div>
+        </div>
+            </div>
+
+
+        }
+        <div class="panel with-nav-tabs panel-default">
+
+            <div class="panel-heading">
+                <ul class="nav nav-tabs" id="myTab">
+                    <li class="active"><a href="#tab3default " data-toggle="tab"><i class="fa fa-comment fa-fw"></i>Budget Expenditure List</a></li>
+                </ul>
+
+            </div>
+            <div class="panel-body">
+                <div class="tab-content">
+
+                    <div class="tab-pane fade in tbl-scroll active" id="tab3default">
+
+                        <div class="panel-body">
+                            <div class="col-lg-8">
+                                <div class="form-group">
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12">
+                                <div class="table-responsive">
+
+                                    <table class="table table-striped table-bordered table-hover gridtable" id="dataTablesExpenditure">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                   S.NO
+                                                </th>
+                                                <th>
+                                                    Budget
+                                                </th>
+                                                <th>
+                                                    Sub Budget Head
+                                                </th>
+                                                <th>
+                                                    Activity 
+                                                </th>
+                                                <th>
+                                                    Sub Activity
+                                                </th>
+                                               
+                                                <th>
+                                                    Allocated Amount(Lakh)
+                                                </th>
+                                                <th>
+                                                    Expenditure Amount(Lakh)
+                                                </th>
+                                                <th>
+                                                   Site Name
+                                                </th>
+                                                <th>
+                                                    Comments
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @{int i = 0;}
+                                            @foreach (var item in Model.BudgetExpenditureList)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                       @{i++;}
+                                                        @i
+                                                    </td>
+                                                   
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.BudgetHead)
+                                                    </td>
+                                                    <td>
+                                                       @Html.DisplayFor(model => item.SubBudgetHead)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.ActivityName)
+                                                    </td>
+                                                    <td>
+                                                         @Html.DisplayFor(model => item.SubActivityName)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.AllocatedAmount)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.ExpenditureTilldate)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.SiteNameExpenditure)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Remarks)
+                                                    </td>
+                                                  
+                                                </tr>
+                                            }
+
+                                        </tbody>
+                                    </table>
+
+
+                                </div>
+                                <!-- /.table-responsive -->
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- /.Tab3 -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.Tab1 -->
+
+
+
+
+</div>
+
+
+
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+
+
+<script type="text/javascript">
+    $.noConflict(true);
+    var tablesToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+        , tmplWorkbookXML = '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'
+          + '<DocumentProperties xmlns="urn:schemas-microsoft-com:office:office"><Author>Axel Richter</Author><Created>{created}</Created></DocumentProperties>'
+          + '<Styles>'
+          + '<Style ss:ID="Currency"><NumberFormat ss:Format="Currency"></NumberFormat></Style>'
+          + '<Style ss:ID="Date"><NumberFormat ss:Format="Medium Date"></NumberFormat></Style>'
+          + '<Style ss:ID="columnheaders"><Font ss:Size="10" ss:Bold="1"/></Style>'
+          + '</Styles>'
+          + '{worksheets}</Workbook>'
+        , tmplWorksheetXML = '<Worksheet ss:Name="{nameWS}"><Table>{rows}</Table></Worksheet>'
+        , tmplCellXML = '<Cell{attributeStyleID}{attributeFormula}><Data ss:Type="{nameType}">{data}</Data></Cell>'
+        , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+        , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (tables, wsnames, wbname, appname) {
+            var ctx = "";
+            var workbookXML = "";
+            var worksheetsXML = "";
+            var rowsXML = "";
+
+            //Export Excel Developed By Rajveer
+
+            var FY = 'N/A';
+            var Scheme_Names = 'N/A';
+            var Month = 'N/A';
+            var Circle_Names = 'NA';
+            var Division_Codes = 'NA';
+            var SantuaryName = 'NA';
+            if ($("#FinancialYearId option:Selected").val().trim() != "" && $("#FinancialYearId option:Selected").val().trim() != "0") {
+                FY = $("#FinancialYearId option:Selected").text().trim();
+            }
+
+            if ($("#SchemeID option:Selected").val().trim() != "" && $("#SchemeID option:Selected").val().trim() != "0") {
+                Scheme_Names = $("#SchemeID option:Selected").text().trim();
+            }
+            if ($("#Months option:Selected").val().trim() != "" && $("#Months option:Selected").val().trim() != "0") {
+                Month = $("#Months option:Selected").text().trim();
+            }
+            if ($("#Circle_Code option:Selected").val().trim() != "" && $("#Circle_Code option:Selected").val().trim() != "0") {
+                Circle_Names = $("#Circle_Code option:Selected").text().trim();
+            }
+            if ($("#Division_Code option:Selected").val().trim() != "" && $("#Division_Code option:Selected").val().trim() != "0") {
+                Division_Codes = $("#Division_Code option:Selected").text().trim();
+            }
+            if ($("#Sanctuary option:Selected").val().trim() != "" && $("#Sanctuary option:Selected").val().trim() != "0") {
+                SantuaryName = $("#Sanctuary option:Selected").text().trim();
+            }
+            //End
+            //var getFilterFromDate = document.getElementById('FromDate').value;
+            //var getFilterToDate = document.getElementById('ToDate').value;
+            wbname = wbname + '.xls';
+            for (var i = 0; i < tables.length; i++) {
+                if (!tables[i].nodeType) tables[i] = document.getElementById(tables[i]);
+
+                //Customized Excel Report By Rajveer
+                rowsXML += '<Row><Cell ss:StyleID="columnheaders"><Data ss:Type="String">Scheme:</Data></Cell><Cell><Data ss:Type="String">' + Scheme_Names + '</Data></Cell><Cell ss:StyleID="columnheaders"><Data ss:Type="String">Budget Year:</Data></Cell><Cell><Data ss:Type="String">' + FY + '</Data></Cell><Cell ss:StyleID="columnheaders"><Data ss:Type="String">Month:</Data></Cell><Cell><Data ss:Type="String">' + Month + '</Data></Cell></Row>';
+                rowsXML += '<Row></Row>'
+                rowsXML += '<Row><Cell ss:StyleID="columnheaders"><Data ss:Type="String">Circle/Division/Sanctuary:-</Data></Cell><Cell><Data ss:Type="String">' + Circle_Names + ' /' + Division_Codes + ' /' + SantuaryName + '</Data></Cell></Row>';
+                rowsXML += '<Row></Row>'
+                //End Customized Excel Report By Rajveer
+                for (var j = 0; j < tables[i].rows.length; j++) {
+                    rowsXML += '<Row>'
+                    for (var k = 0; k < tables[i].rows[j].cells.length; k++) {
+                        var dataType = tables[i].rows[j].cells[k].getAttribute("data-type");
+                        var dataStyle = tables[i].rows[j].cells[k].getAttribute("data-style");
+                        var dataValue = tables[i].rows[j].cells[k].getAttribute("data-value");
+                        dataValue = (dataValue) ? dataValue : tables[i].rows[j].cells[k].innerHTML.trim();
+                        if (dataValue.indexOf('button') == -1 || dataValue.indexOf('a') == -1) {
+                            var dataFormula = tables[i].rows[j].cells[k].getAttribute("data-formula");
+                            dataFormula = (dataFormula) ? dataFormula : (appname == 'Calc' && dataType == 'DateTime') ? dataValue : null;
+                            ctx = {
+                                attributeStyleID: (dataStyle == 'Currency' || dataStyle == 'Date') ? ' ss:StyleID="' + dataStyle + '"' : ''
+                                   , nameType: (dataType == 'Number' || dataType == 'DateTime' || dataType == 'Boolean' || dataType == 'Error') ? dataType : 'String'
+                                   , data: (dataFormula) ? '' : dataValue
+                                   , attributeFormula: (dataFormula) ? ' ss:Formula="' + dataFormula + '"' : ''
+                            };
+                            rowsXML += format(tmplCellXML.trim(), ctx);
+                        }
+                    }
+                    rowsXML += '</Row>'
+                }
+                ctx = { rows: rowsXML, nameWS: wsnames[i] || 'Sheet' + i };
+                worksheetsXML += format(tmplWorksheetXML, ctx);
+                rowsXML = "";
+            }
+            
+            ctx = { created: (new Date()).getTime(), worksheets: worksheetsXML };
+            workbookXML = format(tmplWorkbookXML, ctx);
+
+           
+            var link = document.createElement("A");
+            link.href = uri + base64(workbookXML);
+            link.download = wbname || 'BudgetExpenditureReport.xls';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    })();
+</script>
+
+
+

@@ -1,0 +1,356 @@
+﻿@model FMDSS.Models.Master.EqptSanctuariesFee
+
+<link href="~/css/timepicki.css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+<script>
+    var $j = jQuery.noConflict();
+    $j('.timepicker').timepicki();
+
+</script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        $('#TotalEqptAvailability,#SeatsPerEqpt,#Fee_TigerProject,#Fee_Surcharge,#TotalFee,#seatsForCitizen,#TotalSeats').bind('keypress', function (evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode
+            // var charCode = evt.which;
+            if (charCode != 8) {
+
+                if ((charCode == 46) || (charCode >= 97 && charCode <= 122) || (charCode >= 65 && charCode <= 90)) {
+                    return false;
+                }
+                else {
+                    if (charCode >= 48 && charCode <= 57 || charCode == 46) {
+                        return true;
+                    }
+                    else {
+                        evt.preventDefault();
+                    }
+                }
+            }
+        });
+
+
+        //#EntranceFee,#Surcharge
+        $('#Fee_TigerProject').keyup(function (e) {
+            debugger;
+            if ($('#Fee_TigerProject').val().trim() != "") {
+                if ($('#Fee_Surcharge').val().trim() != "") {
+                    $('#TotalFee').val(parseFloat($('#Fee_TigerProject').val()) + parseFloat($('#Fee_Surcharge').val()));
+                }
+                else {
+                    $('#TotalFee').val($('#Fee_TigerProject').val());
+                }
+            }
+            else {
+                $('#TotalFee').val($('#Fee_Surcharge').val());
+            }
+        });
+
+        $('#Fee_Surcharge').keyup(function (e) {
+            debugger;
+            if ($('#Fee_Surcharge').val().trim() != "") {
+
+                if ($('#Fee_TigerProject').val().trim() != "") {
+                    $('#TotalFee').val(parseFloat($('#Fee_TigerProject').val()) + parseFloat($('#Fee_Surcharge').val()));
+                }
+                else {
+
+                    $('#TotalFee').val($('#Fee_Surcharge').val());
+                }
+            }
+            else {
+                $('#TotalFee').val($('#Fee_TigerProject').val());
+            }
+        });
+
+
+        $('#btn_submit1').click(function (e) {
+
+            if ($('option:selected', $('#PlaceID')).index() == 0) {
+                $("#errPlaceID").css("display", "block");
+                $('#errPlaceID').focus();
+                return false;
+            }
+            else {
+                $("#errPlaceID").css("display", "none");
+            }
+
+            if ($('option:selected', $('#ZoneID')).index() == 0) {
+                $("#errZoneID").css("display", "block");
+                $('#errZoneID').focus();
+                return false;
+            }
+            else {
+                $("#errZoneID").css("display", "none");
+            }
+
+            
+            if ($('option:selected', $('#CategoryID')).index() == 0) {
+                $("#errCategoryID").css("display", "block");
+                $('#errCategoryID').focus();
+                return false;
+            }
+            else {
+                $("#errCategoryID").css("display", "none");
+            }
+
+            if ($('#Name').val().trim() == "") {
+                $('#errName').css("display", "block");
+                $('#errName').focus();
+                return false;
+            }
+            else {
+                $('#errName').css("display", "none");
+            }
+
+            if ($('#TotalEqptAvailability').val().trim() == "") {
+                $('#errTotalEqptAvailability').css("display", "block");
+                $('#errTotalEqptAvailability').focus();
+                return false;
+            }
+            else {
+                $('#errTotalEqptAvailability').css("display", "none");
+            }
+            
+            if ($('#SeatsPerEqpt').val().trim() == "") {
+                $('#errSeatsPerEqpt').css("display", "block");
+                $('#errSeatsPerEqpt').focus();
+                return false;
+            }
+            else {
+                $('#errSeatsPerEqpt').css("display", "none");
+            }
+
+
+            if ($('#seatsForCitizen').val().trim() == "") {
+                $('#errseatsForCitizen').css("display", "block");
+                $('#errseatsForCitizen').focus();
+                return false;
+            }
+            else {
+                $('#errseatsForCitizen').css("display", "none");
+            }
+
+            if ($('#TotalSeats').val().trim() == "") {
+                $('#errTotalSeats').css("display", "block");
+                $('#errTotalSeats').focus();
+                return false;
+            }
+            else {
+                $('#errTotalSeats').css("display", "none");
+            }
+
+            if ($('#Fee_TigerProject').val().trim() == "") {
+                $('#errFee_TigerProject').css("display", "block");
+                $('#errFee_TigerProject').focus();
+                return false;
+            }
+            else {
+                $('#errFee_TigerProject').css("display", "none");
+            }
+
+            if ($('#Fee_Surcharge').val().trim() == "") {
+                $('#errFee_Surcharge').css("display", "block");
+                $('#errFee_Surcharge').focus();
+                return false;
+            }
+            else {
+                $('#errFee_Surcharge').css("display", "none");
+            }
+
+            if ($('#TotalFee').val().trim() == "") {
+                $('#errTotalFee').css("display", "block");
+                $('#errTotalFee').focus();
+                return false;
+            }
+            else {
+                $('#errTotalFee').css("display", "none");
+            }
+
+            if ($('option:selected', $('#Isactive')).index() == 0) {
+                 $("#errIsactive").css("display", "block");
+                 $('#errIsactive').focus();
+                return false;
+            }
+            else {
+                 $("#errIsactive").css("display", "none");
+            }
+
+        });
+
+        
+        $('#PlaceID').change(function (e) {
+
+        $("#ZoneID").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'Master/ZoneByPlace', // we are calling json method
+            dataType: 'json',
+            data: { PlaceID: $("#PlaceID").val() },
+            success: function (circle) {                
+                $("#ZoneID").append('<option value="0">--Select--</option>');
+                $.each(circle, function (i, items) {
+                    $("#ZoneID").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+
+        });
+        return false;
+    });
+
+
+    });
+
+</script>
+
+
+@using (Html.BeginForm("ADDUpdateEqptSanctuariesFeeVip", "Master", FormMethod.Post))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @*<label id="lbl_dpt">Add/Edit Place</label>*@
+                @ViewBag.OpType
+            </h4>
+        </div>
+
+        <div class="modal-body">
+            @Html.HiddenFor(model => model.ID)
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Place : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.PlaceID, (IEnumerable<SelectListItem>)ViewBag.PlaceIDLst, "--Select--", new { @class = "form-control common", id = "PlaceID" })
+                    <div id="errPlaceID" style="display:none" class="alert-danger1">Place is Required.</div>
+                </div>
+            </div> 
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Zone : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.ZoneID, (IEnumerable<SelectListItem>)ViewBag.ZoneIDLst, "--Select--", new { @class = "form-control common", id = "ZoneID" })
+                    <div id="errZoneID" style="display:none" class="alert-danger1">Zone is Required.</div>
+                </div>
+            </div> 
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Shift : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.ShiftType, (IEnumerable<SelectListItem>)ViewBag.ShiftTypesLst, "--Select--", new { @class = "form-control common", id = "ShiftId" })
+                    <div id="errZoneID" style="display:none" class="alert-danger1">Zone is Required.</div>
+                </div>
+            </div> 
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Vehicle Equipment Category : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.CategoryID, (IEnumerable<SelectListItem>)ViewBag.CategoryIDLst, "--Select--", new { @class = "form-control common", id = "CategoryID" })
+                    <div id="errCategoryID" style="display:none" class="alert-danger1">Vehicle Equipment Category is Required.</div>
+                </div>
+            </div> 
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Vehicle Equipment Type: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Name, new { @class = "form-control common", @maxlength = "50" })
+                    <div id="errName" style="display:none" class="alert-danger1">Vehicle Equipment Type is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Total Eqpt Availability: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.TotalEqptAvailability, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errTotalEqptAvailability" style="display:none" class="alert-danger1">Total Eqpt Availability is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Seats Per Eqpt: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.SeatsPerEqpt, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errSeatsPerEqpt" style="display:none" class="alert-danger1">Seats Per Eqpt is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Online Seats: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.seatsForCitizen, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errseatsForCitizen" style="display:none" class="alert-danger1">Seats For Citizen is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Total Seats: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.TotalSeats, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errTotalSeats" style="display:none" class="alert-danger1">Total Seats is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Fee Tiger Project: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Fee_TigerProject, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errFee_TigerProject" style="display:none" class="alert-danger1">Fee Tiger Project is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Fee Surcharge: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Fee_Surcharge, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errFee_Surcharge" style="display:none" class="alert-danger1">Fee Surcharge is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Total Fee: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.TotalFee, new { @class = "form-control common", @maxlength = "8", @readonly="True" })
+                    <div id="errTotalFee" style="display:none" class="alert-danger1">Total Fee is Required.</div>
+                </div>
+            </div>
+            
+           
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Active / Deactive : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.IsActive, (IEnumerable<SelectListItem>)ViewBag.ISactivelst, "--Select--", new { @class = "form-control common", id = "Isactive" })
+                    <div id="errIsactive" style="display:none" class="alert-danger1">Active / Deactive  is Required.</div>
+
+                </div>
+            </div> 
+
+            <div class="col-lg-12"></div>
+
+
+            <!-- /.Btn Groping -->
+
+
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success"  value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+                
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+}

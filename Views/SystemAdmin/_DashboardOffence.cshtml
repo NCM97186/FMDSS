@@ -1,0 +1,548 @@
+﻿@model IEnumerable<FMDSS.Models.Admin.CircleWise>
+
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+</script>
+
+<style type="text/css">
+    .ui-widget {
+        font-family: Arial, Helvetica, sans-serif !important;
+        font-size: 13px;
+    }
+
+    .input-sm {
+        width: 75% !important;
+    }
+
+
+    select option {
+        text-transform: capitalize;
+    }
+
+</style>
+@*<link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+
+<link href="~/Content/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+<script src="~/Content/bootstrap-datepicker.js"></script>*@
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="text-align:center;">
+                <b> @ViewBag.ReportName</b>
+                <button id="btnClose" type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            <!-- .panel-heading -->
+            <div class="panel-body">
+                <div id="tabs">
+                    <ul>
+                        <li><a href="#tabs-1" id="tabCircle">Circle Wise</a></li>
+                        <li><a href="#tabs-2" id="tabDiv">Division Wise</a></li>
+                        <li><a href="#tabs-3" id="tabOfc">Offence Wise</a></li>
+                        <li><a href="javascript:void(0);" id="quaterRpt" onclick="RedirectUrl(this);">Quarter Report</a></li>
+                        <li><a href="javascript:void(0);" id="detailRpt" onclick="RedirectUrl(this);">Detail Report</a></li>
+                        @*<li><a href="javascript:void(0);" id="updOffence" onclick="RedirectUrl(this);">Update Offence</a></li>
+                        <li><a href="javascript:void(0);" id="addOffence" onclick="RedirectUrl(this);">Add Offence</a></li>*@
+                        <li><a href="#tabs-4">Chart View</a></li>
+                    </ul>
+                    <div id="tabs-1">
+                        <div class="col-md-12" style="margin-left: -2.5%;">
+                            <div class="col-md-3">
+                                <input type="hidden" id="hfStatus" value="0,1" />
+                                <label style="margin-left:10%;">Date From</label>
+                                @Html.TextBox("FromDate", "01/01/1970", new { @class = "form-control", @style = "width:100%;float:left;margin:0px 5px 5px 15px;", @placeholder = "From Date", autocomplete = "off", @id = "FromDate0",@type="date" })
+                            </div>
+                            <div class="col-md-3">
+                                <label>Date To</label>
+                                @Html.TextBox("ToDate", DateTime.Now.ToShortDateString(), new { @class = "form-control", @style = "width:100%;float:left;margin-right:5px;", @placeholder = "To Date", autocomplete = "off", @id = "ToDate0", @type = "date" })
+                            </div>
+                            <div class="col-md-4">
+                                <label>Offence Category</label>
+                                <select id="ddlOffence" name="Offence" class="form-control"></select>
+                            </div>
+                            <div class="col-md-1">
+                                <label>&nbsp;</label>
+                                <input type="button" value="Search" class="btn btn-success" style="float:left;" id="btnSearch" />
+                            </div>
+                            <div class="col-md-1"><label>&nbsp;</label><input type="reset" value="Reset" id="btnReset" class="btn btn-info" style="float:left;margin-left:5px;" /></div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="col-md-12" id="dvListContent">
+                            @Html.Partial("_DashboardCircleList_Test", Model)
+                        </div>
+                        <input type="hidden" id="hfFromDate" />
+                        <input type="hidden" id="hfToDate" />
+                        <div class="clearfix"></div>
+                    </div>
+                    <div id="tabs-2">
+                        @*<div><label>Division Wise</label></div>*@
+                        <div class="col-md-12" style="margin-left: -2.5%;">
+                            <div class="col-md-3">
+                                <input type="hidden" id="hfStatus" value="0,1" />
+                                <label style="margin-left:10%;">Date From</label>
+                                @Html.TextBox("FromDate", "01/01/1970", new { @class = "form-control ", @style = "width:100%;float:left;margin:0px 5px 5px 15px;", @placeholder = "From Date", autocomplete = "off", @id = "FromDate1",
+                               @type = "date"
+                           })
+                            </div>
+                            <div class="col-md-3">
+                                <label>Date To</label>
+                                @Html.TextBox("ToDate", DateTime.Now.ToShortDateString(), new { @class = "form-control ", @style = "width:100%;float:left;margin-right:5px;", @placeholder = "To Date", autocomplete = "off", @id = "ToDate1", @type = "date" })
+                            </div>
+                            <div class="col-md-4">
+                                <label>Offence Category</label>
+                                <select id="ddlDivWiseOffence" name="Offence" class="form-control"></select>
+                            </div>
+                            <div class="col-md-1">
+                                <label>&nbsp;</label>
+                                <input type="button" value="Search" class="btn btn-success" style="float:left;" id="btnSearchDivWise" />
+                            </div>
+                            <div class="col-md-1"><label>&nbsp;</label><input type="reset" value="Reset" id="btnResetDivWise" class="btn btn-info" style="float:left;margin-left:5px;" /></div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="col-md-12" id="dvListContentD">
+                            @Html.Partial("_DashboardDivisionList_Test", Model)
+                        </div>
+                        <input type="hidden" id="hfFromDate" />
+                        <input type="hidden" id="hfToDate" />
+                        <div class="clearfix"></div>
+                    </div>
+                    <div id="tabs-3">
+                        @*<div><label>Offence Wise</label></div>*@
+                        <div class="col-md-12" style="margin-left: -2.5%;">
+                            <div class="col-md-3">
+                                <input type="hidden" id="hfStatus" value="0,1" />
+                                <label style="margin-left:10%;">Date From</label>
+                                @Html.TextBox("FromDate", "01/01/1970", new { @class = "form-control ", @style = "width:100%;float:left;margin:0px 5px 5px 15px;", @placeholder = "From Date", autocomplete = "off", @id = "FromDate2", @type = "date" })
+                            </div>
+                            <div class="col-md-3">
+                                <label>Date To</label>
+                                @Html.TextBox("ToDate", DateTime.Now.ToShortDateString(), new { @class = "form-control ", @style = "width:100%;float:left;margin-right:5px;", @placeholder = "To Date", autocomplete = "off", @id = "ToDate2", @type = "date" })
+                            </div>
+                            <div class="col-md-4">
+                                <label>Division List</label>
+                                <select id="ddlDivision" name="Division" class="form-control"></select>
+                            </div>
+                            <div class="col-md-1">
+                                <label>&nbsp;</label>
+                                <input type="button" value="Search" class="btn btn-success" style="float:left;" id="btnSearchOffence" />
+                            </div>
+                            <div class="col-md-1"><label>&nbsp;</label><input type="reset" value="Reset" id="btnResetOffence" class="btn btn-info" style="float:left;margin-left:5px;" /></div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="col-md-12" id="dvListContentO">
+                            @Html.Partial("_DashboardOffenceList_Test", Model)
+                        </div>
+                        <input type="hidden" id="hfFromDate" />
+                        <input type="hidden" id="hfToDate" />
+                        <div class="clearfix"></div>
+                    </div>
+                    <div id="tabs-4">
+                        @Html.Partial("_DashboardChartView", Model)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- .panel-body -->
+    </div>
+    <!-- /.panel -->
+</div>
+<!-- /.col-lg-12 -->
+<div class="modal fade col-lg-12" id="myModal" role="dialog">
+    <div class="modal-dialog modal-lg" id="modelOffence">
+        <!-- Modal content-->
+    </div>
+</div>
+<div class="modal fade in" data-backdrop="static" id="modalOffenceDetails" onclick="closePopUp()" tabindex="5" role="dialog" aria-hidden="false">
+</div>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/Scripts/Controller/Common.js"></script>
+<script type="text/javascript">
+    function initDate() {
+       
+        //jQuery('#FromDate0').datepicker(
+        //    {
+        //        dateFormat: 'dd/mm/yyyy',
+        //        minDate: '-3M',
+        //        maxDate: '+28D',
+        //        selected: 'minDate',
+        //        onSelect: function (selected) {
+        //            $("#FromDate0").datepicker("option", "minDate", selected)
+        //        }             
+        //    }
+        //).val();
+        //jQuery('#ToDate0').datepicker(
+        //    {
+        //        dateFormat: 'dd/mm/yyyy',
+        //        minDate: '-3M',
+        //        maxDate: '+28D',
+        //        selected: 'maxDate',
+        //        onSelect: function (selected) {
+        //            $("#ToDate0").datepicker("option", "maxDate", selected)
+        //        }     
+        //    }
+        //).val();
+        //jQuery('#FromDate1').datepicker(
+        //    {
+        //        dateFormat: 'dd/mm/yyyy',
+        //        changeYear: true,
+        //        minDate: '-3M',
+        //        maxDate: '+28D',
+        //        selected: 'minDate',
+        //        onSelect: function (selected) {
+        //            $("#FromDate1").datepicker("option", "minDate", selected)
+        //        }
+        //    }
+        //).val();
+        //jQuery('#ToDate1').datepicker(
+        //    {
+        //        dateFormat: 'dd/mm/yyyy',
+        //        changeYear: true,
+        //        minDate: '-3M',
+        //        maxDate: '+28D',
+        //        selected: 'maxDate',
+        //        onSelect: function (selected) {
+        //            $("#ToDate1").datepicker("option", "maxDate", selected)
+        //        }
+        //    }
+        //).val();
+        //jQuery('#FromDate2').datepicker(
+        //    {
+        //        dateFormat: 'dd/mm/yyyy',
+        //        changeYear: true,
+        //        minDate: '-3M',
+        //        maxDate: '+28D',
+        //        selected: 'minDate',
+        //        onSelect: function (selected) {
+        //            $("#FromDate2").datepicker("option", "minDate", selected)
+        //        }
+        //    }
+        //).val();
+        //jQuery('#ToDate2').datepicker(
+        //    {
+        //        dateFormat: 'dd/mm/yyyy',
+        //        changeYear: true,
+        //        minDate: '-3M',
+        //        maxDate: '+28D',
+        //        selected: 'maxDate',
+        //        onSelect: function (selected) {
+        //            $("#ToDate2").datepicker("option", "maxDate", selected)
+        //        }
+        //    }
+        //).val();
+        //$('#FromDate').val('01/01/1970');
+        //$("#FromDate").prop("type", "date");
+        //$("#ToDate").prop("type", "date");
+    }
+    $(document).ready(function () {
+        $("#tabs").tabs();
+        //jQuery('#FromDate').datepicker({
+        //    changeMonth: true,
+        //    changeYear: true,
+        //    dateFormat: 'dd/mm/yyyy',
+        //    onSelect: function (selected) {
+        //        $("#ToDate").datepicker("option", "minDate", selected)
+        //    }
+        //});
+        //jQuery('#ToDate').datepicker({
+        //    changeMonth: true,
+        //    changeYear: true,
+        //    dateFormat: 'dd/mm/yyyy',
+
+        //    onSelect: function (selected) {
+        //        $("#FromDate").datepicker("option", "maxDate", selected)
+        //    }
+        //});
+        initDate();
+        $('#btnSearch').click(function () {
+            var fromdate = $('#FromDate0').val();
+            var todate = $('#ToDate0').val();
+            var ddlOffence = $('#ddlOffence').val();
+            $('#hfFromDate').val(fromdate);
+            $('#hfToDate').val(todate);
+            $('#dvContent').html('');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'SystemAdmin/_DashboardCircleList_Test', // we are calling json method
+                dataType: 'html',
+                data: { fromDate: fromdate, toDate: todate, ModuleId: 1, offence_category: ddlOffence },
+                success: function (data) {
+                    $('#dvListContent').html('');
+                    $('#dvListContent').html(data);
+                },
+                error: function (ex) {
+                    alert(ex.error);
+                }
+            });
+        });
+        
+        $('#btnReset').click(function () {
+            $('#FromDate0').val('');
+            $('#ToDate0').val('');
+            $('#hfFromDate').val('');
+            $('#hfToDate').val('');
+            $('#dvContent').html('');
+            var ddlOffence = '0';
+            $.ajax({
+                type: 'GET',
+                url: RootUrl + 'SystemAdmin/_DashboardCircleList_Test', // we are calling json method
+                dataType: 'html',
+                data: { fromDate: '', toDate: '', ModuleId: 1, offence_category: ddlOffence },
+                success: function (data) {
+                    $('#dvListContent').html('');
+                    $('#dvListContent').html(data);
+                },
+                error: function (ex) {
+                    alert(ex.error);
+                }
+            });
+        });
+        $('#btnSearchDivWise,#tabDiv').click(function () {
+            var fromdate = $('#FromDate1').val();
+            var todate = $('#ToDate1').val();
+          //  alert(fromdate + ' d, ' + todate);
+            var ddlDivWiseOffence = $('#ddlDivWiseOffence').val();
+            $('#hfFromDate').val(fromdate);
+            $('#hfToDate').val(todate);
+            $('#dvListContentD').html('');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'SystemAdmin/_DashboardDivisionList_Test', // we are calling json method
+                dataType: 'html',
+                data: { Fromdate: fromdate, Todate: todate, DIV_CODE: '', OffenceCategory: ddlDivWiseOffence,flag:0 },
+                success: function (data) {
+                    $('#dvListContentD').html('');
+                    $('#dvListContentD').html(data);
+                    //initDate();
+                },
+                error: function (ex) {
+                    //alert(ex.error);
+                }
+            });
+        });
+        $('#btnResetDivWise,#tabDiv').click(function () {
+            $('#FromDate1').val('');
+            $('#ToDate1').val('');
+            $('#hfFromDate').val('');
+            $('#hfToDate').val('');
+            var fromdate = $('#FromDate1').val();
+            var todate = $('#ToDate1').val();
+            var ddlDivWiseOffence = $('#ddlDivWiseOffence').val();
+            $.ajax({
+                type: 'GET',
+                url: RootUrl + 'SystemAdmin/_DashboardDivisionList_Test', // we are calling json method
+                dataType: 'html',
+                data: { Fromdate: fromdate, Todate: todate, DIV_CODE: '', OffenceCategory: ddlDivWiseOffence, flag: 0 },
+                success: function (data) {
+                    $('#dvListContentD').html('');
+                    $('#dvListContentD').html(data);
+                },
+                error: function (ex) {
+                   // alert(ex.error);
+                }
+            });
+        });
+        $('#btnSearchOffence,#tabOfc').click(function () {
+            var fromdate = $('#FromDate2').val();
+            var todate = $('#ToDate2').val();
+            //alert(fromdate + ' o, ' + todate);
+            var ddlDivision = $('#ddlDivision').val();
+            $('#hfFromDate').val(fromdate);
+            $('#hfToDate').val(todate);
+            $('#dvListContentO').html('');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'SystemAdmin/_DashboardOffenceList_Test', // we are calling json method
+                dataType: 'html',
+                data: { Fromdate: fromdate, Todate: todate, DIV_CODE: ddlDivision, OffenceCategory:'', flag: 1 },
+                success: function (data) {
+                    $('#dvListContentO').html('');
+                    $('#dvListContentO').html(data);
+                    //initDate();
+                },
+                error: function (ex) {
+                    alert(ex.error);
+                }
+            });
+        });
+        $('#btnResetOffence,#tabOfc').click(function () {
+            $('#FromDate2').val('');
+            $('#ToDate2').val('');
+            $('#hfFromDate').val('');
+            $('#hfToDate').val('');
+            var fromdate = $('#FromDate2').val();
+            var todate = $('#ToDate2').val();
+            var ddlDivision = $('#ddlDivision').val();
+            $.ajax({
+                type: 'GET',
+                url: RootUrl + 'SystemAdmin/_DashboardOffenceList_Test', // we are calling json method
+                dataType: 'html',
+                data: { Fromdate: fromdate, Todate: todate, DIV_CODE: ddlDivision, OffenceCategory: '', flag:1 },
+                success: function (data) {
+                    $('#dvListContentO').html('');
+                    $('#dvListContentO').html(data);
+                },
+                error: function (ex) {
+                    //alert(ex.error);
+                }
+            });
+        });
+        $('#chartview').click(function () {
+            var fromdate = $('#FromDate').val();
+            var todate = $('#ToDate').val();
+            $('#hfFromDate').val(fromdate);
+            $('#hfToDate').val(todate);
+            $('#tabs-4').html('');
+            $.ajax({
+                type: 'GET',
+                url: RootUrl + 'SystemAdmin/_DashboardChartView', // we are calling json method
+                dataType: 'html',
+                data: { fromDate: fromdate, toDate: todate, ModuleId: 1 },
+                success: function (data) {
+                    $('#tabs-4').html('');
+                    $('#tabs-4').html(data);
+                    //initDate();
+                },
+                error: function (ex) {
+                    //alert(ex.error);
+                }
+            });
+        });
+
+        GetOffences();
+        GetDivisions();
+    });
+
+    function RedirectUrl(Id) {
+        var tabId = $(Id).attr('id');
+        if (tabId == 'quaterRpt') {
+            var win = window.open("", "_blank");
+            var url = '@Url.Action("YearWiseOffenceReport", "SystemAdmin")';
+            win.location = url;
+            return false;
+        }
+
+        if (tabId == 'detailRpt') {
+            var win = window.open("", "_blank"); 
+            var url = '@Url.Action("OffenceReport", "MISProtection")';
+            win.location = url;
+            return false;
+        }
+
+        if (tabId == 'updOffence') {
+            var win = window.open("", "_blank");
+            var url = '@Url.Action("ShowOffenceDetails", "Offence")';
+            win.location = url;
+            return false;
+        }
+
+        if (tabId == 'addOffence') {
+            var win = window.open("", "_blank");
+            var url = '@Url.Action("AddOffenceDetails", "Offence")';
+            win.location = url;
+            return false;
+        }
+
+       // alert(tabId);
+    }
+    var RootUrl = '@Url.Content("~/")';
+    function showDashboardDetails(moduleName, parentID, type, cntrlID, status) {
+        var name = $(cntrlID).closest('li.branch').find('.parentanch').html(); //$(cntrlID).text();
+        $('#hfStatus').val('');
+        $('#hfStatus').val(status);
+        var fromdate = $('#hfFromDate').val();
+        var todate = $('#hfToDate').val();
+        $.ajax({
+            type: 'GET',
+            url: RootUrl + 'SystemAdmin/GetDashboardDetails', // we are calling json method
+            dataType: 'html',
+            data: { moduleName: moduleName, parentID: parentID, type: type, status: status, fromDate: fromdate, toDate: todate },
+            success: function (data) {
+                $('#dvContent').html(data);
+                if ($(cntrlID).hasClass('parentanch')) {
+                    $('#dvHeading').html('<strong>' + name + '</strong>')
+                }
+                else {
+                    var currentname = $(cntrlID).text();
+                    name = name + ' / ' + currentname;
+                    $('#dvHeading').html('<strong>' + name + '</strong>')
+                }
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+    }
+
+    function GetOffences() {
+        var ddOff = $("#ddlOffence").empty();
+        var ddOffDivWise = $("#ddlDivWiseOffence").empty();
+
+        $.ajax({
+                url: '@Url.Action("GetOffences", "SystemAdmin")',
+                contentType: 'application/json; charset=utf-8',
+                datatype: 'json',
+                type: "GET",
+                success: function (data) {
+                    if (data != undefined && data != null) {
+
+                        ddOff.append($('<option>', {
+                            value: 0,
+                            text: "All"
+                        }));
+                        $.each(data, function (i, item) {
+                            //alert(item.Value + ',' + item.Text);
+                            ddOff.append($('<option>', {
+                                value: item.Value,
+                                text: item.Text
+                            }));
+                        });
+                        ddOff.val(0).change('trigger');
+
+
+                        ddOffDivWise.append($('<option>', {
+                            value: 0,
+                            text: "All"
+                        }));
+                        $.each(data, function (i, item) {
+                            //alert(item.Value + ',' + item.Text);
+                            ddOffDivWise.append($('<option>', {
+                                value: item.Value,
+                                text: item.Text
+                            }));
+                        });
+                        ddOffDivWise.val(0).change('trigger');
+
+
+                    }
+                }
+         });
+    }
+
+
+    function GetDivisions() {
+        var ddlDivision = $("#ddlDivision").empty();
+        $.ajax({
+                url: '@Url.Action("GetDivision", "SystemAdmin")',
+                contentType: 'application/json; charset=utf-8',
+                datatype: 'json',
+                type: "GET",
+                success: function (data) {
+                    if (data != undefined && data != null) {
+                        ddlDivision.append($('<option>', {
+                            value: 0,
+                            text: "All"
+                        }));
+                        $.each(data, function (i, item) {
+                            //alert(item.Value + ',' + item.Text);
+                            ddlDivision.append($('<option>', {
+                                value: item.Value,
+                                text: item.Text
+                            }));
+                        });
+                        ddlDivision.val(0).change('trigger');
+                    }
+                }
+         });
+    }
+</script>
+
+

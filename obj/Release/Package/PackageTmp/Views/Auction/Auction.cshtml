@@ -1,0 +1,539 @@
+﻿@{
+    ViewBag.Title = "Auction";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+        $(".datefield").datepicker({ minDate: new Date(), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+
+        if ($("#rbl_OnlinePayment").is(":checked")) {
+            $('#dvPaymentmode').hide();
+        }
+
+        $("#rbl_OnlinePayment, #rbl_OfflinePayment").change(function () {
+            if ($("#rbl_OnlinePayment").is(":checked")) {
+                $('#dvPaymentmode').hide();
+            }
+            else if ($("#rbl_OfflinePayment").is(":checked")) {
+                $('#dvPaymentmode').show();
+            }
+
+        });
+
+        if ($("#rbl_OfflinePaymentbydd").is(":checked")) {
+            $('#dvofflinePaymentmode').show();
+        }
+
+        $("#rbl_OfflinePaymentbydd, #rbl_OfflinePaymentbychk").change(function () {
+            if ($("#rbl_OfflinePaymentbydd").is(":checked")) {
+                $('#dvofflinePaymentmode').show();
+            }
+            else if ($("#rbl_OfflinePaymentbychk").is(":checked")) {
+                $('#dvofflinePaymentmode').show();
+            }
+
+        });
+
+
+        $('#biddingAmount').keypress(function (event) {
+
+            return isNumber(event, this)
+
+        });
+
+        $('#btn_Save').click(function (e) {
+
+            if ($('#Applicant_type').val() == '0') {
+                $('#aplerrordiv').show();
+                $('#aplerrordiv').html("Please Select Applicant Type." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#Applicant_type").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#aplerrordiv').hide(); }
+
+            if ($('#noticeId').val() == '0') {
+                $('#noticeerrordiv').show();
+                $('#noticeerrordiv').html("Please Select Notice Number." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#noticeId").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#noticeerrordiv').hide(); }
+
+
+            if ($("#rbl_OfflinePayment").is(":checked")) {
+
+                if ($('#bankName').val().trim() == '') {
+
+                    $('#bankerrordiv').show();
+                    $('#bankerrordiv').html("Please Enter Bank Name." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('html, body').animate({
+                        scrollTop: $("#bankName").offset().top
+                    }, 600);
+                    return false;
+                }
+                else { $('#bankerrordiv').hide(); }
+
+                if ($('#branchName').val().trim() == '') {
+                    $('#brancherrordiv').show();
+                    $('#brancherrordiv').html("Please Enter Branch Name." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('html, body').animate({
+                        scrollTop: $("#branchName").offset().top
+                    }, 600);
+                    return false;
+                }
+                else { $('#brancherrordiv').hide(); }
+
+                if ($('#ddchkIssuesDate').val() == '') {
+                    $('#dddateerrordiv').show();
+                    $('#dddateerrordiv').html("Please Select  DD/Check Issue Date." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('html, body').animate({
+                        scrollTop: $("#ddchkIssuesDate").offset().top
+                    }, 600);
+                    return false;
+                }
+                else { $('#dddateerrordiv').hide(); }
+
+                if ($('#ddChkNumber').val().trim() == '') {
+                    $('#ddnumbererrordiv').show();
+                    $('#ddnumbererrordiv').html("Please Enter  DD/Check Number." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('html, body').animate({
+                        scrollTop: $("#ddChkNumber").offset().top
+                    }, 600);
+                    return false;
+                }
+                else { $('#ddnumbererrordiv').hide(); }
+
+                if ($('#ddchkFile').val() == '') {
+                    $('#uploaddderrordiv').show();
+                    $('#uploaddderrordiv').html("Please Upload  DD/Check ." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('html, body').animate({
+                        scrollTop: $("#ddchkFile").offset().top
+                    }, 600);
+                    return false;
+                }
+                else { $('#uploaddderrordiv').hide(); }
+
+            }
+
+
+            if ($('#biddingAmount').val().trim() == '') {
+                $('#bdamterrordiv').show();
+                $('#bdamterrordiv').html("Please Enter Bidding Amount." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#biddingAmount").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#bdamterrordiv').hide(); }
+
+        });
+
+        $('#noticeId').change(function (e) {
+            var ntno = $("#noticeId option:selected").text();
+
+            $('#hd_No').val(ntno);
+
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'Auction/GetAuctionDetail', // we are calling json method
+                dataType: 'json',
+                data: { noticeId: $("#noticeId").val() },
+                success: function (data) {
+                    $("#regionName").val(data.list1.RegionCode);
+                    $("#circleName").val(data.list1.CircleCode);
+                    $("#divisionName").val(data.list1.DivisionCode);
+                    $("#rangeName").val(data.list1.RangeCode);
+                    $("#paceofAuction").val(data.list1.DepotName);
+                    $("#forestProduce").val(data.list1.ForestProduce);
+                    $("#forestProduct").val(data.list1.ForestProduct);
+                    $("#qty").val(data.list1.Qty);
+                    $("#reservedPrice").val(data.list1.ReservedPrice);
+                    var baseprice = data.list1.ReservedPrice;
+                    var emdPaybleamt = (parseFloat(baseprice) * 2 / 100);
+                    //alert(emdPaybleamt);
+                    $("#emdPaybleAmount").val(emdPaybleamt);
+                    //$("#durationDate").val(data.Durations);
+                    $("#biddOpeningDate").val(data.list1.BiddOpeningDate);
+                    $("#bidClosingDate").val(data.list1.BidClosingDate);
+                    $("#divPublish").html(data.list1.NoticeView);
+                    // $("#Amendments").append(data.list2);
+                    $("#dvAmendments").hide();
+                    $("#myViewNoticeModal2").modal();
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+
+        $("#biddingAmount").change(function () {
+            var biddingAmt = $("#biddingAmount").val();
+            var reservedPrice = $("#reservedPrice").val();
+            var psAmount = (parseFloat(biddingAmt) * 5 / 100);
+            $("#psPaybleAmount").val(psAmount);
+
+            if (parseFloat(biddingAmt) < parseFloat(reservedPrice)) {
+                alert('You can Enter maximum value of “Bidding Amount”  equal or greater  than the reserved Price.');
+                $("#biddingAmount").val('');
+                return false;
+            }
+
+        });
+
+        $('#bankName, #branchName').keypress(function (e) {
+            var kc = e.which;
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+        $('#ddChkNumber').keypress(function (e) {
+            var kc = e.which;
+            if (kc >= 48 && kc <= 57) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+
+        })
+
+
+        $('#ddchkIssuesDate').keydown(function (event)
+        { return cancelBackspace(event) });
+
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+
+
+        function isNumber(evt, element) {
+
+            var charCode = (evt.which) ? evt.which : event.keyCode
+
+            if (
+                 (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+                (charCode < 48 || charCode > 57))
+                return false;
+
+            //return true;
+        }
+
+    });
+</script>
+
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+    function reload() {
+        var r = confirm("Do you want to leave page!");
+        if (r) {
+            window.location = RootUrl + "Dashboard/dashboard";
+        }
+        else {
+            //do nothing
+        }
+    }
+
+    function ShowPaymentmode() {
+
+
+    }
+
+
+</script>
+
+@using (Html.BeginForm("SubmitAuctionForm", "Auction", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <div id="page-wrapper-inn">
+        <div class="col-lg-12 pad">
+            @if (@TempData["Status"] != null)
+            {
+                <div id="divSuccess" class="alert alert-success"><i class="fa fa-thumb-tack fa-fw"></i>@TempData["Status"]</div>
+                TempData["Status"] = null;
+            }
+
+            @if (@Session["AuctionTypeold"] != null)
+            {
+                <h1 class="page-header"><span> Active Auction Notices for  @Session["AuctionTypeold"]</span> </h1>
+            }
+
+        </div>
+        <!-- /.col-lg-12 -->
+        <!-- Row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+
+                    <div class="panel-body">
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Application Type: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("Applicant_Type", (IEnumerable<SelectListItem>)ViewBag.Applicant_Type, new { @class = "form-control common", id = "Applicant_type" })
+
+                                <div id="aplerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Bidder Name: </label>
+                                <input class="form-control" id="bidderName" name="BidderName" readonly="readonly" value="@ViewData["Name"]">
+
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Select Notice: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("NoticeId", (IEnumerable<SelectListItem>)ViewBag.NoticeId, new { @class = "form-control", id = "noticeId" })
+                                <input type="hidden" name="Hd_NO" id="hd_No" />
+                                <div id="noticeerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-lg-6" style="display:none;">
+                            <div class="form-group">
+                                <label>Region Name.:</label>
+
+                                <input class="form-control" id="regionName" readonly="readonly">
+
+
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-6" style="display:none;">
+                            <div class="form-group">
+                                <label>Circle Name:</label>
+                                <input class="form-control" id="circleName" readonly="readonly">
+                            </div>
+                        </div>
+                        <div class="col-lg-6" style="display:none;">
+                            <div class="form-group">
+                                <label>Division Name:</label>
+                                <input class="form-control" id="divisionName" readonly="readonly">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Range Name:</label>
+                                <input class="form-control" id="rangeName" readonly="readonly">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Place of Auction:</label>
+                                <input class="form-control" id="paceofAuction" readonly="readonly">
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Forest Produce:</label>
+                                <input class="form-control" id="forestProduce" readonly="readonly">
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Forest Product:</label>
+                                <input class="form-control" id="forestProduct" readonly="readonly">
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Quantity:</label>
+                                <input class="form-control" id="qty" readonly="readonly">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Bidd Opening Date: </label>
+                                <input class="form-control" id="biddOpeningDate" name="BiddOpeningDate" readonly="readonly">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Bidd Closing Date: </label>
+                                <input class="form-control" id="bidClosingDate" name="BidClosingDate" readonly="readonly">
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <label class="form-group">Payment Mode<span class="mandatory">*</span></label>
+
+
+                            <input type="radio" id="rbl_OnlinePayment" name="PaymentMode" value="Online" checked>Online
+                            <input type="radio" id="rbl_OfflinePayment" name="PaymentMode" value="Offline">Offline
+
+                        </div>
+                        <div class="border-add" id="dvPaymentmode">
+                            <div class="col-lg-12 ">
+                                <label class="form-group">Payment By <span class="mandatory">*</span></label>
+
+
+                                <input type="radio" id="rbl_OfflinePaymentbydd" name="OfflinePaymentMode" value="DD" checked onclick="ShowOfflinePaymentmode();">Demand Draft(DD)
+                                <input type="radio" id="rbl_OfflinePaymentbychk" name="OfflinePaymentMode" value="Check" onclick="ShowOfflinePaymentmode();">Bank Check
+                                <input type="radio" id="rbl_OfflinePaymentbybg" name="OfflinePaymentMode" value="BG" onclick="ShowOfflinePaymentmode();">Bank Granter
+
+                            </div>
+                            <div class="border-add" id="dvofflinePaymentmode">
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Bank Name:<span class="mandatory">*</span></label>
+                                        <input type="text" class="form-control" id="bankName" name="BankName" maxlength="25" />
+                                        <div id="bankerrordiv" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Branch Name: <span class="mandatory">*</span></label>
+                                        <input type="text" class="form-control" id="branchName" name="BranchName" maxlength="25" />
+                                        <div id="brancherrordiv" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>DD/Check Issues Date: <span class="mandatory">*</span></label>
+                                        <input type="text" class="form-control datefield" id="ddchkIssuesDate" name="DdchkIssuesDate" />
+                                        <div id="dddateerrordiv" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>DD/Check Number:<span class="mandatory">*</span></label>
+                                        <input type="text" class="form-control" id="ddChkNumber" name="DdChkNumber" maxlength="15" />
+                                        <div id="ddnumbererrordiv" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Upload DD/Check: <span class="mandatory">*</span></label>
+                                        <input type="file" class="form-control" id="ddchkFile" name="DdchkFile" />
+                                        <div id="uploaddderrordiv" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-lg-12"></div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Reserved Price(INR): </label>
+                                <input class="form-control" id="reservedPrice" readonly="readonly">
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>EMD Amount (INR): </label>
+                                <input class="form-control" id="emdPaybleAmount" name="EmdPaybleAmount" readonly="readonly">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Bidding Amount (INR): <span class="mandatory">*</span></label>
+                                <input class="form-control" id="biddingAmount" name="BiddingAmount" maxlength="10">
+                            </div>
+                            <div id="bdamterrordiv" style="display:none" class="alert-danger1"></div>
+                        </div>
+                        <div class="col-lg-6" style="display:none;">
+                            <div class="form-group">
+                                <label>Purformance Security(5% of Bidding Amount): </label>
+                                <input class="form-control" id="psPaybleAmount" name="PsPaybleAmount" readonly="readonly">
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12"></div>
+
+
+
+                        <!-- Btn Groping -->
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_Save">
+                                    <i class="fa fa-check"></i> Save
+                                </button>
+                                <button type="reset" class="btn btn-warning">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+                                <button type="button" value="Cancel" class="btn btn-danger" onclick="reload(); return false;">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+
+                            </div>
+                        </div>
+                        <!-- /.Btn Groping -->
+
+                    </div>
+                    <!-- /.panel-body -->
+
+                </div>
+                <!-- /.panel -->
+
+            </div>
+            <!-- /.col-lg-12 -->
+
+            <div class="modal fade in" id="myViewNoticeModal2" tabindex="-1" role="dialog" aria-hidden="false">
+                <div class="modal-dialog mdw">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                            <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> </label></h4>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- From URL Get -->
+                            <input type="hidden" id="pHdn_No" name="PHdn_No" />
+                            <div id="divPublish"></div>
+
+                            <!-- /. From URL Get -->
+                        </div>
+                        <!-- /.modal-body -->
+                        <div class="modal-footer" id="fot-f">
+                            <div id="btn" class="col-lg-12">
+
+                                <button name="button" class="btn btn-danger" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                                    <i class="fa fa-times fa-fw"></i> Close
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- /.modal-content -->
+                </div>
+                <!-- /.modal-dialog -->
+            </div>
+        </div>
+    </div>
+
+}

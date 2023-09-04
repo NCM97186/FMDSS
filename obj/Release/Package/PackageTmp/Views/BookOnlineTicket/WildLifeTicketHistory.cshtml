@@ -1,0 +1,356 @@
+﻿@{
+    ViewBag.Title = "WildLifeTicketHistory";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+@model IEnumerable<FMDSS.Models.BookOnlineTicket.BookOnTicket>
+
+
+<style>
+    #myModal .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModal .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModal .modal-footer {
+        background-color: #f9f9f9;
+    }
+
+    #myModal .btn-success {
+        width: 100%;
+        padding: 10px;
+    }
+
+    ul.a {
+        list-style-type: circle;
+    }
+    /*Create by sunny */
+    #myModal_TicketCancel .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModal_TicketCancel .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModal_TicketCancel .modal-footer {
+        background-color: #f9f9f9;
+    }
+    #myModal_TicketRefund .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModal_TicketRefund .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModal_TicketRefund .modal-footer {
+        background-color: #f9f9f9;
+    }
+    /*END*/
+</style>
+
+
+<style>
+    #myModalRefund .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModalRefund .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModalRefund .modal-footer {
+        background-color: #f9f9f9;
+    }
+
+    #myModalRefund .btn-success {
+        width: 100%;
+        padding: 10px;
+    }
+
+    ul.a {
+        list-style-type: circle;
+    }
+</style>
+
+
+<script src="~/js/jquery.min.js"></script>
+
+
+
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        $('#tbltemp').DataTable({
+            responsive: true
+        });
+
+    });
+    function TicketCancel(id) {
+        // alert(id);
+        $("#myModal_TicketCancel").modal('show');
+        var RootUrl = '@Url.Content("~/")';
+        $('#TicketID').val(id);
+        $('#btn_FullCancel').attr('href', RootUrl + 'BookOnlineTicket/RefundRequest?TicketId=' + id);
+        $('#btn_PartialCancel').attr('href', RootUrl + 'BookOnlineTicket/RefundRequestMemberWise?ticketid=' + id);
+    };
+     function TicketRefund(id) {
+        // alert(id);
+        $("#myModal_TicketRefund").modal('show');
+        var RootUrl = '@Url.Content("~/")';
+        $('#TicketID').val(id);
+        $('#btn_Refund').attr('href', RootUrl + 'BookOnlineTicket/Refund?TicketId=' + id);
+        
+    };
+
+</script>
+<div class="modal fade" id="myModal_TicketCancel" role="dialog">
+
+    <div class="modal-dialog">
+
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header" style="padding:35px 50px;">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4><i class="fa-fw"></i>Ticket Cancellation Policy</h4>
+            </div>
+            <div class="modal-body">
+                <ul class="a">
+                    @*<li> As per the policy, if you cancel the booking then 50% amount of charged fees excluding emitra & bank charges will be refunded.</li>*@
+                    <li> As per the policy, if you cancel the booking then below amount of charged fees excluding emitra & bank charges will be refunded.</li>
+                    <li>पॉलिसी के अनुसार, यदि आप बुकिंग निरस्त करते हैं, तो नीचे दी गई शुल्क राशि ई-मित्र और बैंक शुल्क को छोड़कर वापस कर दी जाएगी।</li>
+                    <table class="table table-striped table-bordered table-hover">
+                        <tr>
+                            <th style="color: black;">अवधि बुकिंग दिवस को शामिल करते हुए <br />(Including period bookings day) </th>
+                            <th style="color: black;">रिफंड टिकट राशि का प्रतिशत <br />(Percent of refund ticket amount)</th>
+                        </tr>
+                        <tr>
+                            <td>यदि भ्रमण दिवस की तारीख से पहले 90 दिनों के भीतर निरस्त कर दिया जाता है<br /> (If cancellation is made within 90 days before the date of visit)</td>
+                            <td>0</td>
+                        </tr>
+                        <tr>
+                            <td>यदि यात्रा की तारीख से पहले 91 से 180 दिनों के भीतर निरस्त कर दिया जाता है <br /> (If cancellation is made within 91-180 days before the date of visit)</td>
+                            <td>25</td>
+                        </tr>
+                        <tr>
+                            <td>यदि यात्रा की तारीख से पहले 181 से 270 दिनों के भीतर निरस्त कर दिया जाता है <br /> (If cancellation is made within 181-270 days before the date of visit)</td>
+                            <td>50</td>
+                        </tr>
+                        <tr>
+                            <td>यदि यात्रा की तारीख से पहले 271 से अधिक दिनों के भीतर निरस्त कर दिया जाता है <br /> (If cancellation is made 271 or more days before the date of visit)</td>
+                            <td>75</td>
+                        </tr>
+                    </table>
+                    <li>Before proceeding please keep ready the required bank details i.e. Bank Name, Branch Name, IFSC Code, Account Type (Saving) & Account No. etc.</li>
+                    <li>Note: Full or half day safari, current and tatkal safari bookings are non transferable and non refundable booking once made shall not be cancelled. .</li>
+                </ul>
+            </div>
+            <div class="modal-footer" style="clear:both; padding-left: 50px;">
+                <div id="btn" class="col-lg-6">
+                    <a class="btn btn-danger" target="_blank" id="btn_FullCancel" href='javascript:void(0)'>
+                        Full Cancel
+                    </a>
+                </div>
+                <div id="btn" class="col-lg-6">
+                    <a class="btn btn-info" target="_blank" id="btn_PartialCancel" href='javascript:void(0)'>
+                        Partial Cancel
+                    </a>
+                    @*<a class="btn btn-primary" href='@Url.Action("BookOnlineTicket", "BookOnlineTicket" )'>
+                            Exit
+                        </a>*@
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
+<div class="modal fade" id="myModal_TicketRefund" role="dialog">
+
+    <div class="modal-dialog">
+
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header" style="padding:35px 50px;">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4><i class="fa-fw"></i>Ticket Refund Policy(For 18th March to 30th June 2020 Visitors)</h4>
+            </div>
+            <div class="modal-body">
+                <ul class="a">
+                    <li>As per the policy, if the booking cancelled by the guest, then the full amount of charged fees excluding emitra & bank charges will be refunded.</li>
+                    <li>पॉलिसी के अनुसार, आगंतुक के द्वारा बुकिंग निरस्त करने पर पूरी जमा राशि ,ई-मित्र और बैंक शुल्क को छोड़कर वापस कर दी जाएगी।</li>
+                    <li>Before proceeding please keep ready the required bank details i.e. Bank Name, Branch Name, IFSC Code, Account Type (Saving) & Account No. etc.</li>
+                </ul>
+            </div>
+            <div class="modal-footer" style="clear:both; padding-left: 50px;">
+                <div id="btn" class="col-lg-12">
+                    <a class="btn btn-danger" target="_blank" id="btn_Refund" href='javascript:void(0)'>
+                        Refund
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
+
+<div id="page-wrapper-inn">
+
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">WildLife Ticket History</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="tbl" class="table-responsive">
+                        <table class="table table-striped table-bordered table-hover" id="tbltemp">
+                            <thead>
+                                <tr>
+
+                                    <th>
+                                        Booking No.
+                                    </th>
+                                    <th>
+                                        Total Tickets
+                                    </th>
+                                    <th>
+                                        Arrival Date
+                                    </th>
+                                    <th>
+                                        Paid Amount
+                                    </th>
+
+
+                                    <th>
+                                        Action
+                                    </th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in ViewData["ticketlist"] as IEnumerable<FMDSS.Models.BookOnlineTicket.BookOnTicket>)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(model => item.EmitraTransactionId)
+                                            @Html.HiddenFor(model => item.TicketID)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.TotalMember)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.DateOfArrival)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.TotalAmount)
+                                        </td>
+                                        @*<td>
+                                                <a href="" class="Print">Print Ticket</a>
+                                            </td>*@
+                                        <td>
+                                            @if (item.CancleTicketStatus == 1 && item.CancelStatus == 0)
+                                            {
+                                                if (!item.EmitraTransactionId.Trim().StartsWith("C19-"))
+                                                {
+                                                    if (item.RefundStatus == 0)
+                                                    {
+                                                    <a onclick="TicketCancel('@Encryption.encrypt(Convert.ToString(item.TicketID))')" style="cursor:pointer;">
+                                                        Cancel Ticket
+                                                        <input id="hdn_TicketID" type="hidden" value="'@Encryption.encrypt(Convert.ToString(item.TicketID))'" />
+                                                    </a>
+                                                    <span style="color: #337ab7">&nbsp; &nbsp;  </span>
+                                                    }
+                                                }
+                                                @*<a id="btnAddModelRefund" data-target="#myModalRefund" data-toggle="modal" onclick="return RefundMsg(@item.TicketID);">
+                    Cancel Ticket
+            </a>*@
+
+
+                                            }
+                                            else if (item.CancleTicketStatus != 1 && item.CancleTicketStatus != 0)
+                                            {
+
+                                                <span style="color: #337ab7">@item.CancleTicketStatusName </span>
+
+                                            }
+
+
+
+                                            @if (item.CancleTicketStatus == 1 || item.CancleTicketStatus == 0)
+                                            {
+                                                <a href='@Url.Action("PrintWildLifeTicket", "BookOnlineTicket", new { ticketid = Encryption.encrypt(Convert.ToString(item.TicketID)) })' target="_blank">
+                                                    Download
+                                                </a>
+                                            }
+
+                                            @if (item.COVIDStatus == 1 && item.TicketMemberBordingStatus == 0)
+                                            {
+                                                var rqid = item.TicketID;
+                                                if (item.isDFOApproved == 0)
+                                                {
+                                                    <span style="color: #337ab7">&nbsp; | &nbsp;  </span>
+                                                    <span style="color: #337ab7">Pending For Approval</span>
+                                                }
+                                                else
+                                                {
+                                                    if (item.PlaceId != 53 && item.PlaceId != 57)
+                                                    {
+                                                        if (item.RefundStatus == 0)
+                                                        {
+                                                    <a href='@Url.Action("CovidBooking", "BookOnlineTicket", new { ticketid = Encryption.encrypt(Convert.ToString(item.TicketID)) })'>
+                                                        <span style="color: #337ab7">&nbsp; | &nbsp;  </span>
+                                                        <span style="color: #337ab7"> CovidBooking</span>
+                                                    </a>
+
+                                                    <span style="color: #337ab7">&nbsp; | &nbsp;  </span>
+                                                    <a onclick="TicketRefund('@Encryption.encrypt(Convert.ToString(item.TicketID))')" style="cursor:pointer;">
+                                                        Refund
+                                                    </a>
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                        </td>
+
+
+                                    </tr>
+
+                                }
+
+
+                            </tbody>
+                        </table>
+                        <table id="tbl_tkt">
+                            <tbody></tbody>
+                        </table>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

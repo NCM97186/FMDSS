@@ -1,0 +1,288 @@
+﻿@model FMDSS.Models.Master.Ticker
+@{
+    Layout = null;
+}
+@using CaptchaMvc.HtmlHelpers
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link href="~/css/bootstrap.min.css" rel="stylesheet">
+<!-- Custom styles for this template -->
+<link href="~/css/mobile.css" rel="stylesheet">
+<link href="~/css/main.css" rel="stylesheet">
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+    #tbl {
+        overflow-x: auto;
+        overflow-y: auto;
+        padding: 15px;
+        width: 100%;
+        height: 400px;
+    }
+
+    .header-top ul li a {
+        color: #333;
+        font-size: 12px;
+        font-weight: bolder;
+    }
+
+    #noticeDiv {
+        position: absolute;
+        top: 150px;
+        background: rgba(0,0,0,0.5);
+        width: 25%;
+        height: 37%;
+        left: 14px;
+        padding: 12px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    #modalWorkFlowDetails .tbl-scroll {
+        overflow-y: auto;
+        max-height: 600px !important;
+    }
+
+    #modalWorkFlowDetails .modal-dialog {
+        width: 1092px !important
+    }
+
+    #modalWorkFlowDetails .scroll {
+        overflow-y: auto;
+        max-height: 350px !important;
+    }
+
+    #modalWorkFlowDetails .panel-body .form-group {
+        margin-bottom: 10px;
+    }
+
+    .page-header {
+        float: left;
+        font-size: 19px;
+        background: #737373;
+        color: #fff;
+        font-weight: normal;
+        width: 100%;
+        padding: 5px;
+        box-sizing: border-box;
+        border-radius: 3px;
+    }
+
+    .inventry_tbl tr th, .inventry_tbl tr td {
+        font-size: 14px;
+        vertical-align: top;
+    }
+
+    .inventry_tbl tr th {
+        font-weight: 600;
+        background: #737373;
+        color: #fff
+    }
+</style>
+
+
+
+<div class="headerfirst">
+
+    <!--Top Bar-->
+    <div class="header-top">
+        <div class="container" id="con">
+            <div class="row">
+                <div class="text-right">
+                    <ul class="links list-inline">
+                        <li><a href="~/Help/User_Manual_Online20_Ticket_Booking_20-12-2018.pdf" target="_blank"> Help Doc for online booking </a></li>
+                        <li><a href="~/Help/Help_document.pdf" target="_blank"> Help Doc for FMDSS</a></li>
+                        <li><img src="~/images/sign_in.png" alt="SSO Sign in"><a href="https://sso.rajasthan.gov.in/signin?ru=fmdss">SSO Login</a></li>
+
+
+                        <li>
+                            <img src="~/images/flags/flag_default.png" alt="English"> <a href="">English</a> &nbsp;
+                            <!-- <img src="~/images/flags/flag_india.png" alt="Hindi"> <a href="">Hindi</a>-->
+                        </li>  |
+                        <li><a href="#" id="incfont">A+</a>&nbsp;&nbsp;<a href="#" id="decfont">A-</a></li>
+                        <li><a href="#" class="box-green" id="GreenCss">A</a></li>
+                        <li><a href="#" class="box-white" id="RevertCss">A</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--/.End of Top Bar-->
+
+    <div class="navbar navbar-default" role="navigation" data-spy="affix" data-offset-top="400" id="nav">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse" onclick="togglenav();">
+                    <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand scroll" href="http://fmdss.forest.rajasthan.gov.in/" id="myLogo">
+                    <img src="~/images/logo.png" alt="Logo" title="Logo" class="img-responsivebrand">
+                </a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        @Html.ActionLink("Check Inventory for Wildlife Booking", "InventoryReport", "Home")
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Mobile App <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="https://play.google.com/store/apps/details?id=gov.fmdssbooking" target="_blank"><i class="fa fa-android" style="font-size:20px"> </i>  Android</a></li>
+                            <li><a href="https://itunes.apple.com/in/app/fmdss-wb/id1449570571?mt=8" target="_blank"><i class="fa fa-apple" style="font-size:20px"> </i>  Iphone</a></li>
+
+                        </ul>
+                    </li>
+
+
+                    <li>
+                        <a href="javascript:void(0)" id="a_request" data-toggle="modal" data-target="#requestModal">Validate Ticket</a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About Us <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="http://forest.rajasthan.gov.in/content/raj/forest/forest-department/en/about-us/mandate.html" target="_blank">Mandate </a></li>
+                            <li><a href="http://forest.rajasthan.gov.in/content/raj/forest/en/raj-wild-life/about-us/organizational-structure.html">Organizational Structure</a></li>
+                            <li><a href="http://forest.rajasthan.gov.in/content/raj/forest/en/raj-wild-life/about-us/structure-at-the-division-level.html">Structure at the Divisional Level</a></li>
+                            <li><a href="http://forest.rajasthan.gov.in/content/raj/forest/en/raj-wild-life/about-us/administrative-strength.html">Administrative Strength</a></li>
+                            <li><a href="http://forest.rajasthan.gov.in/content/raj/forest/en/raj-wild-life/public-information/orders---circulars.html">Orders,Circulars & IPR of ROs</a></li>
+                        </ul>
+                    </li>
+                    <!--/.end-->
+                    <!--Help doc-->
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Help Documents <b class="caret"></b></a>
+                        <ul class="dropdown-menu width-control">
+                            <li><a href="~/Help/User_Manual_Online20_Ticket_Booking_20-12-2018.pdf" target="_blank">Help Document for online booking</a></li>
+                            <li><a href="/Help/Help_document.pdf" target="_blank">Help Document for FMDSS</a></li>
+                        </ul>
+                    </li>
+
+
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+
+
+        </div>
+    </div>
+</div>
+
+@*<div id="page-wrapper-inn">*@
+<div class="container-fluid">
+    <p>
+        <br />
+        <a href='@Url.Action("Home","Home")' class="btn btn-primary pull-right">Back to home</a>
+    </p>
+    <div class="row">
+        <div class="col-xs-12">
+            <h1 class="page-header"><span>Ticket Details:</span></h1>
+        </div>
+        <div class="col-lg-12">
+
+            <table class="table table-bordered table-responsive" style="background: cornsilk;">
+                <tr>
+                    <td>Booking Type</td>
+                    <td colspan="3">@Model.BookingType</td>
+                </tr>
+                <tr>
+                    <td>Request ID</td>
+                    <td>@Model.RequestId</td>
+                    <td>Date Of Booking</td>
+                    <td>@Model.DateOfBooking</td>
+                </tr>
+                <tr>
+                    <td>Place</td>
+                    <td>@Model.Place</td>
+                    <td>Zone</td>
+                    <td>@Model.Zone</td>
+                </tr>
+                <tr>
+                    <td>Shift</td>
+                    <td>@Model.Shift</td>
+                    <td>Vehicle</td>
+                    <td>@Model.Vehicle</td>
+                </tr>
+                <tr>
+                    <td>Visiting Date</td>
+                    <td>@Model.VisitingDate</td>
+                    <td>Total Members</td>
+                    <td>@Model.TotalMembers</td>
+                </tr>
+                <tr>
+                    <td>Total Amount</td>
+                    <td>@Model.TotalAmount</td>
+                    <td>Ticket Status</td>
+                    <td>@Model.TicketStatus</td>
+                </tr>
+                <tr>
+                    <td>Member Details</td>
+                    <td colspan="3">@Model.MemberNames</td>                    
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+@Html.Partial("_PartialFooterHome")
+
+
+<div class="modal fade" id="requestModal" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <input type="hidden" id="BookingPopUpStatus" value="@ViewData["PopUpContentStatus"]" />
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header" style="color:#808080 !important">
+                <button type="button" id="btnClose" class="close" data-dismiss="modal">&times;</button>
+                <h4>Check Your Booking Id</h4>
+            </div>
+
+            @using (Html.BeginForm("CheckTicketInfo", "Home", FormMethod.Post))
+            {
+                <div class="modal-body">
+                    <div id="popUpStatus">
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            @Html.Raw(TempData["ErrorMessage"]);
+                        }
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="form-group col-md-12" style="margin-bottom:0px;">
+                        <label>Enter Booking Id: </label>
+                        <input type="text" id="txtRequestId" name="RequestId" class="form-control" />
+                        <input type="hidden" id="ErrorVal" value="@TempData["ErrorVal"]" />
+
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="capt">
+                            @Html.MathCaptcha()
+                        </div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <input type="submit" id="btnSubmit1" value="Check" class="btn btn-success" />
+                    </div>
+
+                    <div class="clearfix"></div>
+
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+
+
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script type="text/javascript">
+    var $ = $.noConflict();
+</script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/js/bootstrap.min.js"></script>
+<link href="~/css/dashboard/dataTables.bootstrap.css" rel="stylesheet" />
+<script src="~/js/dashboard/jquery.dataTables.min.js"></script>
+<script src="~/js/dashboard/dataTables.bootstrap.min.js"></script>
+
+
+
+

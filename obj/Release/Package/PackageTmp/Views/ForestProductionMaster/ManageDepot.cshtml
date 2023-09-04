@@ -1,0 +1,694 @@
+﻿@{
+    ViewBag.Title = "ManageDepot";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); 
+}
+@model IEnumerable<FMDSS.Models.ForestProduction.DepotManagement>
+
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+
+    function ShowDepot(depotID) {
+        document.getElementById("ssoid").value = '@Session["SSOID"]';
+        document.getElementById("reqID").value = depotID;
+        document.getElementById("postDepotform").action = 'http://localhost:17105/fmdssgis/dnm/dnm.aspx';
+        document.getElementById("postDepotform").submit();
+
+
+        return false;
+    }
+
+
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        $('#dataTables-example').DataTable({
+            responsive: true
+        });
+
+
+
+        $('#ddl_circleCode').change(function (e) {
+            $("#ddl_divisionCode").empty();
+            $("#ddl_RangeCode").empty();
+            $("#ddl_RangeCode").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ForestProductionMaster/DivisionData', // we are calling json method
+                dataType: 'json',
+                data: { regionCode: $("#ddl_regionCode").val(), circleCode: $("#ddl_circleCode").val() },
+                success: function (circle) {
+                    $.each(circle, function (i, items) {
+                        $("#ddl_divisionCode").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#ddl_divisionCode').change(function (e) {
+            $("#ddl_RangeCode").empty();
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ForestProductionMaster/RangeData', // we are calling json method
+                dataType: 'json',
+                data: { regionCode: $("#ddl_regionCode").val(), circleCode: $("#ddl_circleCode").val(), divisionCode: $("#ddl_divisionCode").val() },
+                success: function (divCode) {
+                    $.each(divCode, function (i, items) {
+                        $("#ddl_RangeCode").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#villageCode').change(function (e) {
+
+            //alert($("#divisionCode").val());
+            //alert($("#rangeCode").val());
+            //alert($("#villageCode").val());
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ForestProductionMaster/getVillage', // we are calling json method
+                dataType: 'json',
+                data: { divCode: $("#ddl_divisionCode").val(), ranCode: $("#ddl_RangeCode").val(), villCode: $("#villageCode").val() },
+                success: function (range) {
+                    $.each(range, function (i, items) {
+                        $("#depotId").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#ddl_RangeCode').change(function (e) {
+
+            $("#ddl_designation").empty();
+            $("#ddl_designation").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            $("#ddl_depotIncharge").empty();
+            $("#ddl_depotIncharge").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ForestProductionMaster/DesignationByRange', // we are calling json method
+                dataType: 'json',
+                data: { rangeCode: $("#ddl_RangeCode").val() },
+                success: function (range) {
+                    $.each(range, function (i, items) {
+                        $("#ddl_designation").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#ddl_designation').change(function (e) {
+            $("#ddl_depotIncharge").empty();
+            $("#ddl_depotIncharge").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ForestProductionMaster/EmpByRangeDesignation', // we are calling json method
+                dataType: 'json',
+                data: { rangeCode: $("#ddl_RangeCode").val(), desigID: $("#ddl_designation").val() },
+                success: function (range) {
+                    $.each(range, function (i, items) {
+                        $("#ddl_depotIncharge").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $(document).on('click', '.EditDepot', function () {
+            $('#lbl_dpt').text("Edit Depot");
+            var $row = jQuery(this).closest('tr');
+            var $columns = $row.find('td');
+            var values = "";
+            var deptID = $(this).parents('tr').find('input[type="hidden"]').val();
+            var option = "Edit";
+            EditDepot(deptID, option);
+        }); 
+         
+        $(document).on('click', '.ViewDepot', function () {  
+            var $row = jQuery(this).closest('tr');
+            var $columns = $row.find('td');
+            var values = "";
+            var deptID = $(this).parents('tr').find('input[type="hidden"]').val();
+            var option = "View";
+            EditDepot(deptID, option);
+        });
+
+        function EditDepot(did, option) { 
+            clear();
+            $('#hdn_dpotID').val(did);
+            var tblinfo = {
+                DepotId: $.trim(did)
+            }
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(tblinfo),
+                url: RootUrl + 'ForestProductionMaster/EditDetails',
+                success: function (data) {
+                    if (option == "Edit") {
+                        //var r_Code = data.RegionCode;
+                        var c_Code = data.CircleCode;
+                        var d_Code = data.DivisionCode;
+                        var rg_Code = data.RangeCode;
+                        var desigID = data.DesignationID;
+                        var incharge = data.DepotIncharge;
+
+                        if (data.DepotType == "Private") {
+                            $("#depotP").prop("checked", true);
+                        }
+                        else {
+                            $("#depotG").prop("checked", true);
+                        }
+
+                        $('#txt_depotName').val(data.DepotName);
+                        $('#txt_Latitude').val(data.Latitude);
+                        $('#txt_Longitude').val(data.Longitude);
+                        //$('#txt_depotIncharge').val(data.DepotIncharge);
+
+
+                        var selectObj = document.getElementById('ddl_circleCode');
+
+                        for (var i = 0; i < selectObj.options.length; i++) {
+                            if (selectObj.options[i].value == c_Code) {
+                                selectObj.options[i].selected = true;
+                            }
+                        }
+
+
+                        //$("#ddl_RangeCode").val(rg_Code);
+
+
+
+                        // bind division
+                        $.ajax({
+                            type: 'POST',
+                            url: RootUrl + 'ForestProductionMaster/DivisionData', // we are calling json method
+                            dataType: 'json',
+                            data: { circleCode: c_Code },
+                            success: function (circle) {
+                                $("#ddl_divisionCode").empty();
+                                $.each(circle, function (i, items) {
+                                    $("#ddl_divisionCode").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                                    if (items.Value == d_Code) {
+                                        $('#ddl_divisionCode option').filter(function () { return $(this).val() == d_Code }).attr('selected', true);
+                                        return;
+                                    }
+                                });
+                            },
+                            error: function (ex) {
+                                alert('Failed to retrieve states.' + ex);
+                            }
+
+                        });
+
+                        //bind range
+                        $.ajax({
+                            type: 'POST',
+                            url: RootUrl + 'ForestProductionMaster/RangeData', // we are calling json method
+                            dataType: 'json',
+                            data: { divisionCode: d_Code },
+                            success: function (divCode) {
+                                $("#ddl_RangeCode").empty();
+                                $.each(divCode, function (i, items) {
+                                    $("#ddl_RangeCode").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                                    if (items.Value == rg_Code) {
+                                        $('#ddl_RangeCode option').filter(function () { return $(this).val() == rg_Code }).attr('selected', true);
+                                        return;
+                                    }
+                                });
+                            },
+                            error: function (ex) {
+                                alert('Failed to retrieve states.' + ex);
+                            }
+
+                        });
+
+                        $.ajax({
+                            type: 'POST',
+                            url: RootUrl + 'ForestProductionMaster/DesignationByRange', // we are calling json method
+                            dataType: 'json',
+                            data: { rangeCode: rg_Code },
+                            success: function (range) {
+                                $.each(range, function (i, items) {
+                                    $("#ddl_designation").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                                    if (items.Value == desigID) {
+                                        $('#ddl_designation option').filter(function () { return $(this).val() == desigID }).attr('selected', true);
+                                        return;
+                                    }
+                                });
+                            },
+                            error: function (ex) {
+                                alert('Failed to retrieve states.' + ex);
+                            }
+
+                        });
+
+                        $.ajax({
+                            type: 'POST',
+                            url: RootUrl + 'ForestProductionMaster/EmpByRangeDesignation', // we are calling json method
+                            dataType: 'json',
+                            data: { rangeCode: rg_Code, desigID: desigID },
+                            success: function (range) {
+                                $.each(range, function (i, items) {
+                                    $("#ddl_depotIncharge").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                                    if (items.Value == incharge) {
+                                        $('#ddl_depotIncharge option').filter(function () { return $(this).val() == incharge }).attr('selected', true);
+                                        return;
+                                    }
+                                });
+                            },
+                            error: function (ex) {
+                                alert('Failed to retrieve states.' + ex);
+                            }
+
+                        });
+
+
+                        $("#btn_submit1").html('Update');
+                        $('#btn_submit1').val('Update');
+                        // $('#btn_addDepotPopup').trigger('click');
+                    }
+                    else if (option == "View") {
+                        //$("#txt_depotName").attr("disabled", "disabled");
+                        //$("#btn_submit1").css("display", "none");
+                        //$("#btn_reset").css("display", "none");
+                        //$("#btn_cancel").css("display", "none");
+                        $("#tbdyScart").empty();
+                        bardata = "<tr><td>Depot Type</td><td>" + data.DepotType +
+               //"</td></tr><tr><td>Region Name</td><td>" + data.RegionName +
+               "</td></tr><tr><td>Circle Name</td><td>" + data.CircleName +
+               "</td></tr><tr><td>Division Name</td><td>" + data.DivisionName +
+               "</td></tr><tr><td>Range Name</td><td>" + data.RangeName +
+               "</td></tr><tr><td>Depot Name</td><td>" + data.DepotName +
+               "</td></tr><tr><td>Latitude</td><td>" + data.Latitude +
+               "</td></tr><tr><td>Longitude</td><td>" + data.Longitude +
+               "</td></tr><tr><td>Depot Incharge</td><td>" + data.DepotIncharge +
+               "</td></tr>";
+
+
+                        $("#tbdyScart").append(bardata);
+                    }
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        }
+
+        $('#btn_submit1').click(function (e) {
+            if ($('#ddl_RangeCode').val() == '' || $('#ddl_RangeCode').val() == null || $('#ddl_RangeCode').val() == '0') {
+                $("#errorRange").css("display", "block");
+                $('#ddl_RangeCode').focus();
+                return false;
+            }
+            else {
+                $("#errorRange").css("display", "none");
+            }
+
+            if ($('#txt_depotName').val() == '') {
+                $("#errorDName").css("display", "block");
+                $('#txt_depotName').focus();
+                return false;
+            }
+            else {
+                $("#errorDName").css("display", "none");
+            }
+            if ($('#ddl_designation').val() == '' || $('#ddl_designation').val() == null || $('#ddl_designation').val() == '0') {
+                $("#errorDesignation").css("display", "block");
+                $('#ddl_designation').focus();
+                return false;
+            }
+            else {
+                $("#errorDesignation").css("display", "none");
+            }
+            if ($('#ddl_depotIncharge').val() == '' || $('#ddl_depotIncharge').val() == null || $('#ddl_depotIncharge').val() == '0') {
+                $("#errorDIncharge").css("display", "block");
+                $('#ddl_depotIncharge').focus();
+                return false;
+            }
+            else {
+                $("#errorDIncharge").css("display", "none");
+            }
+            //if ($('#txt_depotIncharge').val() == '') {
+            //    $("#errorDIncharge").css("display", "block");
+            //    $('#txt_depotIncharge').focus();
+            //    return false;
+            //}
+            //else {
+            //    $("#errorDIncharge").css("display", "none");
+            //}
+
+        });
+        $('#btn_addDepotPopup').click(function (e) {
+            $('#lbl_dpt').text("Create Depot");
+            clear();
+        });
+
+        //$('#txt_depotName').keypress(function (e) {
+        //    var kc = e.which;
+        //    if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 32)) {
+
+        //    }
+        //    else {
+        //        e.preventDefault();
+        //    }
+        //});
+
+        $('[data-toggle=modal]').on('click', function (e) {
+            var $target = $($(this).data('target'));
+            $target.data('triggered', true);
+            setTimeout(function () {
+                if ($target.data('triggered')) {
+                    $target.modal('show').data('triggered', false);
+                };
+            }, 600); // milliseconds
+            return false;
+        });
+        $('#btn_reset').click(function (e) {
+            clear();
+        });
+    });
+
+    function clear() {
+
+        //$("#ddl_regionCode").val('');
+        //$("#ddl_divisionCode").empty();
+        //$("#ddl_divisionCode").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+        //$("#ddl_circleCode").empty();
+        //$("#ddl_circleCode").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+        //$("#ddl_RangeCode").empty();
+        //$("#ddl_RangeCode").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+        $("#ddl_RangeCode").val('')
+        $("#ddl_designation").empty();
+        $("#ddl_designation").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+        $("#ddl_depotIncharge").empty();
+        $("#ddl_depotIncharge").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+
+        $("#btn_submit1").html('Save');
+        $('#btn_submit1').val('Save');
+        $("#txt_depotName").val('');
+        //$("#txt_depotIncharge").val('');
+
+        $("#errorRange").css("display", "none");
+        $("#errorDName").css("display", "none");
+        $("#errorDIncharge").css("display", "none");
+    }
+</script>
+
+@using (Html.BeginForm("SubmitDepotForm", "ForestProductionMaster", FormMethod.Post, new { id = "submitForm" }))
+{
+
+    <div id="page-wrapper-inn">
+        <div class="col-lg-12 pad">
+            <h1 class="page-header"><span>Manage Depots</span></h1>
+            @if (@Session["Depot_Status"] != null)
+            {
+                <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@Session["Depot_Status"]</div>
+                Session["Depot_Status"] = null;
+            }
+        </div>
+        <!-- /.col-lg-12 -->
+        <!-- Row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+
+
+                    <div class="panel-body">
+                        <div class="col-lg-3 pull-right">
+                            <button type="button" class="btn btn-success AddNewDepot btn_pp pull-right" id="btn_addDepotPopup" name="btn_addpopip" value="" data-toggle="modal" data-target="#myModal" title="Add New Depot">
+                                <i class="fa fa-plus"></i> Add New Depot
+                            </button>
+                        </div>
+                        <div class="dataTable_wrapper">
+                            <div id="tbl" class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+
+                                    <thead>
+                                        <tr>
+                                            <th style="width:10%;">S. No</th>
+                                            <th>Division Name</th>
+                                            <th>Range Name</th>
+                                            <th>Depot Name</th>
+                                            <th>Depot Incharge</th>
+                                            <th style="display:none">DepotType</th>
+                                            <th style="display:none">RegionCode</th>
+                                            <th style="display:none">CircleCode</th>
+                                            <th style="display:none">DivisionCode</th>
+                                            <th style="display:none">RangeCode</th>
+                                            <th style="width:15%;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+
+                                            <tr>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.RowID)
+                                                    @Html.HiddenFor(model => item.DepotId)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.DivisionName)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.RangeName)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.DepotName)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.DepotIncharge)
+                                                </td>
+                                                <td style="display:none">
+                                                    @Html.DisplayFor(model => item.DepotType)
+                                                </td>
+                                                <td style="display:none">
+                                                    @Html.DisplayFor(model => item.RegionCode)
+                                                </td>
+                                                <td style="display:none">
+                                                    @Html.DisplayFor(model => item.CircleCode)
+                                                </td>
+                                                <td style="display:none">
+                                                    @Html.DisplayFor(model => item.DivisionCode)
+                                                </td>
+                                                <td style="display:none">
+                                                    @Html.DisplayFor(model => item.RangeCode)
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-success btn-circle ViewDepot" title="View" data-toggle="modal" data-target="#myViewDepot">
+                                                        <i class="fa fa-eye"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-warning btn-circle EditDepot" data-toggle="modal" data-target="#myModal" title="Edit">
+                                                        <i class="fa fa-edit"></i>
+                                                    </button>
+
+                                                    <a class="btn btn-danger btn-circle" title="Delete" onclick="return confirm('Are you sure you wish to delete this record?');" href='@Url.Action("DeleteRecord", "ForestProductionMaster", new { id = item.DepotId })'>
+                                                        <i class="fa fa-times"></i>
+                                                    </a>
+                                                    <a class="btn btn-info btn-circle" href="javascript:void();" target="_blank" title="View in GIS" onclick="return ShowDepot(@item.DepotId);">
+                                                        <i class="fa fa-map-marker"></i>
+                                                    </a>
+
+                                                </td>
+                                            </tr>
+
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="myModal" role="dialog">
+                    <div class="modal-dialog modal-lg">
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">
+                                    &times;
+                                </button>
+                                <h4 class="modal-title">
+                                    <label id="lbl_dpt"></label>
+                                </h4>
+                            </div>
+                            <div class="modal-body">
+
+
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label>
+                                            Depot Type: <span class="mandatory">*</span>
+                                        </label>
+                                        <input type="radio" name="DepotType" id="depotG" value="Govt" checked="checked" />Govt. &nbsp;&nbsp;&nbsp;&nbsp;
+                                        <input type="radio" name="DepotType" id="depotP" value="Private" />Private
+                                    </div>
+                                </div>
+
+                                @*<div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Region Name: <span class="mandatory"></span></label>
+                                            @Html.DropDownList("RegionCode", (IEnumerable<SelectListItem>)ViewBag.RegionCode, "--Select--", new { @class = "form-control", id = "ddl_regionCode" })
+                                        </div>
+                                    </div>*@
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Circle Name: <span class="mandatory"></span></label>
+                                        @Html.DropDownList("CircleCode", (IEnumerable<SelectListItem>)ViewBag.CircleCode, "--Select--", new { @class = "form-control", id = "ddl_circleCode" })
+                                    </div>
+                                </div>
+
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Division Name: <span class="mandatory"></span></label>
+                                        @Html.DropDownList("DivisionCode", (IEnumerable<SelectListItem>)ViewBag.DivisionCode, new { @class = "form-control", id = "ddl_divisionCode" })
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Range Name: <span class="mandatory">*</span></label>
+                                        @Html.DropDownList("RangeCode", (IEnumerable<SelectListItem>)ViewBag.RangeCode, "--Select--", new { @class = "form-control", id = "ddl_RangeCode" })
+                                        <span id="errorRange" style="color: Red; display: none" class="alert-danger1">* Please Select Range.</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Depot Name: <span class="mandatory">*</span></label>
+                                        <input class="form-control" id="txt_depotName" name="DepotName" maxlength="50" />
+                                        <span id="errorDName" style="color: Red; display: none" class="alert-danger1">* Please Enter Depot Name.</span>
+                                        <input class="form-control" id="hdn_dpotID" type="hidden" name="DepotId" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Latitude:</label>
+                                        <input class="form-control" id="txt_Latitude" name="Latitude" maxlength="50" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Longitude:</label>
+                                        <input class="form-control" id="txt_Longitude" name="Longitude" maxlength="50" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Designation: <span class="mandatory">*</span></label>
+                                        @*<input class="form-control" id="txt_depotIncharge" name="DepotIncharge" />*@
+                                        @Html.DropDownList("Designation", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddl_designation" })
+                                        <span id="errorDesignation" style="color: Red; display: none" class="alert-danger1">* Please Select Designation.</span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Depot Incharge: <span class="mandatory">*</span></label>
+                                        @*<input class="form-control" id="txt_depotIncharge" name="DepotIncharge" />*@
+                                        @Html.DropDownList("DepotIncharge", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddl_depotIncharge" })
+                                        <span id="errorDIncharge" style="color: Red; display: none" class="alert-danger1">* Please Select Incharge.</span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12"></div>
+
+
+                                <!-- /.Btn Groping -->
+
+
+                            </div>
+                            <div class="modal-footer" style="clear:both">
+                                <div id="btn" class="col-lg-12">
+
+                                    <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit1">
+                                        <i class="fa fa-check"></i> Save
+                                    </button>
+                                    <button type="button" class="btn btn-warning" id="btn_reset">
+                                        <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                    </button>
+                                    <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                                        <i class="fa fa-times fa-fw"></i> Close
+                                    </button>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal fade in" id="myViewDepot" tabindex="-1" role="dialog" aria-hidden="false">
+                    <div class="modal-dialog mdw">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                <h4 class="modal-title" id="myModalLabel">View Depot Details</h4>
+                            </div>
+
+                            <div class="modal-body">
+                                <!-- From URL Get -->
+                                <table class="table table-striped table-bordered table-hover">
+                                    <tbody id="tbdyScart"></tbody>
+                                </table>
+
+                                <!-- /. From URL Get -->
+                            </div>
+                            <!-- /.modal-body -->
+                            <div class="modal-footer" id="fot-f">
+                                <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                                    <i class="fa fa-times fa-fw"></i> Close
+                                </button>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+
+
+                <!-- /.panel -->
+
+            </div>
+            <!-- /.col-lg-12 -->
+
+        </div>
+    </div>
+}
+<form name="postDepotform" id="postDepotform" method="post">
+    <input type="hidden" id="ssoid" name="ssoid" />
+    <input type="hidden" id="portalid" name="portalid" value="portal123" />
+    <input type="hidden" id="requestFor" name="requestFor" value="Depot" />
+    <input type="hidden" id="reqID" name="reqID" />
+</form>
+

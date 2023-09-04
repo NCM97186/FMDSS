@@ -1,0 +1,57 @@
+﻿@{
+    ViewBag.Title = "Master Data Import with Excel";
+}<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/js/bootstrap.min.js"></script>
+<script src="~/js/dashboard/dashboard.js" type="text/javascript"></script>
+<script src="~/js/dashboard/sidebar.js" type="text/javascript"></script>
+<script src="~/js/Common.js"></script>
+
+<!-- DataTables JavaScript -->
+<script src="~/js/dashboard/jquery.dataTables.min.js"></script>
+<script src="~/js/dashboard/dataTables.bootstrap.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#Import").click(function () {
+          //  alert('Import');
+            var form = $("form#myForm");
+            form.attr("action", "@Url.Action("ImportData", "Master")");
+            form.submit();
+        });
+
+        $("#Export").click(function () {
+           // alert('Export');
+            var form = $("form#myForm");
+            form.attr("action", "@Url.Action("ExportData", "Master")");
+            form.submit();
+        });
+    });
+</script>
+<h2>Master Data Import / Export</h2>
+@using (Html.BeginForm("ImportData", "Master", FormMethod.Post, new { id = "myForm", enctype = "multipart/form-data" }))
+                {
+
+
+    <div class="col-lg-6">
+        @ViewBag.OpType
+        <div class="form-group">
+            <label>Choose Master Data Table: <span class="mandatory">*</span></label>
+
+            @Html.DropDownList("ddlTableName", (IEnumerable<SelectListItem>)ViewBag.ddlTableName1, "--Select--",new { @class = "form-control common", id = "ddlTableName" })
+         
+        </div>
+    </div>
+    <input type="submit" value="Export Data to Excel" name="ExportData" id="Export" formmethod="post" />
+
+    <div class="col-lg-6">
+        <div class="form-group">
+            <input type="file" name="file" id="File5" />
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="form-group">
+            <input type="submit" name="ImportData" id="Import" value="OK" />
+        </div>
+    </div>
+}

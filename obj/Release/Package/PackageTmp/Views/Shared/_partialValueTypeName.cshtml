@@ -1,0 +1,122 @@
+﻿
+@model FMDSS.Models.Master.ValueTypeName
+<link href="~/css/timepicki.css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+<script>
+    var $j = jQuery.noConflict();
+    $j('.timepicker').timepicki({ timeFormat: 'h:mm p' });
+
+</script>
+
+<script src="~/js/jquery.min.js"></script>
+
+<script src="~/Scripts/jquery.validate.js"></script>
+
+<script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+   
+      $(document).ready(function () {
+
+    
+        $('#btn_submit1').click(function (e) {
+
+           
+
+            //if ($('#ValueType_Name').val().trim() == "") {
+            //    $('#errValueType_Name').css("display", "block");
+            //    $('#errValueType_Name').focus();
+            //    return false;
+            //}
+            //else {
+            //    $('#errValueType_Name').css("display", "none");
+            //}
+
+          
+            if ($('option:selected', $('#IsActive')).index() == 0) {
+                $("#errIsActive").css("display", "block");
+                $('#errIsActive').focus();
+                return false;
+            }
+            else {
+                $("#errIsActive").css("display", "none");
+            }
+
+
+
+
+        });
+
+    });
+
+
+</script>
+
+@using (Html.BeginForm("ADDUpdate_ValueType_Name", "Master", FormMethod.Post))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @*<label id="lbl_dpt">Add/Edit Place</label>*@
+                @ViewBag.OpType
+            </h4>
+        </div>
+
+        <div class="modal-body">
+            @Html.HiddenFor(model => model.VId)
+            
+            @*<div class="col-lg-6">
+                <div class="form-group">
+                    <label>Value Type Name: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.ValueType_Name, new { @class = "form-control common", @maxlength = "100" })
+                    <div id="errValueType_Name" style="display:none" class="alert-danger1">Value Type Name is Required.</div>
+                </div>
+            </div>*@
+           
+
+            <div class="col-lg-6 un-bold">
+                <div class="form-group">
+                    <label>@Html.LabelFor(Model => Model.ValueType_Name) <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(Model => Model.ValueType_Name, new { @class = "form-control common", id = "ValueType_Name" })
+                    @Html.ValidationMessageFor(model => model.ValueType_Name, "", new { @class = "alert-danger1" })
+
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Active / Deactive : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.IsActive, (IEnumerable<SelectListItem>)ViewBag.ISactivelst, "--Select--", new { @class = "form-control common", id = "IsActive" })
+                    <div id="errIsactive" style="display:none" class="alert-danger1">Active / Deactive  is Required.</div>
+
+                </div>
+            </div>
+            <!-- /.Btn Groping -->
+
+
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success" value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+}

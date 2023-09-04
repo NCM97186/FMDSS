@@ -1,0 +1,133 @@
+﻿@model IList<FMDSS.Models.BookOnlineTicket.TicketData>
+
+<style type="text/css">
+    .slno {
+        width: 80% !important;
+        text-align: center;
+    }
+
+    .error {
+        border-color: red;
+    }
+</style> 
+
+<div class="col-lg-12 pad">
+    <h4 id="hdMember" style="">Member Details</h4>
+    <span id="hdmessage" style="" class="mandatory">
+        Please carry original photo ID at the time of entry. Any wrong Id will be treated as fake booking and will be prosecuted as per Law.
+    </span>
+    <br> <div id="hdGSTmessage" style="color:#337ab7;">  </div>
+</div>
+@using (Ajax.BeginForm("Index", "NationalPark", new AjaxOptions{ HttpMethod = "Post"}))
+{
+    <div class="form-group un-bold">
+        <table id="tblMemberInfo" style="" class="table table-striped table-bordered table-hover ad-scrolll">
+            <thead>
+                <tr>
+                    <th>S.No.</th>
+                    <th>Name</th>
+                    <th>Gender</th>
+                    <th>Nationality</th>
+                    <th>IDType</th>
+                    <th>IDNo</th>
+                    <th>Video Camera</th>
+                    <th>Fees Per Member(INR)</th>
+                    <th>Total Camera Fees(INR)</th>
+                    <th>Total Guide &amp; Vehicle Rent(INR)</th>
+                </tr>
+            </thead>
+            <tbody id="tbdMemberInfo">
+                @for (int i = 0; i < Model.Count(); i++)
+                {
+                    <tr class="trRow_@i">
+                        <td style="width:10%!important;">@Html.TextBoxFor(x => x[i].Id, new { @class = "slno" }) </td>
+                        <td>@Html.TextBoxFor(x => x[i].Name, new { @class = "abc_" + i }) </td>
+                        <td>
+                            @Html.DropDownListFor(x => x[i].Gender, new SelectList(new List<string> { "Male", "Female", "Transgender" }),
+                           "--Select--", new { @class = "abc_" + i, @title = "Gender" })
+                        </td>
+                        <td>
+                            @Html.DropDownListFor(x => x[i].Nationality, new SelectList(new List<string> { "Indian", "Foreigner" }),
+                                "--Select--", new { @title = "Nationality", @class = "cnationality abc_" + i })
+                        </td>
+                        <td>
+                            @Html.DropDownListFor(x => x[i].IDType, new SelectList(new List<string> { "Passport", "Aadhar", "Driving Licence", "Voter ID",
+                                        "PAN Card", "Office ID", "Student ID" }), "--Select--", new { @class = "cidtype abc_" + i, @title = "Id Type" })
+                        </td>
+                        <td>@Html.TextBoxFor(x => x[i].IDNo, new { @class = "cidno abc_" + i }) </td>
+                        <td>@Html.TextBoxFor(x => x[i].VideoCamera, new { @class = "slno camera" }) </td>
+                        <td>@Html.TextBoxFor(x => x[i].Fee, new { @class = "slno memberfee" }) </td>
+                        <td>@Html.TextBoxFor(x => x[i].CameraFee, new { @class = "slno camerafee" }) </td>
+                        <td>@Html.TextBoxFor(x => x[i].GuideFee, new { @class = "slno guidefee" }) </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="col-lg-12 un-bold" style="clear:both">
+        <div class="form-group" id="btn-cont1">
+            <label> &nbsp;</label>
+            <input type="hidden" id="indianfee" value="100" />
+            <input type="hidden" id="otherfee" value="200" />
+            <input type="hidden" id="cameraindian" value="300" />
+            <input type="hidden" id="cameraother" value="500" />
+            <input type="hidden" id="guidindian" value="400" />
+            <input type="hidden" id="guidother" value="600" />
+            @*type="submit"*@
+            <button type="submit" class="btn btn-success" value="Submit" id="btn_Submit">
+                Submit
+            </button>
+            <button type="button" id="btnReset" class="btn btn-success">Reset</button>
+            <button type="button" id="btnCancel" class="btn btn-danger">Cancel</button>
+        </div>
+    </div>
+    <script type="text/javascript">
+       jQuery()('#btn_Submit').on('click', function () {
+           jQuery()('.error').each(function () {jQuery()(this).removeClass('error'); }); //clear all error class
+
+           jQuery()("#tbdMemberInfo > tr").each(function (i) {   // add error class those name have value and element blank
+                if ($(".abc_" + i).first().val().trim().length > 0) {
+                   jQuery()(".abc_" + i).each(function () {
+                        if ($(this).val().trim().length < 1 ||jQuery()(this).val().trim() === '0') {
+                           jQuery()(this).addClass('error');
+                        }
+                    });
+                }
+            });
+
+            if ($('.error').length < 1) {
+
+                //$(this).submit();
+                return true;
+            }
+            else {
+                return false;
+            }
+        });
+
+       jQuery()('.cnationality').on('change', calcFee);
+       jQuery()('.camera').on('change', calcFee);
+
+        function calcFee() {
+            var nation =jQuery()(this).parents('tr').find('.cnationality').val();
+            if (nation.trim().length > 1) {
+                var fee = nation === 'Indian' ?jQuery()('#indianfee').val() :jQuery()('#otherfee').val();
+                var cameraFee = nation === 'Indian' ?jQuery()('#cameraindian').val() :jQuery()('#cameraother').val();
+                var guideFee = nation === 'Indian' ?jQuery()('#guidindian').val() :jQuery()('#guidother').val();
+
+                var noOfCamera =jQuery()(this).parents('tr').find('.camera').val();
+                var totalCamerafee = noOfCamera * cameraFee;
+                var totalFee = parseFloat(fee) + parseFloat(totalCamerafee) + parseFloat(guideFee);
+
+               jQuery()(this).parents('tr').find('.camerafee').val(totalCamerafee);
+               jQuery()(this).parents('tr').find('.memberfee').val(fee);
+               jQuery()(this).parents('tr').find('.guidefee').val(guideFee);
+                //$(this).parents('tr').find('.cidno').val(totalFee);
+            }
+            //alert($(this).parents('tr').find('.memberfee').attr('class'));
+        } 
+       
+    </script>
+
+}

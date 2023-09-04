@@ -1,0 +1,1071 @@
+﻿@model FMDSS.Models.CitizenService.PermissionService.StakeholderService.StakeholderServices
+@{
+    ViewBag.Title = "VFMCRegistration";
+    Layout = "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js" type="text/javascript"></script>
+<script src="~/js/validation.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+</script>
+<script type="text/javascript">
+
+    $(function (e) {
+
+        $('#Minutes_of_Meeting').change(function (e) {
+            if ($('#Minutes_of_Meeting option:selected').val() == "Yes") {
+                $('#UploadMom').show();
+            }
+            else {
+                $('#UploadMom').hide();
+            }
+        });
+
+
+        $('#Dist_Code').change(function (e) {
+            $("#Blk_Code").empty();
+            $("#Gp_Code").empty();
+            $("#Vill_Code").empty();
+            $("#Blk_Code").append('<option value="' + '' + '">' +
+                    '--Select--' + '</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'JFMCRegistration/getBlock', // we are calling json method
+                dataType: 'json',
+                data: { dist_code: $("#Dist_Code").val() },
+                success: function (states) {
+                    $.each(states, function (i, block) {
+                        $("#Blk_Code").append('<option value="' + block.Value + '">' +
+                         block.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        });
+
+        $('#Blk_Code').change(function (e) {
+            $("#Vill_Code").empty();
+            $("#Gp_Code").empty();
+            $("#Gp_Code").append('<option value="' + '' + '">' +
+                   '--Select--' + '</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'JFMCRegistration/getGPs', // we are calling json method
+                dataType: 'json',
+                data: { dist_code: $("#Dist_Code").val(), block: $("#Blk_Code").val() },
+                success: function (states) {
+                    $.each(states, function (i, Gps) {
+                        $("#Gp_Code").append('<option value="' + Gps.Value + '">' +
+                         Gps.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        });
+
+        $('#Gp_Code').change(function (e) {
+            $("#Vill_Code").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'JFMCRegistration/getVillage', // we are calling json method
+                dataType: 'json',
+                data: { District_code: $("#Dist_Code").val(), Block_code: $("#Blk_Code").val(), GP_Code: $("#Gp_Code").val() },
+                success: function (states) {
+                    $.each(states, function (i, village) {
+                        $("#Vill_Code").append('<option value="' + village.Value + '">' +
+                         village.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        });
+
+        $('#Bank_Account_Operated').change(function (e) {
+
+            if ($('#Bank_Account_Operated option:selected').val() == "No") {
+
+                $('#Bank_Name,#Branch_Name,#Branch_Id,#Account_No,#Account_Type').val('');
+                $('.bank').hide();
+            }
+            if ($('#Bank_Account_Operated option:selected').val() == "Yes") {
+                $('.bank').show();
+            }
+
+        });
+
+        $('.sum').bind('change blur', function (e) {
+            if ($('#MembershipFees').val() == '') {
+                var sum1 = 0;
+            }
+            else {
+                var sum1 = $('#MembershipFees').val();
+            }
+            if ($('#Income_Deposit_ForestOffice').val() == '') {
+                var sum2 = 0;
+            }
+            else {
+                var sum2 = $('#Income_Deposit_ForestOffice').val();
+            }
+            if ($('#Income_Sale_ForestProduce').val() == '') {
+                var sum3 = 0;
+            }
+            else {
+                var sum3 = $('#Income_Sale_ForestProduce').val();
+            }
+            if ($('#Income_Generated_Activity').val() == '') {
+                var sum5 = 0;
+            }
+            else {
+                var sum5 = $('#Income_Generated_Activity').val();
+            }
+            if ($('#Other_Sources').val() == '') {
+                var sum4 = 0;
+            }
+            else {
+                var sum4 = $('#Other_Sources').val();
+            }
+            $('#Total_Income').val(parseInt(sum1) + parseInt(sum2) + parseInt(sum3) + parseInt(sum4) + parseInt(sum5));
+        });
+        
+        $('.sum1').bind('change blur', function (e) {
+
+
+            if ($('#Self_Help_Group_Men').val() == '--Select--') {
+                var sum1 = 0;
+            }
+            else {
+                var sum1 = $('#Self_Help_Group_Men').val();
+            }
+            if ($('#Self_Help_Group_Women').text() == '--Select--') {
+                var sum2 = 0;
+            }
+            else {
+                var sum2 = $('#Self_Help_Group_Women').val();
+            }
+            if ($('#Self_Help_Group_Others option:selected').text() == '--Select--') {
+                var sum3 = 0;
+            }
+            else {
+                var sum3 = $('#Self_Help_Group_Others').val();
+            }         
+            $('#Self_Help_Group_Total').val(parseInt(sum1) + parseInt(sum2) + parseInt(sum3));
+        });             
+        $('#Registration_Id').val(@Session["RegistId"]);
+        $('#Registration_Id,#Total_Income,#Self_Help_Group_Total').attr('Readonly', true);
+        $('#btn_submit').click(function (e) {
+            if ($('#DropMom option:selected').val() == 'Yes' && $('#fileMom').val().length == 0) {
+                alert('Upload valid file');
+                $('#fileMom').focus();
+                e.preventDefault();
+            }
+            else if (!(parseInt($('#Lattitude').val().substring(0, 2), 10) >= 23 && parseInt($('#Lattitude').val().substring(0, 2), 10) <= 29)) {
+                $('#errLattitude').show();
+                $('#errLattitude').html("Enter the GPS latitude between 23° - 29°!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Lattitude').focus();
+                return false;
+            }
+            else if (!(parseInt($('#Longitude').val().substring(0, 2), 10) >= 67 && parseInt($('#Longitude').val().substring(0, 2), 10) <= 78)) {
+                $('#errLongitude').show();
+                $('#errLongitude').html("Enter the GPS longitude between 67° to 78°!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Longitude').focus();
+                return false;
+            }
+           else if ($('#Bank_Account_Operated option:selected').val() == "Yes" && $('#Bank_Name').val()=='') {
+                alert('Enter bank name');
+                $('#Bank_Name').focus();
+                e.preventDefault();
+            }
+           else if ($('#Bank_Account_Operated option:selected').val() == "Yes" && $('#Branch_Name').val() == '') {
+                alert('Enter branch name');
+                $('#Branch_Name').focus();
+                e.preventDefault();
+            }
+           else if ($('#Bank_Account_Operated option:selected').val() == "Yes" && $('#Branch_Id').val() == '') {
+                alert('Enter branch id');
+                $('#Branch_Id').focus();
+                e.preventDefault();
+            }
+           else if ($('#Bank_Account_Operated option:selected').val() == "Yes" && $('#Account_No').val() == '') {
+                alert('Enter account no');
+                $('#Account_No').focus();
+                e.preventDefault();
+            }
+           else if ($('#Bank_Account_Operated option:selected').val() == "Yes" && $('#Account_Type').val() == '') {
+                alert('Enter account type');
+                $('#Account_Type').focus();
+                e.preventDefault();
+            }
+            else {
+
+            }
+
+        });
+
+
+        //$('#txtRegistrationId,#txtCommittee,#txtBankName,#txtBranchName,#txtBranchid,#txtAccountType,#txtareRemarks').keypress(function (e) {
+        //    var kc = e.which;
+
+        //    if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95) || (kc >= 44 && kc <= 57) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+        //    }
+        //    else {
+        //        e.preventDefault();
+        //    }
+        //});
+
+        $('#Account_No').keypress(function (e) {
+            var kc = e.which;
+            if ((kc >= 48 && kc <= 57) || (kc == 0 || kc == 8 || kc == 13 || kc == 95 || kc == 46)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+        //$('#txtOtherSource,#txtTotalIncome,#txtGrassQuantity,#txtGrassAmount,#txtProduceQuantity,#txtProduceAmount,#txtOthetQuantity,#txtOtherAmount,#txtThreeyear,#txtCurrentYear,#txtNgo,#txtTotalhelpgrp').keypress(function (e) {
+        //    var kc = e.which;
+        //    if ((kc >= 48 && kc <= 57) || (kc == 0 || kc == 8 || kc == 13 || kc == 95 || kc == 46)) {
+
+        //    }
+        //    else {
+        //        e.preventDefault();
+        //    }
+        //});
+
+        $('#Bank_Name,#Branch_Name,#Account_Type').keypress(function (e) {
+            var regex = new RegExp(/^[a-zA-Z\s]+$/);
+            var str = String.fromCharCode(!e.charCode ? e.which : e.charCode);
+            if (regex.test(str)) {
+                return true;
+            }
+            else {
+                e.preventDefault();
+                //alert('Please Enter Alphabate');
+                return false;
+            }
+        });
+
+        $('#Branch_Id,#RefNodoc,#KeyActivities').keypress(function (e) {
+            var regex = new RegExp("^[a-zA-Z0-9]*$");
+            var str = String.fromCharCode(!e.charCode ? e.which : e.charCode);
+            if (regex.test(str)) {
+                return true;
+            }
+            else {
+                e.preventDefault();
+                //alert('Please Enter Alphabate');
+                return false;
+            }
+        });
+
+
+        $('#Account_No').bind('keypress', function (evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode
+            // var charCode = evt.which;
+
+            if ((charCode == 46 && this.value.split('.').length > 1) || (charCode >= 97 && charCode <= 122) || (charCode >= 65 && charCode <= 90)) {
+                return false;
+            }
+            else {
+                if (charCode >= 48 && charCode <= 57 || charCode == 46) {
+                    return true;
+                }
+                else {
+                    evt.preventDefault();
+                }
+            }
+        });
+        $('.gridtable').DataTable({
+            responsive: true
+        });
+        $('#btn_AddNewJfmc').click(function (e) {
+            $('#NewJfmc').show();
+            $('html, body').animate({ scrollTop: $("#NewJfmc").offset().top - 120 }, 'slow');
+        });
+
+        $('#Longitude').keydown(function (e) {
+            var kc = e.keyCode;
+            var position = $(this).val().length;
+            if (position == 2 && kc != 8) {
+                if (parseInt($(this).val().substring(0, 2), 10) >= 67 && parseInt($(this).val().substring(0, 2), 10) <= 78) {
+                    var value = $('#Longitude').val();
+                    $('#Longitude').val(value + '.');
+                }
+            }
+            if (position > 2 && kc != 8) {
+                if (!(parseInt($(this).val().substring(0, 2), 10) >= 67 && parseInt($(this).val().substring(0, 2), 10) <= 78)) {
+                    $('#errLongitude').show();
+                    $('#errLongitude').html("Enter the GPS longitude between 67° to 78°!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Longitude').focus();
+                    e.preventDefault();
+                }
+            }
+        });
+
+        $('#Lattitude').keydown(function (e) {
+            var kc = e.keyCode;
+            var position = $(this).val().length;
+            if (position == 2 && kc != 8) {
+                if (parseInt($(this).val().substring(0, 2), 10) >= 23 && parseInt($(this).val().substring(0, 2), 10) <= 29) {
+                    var value = $('#Lattitude').val();
+                    $('#Lattitude').val(value + '.');
+                }
+            }
+            if (position > 2 && kc != 8) {
+                if (!(parseInt($(this).val().substring(0, 2), 10) >= 23 && parseInt($(this).val().substring(0, 2), 10) <= 29)) {
+                    $('#errLattitude').show();
+                    $('#errLattitude').html("Enter the GPS latitude between 23° - 29°!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    e.preventDefault();
+                }
+
+            }
+        });
+
+        
+        $('#Ssoid').blur(function () {
+
+            if ($('#Ssoid').val() != '') {
+                AddSsoid();
+            }
+            else {
+                $('#errSSOid').show();
+                $('#errSSOid').html("Enter valid ssoid" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Ssoid').focus();
+                e.preventDefault();
+                return false;
+            }
+        });
+
+   
+        
+
+    });
+
+    function EditJFMC(Id) {
+        $('#hdnId').val(Id);
+        var Id = { Id: Id }
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'JFMCRegistration/Edit', // we are calling json method
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(Id),
+            success: function (data) {
+                $('#Dist_Code').val(data.Dist_Code);
+                Block(data.Dist_Code,data.Blk_Code);              
+                GP(data.Dist_Code,data.Blk_Code, data.Gp_Code);
+                Village(data.Dist_Code, data.Blk_Code, data.Gp_Code, data.Vill_Code);
+                $('#Minutes_of_Meeting').val(data.Minutes_of_Meeting);
+                $('#Committee_Name').val(data.Committee_Name);
+                $('#Registration_Id').val(data.Registration_Id);
+                $('#Secretary_Name').val(data.Secretary_Name);
+                $('#Ssoid').val(data.Ssoid);
+                $('#Lattitude').val(data.Lattitude);
+                $('#Longitude').val(data.Longitude);
+                $('#Plantation_Area').val(data.Plantation_Area);
+                $('#Total_Area_Managed').val(data.Total_Area_Managed);
+                $('#Bank_Account_Operated').val(data.Bank_Account_Operated);
+                $('#Bank_Name').val(data.Bank_Name);
+                $('#Branch_Name').val(data.Branch_Name);
+                $('#Branch_Id').val(data.Branch_Id);
+                $('#Account_No').val(data.Account_No);
+                $('#Account_Type').val(data.Account_Type);
+                $('#MembershipFees').val(data.MembershipFees);
+                $('#Income_Deposit_ForestOffice').val(data.Income_Deposit_ForestOffice);
+                $('#Income_Generated_Activity').val(data.Income_Generated_Activity);
+                $('#Income_Sale_ForestProduce').val(data.Income_Sale_ForestProduce);
+                $('#Other_Sources').val(data.Other_Sources);
+                $('#Total_Income').val(data.Total_Income);
+                $('#Benefits_Plant_Grass_Quantity').val(data.Benefits_Plant_Grass_Quantity);
+                $('#Benefits_Plant_Grass_Amount').val(data.Benefits_Plant_Grass_Amount);
+                $('#Minor_Forest_Produce_Quantity').val(data.Minor_Forest_Produce_Quantity);
+                $('#Minor_Forest_Produce_Amount').val(data.Minor_Forest_Produce_Amount);
+                $('#Other_ForestProduce_Quantity').val(data.Other_ForestProduce_Quantity);
+                $('#Other_ForestProduce_Amount').val(data.Other_ForestProduce_Amount);
+                $('#No_Of_Beneficiaries_LastThreeYear').val(data.No_Of_Beneficiaries_LastThreeYear);
+                $('#No_Of_Beneficiaries_CurrentYear').val(data.No_Of_Beneficiaries_CurrentYear);
+                $('#Efficient_Grades').val(data.Efficient_Grades);
+                $('#No_Of_NGO_Working').val(data.No_Of_NGO_Working);
+                $('#Self_Help_Group_Men').val(data.Self_Help_Group_Men);
+                $('#Self_Help_Group_Women').val(data.Self_Help_Group_Women);
+                $('#Self_Help_Group_Others').val(data.Self_Help_Group_Others);
+                $('#Self_Help_Group_Total').val(data.Self_Help_Group_Total);
+                $('#Overall_Remarks').val(data.Overall_Remarks);                                                
+                $('#NewJfmc').show();
+                $('html, body').animate({ scrollTop: $("#NewJfmc").offset().top - 120 }, 'slow');
+            }
+        });
+    }
+
+    function Block(Dist,Block) {
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'JFMCRegistration/getBlock', // we are calling json method
+            dataType: 'json',
+            data: { dist_code: Dist },
+            success: function (states) {
+                $.each(states, function (i, block) {
+                    $("#Blk_Code").append('<option value="' + block.Value + '">' +
+                     block.Text + '</option>');
+                });
+                $("#Blk_Code").val(Block);
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    }
+
+    function GP(Dist, Block,Gp) {
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'JFMCRegistration/getGPs', // we are calling json method
+            dataType: 'json',
+            data: { dist_code: Dist, block: Block },
+            success: function (states) {
+                $.each(states, function (i, Gps) {
+                    $("#Gp_Code").append('<option value="' + Gps.Value + '">' +
+                     Gps.Text + '</option>');
+                });
+                $("#Gp_Code").val(Gp);
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    }
+
+    function Village(Dist, Block, Gp,Vill) {      
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'JFMCRegistration/getVillage', // we are calling json method
+            dataType: 'json',
+            data: { District_code: Dist, Block_code: Block, GP_Code: Gp },
+            success: function (states) {
+                $.each(states, function (i, village) {
+                    $("#Vill_Code").append('<option value="' + village.Value + '">' +
+                     village.Text + '</option>');
+                });
+                $("#Vill_Code").val(Vill);
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    }
+
+    function AddSsoid() {
+
+        var member = { member: $('#Ssoid').val() }
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(member),
+            url: '@Url.Content("~/")' + 'JFMCMember/AddJFMCMember',
+            success: function (data) {
+                if (data.list1.length > 0) {
+                    $.each(data.list1, function (i, items) {
+                        $('#Secretary_Name').val(items.FullName);
+                    });
+
+
+                }
+                else {
+                    alert('Invalid SSOId Please create ssoid');
+                    $('#MemberName').val('');
+                }
+
+                if (data.list2 == 'Invalid') {
+                    alert('Invalid SSOId Please create ssoid');
+                    $('#MemberName').val('');
+                }
+
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+
+    }
+
+</script>
+<style>
+    #jfmc {
+        overflow-y: auto;
+        height: 500px !important;
+    }
+</style>
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header"><span>  Village Forest Management Committee (VFMC) Registration</span></h1>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">               
+                @using (Html.BeginForm("Submit", "JFMCRegistration", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                { 
+                    
+                   <div><button type="button" class="btn btn-success add-btn-servy " id="btn_AddNewJfmc">Add New VFMC</button></div>                   
+                    <div class="panel-body">
+                        <input type="hidden" id="hdnId" name="hdnId" />
+                        <div class="dataTable_wrapper">
+                            <div id="tbl" class="table-responsive">
+                                @if (ViewData["Jfmclist"] != "")
+                                    {
+                                      <table class="table table-striped table-bordered table-hover table-responsive gridtable" id="dataTables-example">
+                                    <thead>
+                                        <tr>
+                                            @*<th style="width:7%;">S. No</th>*@
+                                            <th style="width:14%;">District</th>
+                                            <th style="width:14%;">Block</th>
+                                            <th style="width:14%;">Gram Panchayat</th>
+                                            <th style="width:14%;">Village</th>
+                                            <th style="width:14%;">VFMC</th>
+                                            <th style="width:14%;">Secretary</th>
+                                            <th style="width:14%;">Action</th>
+                                        </tr>
+                                        </thead>
+                                            <tbody>
+                                            @foreach (var item in ViewData["Jfmclist"] as IEnumerable<FMDSS.Models.CitizenService.PermissionService.StakeholderService.StakeholderServices>)
+                                            {
+                                                <tr>
+                                                   <td>
+                                                        @Html.DisplayFor(model => item.District)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Blk_Code)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Gp_Code)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.village)
+                                                    </td>
+
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Committee_Name)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Secretary_Name)
+                                                    </td>
+                                                    <td>
+                                                        @if (item.Id != 0)
+                                                            {
+                                                                <button type="button" class="btn btn-warning btn-circle" id="btnedit" title="Edit"  onclick="EditJFMC('@item.Id')">
+                                                                    <i class="fa fa-edit"></i>
+                                                                </button>
+                                                            }
+                                                            else
+                                                            {
+                                                                <a href='javascript:void(0);' style="cursor:not-allowed">
+                                                                    Not Allowed
+                                                                </a>
+                                                            }
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                    }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                  <div class="col-lg-12" id="NewJfmc" style="display:none">
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>District:<span class="mandatory">*</span></label>
+                          @Html.DropDownListFor(x => x.Dist_Code, (IEnumerable<SelectListItem>)ViewBag.DistrictName, "--Select--", new { id = "Dist_Code", name = "Dist_Code", @class = "form-control" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Dist_Code)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>Block:<span class="mandatory">*</span></label>
+                          @Html.DropDownListFor(x => x.Blk_Code, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "Blk_Code", name = "Blk_Code", @class = "form-control" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Blk_Code)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Name of Gram-Panchayat:<span class="mandatory">*</span>
+                          </label>
+                          @Html.DropDownListFor(x => x.Gp_Code, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "Gp_Code", name = "Gp_Code", @class = "form-control" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Gp_Code)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label> Village:<span class="mandatory">*</span></label>
+                          @Html.DropDownListFor(x => x.Vill_Code, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "Vill_Code", name = "Vill_Code", @class = "form-control" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Vill_Code)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Minutes of Meeting:<span class="mandatory">*</span>
+                          </label>
+
+                          @Html.DropDownListFor(x => x.Minutes_of_Meeting, new List<SelectListItem>
+                                                   {
+                                                     new SelectListItem { Text = "--Select--", Value = ""},
+                                                     new SelectListItem { Text = "Yes", Value = "Yes"},
+                                                     new SelectListItem { Text = "No", Value = "No"},
+                                                  },
+                                                  new
+                                                  {
+                                                      @id = "Minutes_of_Meeting",
+                                                      @name = "Minutes_of_Meeting",
+                                                      @class = "form-control"
+                                                  })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Minutes_of_Meeting)</div>
+                      </div>
+                  </div>
+                  <div id="UploadMom" style="display:none" class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Minutes of Meeting
+                          </label>
+                          @Html.TextBoxFor(x => x.Upload_MOM, new { @class = "form-control", @id = "Upload_MOM", name = "Upload_MOM", Type = "File" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Upload_MOM)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Name of Committee:<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Committee_Name, new { @class = "form-control", title = "Enter Committee Name", @maxlength = 200, @id = "Committee_Name" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Committee_Name)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Registration Id:<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Registration_Id, new { @class = "form-control", title = "Enter registration id", @maxlength = 50, @id = "Registration_Id" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Registration_Id)</div>
+
+                      </div>
+                  </div>
+                      <div class="col-lg-6">
+                          <div class="form-group">
+                              <label>
+                                  SSOId:<span class="mandatory">*</span>
+                              </label>
+                              @Html.TextBoxFor(x => x.Ssoid, new { @class = "form-control", title = "Enter Ssoid", @maxlength = 50, @id = "Ssoid" })
+                              <div id="errSSOid" class="alert-danger1">@Html.ValidationMessageFor(x => x.Ssoid)</div>
+                          </div>
+                      </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Name of Secretary:<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Secretary_Name, new { @class = "form-control", title = "Enter Secretary Name", @maxlength = 100, @id = "Secretary_Name" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Secretary_Name)</div>
+                      </div>
+                  </div>
+
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Lattitude:(Range between 23° to 29° Eg 25.052)<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Lattitude, new { @class = "form-control", title = "Enter lattitude", @maxlength = 6, @id = "Lattitude", name = "Lattitude" })
+                          <div id="errLattitude" style="display:none" class="alert-danger1"></div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Longitude:(Range between 67° to 78° Eg 69.053)<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Longitude, new { @class = "form-control", title = "Enter longitude", @maxlength = 6, @id = "Longitude", name = "Longitude" })
+                          <div id="errLongitude" style="display:none" class="alert-danger1"></div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Area Of Plantation(hectare):<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Plantation_Area, new { @class = "form-control", title = "Enter plantation area", @maxlength = 10, @id = "Plantation_Area", name = "Plantation_Area" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Plantation_Area)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Total Area Managed(hectare):<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Total_Area_Managed, new { @class = "form-control", title = "Enter total area managed", @maxlength = 10, @id = "Total_Area_Managed", name = "Total_Area_Managed" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Total_Area_Managed)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Bank Account Operated/Not:<span class="mandatory">*</span>
+                          </label>
+                          @Html.DropDownListFor(x => x.Bank_Account_Operated, new List<SelectListItem>
+                                                   {
+                                                     new SelectListItem { Text = "--Select--", Value = ""},
+                                                     new SelectListItem { Text = "Yes", Value = "Yes"},
+                                                     new SelectListItem { Text = "No", Value = "No"},
+                                                  },
+                                                  new
+                                                  {
+                                                      @id = "Bank_Account_Operated",
+                                                      @name = "Bank_Account_Operated",
+                                                      @class = "form-control"
+                                                  })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Bank_Account_Operated)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6 bank">
+                      <div class="form-group">
+                          <label>
+                              Name of the Bank:
+                          </label>
+                          @Html.TextBoxFor(x => x.Bank_Name, new { @class = "form-control", title = "Enter bank name", @maxlength = 200, @id = "Bank_Name", name = "Bank_Name" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Bank_Name)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6 bank">
+                      <div class="form-group">
+                          <label>
+                              Name of Branch:
+                          </label>
+                          @Html.TextBoxFor(x => x.Branch_Name, new { @class = "form-control", title = "Enter branch name", @maxlength = 200, @id = "Branch_Name", name = "Branch_Name" })
+
+                      </div>
+                  </div>
+                  <div class="col-lg-6 bank">
+                      <div class="form-group">
+                          <label>
+                              IFSC Code:
+                          </label>
+                          @Html.TextBoxFor(x => x.Branch_Id, new { @class = "form-control", title = "Enter branch id", @maxlength = 50, @id = "Branch_Id", name = "Branch_Id" })
+
+                      </div>
+                  </div>
+                  <div class="col-lg-6 bank">
+                      <div class="form-group">
+                          <label>
+                              Account Number:
+                          </label>
+                          @Html.TextBoxFor(x => x.Account_No, new { @class = "form-control", title = "Enter account no", @maxlength = 20, @id = "Account_No", name = "Account_No" })
+
+                      </div>
+                  </div>
+                  <div class="col-lg-6 bank">
+                      <div class="form-group">
+                          <label>
+                              Account Type:
+                          </label>
+                          @Html.TextBoxFor(x => x.Account_Type, new { @class = "form-control", title = "Enter account type", @maxlength = 50, @id = "Account_Type", name = "Account_Type" })
+
+                      </div>
+                  </div>
+                  <div class="col-lg-12">
+                      <h2>Income of Committee:<span class="mandatory">*</span></h2>
+                      <hr />
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Membership Fees(INR):<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.MembershipFees, new { @class = "form-control sum", title = "Enter membership fees", @maxlength = 20, @id = "MembershipFees", name = "MembershipFees" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.MembershipFees)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Income Deposited From Forest Offense(INR):<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Income_Deposit_ForestOffice, new { @class = "form-control sum", title = "Enter membership fees", @maxlength = 20, @id = "Income_Deposit_ForestOffice", name = "Income_Deposit_ForestOffice" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Income_Deposit_ForestOffice)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Income From Sale of Forest Produces(INR):<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Income_Sale_ForestProduce, new { @class = "form-control sum", title = "Enter Income from sale of forest produce", @maxlength = 20, @id = "Income_Sale_ForestProduce", name = "Income_Sale_ForestProduce" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Income_Sale_ForestProduce)</div>
+                      </div>
+                  </div>
+                      <div class="col-lg-6">
+                          <div class="form-group">
+                              <label>
+                                  Income genrated activity(INR):<span class="mandatory">*</span>
+                              </label>
+                              @Html.TextBoxFor(x => x.Income_Generated_Activity, new { @class = "form-control sum", title = "Enter Other Sources", @maxlength = 20, @id = "Income_Generated_Activity", name = "Income_Generated_Activity" })
+                              <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Other_Sources)</div>
+                          </div>
+                      </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Other Sources(INR):<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Other_Sources, new { @class = "form-control sum", title = "Enter Other Sources", @maxlength = 20, @id = "Other_Sources", name = "Other_Sources" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Other_Sources)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Total Income:<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Total_Income, new { @class = "form-control", title = "Enter Total Income", @maxlength = 30, @id = "Total_Income", name = "Total_Income" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Total_Income)</div>
+                      </div>
+                  </div>
+
+                  <div class="col-lg-12">
+                      <h2>Benefits from Plantation of forest area</h2>
+                      <h4>Grass</h4>
+                      <hr />
+                  </div>
+
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Quantity(In Qntl):<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Benefits_Plant_Grass_Quantity, new { @class = "form-control", title = "Enter Quantity", @maxlength = 20, @id = "Benefits_Plant_Grass_Quantity", name = "Benefits_Plant_Grass_Quantity" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Benefits_Plant_Grass_Quantity)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Amount(INR):<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Benefits_Plant_Grass_Amount, new { @class = "form-control", title = "Enter Amount", @maxlength = 20, @id = "Benefits_Plant_Grass_Amount", name = "Benefits_Plant_Grass_Amount" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Benefits_Plant_Grass_Amount)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-12">
+                      <h4>Minor Forest Produce</h4>
+                      <hr />
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Quantity(In Qntl):<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Minor_Forest_Produce_Quantity, new { @class = "form-control", title = "Enter Quantity", @maxlength = 20, @id = "Minor_Forest_Produce_Quantity", name = "Minor_Forest_Produce_Quantity" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Minor_Forest_Produce_Quantity)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Amount(INR):<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Minor_Forest_Produce_Amount, new { @class = "form-control", title = "Enter Amount", @maxlength = 20, @id = "Minor_Forest_Produce_Amount", name = "Minor_Forest_Produce_Amount" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Minor_Forest_Produce_Amount)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-12">
+                      <h4>Other Forest Produce</h4>
+                      <hr />
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Quantity(In Qntl):<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Other_ForestProduce_Quantity, new { @class = "form-control", title = "Enter Quantity", @maxlength = 20, @id = "Other_ForestProduce_Quantity", name = "Other_ForestProduce_Quantity" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Other_ForestProduce_Quantity)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Amount(INR):<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Other_ForestProduce_Amount, new { @class = "form-control", title = "Enter Amount", @maxlength = 20, @id = "Other_ForestProduce_Amount", name = "Other_ForestProduce_Amount" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Other_ForestProduce_Amount)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-12">
+                      <h2>Number of Beneficiaries</h2>
+                      <hr />
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Upto Last 3 Years:<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.No_Of_Beneficiaries_LastThreeYear, new { @class = "form-control", title = "Enter number of beneficiaries", @maxlength = 20, @id = "No_Of_Beneficiaries_LastThreeYear", name = "No_Of_Beneficiaries_LastThreeYear" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.No_Of_Beneficiaries_LastThreeYear)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Current Year:
+                          </label>
+                          @Html.TextBoxFor(x => x.No_Of_Beneficiaries_CurrentYear, new { @class = "form-control", title = "Enter number of bebeficiaries", @maxlength = 20, @id = "No_Of_Beneficiaries_CurrentYear", name = "No_Of_Beneficiaries_CurrentYear" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.No_Of_Beneficiaries_CurrentYear)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-12">
+                      <h2>Category Grades</h2>
+                      <hr />
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Grades:<span class="mandatory">*</span>
+                          </label>
+                          @Html.DropDownListFor(x => x.Efficient_Grades, new List<SelectListItem>
+                                                   {
+                                                     new SelectListItem { Text = "--Select--", Value = ""},
+                                                     new SelectListItem { Text = "A(60% or above achievement)", Value = "A(60% or above achievement)"},
+                                                     new SelectListItem { Text = "B(35% to 60% achievement)", Value = "B(35% to 60% achievement)"},
+                                                     new SelectListItem { Text = "C(35% or less achievement)", Value = "C(35% or less achievement)"},
+                                                     new SelectListItem { Text = "N/A", Value = "N/A"},
+                                                  },
+                                                  new
+                                                  {
+                                                      @id = "Efficient_Grades",
+                                                      @name = "Efficient_Grades",
+                                                      @class = "form-control"
+                                                  })
+                      </div>
+                      <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Efficient_Grades)</div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Number of NGO working in this field:
+                          </label>
+                          @Html.TextBoxFor(x => x.No_Of_NGO_Working, new { @class = "form-control", title = "Enter number of NGO", @maxlength = 20, @id = "No_Of_NGO_Working", name = "No_Of_NGO_Working" })
+                          @*<div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.No_Of_NGO_Working)</div>*@
+                      </div>
+                  </div>
+                  <div class="col-lg-12">
+                      <h2>Self Help Group(Sakhdarpan)</h2>
+                      <hr />
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label> Men:<span class="mandatory">*</span></label>
+                          @Html.DropDownListFor(x => x.Self_Help_Group_Men, new List<SelectListItem>
+                                                   {
+                                                     new SelectListItem { Text = "--Select--", Value = ""},
+                                                     new SelectListItem { Text = "1", Value = "1"},
+                                                     new SelectListItem { Text = "2", Value = "2"},
+                                                     new SelectListItem { Text = "3", Value = "3"},
+                                                     new SelectListItem { Text = "4", Value = "4"},
+                                                  },
+                                                  new
+                                                  {
+                                                      @id = "Self_Help_Group_Men",
+                                                      @name = "Self_Help_Group_Men",
+                                                      @class = "form-control sum1"
+                                                  })
+                      </div>
+                      <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Self_Help_Group_Men)</div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>Women:<span class="mandatory">*</span></label>
+                          @Html.DropDownListFor(x => x.Self_Help_Group_Women, new List<SelectListItem>
+                                                   {
+                                                     new SelectListItem { Text = "--Select--", Value = ""},
+                                                     new SelectListItem { Text = "1", Value = "1"},
+                                                     new SelectListItem { Text = "2", Value = "2"},
+                                                     new SelectListItem { Text = "3", Value = "3"},
+                                                     new SelectListItem { Text = "4", Value = "4"},
+                                                  },
+                                                  new
+                                                  {
+                                                      @id = "Self_Help_Group_Women",
+                                                      @name = "Self_Help_Group_Women",
+                                                      @class = "form-control sum1"
+                                                  })
+                      </div>
+                      <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Self_Help_Group_Women)</div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>Others:</label>
+                          @Html.DropDownListFor(x => x.Self_Help_Group_Others, new List<SelectListItem>
+                                                   {
+                                                     new SelectListItem { Text = "--Select--", Value = ""},
+                                                     new SelectListItem { Text = "1", Value = "1"},
+                                                     new SelectListItem { Text = "2", Value = "2"},
+                                                     new SelectListItem { Text = "3", Value = "3"},
+                                                     new SelectListItem { Text = "4", Value = "4"},
+                                                  },
+                                                  new
+                                                  {
+                                                      @id = "Self_Help_Group_Others",
+                                                      @name = "Self_Help_Group_Others",
+                                                      @class = "form-control sum1",
+
+                                                  })
+                      </div>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="form-group">
+                          <label>
+                              Total:<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Self_Help_Group_Total, new { @class = "form-control", title = "Enter total", @maxlength = 20, @id = "Self_Help_Group_Total", name = "Self_Help_Group_Total" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Self_Help_Group_Total)</div>
+                      </div>
+                  </div>
+                  <div class="col-lg-12">
+                      <div class="form-group">
+                          <label for="txtareRemarks">
+                              Overall Remarks:<span class="mandatory">*</span>
+                          </label>
+                          @Html.TextBoxFor(x => x.Overall_Remarks, new { @class = "form-control", title = "Enter remarks", @maxlength = 20, @id = "Overall_Remarks", name = "Overall_Remarks" })
+                          <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Overall_Remarks)</div>
+                      </div>
+                  </div>
+                  <div class="btn-padd">
+                      <div id="btn" class="col-lg-12">
+                          <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit">
+                              <i class="fa fa-check"></i> Next
+                          </button>
+                          <button type="submit" class="btn btn-warning">
+                              <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                          </button>
+                          <button type="submit" name="Command" value="Cancel" class="btn btn-danger">
+                              <i class="fa fa-times fa-fw"></i> Cancel
+                          </button>
+                      </div>
+                  </div>
+              </div>
+        </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,304 @@
+﻿@{
+    ViewBag.Title = "PaymentByDepartmentalKioskUserDetails";
+
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString());
+
+}
+
+
+@model FMDSS.Models.PaymentByDepartmentalKioskUserDetails
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('body').bind('copy paste cut', function (e) {
+            e.preventDefault(); //disable cut,copy,paste
+            //alert('cut,copy & paste options are disabled !!');
+        });
+    });
+</script>
+<script type="text/javascript" language="javascript">
+
+    var RootURl = '@Url.Content("~/")';
+    $(document).ready(function () {
+
+        function disableBack() { window.history.forward() }
+
+        window.onload = disableBack();
+        window.onpageshow = function (evt) {
+            if (evt.persisted) disableBack()
+        }
+
+        $('.PrintTicketDeptKisok').click(function (e) {
+            var contents = $("#Print_table").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            //frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title>E-Ticket - Forest Department Rajasthan </title>');
+            //Append the external CSS file.
+            //frameDoc.document.write('<link href="../css/bootstrap.min.css" rel="stylesheet" />');
+            //frameDoc.document.write('<link href="../css/mobile.css" rel="stylesheet" />');
+            //frameDoc.document.write('<link href="../css/dashboard/main.css" rel="stylesheet" />');
+            //frameDoc.document.write('<link href="../css/dashboard/dashboard.css" rel="stylesheet" />');
+            //frameDoc.document.write('<link href="../css/dashboard/font-awesome.min.css" rel="stylesheet" />');
+            frameDoc.document.write('</head><body>');
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        
+
+        });
+
+
+
+        $('.PrintTicketclassZoo').click(function (e) {
+
+
+            var id = $("#TRANSACTIONID").val();
+
+
+
+            var ticket;
+            $.ajax({
+                type: 'POST',
+                url: RootURl + 'BookOnlineZoo/PrintTicket',
+                data: { ticketid: id },
+                success: function (data) {
+                  
+                    $("#dvContainer").html(data);
+
+                    var contents = $("#dvContainer").html();
+                    var frame1 = $('<iframe />');
+                    frame1[0].name = "frame1";
+                    //frame1.css({ "position": "absolute", "top": "-1000000px" });
+                    $("body").append(frame1);
+                    var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+                    frameDoc.document.open();
+                    //Create a new HTML document.
+                    frameDoc.document.write('<html><head><title>E-Ticket - Forest Department Rajasthan </title>');
+                    //Append the external CSS file.
+                    //frameDoc.document.write('<link href="../css/bootstrap.min.css" rel="stylesheet" />');
+                    //frameDoc.document.write('<link href="../css/mobile.css" rel="stylesheet" />');
+                    //frameDoc.document.write('<link href="../css/dashboard/main.css" rel="stylesheet" />');
+                    //frameDoc.document.write('<link href="../css/dashboard/dashboard.css" rel="stylesheet" />');
+                    //frameDoc.document.write('<link href="../css/dashboard/font-awesome.min.css" rel="stylesheet" />');
+                    frameDoc.document.write('</head><body>');
+                    //Append the DIV contents.
+                    frameDoc.document.write(contents);
+                    frameDoc.document.write('</body></html>');
+                    frameDoc.document.close();
+                    setTimeout(function () {
+                        window.frames["frame1"].focus();
+                        window.frames["frame1"].print();
+                        frame1.remove();
+                    }, 500);
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+            e.preventDefault();
+        });
+
+
+
+    });
+
+</script>
+
+<style>
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 5px;
+        text-align: left;
+    }
+
+    table#tblScart tr:nth-child(even) {
+        background-color: #eee;
+    }
+
+    table#tblScart tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    table th {
+        background-color: dimgrey;
+        color: white;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #eee;
+    }
+
+    table tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    table th {
+        background-color: dimgrey;
+        color: white;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #eee;
+    }
+
+    table tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    table th {
+        background-color: dimgrey;
+        color: white;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #eee;
+    }
+
+    table tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    table th {
+        background-color: dimgrey;
+        color: white;
+    }
+</style>
+
+<div style="display:none" id="dvContainer">
+
+</div>
+<div id="page-wrapper-inn">
+
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Transaction Status</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <br />
+                <div id="Print_table">
+
+
+                    <table style=" border-width: 1px; height: 350px; width: 70%; margin: auto;" bordercolor="blue" cellpadding="2" cellspacing="5">
+                        <tr>
+                            <td colspan="2" style="text-align: Left;"><img src=" ~/images/logo.png" alt="Forest Department, Government of Rajasthan" title="Logo" style="margin:8px;" class=""></td>
+
+                        </tr>
+                        <tr>
+                            <td>Receipt Number:</td>
+                            <td>@Model.TransactionID</td>
+                        </tr>
+                        <tr>
+                            <td>Request ID:</td>
+                            <td>@Model.RequestedId</td>
+                            <input type="hidden" id="TRANSACTIONID" name="TRANSACTIONID" value='@Model.GuideName'>
+                        </tr>
+                        <tr>
+                            <td>Module Name:</td>
+                            <td>@Model.ModuleName</td>
+                        </tr>
+                        <tr>
+                            <td>Service Type Name:</td>
+                            <td>@Model.ServiceTypeName</td>
+                        </tr>
+                        <tr>
+                            <td>Permission Name:</td>
+                            <td>@Model.PermissionName</td>
+                        </tr>
+                        <tr>
+                            <td>Sub Permissio Name:</td>
+                            <td>@Model.SubPermissioName</td>
+                        </tr>
+
+                        <tr>
+                            <td>Name Of Applicant:</td>
+                            <td>@Model.PaidForCitizenName</td>
+                        </tr>
+
+                        <tr>
+                            <td>Received By:</td>
+                            <td>@Model.PaidBy</td>
+                        </tr>
+
+                        <tr>
+                            <td>Received On:</td>
+                            <td>@Model.PaidOn</td>
+                        </tr>
+
+                        @*<tr>
+                                <td>Paid For Citizen Name:</td>
+                                <td>@Model.PaidForCitizenName</td>
+                            </tr>*@
+
+
+                        <tr>
+                            <td>Amount Received:</td>
+                            <td>@Model.PaidAmount</td>
+                        </tr>
+                        <tr>
+                            <td>Payment Mode:</td>
+                            <td>@Model.PaymentMode</td>
+                        </tr>
+
+                        @if (@Model.PaymentMode != "CASH")
+                        {
+                            <tr>
+                                <td>Bank Name:</td>
+                                <td>@Model.BankName</td>
+                            </tr>
+                            <tr>
+                                <td>IFSC Code:</td>
+                                <td>@Model.IFSCCode</td>
+                            </tr>
+                            <tr>
+                                <td>Cheque Number:</td>
+                                <td>@Model.ChequeNumber</td>
+                            </tr>
+                            <tr>
+                                <td>Cheque Date:</td>
+                                <td>@Model.ChequeDate</td>
+                            </tr>
+                        }
+                    </table>
+                    @if (ViewBag.TicketStatus == "SUCCESS")
+                    {
+                        <div style=" text-align: center;">
+                            <a class="PrintTicketclassZoox btn btn-success" id="PrintTicketx" target="_blank" style="float: none;width:30%; text-align: center;" href='/ZooTicketReport/ZooTicketView.aspx?ID=@Encryption.encrypt(@Model.GuideName)'>
+                                print ticket
+                            </a>
+
+                        </div>
+
+                    }
+
+
+                   
+                </div>
+                <div style=" text-align: center;">
+                    <button type="button" value="Print" class="PrintTicketDeptKisok">Print Ticket</button>
+
+                </div>
+                <br />
+
+            </div>
+        </div>
+    </div>
+</div>
+

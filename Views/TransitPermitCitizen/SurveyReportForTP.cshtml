@@ -1,0 +1,744 @@
+﻿@{
+    ViewBag.Title = "Servey Report";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+
+@model FMDSS.Models.CitizenService.ProductionServices.SurveyReportTP
+
+<style>
+    #total {
+        text-align: right;
+        font-size: 13px;
+    }
+
+    .ErrorColor {
+        border-color: red;
+    }
+
+    .show {
+        display: none !important;
+    }
+</style>
+
+@*<script type="text/javascript" src="~/js/jquery.min.js"></script>*@
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+<script>
+
+
+    $(function () {
+        $("#txt_SurveyDate").datepicker({ minDate: new Date(), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        $(".Numbers").keypress(function (evt) {
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (charCode == 8) { return true; }
+            if (
+                 (charCode != 46 || $(this).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+                (charCode < 48 || charCode > 57))
+                return false;
+        });
+
+    });
+    $('#txt_SurveyDate').keydown(function (event)
+    { return cancelBackspace(event) });
+
+
+    function cancelBackspace(event) {
+        if (event.keyCode == 8 || event.keyCode == 46) {
+            return false;
+        }
+    }
+
+
+    $(document).ready(function () {
+        var validFilesTypes = ["gif", "png", "jpg", "jpeg"];
+        $('.fileToUpload').change(function () {
+            // CheckExtension(this);
+            validateFileSize(this);
+        });
+        function CheckExtension(e) {
+            /*global document: false */
+            var file = e;
+            var path = file.value;
+
+            var ext = path.substring(path.lastIndexOf(".") + 1, path.length).toLowerCase();
+            var isValidFile = false;
+            for (var i = 0; i < validFilesTypes.length; i++) {
+                if (ext == validFilesTypes[i]) {
+                    isValidFile = true;
+                    break;
+                }
+            }
+            if (!isValidFile) {
+                e.value = null;
+                alert("Only .jpg /.png /.gif file formats are allowed" +
+                "Valid extensions are:\n\n" + validFilesTypes.join(", "));
+            }
+            return isValidFile;
+        }
+
+        function validateFileSize(e) {
+            /*global document: false */
+            var file = e;
+            var fileSize = file.files[0].size / 1048576;
+            var isValidFile = true;
+            if (fileSize > 2) {
+                isValidFile = false;
+            }
+            if (!isValidFile) {
+                e.value = null;
+                alert("File Size Should be Greater than 0 and less than 2 mb");
+            }
+            return isValidFile;
+        }
+    });
+
+</script>
+
+<script type="text/javascript">
+    var $ = jQuery.noConflict();
+    var RootURl = '@Url.Content("~/")';
+    $(function () {
+
+        $("#btn_submit1").click(function () {
+            if ($("input[id ='PhotoURL']").val() == "") {
+                $("#errorPhoto").addClass("ErrorColor");
+                $("#errorPhoto").css("display", "block");
+                return false;
+            }
+            else {
+                $("#errorPhoto").removeClass("ErrorColor");
+                $("#errorPhoto").css("display", "none");
+            }
+            if ($("input[id ='ShapeFileURL']").val() == "") {
+                $("#errorShapeFile").addClass("ErrorColor");
+                $("#errorShapeFile").css("display", "block");
+                return false;
+            }
+            else {
+                $("#errorShapeFile").removeClass("ErrorColor");
+                $("#errorShapeFile").css("display", "none");
+            }
+        });
+
+        //$('#DIV_CODE').change(function (e) {
+        //    $("#RANGE_CODE,#FROM_DISTRICT,#APPLICANT_DISTRICT,#FROM_STATE,#DISTRICT,#APPLICANT_TEHSIL,#APPLICANT_VILLAGE,#VILLAGE_NAME,#TEHSIL").empty();
+        //    $("#RANGE_CODE").append('<option value="' + '' + '">' +
+        //            '--Select--' + '</option>');
+
+        //    $.ajax({
+        //        type: 'POST',
+        //        url: RootURl + 'TransitPermitCitizen/getRange', // we are calling json method
+        //        dataType: 'json',
+        //        data: { DIV_CODE: $("#DIV_CODE").val() },
+        //        success: function (data) {
+        //            var obj = jQuery.parseJSON(data);
+        //            $.each(obj[0], function (i, block) {
+        //                $("#RANGE_CODE").append('<option value="' + block.Value + '">' +
+        //                 block.Text + '</option>');
+        //            });
+
+        //            if (obj[1].length > 0) {
+        //                $.each(obj[1], function (i, block) {
+        //                    $("#FROM_DISTRICT,#APPLICANT_DISTRICT,#DISTRICT").append('<option value="' + block.Value + '">' +
+        //                     block.Text + '</option>');
+        //                });
+        //            }
+        //            else {
+        //                $("#FROM_DISTRICT,#APPLICANT_DISTRICT,#DISTRICT").append('<option value="' + '' + '">' + '--Select--' + '</option>');
+        //            }
+        //            if (obj[2].length > 0) {
+        //                $.each(obj[2], function (i, block) {
+        //                    $("#FROM_STATE").append('<option value="' + block.Value + '">' +
+        //                     block.Text + '</option>');
+        //                });
+        //            }
+        //            else {
+        //                $("#FROM_STATE").append('<option value="' + '' + '">' + '--Select--' + '</option>');
+        //            }
+        //            if (obj[3].length > 0) {
+        //                $.each(obj[3], function (i, block) {
+        //                    $("#APPLICANT_TEHSIL,#TEHSIL").append('<option value="' + block.Value + '">' +
+        //                     block.Text + '</option>');
+        //                });
+        //            }
+        //            else {
+        //                $("#APPLICANT_TEHSIL,#TEHSIL").append('<option value="' + '' + '">' + '--Select--' + '</option>');
+        //            }
+        //            if (obj[4].length > 0) {
+        //                $.each(obj[4], function (i, block) {
+        //                    $("#APPLICANT_VILLAGE,#VILLAGE_NAME").append('<option value="' + block.Value + '">' +
+        //                     block.Text + '</option>');
+        //                });
+        //            }
+        //            else {
+        //                $("#APPLICANT_VILLAGE,#VILLAGE_NAME").append('<option value="' + '' + '">' + '--Select--' + '</option>');
+        //            }
+
+        //        },
+        //        error: function (ex) {
+        //            alert('Failed to retrieve states.' + ex);
+        //        }
+        //    });
+        //});
+
+    });
+
+
+
+
+</script>
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header"><span>Survey Report Transit Permit </span></h1>
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                @using (Html.BeginForm("SurveyReportForTP", "TransitPermitCitizen", FormMethod.Post, new { enctype = "multipart/form-data", data_behavior = "confirm" }))
+                {
+                    <div class="panel-body">
+                        <label>Office Details:</label>
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        @Html.HiddenFor(s => s.PermitID, new { @id = "RequestID" })
+                                        <label>Division Office: <span class="mandatory">*</span></label>
+                                        @Html.DropDownListFor(x => x.DIVISION_OFFICE, (IEnumerable<SelectListItem>)ViewBag.DIVISION_CODE, "--Select--", new { @class = "form-control notranslate", title = "DIV_CODE", id = "DIV_CODE" })
+                                        <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.DIVISION_OFFICE)</div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>District:<span class="mandatory">*</span></label>
+                                        @Html.DropDownListFor(x => x.District_OFFICE, (IEnumerable<SelectListItem>)ViewBag.DISTRICT_CODE, "--Select--", new { id = "APPLICANT_DISTRICT", name = "APPLICANT_DISTRICT", @class = "form-control" })
+                                        <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.District_OFFICE)</div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+
+                                        <label>Tehsil: <span class="mandatory">*</span></label>
+                                        @Html.DropDownListFor(x => x.Tehsil, (IEnumerable<SelectListItem>)ViewBag.APPLICANT_TEHSIL, new { id = "APPLICANT_TEHSIL", name = "APPLICANT_TEHSIL", @class = "form-control" })
+                                        <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Tehsil)</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Village: <span class="mandatory">*</span></label>
+                                        @Html.DropDownListFor(x => x.Village, (IEnumerable<SelectListItem>)ViewBag.APPLICANT_VILLAGE, new { id = "APPLICANT_VILLAGE", name = "APPLICANT_VILLAGE", @class = "form-control" })
+                                        <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Village)</div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+
+                        <label>Produce Details:<span class="mandatory">*</span></label>
+                        @Html.HiddenFor(d => d.ProduceListInString, new { @id = "ProduceList" })
+                        <input type="hidden" name="ProductDetails" id="ProductDetails" value="" />
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Produce Type :</label>
+                                        @Html.DropDownList("PRODUCE_NAME", (IEnumerable<SelectListItem>)ViewBag.PRODUCE_NAME, "--Select--", new { id = "PRODUCE_NAME", name = "PRODUCE_NAME", @class = "form-control" })
+                                        <div id="Err_PRODUCE_VALUE" style="display: none; position: initial !important" class="alert-danger1">Please Select Product Name </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Produce Quantity:<label id="unittype"></label> </label>
+                                        @Html.TextBox("PRODUCE_QUANTITY", string.Empty, new { id = "PRODUCE_QUANTITY", name = "PRODUCE_QUANTITY", @class = "form-control Numbers", @maxlength = 4 })
+                                        <div id="Err_PRODUCE_QUANTITY" style="display: none; position: initial !important" class="alert-danger1">Quantity field is required. </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Produce Description: </label>
+                                        @Html.TextBox("PRODUCE_DESCRIPTION", string.Empty, new { id = "PRODUCE_DESCRIPTION", name = "PRODUCE_DESCRIPTION", @class = "form-control", @maxlength = 500 })
+                                        <div id="Err_PRODUCE_DESCRIPTION" style="display: none; position: initial !important" class="alert-danger1">Product Description field is required. </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-4">
+                                    <div class="form-group">
+                                    </div>
+                                </div>
+                                <div class="col-lg-2">
+                                    <div class="form-group">
+                                        <br />
+                                        <button type="button" class="btn btn-success " id="btn_Add">
+                                            Add
+                                        </button>
+
+                                        <button type="button" class="btn btn-success show" id="btn_Update">
+                                            Update
+                                        </button>
+
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <div id="tbl" class="table-responsive request-id">
+                                            <table class="table table-striped table-bordered table-hover" id="dataTableInventory">
+                                                <thead>
+                                                    <tr>
+
+                                                        <th width="35%">Produce Name</th>
+                                                        <th width="40%">Produce Description</th>
+                                                        <th width="10%">Produce Quantity</th>
+                                                        <th width="10%">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                        <div id="Err_PRODUCE_Len" style="display: none; position: initial !important" class="alert-danger1">Please Add Atleast One Product</div>
+
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+                        </div>
+
+                        <label>Survey Details: </label>
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Survey Date: <span class="mandatory">*</span></label>
+                                        @Html.TextBoxFor(s => s.SurveyDate, new { @class = "form-control", @id = "txt_SurveyDate" })
+                                        <div id="errorSurveyDate" class="alert-danger1">@Html.ValidationMessageFor(x => x.SurveyDate)</div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Upload Photo: <span class="mandatory">*</span></label>
+                                        @Html.TextBoxFor(s => s.fileUpload, new { @class = "form-control fileToUpload", @type = "File", @name = "fileUpload" })
+                                        <div id="errorAreaName" class="alert-danger1">@Html.ValidationMessageFor(x => x.fileUpload) </div>
+                                        @*<input type="file" class="form-control fileToUpload1" id="PhotoURL" name="fileUpload">*@
+                                        @** Only .jpg /.pdf /.png /.gif file formats are allowed with max size: 2Mb.
+                                            <div id="errorPhoto" style="display:none" class="alert-danger1">Please Upload File.</div>*@
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label> Area Name:<span class="mandatory">*</span></label>
+                                        @Html.TextBoxFor(s => s.AreaName, new { @class = "form-control ", @id = "txt_areaName", @maxlength = "200" })
+                                        <div id="errorAreaName" class="alert-danger1">@Html.ValidationMessageFor(x => x.AreaName)</div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label> Area(In Hectare / Bigha):<span class="mandatory">*</span></label>
+                                        @Html.TextBoxFor(s => s.AreaInKm, new { @class = "form-control Numbers", @id = "txt_areaName", @maxlength = "15" })
+                                        <div id="errorArea" class="alert-danger1">@Html.ValidationMessageFor(x => x.AreaInKm)</div>
+                                    </div>
+                                </div>
+                                @*<div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label> Latitude: <span class="mandatory">*</span></label>
+                                        @Html.TextBoxFor(s => s.Latitude, new { @class = "form-control Numbers", @id = "txt_latitude", @maxlength = "6" })
+                                        <div id="errorLat" class="alert-danger1">@Html.ValidationMessageFor(x => x.Latitude)</div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label> Longitude:  <span class="mandatory">*</span></label>
+                                        @Html.TextBoxFor(s => s.Longitude, new { @class = "form-control Numbers", @id = "txt_longitude", @maxlength = "6" })
+                                        <div id="errorLong" class="alert-danger1">@Html.ValidationMessageFor(x => x.Longitude)</div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Shape File: <span class="mandatory">*</span></label>
+                                        @Html.TextBoxFor(s => s.fileShapeFile, new { @class = "form-control fileToUpload", @name = "fileShapeFile", @type = "File" })
+                                        <div id="errorAreaName" class="alert-danger1">@Html.ValidationMessageFor(x => x.fileShapeFile) </div>
+                                        @*<label>Upload Shape File: <span class="mandatory">*</span></label>
+                                            <input type="file" class="form-control fileToUpload1" id="ShapeFileURL" name="fileShapeFile">
+                                            * Only .jpg /.pdf /.png /.gif file formats are allowed with max size: 2Mb.
+                                            <div id="errorShapeFile" style="display:none" class="alert-danger1">Please Upload File.</div>*@
+                                     @*</div>
+                                </div>*@
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label> Description: <span class="mandatory">*</span></label>
+                                        @Html.TextBoxFor(s => s.Description, new { @class = "form-control", @id = "txt_desc", @maxlength = "500" })
+                                        <div id="Description" class="alert-danger1">@Html.ValidationMessageFor(x => x.Description)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- Btn Groping -->
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+
+                                <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_submit1">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+                                <button class="btn btn-warning" type="reset">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+
+                            </div>
+                        </div>
+                        <!-- /.Btn Groping -->
+
+                    </div>
+                        <!-- /.panel-body -->
+                }
+            </div>
+            <!-- /.panel -->
+
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var productlist = $("#ProduceList").val();
+        if (productlist != null) {
+            var obj = jQuery.parseJSON(productlist);
+            if (obj.length > 0) {
+                $.each(obj, function (index, value) {
+                    var markup = "<tr><td>" + value.ProductName + "<input type='hidden' value='" + value.PRODUCE_VALUE + "' class='PRODUCE_VALUE' name='PRODUCE_VALUE'/></td><td>" + value.PRODUCE_DESCRIPTION + "<input type='hidden' value='" + value.PRODUCE_DESCRIPTION + "' name='PRODUCE_DESCRIPTION'/></td><td class='qty'>" + value.PRODUCE_QUANTITY + "<input type='hidden' value='" + value.PRODUCE_QUANTITY + "' name='PRODUCE_QUANTITYS'/></td><td><button type='button' id='btnDelete' class='deleteContact hide_bg'  title='Remove'><i class='fa fa-times f20 text-danger'></i></button><button type='button' id='btnUpdate' class='UpdateContact hide_bg'  title='Update'><i class='fa fa-edit f20 text-success'></i></button></td></tr>";
+                    $("#dataTableInventory tbody").append(markup);
+                    if ($('#totalqtyvalue').length > 0) {
+                        $('#totalqtyvalue').remove();
+                    }
+                });
+                $('#dataTableInventory tbody tr:last').after("<tr id='totalqtyvalue'><td id='total' colspan='2'>Total</td><td colspan='2' class='qtytotal'></td></tr>");
+                $("#PRODUCE_QUANTITY").val('1');
+                $('#Err_PRODUCE_QUANTITY').attr("style", "display:none");
+                $("#PRODUCE_DESCRIPTION").val('');
+
+                var sum = 0;
+                // iterate through each td based on class and add the values
+                $(".qty").each(function () {
+
+                    var value = $(this).text();
+                    // add only if the value is number
+                    if (!isNaN(value) && value.length != 0) {
+                        sum += parseFloat(value);
+                    }
+                });
+                $('.qtytotal').text(sum);
+            }
+        }
+
+
+
+        $("#btn_Add").click(function () {
+            var PRODUCE_NAME = $("#PRODUCE_NAME option:selected").text();
+            var PRODUCE_VALUE = $("#PRODUCE_NAME option:selected").val();
+            var PRODUCE_QUANTITY = $("#PRODUCE_QUANTITY").val();
+            var PRODUCE_DESCRIPTION = $("#PRODUCE_DESCRIPTION").val();
+
+            if (PRODUCE_VALUE == '') {
+                $('#Err_PRODUCE_VALUE').attr("style", "display:block");
+            }
+            else {
+                $('#Err_PRODUCE_VALUE').attr("style", "display:none");
+            }
+            if (PRODUCE_QUANTITY === '' || PRODUCE_QUANTITY === '0') {
+                $('#Err_PRODUCE_QUANTITY').attr("style", "display:block");
+            }
+            else {
+                $("#PRODUCE_QUANTITY").val('1');
+                $('#Err_PRODUCE_QUANTITY').attr("style", "display:none");
+            }
+            if (PRODUCE_DESCRIPTION == '') {
+                $('#Err_PRODUCE_DESCRIPTION').attr("style", "display:block");
+            }
+            else {
+                $('#Err_PRODUCE_DESCRIPTION').attr("style", "display:none");
+            }
+            if (PRODUCE_VALUE != '' && PRODUCE_QUANTITY != '' && PRODUCE_QUANTITY != '0' && PRODUCE_DESCRIPTION != '') {
+
+                var index = $("#dataTableInventory tbody ").not('tr:last').length + 1;
+                if ($(".PRODUCE_VALUE").length > 0) {
+                    var PRODUCEVal = [];
+                    $(".PRODUCE_VALUE").each(function () {
+                        PRODUCEVal.push($(this).val().trim());
+
+                    });
+
+                    if ($.inArray(PRODUCE_VALUE, PRODUCEVal) > -1) {
+                        $(".PRODUCE_VALUE").each(function () {
+                            if ($(this).val().trim() == PRODUCE_VALUE.trim()) {
+                                var newval = $(this).closest('td').next('td').next('.qty').text();
+                                totalVal = parseInt(newval) + parseInt(PRODUCE_QUANTITY);
+                                $(this).closest('td').next('td').next('.qty').html(totalVal + "<input type='hidden' value='" + totalVal + "' name='PRODUCE_QUANTITYS'/>");
+                                if ($('#totalqtyvalue').length > 0) {
+                                    $('#totalqtyvalue').remove();
+                                }
+                            }
+
+
+                        });
+                    }
+                    else {
+                        var markup = "<tr><td>" + PRODUCE_NAME + "<input type='hidden' value='" + PRODUCE_VALUE + "' class='PRODUCE_VALUE' name='PRODUCE_VALUE'/></td><td>" + PRODUCE_DESCRIPTION + "<input type='hidden' value='" + PRODUCE_DESCRIPTION + "' name='PRODUCE_DESCRIPTION'/></td><td class='qty'>" + PRODUCE_QUANTITY + "<input type='hidden' value='" + PRODUCE_QUANTITY + "' name='PRODUCE_QUANTITYS'/></td><td><button type='button' id='btnDelete' class='deleteContact hide_bg'  title='Remove'><i class='fa fa-times f20 text-danger'></i></button> <button type='button' id='btnUpdate' <button type='button' id='btnUpdate'  class='UpdateContact hide_bg'  title='Update'><i class='fa fa-edit f20 text-success'></i></button></td></tr>";
+                        $("#dataTableInventory tbody").append(markup);
+                        if ($('#totalqtyvalue').length > 0) {
+                            $('#totalqtyvalue').remove();
+                        }
+
+                    }
+                }
+                else {
+                    var markup = "<tr><td>" + PRODUCE_NAME + "<input type='hidden' value='" + PRODUCE_VALUE + "' class='PRODUCE_VALUE' name='PRODUCE_VALUE'/></td><td>" + PRODUCE_DESCRIPTION + "<input type='hidden' value='" + PRODUCE_DESCRIPTION + "' name='PRODUCE_DESCRIPTION'/></td><td class='qty'>" + PRODUCE_QUANTITY + "<input type='hidden' value='" + PRODUCE_QUANTITY + "' name='PRODUCE_QUANTITYS'/></td><td><button type='button' id='btnDelete' class='deleteContact hide_bg'  title='Remove'><i class='fa fa-times f20 text-danger'></i></button><button type='button' id='btnUpdate' <button type='button' id='btnUpdate'class='UpdateContact hide_bg'  title='Update'><i class='fa fa-edit f20 text-success'></i></button></td></tr>";
+                    $("#dataTableInventory tbody").append(markup);
+                    if ($('#totalqtyvalue').length > 0) {
+                        $('#totalqtyvalue').remove();
+                    }
+
+                }
+
+                $('#dataTableInventory tbody tr:last').after("<tr id='totalqtyvalue'><td id='total' colspan='2'>Total</td><td colspan='2' class='qtytotal'></td></tr>");
+                $("#PRODUCE_QUANTITY").val('1');
+                $('#Err_PRODUCE_QUANTITY').attr("style", "display:none");
+                $("#PRODUCE_DESCRIPTION").val('');
+
+                var sum = 0;
+                // iterate through each td based on class and add the values
+                $(".qty").each(function () {
+
+                    var value = $(this).text();
+                    // add only if the value is number
+                    if (!isNaN(value) && value.length != 0) {
+                        sum += parseFloat(value);
+                    }
+                });
+                $('.qtytotal').text(sum);
+            }
+        });
+
+
+        $("#btn_Update").click(function () {
+            $(".UpdateContact").removeClass("show");
+            $("#PRODUCE_NAME option").prop('disabled', false);
+            var PRODUCE_NAME = $("#PRODUCE_NAME option:selected").text();
+            var PRODUCE_VALUE = $("#PRODUCE_NAME option:selected").val();
+            var PRODUCE_QUANTITY = $("#PRODUCE_QUANTITY").val();
+            var PRODUCE_DESCRIPTION = $("#PRODUCE_DESCRIPTION").val();
+
+            if (PRODUCE_VALUE == '') {
+                $('#Err_PRODUCE_VALUE').attr("style", "display:block");
+            }
+            else {
+                $('#Err_PRODUCE_VALUE').attr("style", "display:none");
+            }
+            if (PRODUCE_QUANTITY === '' || PRODUCE_QUANTITY === '0') {
+                $('#Err_PRODUCE_QUANTITY').attr("style", "display:block");
+            }
+            else {
+                $("#PRODUCE_QUANTITY").val('1');
+                $('#Err_PRODUCE_QUANTITY').attr("style", "display:none");
+            }
+            if (PRODUCE_DESCRIPTION == '') {
+                $('#Err_PRODUCE_DESCRIPTION').attr("style", "display:block");
+            }
+            else {
+                $('#Err_PRODUCE_DESCRIPTION').attr("style", "display:none");
+            }
+            if (PRODUCE_VALUE != '' && PRODUCE_QUANTITY != '' && PRODUCE_QUANTITY != '0' && PRODUCE_DESCRIPTION != '') {
+
+                var index = $("#dataTableInventory tbody ").not('tr:last').length + 1;
+                if ($(".PRODUCE_VALUE").length > 0) {
+                    var PRODUCEVal = [];
+                    $(".PRODUCE_VALUE").each(function () {
+                        PRODUCEVal.push($(this).val().trim());
+
+                    });
+
+                    if ($.inArray(PRODUCE_VALUE, PRODUCEVal) > -1) {
+                        $(".PRODUCE_VALUE").each(function () {
+                            if ($(this).val().trim() == PRODUCE_VALUE.trim()) {
+                                var newval = $(this).closest('td').next('td').next('.qty').text();
+                                totalVal = parseInt(PRODUCE_QUANTITY);
+                                $(this).closest('td').next('td').next('.qty').html(totalVal + "<input type='hidden' value='" + totalVal + "' name='PRODUCE_QUANTITYS'/>");
+                                if ($('#totalqtyvalue').length > 0) {
+                                    $('#totalqtyvalue').remove();
+                                }
+                            }
+
+
+                        });
+                    }
+                    else {
+                        var markup = "<tr><td>" + PRODUCE_NAME + "<input type='hidden' value='" + PRODUCE_VALUE + "' class='PRODUCE_VALUE' name='PRODUCE_VALUE'/></td><td>" + PRODUCE_DESCRIPTION + "<input type='hidden' value='" + PRODUCE_DESCRIPTION + "' name='PRODUCE_DESCRIPTION'/></td><td class='qty'>" + PRODUCE_QUANTITY + "<input type='hidden' value='" + PRODUCE_QUANTITY + "' name='PRODUCE_QUANTITYS'/></td><td><button type='button' id='btnDelete' class='deleteContact hide_bg'  title='Remove'><i class='fa fa-times f20 text-danger'></i></button> <button type='button' id='btnUpdate' <button type='button' id='btnUpdate'  class='UpdateContact hide_bg'  title='Update'><i class='fa fa-times f20 text-danger'></i></button></td></tr>";
+                        $("#dataTableInventory tbody").append(markup);
+                        if ($('#totalqtyvalue').length > 0) {
+                            $('#totalqtyvalue').remove();
+                        }
+
+                    }
+                }
+                else {
+                    var markup = "<tr><td>" + PRODUCE_NAME + "<input type='hidden' value='" + PRODUCE_VALUE + "' class='PRODUCE_VALUE' name='PRODUCE_VALUE'/></td><td>" + PRODUCE_DESCRIPTION + "<input type='hidden' value='" + PRODUCE_DESCRIPTION + "' name='PRODUCE_DESCRIPTION'/></td><td class='qty'>" + PRODUCE_QUANTITY + "<input type='hidden' value='" + PRODUCE_QUANTITY + "' name='PRODUCE_QUANTITYS'/></td><td><button type='button' id='btnDelete' class='deleteContact hide_bg'  title='Remove'><i class='fa fa-times f20 text-danger'></i></button> <button type='button' id='btnUpdate' <button type='button' id='btnUpdate'  class='UpdateContact hide_bg'  title='Update'><i class='fa fa-times f20 text-danger'></i></button></td></tr>";
+                    $("#dataTableInventory tbody").append(markup);
+                    if ($('#totalqtyvalue').length > 0) {
+                        $('#totalqtyvalue').remove();
+                    }
+
+                }
+
+                $('#dataTableInventory tbody tr:last').after("<tr id='totalqtyvalue'><td id='total' colspan='2'>Total</td><td colspan='2' class='qtytotal'></td></tr>");
+                $("#PRODUCE_QUANTITY").val('1');
+                $('#Err_PRODUCE_QUANTITY').attr("style", "display:none");
+                $("#PRODUCE_DESCRIPTION").val('');
+
+                var sum = 0;
+                // iterate through each td based on class and add the values
+                $(".qty").each(function () {
+
+                    var value = $(this).text();
+                    // add only if the value is number
+                    if (!isNaN(value) && value.length != 0) {
+                        sum += parseFloat(value);
+                    }
+                });
+                $('.qtytotal').text(sum);
+                $("#btn_Add").removeClass('show');
+                $("#btn_Update").addClass('show');
+            }
+        });
+        // Find and remove selected table rows
+        //$(".delete-row").click(function () {
+        //    $("table tbody").find('input[name="record"]').each(function () {
+        //        if ($(this).is(":checked")) {
+        //            $(this).parents("tr").remove();
+        //        }
+        //    });
+        //});
+
+
+
+
+        $(document).on("click", ".deleteContact", function () {
+            if ($("#dataTableInventory tbody tr").length < 2) {
+                $("#totalqtyvalue").remove();
+            }
+            else {
+                var sum = $('.qtytotal').text();
+                sum = sum - $(this).closest('td').siblings('.qty').text();
+                $('.qtytotal').text(sum);
+            }
+            $(this).closest("tr").remove(); // closest used to remove the respective 'tr' in which I have my controls
+        });
+
+
+        $(document).on("click", ".UpdateContact", function () {
+            var PRODUCEQUANTITY = parseInt($(this).closest('td').siblings('.qty').text());
+            var PRODUCEDESCRIPTION = $(this).closest('tr').find('input[name=PRODUCE_DESCRIPTION]').val();
+            var PRODUCEVALUE = $(this).closest('tr').find('.PRODUCE_VALUE').val();
+            $(this).addClass("show");
+            $("#PRODUCE_NAME option[value!='" + PRODUCEVALUE + "']").prop('disabled', true);
+            Update1(PRODUCEVALUE, PRODUCEDESCRIPTION, PRODUCEQUANTITY,0);
+        });
+
+    });
+    function Update1(PRODUCEVALUE, PRODUCEDESCRIPTION, PRODUCEQUANTITY, Index) {
+        $("#btn_Update").removeClass('show');
+        $("#btn_Add").addClass('show');
+        $("#PRODUCE_NAME").val(PRODUCEVALUE);
+        $("#PRODUCE_QUANTITY").val(PRODUCEQUANTITY);
+        $("#PRODUCE_DESCRIPTION").val(PRODUCEDESCRIPTION);
+
+        if ($("#dataTableInventory tbody tr").length < 2) {
+            $("#totalqtyvalue").remove();
+        }
+        else {
+            var sum = $('.qtytotal').text();
+            sum = parseInt(sum) - parseInt(PRODUCEQUANTITY);
+            $('.qtytotal').text(sum);
+        }
+        //$("#dataTableInventory tbody tr").eq(Index).remove();
+
+
+    };
+    $("#PRODUCE_QUANTITY").blur(function () {
+        if ($("#PRODUCE_QUANTITY").val() === '' && $("#PRODUCE_QUANTITY").val() === '0') {
+            $("#PRODUCE_QUANTITY").val(1);
+        }
+        else {
+            $('#Err_PRODUCE_QUANTITY').attr("style", "display:none");
+        }
+    });
+
+    $("#btn_submit1").click(function () {
+
+        if ($('.datefield').val() == '') {
+            $("#errFromDate").css("display", "block");
+            $('#errFromDate').focus();
+            return false;
+        }
+        else {
+            $("#errFromDate").css("display", "none");
+        }
+        $("#dataTableInventory tbody tr").find('.qtytotal').closest('tr').remove();
+        if ($("#dataTableInventory tbody tr").length > 0) {
+            $('#Err_PRODUCE_Len').attr("style", "display:none");
+            var finalTbl = '';
+            var j = [];
+            $("#dataTableInventory tbody tr").each(function (i) {
+                var PRODUCEVALUE = $(this).find('input[name=PRODUCE_VALUE]').val();
+                var PRODUCEQUANTITY = $(this).find('input[name=PRODUCE_QUANTITYS]').val();
+                var PRODUCEDESCRIPTION = $(this).find('input[name=PRODUCE_DESCRIPTION]').val();
+                var RequestID = $("#RequestID").val();
+                var data = { "Permit_no": RequestID, "PRODUCE_VALUE": PRODUCEVALUE, "PRODUCE_QUANTITY": PRODUCEQUANTITY, "PRODUCE_DESCRIPTION": PRODUCEDESCRIPTION };
+                j.push(data);
+                //finalTbl += PRODUCEVALUE + "," + PRODUCEQUANTITY + "," + PRODUCEDESCRIPTION + "|";
+            });
+            //$("#ProductDetails").val(finalTbl);
+            $("#ProductDetails").val(JSON.stringify(j));
+            return true;
+        }
+        else {
+            $('#Err_PRODUCE_Len').attr("style", "display:block");
+            $("#PRODUCE_QUANTITY").focus();
+            return false;
+        }
+    });
+
+    $(document).ready(function () {
+        //called when key is pressed in textbox
+        $(".Numbers").keypress(function (evt) {
+            //if the letter is not digit then display error and don't type anything
+            //if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+            //    return false;
+            //}
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (charCode == 8) { return true; }
+            if (
+                 (charCode != 46 || $(this).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+                (charCode < 48 || charCode > 57))
+                return false;
+        });
+
+        $('#PRODUCE_NAME').change(function () {
+
+            var a = $('#PRODUCE_NAME option:selected').text();
+            $("#unittype").text(a.substr(a.indexOf('( '), a.indexOf(' )')));
+
+        });
+
+    });
+
+</script>

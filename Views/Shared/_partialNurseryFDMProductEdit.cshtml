@@ -1,0 +1,401 @@
+﻿@model FMDSS.Models.Master.NurseryFDMProduct
+
+<link href="~/css/timepicki.css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+<script>
+    var $j = jQuery.noConflict();
+    $j('.timepicker').timepicki();
+
+</script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+
+
+
+
+    $(document).ready(function () {
+
+         $("#BaseProduceTypeID").bind("change", function () {
+
+
+                var values = {
+                    objectType: 'in',
+                    ID: $("#BaseProduceTypeID").val()
+                };
+
+                $.ajax({
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    url: '@Url.Content("~/")' + 'Master/getHeadDetails',
+                    data: JSON.stringify(values),
+                    success: function (data) {
+
+                        $('#VehicleDIV').html(data.VehiclePartialView);
+
+                        if (data.VehicleStatus == "TRUE") {
+                            $('#VehicleIDSS').show();
+
+
+                        }
+                        else {
+                            $('#VehicleIDSS').hide();
+
+                        }
+
+                    }
+                });
+            });
+        $("#ProduceTypeID").bind("change", function () {
+            $("#BaseProduceTypeID").empty();
+            $("#BaseProduceTypeID").append('<option value="0">--Select--</option>');
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'Master/getBaseProductType', // we are calling json method
+                    dataType: 'json',
+                    data: { ProduceTypeID: $("#ProduceTypeID").val() },
+                    success: function (circle) {
+                        $.each(circle, function (i, items) {
+                            $("#BaseProduceTypeID").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve states.' + ex);
+                    }
+
+                });
+                return false;
+        });
+
+
+
+        $('#DiscountCitizen,#DiscountDepartment ,#DiscountNGO').keypress(function (event) {
+            return $.isNumeric(event, this)
+        });
+
+        $('#btn_submit1').click(function (e) {
+
+            if ($('option:selected', $('#ProduceTypeID')).index() == 0) {
+                $("#errProduceTypeID").css("display", "block");
+                $('#errProduceTypeID').focus();
+                return false;
+            }
+            else {
+                $("#errProduceTypeID").css("display", "none");
+            }
+
+
+            if ($('option:selected', $('#BaseProduceTypeID')).index() == 0) {
+                $("#errBaseProduceTypeID").css("display", "block");
+                $('#errBaseProduceTypeID').focus();
+                return false;
+            }
+            else {
+                $("#errBaseProduceTypeID").css("display", "none");
+            }
+
+
+
+            if ($('#ProductName').val().trim() == "") {
+                $("#errProductName").css("display", "block");
+                $('#errProductName').focus();
+                return false;
+            }
+            else {
+                $('#errProductName').css("display", "none");
+            }
+
+            //if ($('#NumberofVehicle').val().trim() == "") {
+            //    $("#errNumberofVehicle").css("display", "block");
+            //    $('#errNumberofVehicle').focus();
+            //    return false;
+            //}
+            //else {
+            //    $('#errNumberofVehicle').css("display", "none");
+            //}
+
+
+
+
+
+
+            //if ($('#DiscountCitizen').val().trim() == "") {
+            //    $("#errDiscountCitizen").css("display", "block");
+            //    $('#errDiscountCitizen').focus();
+            //    return false;
+            //}
+            //else {
+            //    $('#errDiscountCitizen').css("display", "none");
+            //}
+
+            //if ($('#DiscountDepartment').val().trim() == "") {
+            //    $("#errDiscountDepartment").css("display", "block");
+            //    $('#errDiscountDepartment').focus();
+            //    return false;
+            //}
+            //else {
+            //    $('#errDiscountDepartment').css("display", "none");
+            //}
+
+            //if ($('#DiscountNGO').val().trim() == "") {
+            //    $("#errDiscountNGO").css("display", "block");
+            //    $('#errDiscountNGO').focus();
+            //    return false;
+            //}
+            //else {
+            //    $('#errDiscountNGO').css("display", "none");
+            //}
+
+            if ($('option:selected', $('#Isactive')).index() == 0) {
+                $("#errIsactive").css("display", "block");
+                $('#errIsactive').focus();
+                return false;
+            }
+            else {
+                $("#errIsactive").css("display", "none");
+            }
+
+        });
+
+
+
+
+    });
+
+
+
+
+</script>
+
+
+@using (Html.BeginForm("ADDUpdateNurseryFDMProduct", "Master", FormMethod.Post, new { enctype = "multipart/form-data", data_behavior = "confirm" }))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @*<label id="lbl_dpt">Add/Edit Place</label>*@
+                @ViewBag.OpType
+            </h4>
+        </div>
+
+        <div class="modal-body">
+
+            @Html.HiddenFor(model => model.ID)
+            @Html.HiddenFor(model => model.ProduceFor)
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Product Type : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.ProduceTypeID, (IEnumerable<SelectListItem>)ViewBag.ddlNurseryFDMProduct, "--Select--", new { @class = "form-control common", id = "ProduceTypeID" })
+                    <div id="errProduceTypeID" style="display:none" class="alert-danger1">Product Type is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Base Product Type : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.BaseProduceTypeID, (IEnumerable<SelectListItem>)TempData["BaseProductType"], "--Select--", new { @class = "form-control common", id = "BaseProduceTypeID" })
+                    <div id="errBaseProduceTypeID" style="display:none" class="alert-danger1">Base Produce Type is Required.</div>
+                </div>
+            </div>
+
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Product Name: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.ProductName, new { @class = "form-control common", @maxlength = "50" })
+                    <div id="errProductName" style="display:none" class="alert-danger1">Product Name is Required.</div>
+                </div>
+            </div>
+
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Thumb Image: <span class="mandatory">*</span></label>
+                    <input type="file" class="form-control common fileToUpload" id="thumbImage" name="thumbImage">
+                    <label><span style="display: none; color: #a94442;" class="spanmark" id="erroruploadfile"> </span></label>
+
+                    @Html.HiddenFor(d => d.ProductThumbImage)
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Full Image: <span class="mandatory">*</span></label>
+                    <input type="file" class="form-control common fileToUpload" id="fullImage" name="fullImage">
+                    <label><span style="display: none; color: #a94442;" class="spanmark" id="erroruploadfile"> </span></label>
+                    @Html.HiddenFor(d => d.ProductFullImage)
+                </div>
+            </div>
+            @*<div class="col-lg-6">
+            <div class="form-group">
+                <label>Discount for Citizen (%): <span class="mandatory">*</span></label>
+                @Html.TextBoxFor(model => model.DiscountCitizen, new { @class = "form-control common", @maxlength = "2" })
+                <div id="errDiscountCitizen" style="display:none" class="alert-danger1">Discount for Citizen is Required.</div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>Discount for Department (%): <span class="mandatory">*</span></label>
+                @Html.TextBoxFor(model => model.DiscountDepartment, new { @class = "form-control common", @maxlength = "2" })
+                <div id="errDiscountDepartment" style="display:none" class="alert-danger1">Discount for Department is Required.</div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>Discount for NGO (%): <span class="mandatory">*</span></label>
+                @Html.TextBoxFor(model => model.DiscountNGO, new { @class = "form-control common", @maxlength = "2" })
+                <div id="errDiscountNGO" style="display:none" class="alert-danger1">Discount for NGO is Required.</div>
+            </div>
+        </div>*@
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Active / Deactive : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.IsActive, (IEnumerable<SelectListItem>)ViewBag.ISactivelst, "--Select--", new { @class = "form-control common", id = "IsActive" })
+                    <div id="errIsactive" style="display:none" class="alert-danger1">Active / Deactive  is Required.</div>
+
+                </div>
+            </div>
+
+
+            <div class="col-lg-12">
+                <div id="VehicleIDSS">
+
+                    <div class="col-lg-12">
+                        <label>Head Details:</label>
+                        <div class="divider"></div>
+                    </div>
+                    <div id="VehicleDIV" class="col-lg-12 vehicle">
+                        @if (Convert.ToString(ViewBag.ProduceTypeID) != "0")
+                        {
+                            @Html.Partial("MapNurserieHeadPrice", Model.HeadPriceList)
+                        }
+
+                    </div>
+                </div>
+
+            </div>
+
+
+
+
+
+            <div class="col-lg-12"></div>
+
+
+            <!-- /.Btn Groping -->
+
+
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success" value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+}
+
+    <script>
+
+        $(function () {
+            $(":file").attr('title', '  ');
+            var $loading = $('#loadingDiv').hide();
+            $("#fileToUpload1").change(function (e) {
+                doReCreate(e);
+            });
+
+            $("#fileToUpload").change(function (e) {
+                doReCreate(e);
+            });
+        });
+
+        function FileVal(file) {
+            var iSize = (file.size / 1048576);
+            if (iSize > 2) {
+                $('.fileToUpload').val('');
+                $('#erroruploadfile').show();
+                $('#erroruploadfile').html("Image 2MB से बड़ा नहीं होना चाहिए!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#fileToUpload').focus();
+                return false;
+            }
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+            if (file) {
+                // split file name at dot
+                var get_ext = file.name.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('.fileToUpload').val('');
+                    $('#erroruploadfile').show();
+                    $('#erroruploadfile').html("कृपया Image फील्ड में केवल jpeg या jpg या png या gif फ़ाइल प्रारूप अपलोड करें !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('.fileToUpload').focus();
+                    return false;
+                } else {
+                    $('#erroruploadfile').hide();
+                }
+            }
+            else { $('#erroruploadfile').hide(); }
+        }
+        var nowTemp = new Date();
+        var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+        var files;
+        var storedFiles = [];
+        var upc = 0;
+        $(function () {
+            $(":file").attr('title', '  ');
+            var $loading = $('#loadingDiv').hide();
+            $(".fileToUpload").change(function (e) {
+                doReCreate(e);
+            });
+            selDiv = $("#selectedFiles");
+        });
+        function doReCreate(e) {
+            upc = upc + 1;
+            handleFileSelect(e);
+        }
+        function handleFileSelect(e) {
+            if (!e.target.files) return;
+            files = e.target.files;
+            for (var i = 0; i < files.length; i++) {
+                var ret = FileVal(files[i]);
+                if (ret != false) {
+                    var f = files[i];
+                    storedFiles.push(f.name);
+                }
+                else {
+                    $(".fileToUpload").val('');
+                }
+            }
+        }
+        function removeAtt(t) {
+            var serEle = $(t).parent().text().slice(0, -3);
+            var index = storedFiles.indexOf(serEle);
+            if (index !== -1) {
+                storedFiles.splice(index, 1);
+            }
+            $(t).parent().remove();
+        }
+
+    </script>

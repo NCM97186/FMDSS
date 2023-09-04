@@ -1,0 +1,181 @@
+﻿@model FMDSS.Models.Admin.CordinatorManagement
+@{
+    ViewBag.Title = "CoordinatorRegistration";
+    Layout =  "~/Views/Shared/AdminLayout.cshtml";
+}
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function (e) {
+
+      
+        $('#pincode').keypress(function (e) {
+            var kc = e.which;
+            if (kc >= 48 && kc <= 57) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+
+        })
+
+        $('#coordinatorID').keypress(function (e) {
+            var kc = e.which;
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        })
+
+        $('#address').keypress(function (e) {
+            var kc = e.which;
+
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95) || (kc >= 44 && kc <= 57) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        })
+
+        $('#btn_submit1').click(function (e) {
+         
+            if ($('#coordinatorID').val() == '') {
+                $('#errordiv').show();
+                $('#errordiv').html("Please Enter Name" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#coordinatorID").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv').hide(); }
+
+            if ($('#address').val() == '') {
+                $('#errordiv1').show();
+                $('#errordiv1').html("Please Enter Address." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#address").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv1').hide(); }
+
+
+        });
+       
+    });
+
+
+
+
+</script>
+
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <div class="col-lg-10 pad">
+            <h1 class="page-header">Research Co-Ordinator/Supervisor  Registration</h1>
+            @if (@TempData["CO_Status"] != null)
+            {
+                <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["CO_Status"]</div>
+                //Session["Status"] = null;
+            }
+        </div>
+        <div class="col-lg-2 pull-right">
+            <button type="button" class="btn btn-success btn_pp pull-right" name="btn_addpopip" value="" title="Survey List" onclick="location.href='@Url.Action("Index", "CoordinatorRegistration")'">
+                <i class=" fa fa-th-list ">
+                </i> Co-Ordinator List
+            </button>
+        </div>
+
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!--<div class="panel-heading">Processing Fees</div>-->
+                <!-- /.panel-heading -->
+                @using (Html.BeginForm("SubmitCoordinatorform", "CoordinatorRegistration", FormMethod.Post, new { data_behavior = "confirm" }))
+                {
+
+                    <div class="panel-body">
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Co-Ordinator Name: <span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(x => x.CoordinatorName, new { @class = "form-control Alphanumeric", title = "Enter Co-Ordinator/Supervisor Name eg: Narendra Singh", @placeholder = "Enter Co-Ordinator/Supervisor Name", @maxlength = 50, @id = "coordinatorID" })
+                                @Html.HiddenFor(x => x.CoordinatorId)
+                                <div id="errordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>SSO ID:</label>
+                                @Html.TextBoxFor(x => x.SSOID, new { @class = "form-control Alphanumeric", title = "Enter SSO ID eg:", @placeholder = "Enter SSO ID", @maxlength = 50, @id = "ssoID" })
+                                <div id="errordiv8" style="display:none" class="alert-danger1"></div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Address: <span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(x => x.Address, new { @class = "form-control Alphanumeric", title = "Enter Address:", @placeholder = "Enter Address", @maxlength = 150, @id = "address" })
+                                <div id="errordiv1" style="display:none" class="alert-danger1"></div>
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label> District: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.DistrictCode, (IEnumerable<SelectListItem>)ViewBag.DistrictCode, new { @class = "form-control common", title = "Select District", id = "ddlDistrictID" })
+
+                                <div id="errordiv10" style="display:none" class="alert-danger1"></div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Pincode:</label>
+                                @Html.TextBoxFor(x => x.Pincode, new { @class = "form-control Alphanumeric", title = "Enter Pincode:", @placeholder = "Enter Pincode", @maxlength = 6, @id = "pincode" })
+                                <div id="errordiv9" style="display:none" class="alert-danger1"></div>
+
+                            </div>
+                        </div>
+
+                        
+                        <div class="col-lg-12"></div>
+
+                        <!-- Btn Groping -->
+                        <div class="btn-padd">
+                            <div class="col-lg-12" id="btn">
+                                <button id="btn_submit1" value="Submit" name="Command" class="btn btn-success" type="submit">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+                                <button class="btn btn-warning" type="reset">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+                                <button class="btn btn-danger" value="Cancel" name="Command" type="button">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+
+                            </div>
+                        </div>
+                        <!-- /.Btn Groping -->
+
+
+                    </div>
+                }
+                <!-- /.panel-body -->
+            </div>
+
+            <!-- /.panel -->
+
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>

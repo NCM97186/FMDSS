@@ -1,0 +1,400 @@
+﻿@{
+    ViewBag.Title = "DropOutAuction";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+@model FMDSS.Models.CitizenService.ProductionServices.Auction
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script type="text/javascript">
+
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        $('#dataTableNursery').DataTable({
+            responsive: true
+        });
+
+        $('#noticeId').change(function (e) {
+            $("#lbl_totalPrice").html('');
+            $("#applyTable").empty();
+            $("#Hdn_AuId").val('');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'Auction/GetWinner', // we are calling json method
+                dataType: 'json',
+                data: { noticeId: $("#noticeId").val() },
+                success: function (data) {
+
+                    $("#lbl_totalPrice").html(data.BiddingAmount);
+                    $("#Hdn_AuId").val(data.AuctionId);
+                    var bardata = "<tr><td>" + data.RequestId + "</td><td>" + data.NoticeNo + "</td><td>" + data.BidderName + "</td><td>" + data.BiddingAmount + "</td>" + "</td><td>" + data.Status + "</td><td  class='Dropp'> <button type='button' class='btn btn-warning btn-circle DropOut1' data-toggle='modal' data-target='#myModal' style='cursor:pointer' title='Drop-Out'><i class='fa fa-edit'></i></button> </td></tr>";
+                    $("#applyTable").append(bardata);
+
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+
+
+            });
+            return false;
+        });
+
+
+
+        $('#btn_Save').click(function (e) {
+
+            if ($('#dropOut_Reason').val() == '0') {
+                $('reasonerrordiv').show();
+                $('#reasonerrordiv').html("Please Select Reason for Drop-Out." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#dropOut_Reason").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#reasonerrordiv').hide(); }
+        });
+
+
+
+    });
+
+</script>
+
+<script type="text/javascript">
+
+    function DropOut(aucId) {
+
+        $("#Hdn_AuId").val(aucId);
+
+        var tblinfo = {
+            AuctionId: $.trim(aucId)
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'Auction/AddDropout', // we are calling json method
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(tblinfo),
+            success: function (data) {
+
+                $("#noticeNo").val(data.NoticeNo);
+                $("#bidderName").val(data.BidderName);
+                $("#regionName").val(data.RegionCode);
+                $("#circleName").val(data.CircleCode);
+                $("#divisionName").val(data.DivisionCode);
+                $("#rangeName").val(data.RangeCode);
+                $("#paceofAuction").val(data.DepotName);
+                $("#forestProduce").val(data.ForestProduce);
+                $("#qty").val(data.Qty);
+                $("#reservedPrice").val(data.ReservedPrice);
+                $("#durationDate").val(data.Durations);
+                $("#biddingAmount").val(data.BiddingAmount);
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+
+        });
+    }
+
+    function GetAucDetail(reqId, noticeNo, name, paidAmt, status) {
+
+        $("#Hdn_ReqId").val(reqId);
+        $("#Hdn_Notice").val(noticeNo);
+        $("#Hdn_Name").val(name);
+        $("#Hdn_PaidAmt").val(paidAmt);
+        $("#Hdn_Status").val(status);
+
+    }
+
+</script>
+
+
+
+
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Auction Result</h1>
+        @if (@TempData["Status"] != null)
+        {
+            <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["Status"]</div>
+        }
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                        <div id="tbl" class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover" id="dataTableNursery">
+                                <thead>
+                                    <tr>
+                                        <th style="width:5px">
+                                            S.No.
+                                        </th>
+                                        <th style="width:20px">
+                                            Notice Number
+                                        </th>
+                                        <th style="width:12px">
+                                            Range
+                                        </th>
+                                        <th style="width:12px">
+                                            Depot
+                                        </th>
+                                        <th>
+                                            Depot In-Charge
+                                        </th>
+                                        <th>
+                                            Product Type
+                                        </th>
+                                        <th >
+                                            Product
+                                        </th>
+                                        <th style="width:15px">
+                                            Auction Qty
+                                        </th>
+                                        <th style="width:12px">
+                                            Unit
+                                        </th>
+                                        <th>
+                                            Bidding Amount <br/> (INR)
+                                        </th>
+                                        <th>
+                                            Qty Left to be <br /> Taken Out
+                                        </th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in ViewData["winnerList"] as IEnumerable<FMDSS.Models.CitizenService.ProductionServices.Auction>)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @Html.DisplayFor(model => item.AuctionId)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.NoticeNo)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.RangeName)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.PlaceofAuction)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.DepotIncharge)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.ProduceFor)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.ForestProduce)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.StockQuantity)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.ProductUnit)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.BiddingAmount)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.Qty)
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            <br />
+                            <div style="text-align:center;">
+
+
+
+                                <div style="text-align:center" class="form-horizontal" role="form">
+                                    <input type="hidden" id="Hdn_ReqId" name="Hdn_ReqId" />
+                                    <input type="hidden" id="Hdn_Notice" name="Hdn_Notice" />
+                                    <input type="hidden" id="Hdn_Name" name="Hdn_Name" />
+                                    <input type="hidden" id="Hdn_PaidAmt" name="Hdn_PaidAmt" />
+                                    <input type="hidden" id="Hdn_Status" name="Hdn_Status" />
+
+
+
+                                </div>
+
+                                <br />
+
+                            </div>
+
+                        </div>
+                  
+                </div>
+
+                @using (Html.BeginForm("SubmitDropout", "Auction", FormMethod.Post, new { id = "Dropout" }))
+                {
+                    <div class="modal fade" id="myModal" role="dialog">
+                        <div class="modal-dialog modal-lg">
+                            <!-- Modal content-->
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">
+                                        &times;
+                                    </button>
+                                    <h4 class="modal-title">
+                                        Drop-Out A Notice
+
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Bidder Name: </label>
+                                            <input class="form-control" id="bidderName" name="BidderName" readonly="readonly">
+                                            <input type="hidden" id="Hdn_AuId" name="Hdn_AuId" value="0">
+
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label> Notice No.: <span class="mandatory"></span></label>
+                                            <input class="form-control" id="noticeNo" name="Notice_No" readonly="readonly">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Region Name.:</label>
+
+                                            <input class="form-control" id="regionName" readonly="readonly">
+
+
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Circle Name:</label>
+                                            <input class="form-control" id="circleName" readonly="readonly">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Division Name:</label>
+                                            <input class="form-control" id="divisionName" readonly="readonly">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Range Name:</label>
+                                            <input class="form-control" id="rangeName" readonly="readonly">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Place of Auction:</label>
+                                            <input class="form-control" id="paceofAuction" readonly="readonly">
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Forest Produce:</label>
+                                            <input class="form-control" id="forestProduce" readonly="readonly">
+
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Quantity:</label>
+                                            <input class="form-control" id="qty" readonly="readonly">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Reserved Price: </label>
+                                            <input class="form-control" id="reservedPrice" readonly="readonly">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Valid Auction Duration: </label>
+                                            <input class="form-control" id="durationDate" readonly="readonly">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Bidding Amount: <span class="mandatory">*</span></label>
+                                            <input class="form-control" id="biddingAmount" name="BiddingAmount" readonly="readonly">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Drop-Out Reasons: <span class="mandatory">*</span></label>
+                                            @Html.DropDownList("DropOut_Reason", (IEnumerable<SelectListItem>)ViewBag.DropOut_Reason, new { @class = "form-control common", id = "dropOut_Reason" })
+
+
+                                        </div>
+                                        <div id="reasonerrordiv" style="display:none" class="alert-danger1"></div>
+
+                                    </div>
+
+                                    <div class="col-lg-12"></div>
+
+
+
+
+
+
+                                    <div class="form-group" id="btn-cont1">
+                                        <div class="col-sm-offset-2 col-sm-10">
+                                            <button type="button" class="btn btn-success" id="procedId" style="display:none">
+                                                Proceed
+                                            </button>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--/.model body-->
+
+                                <div class="modal-footer" style="clear: both">
+
+                                    <div id="btn" class="col-lg-12">
+                                        <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_Save">
+                                            <i class="fa fa-check"></i> Save
+                                        </button>
+
+                                        <button type="button" class="btn btn-danger" data-dismiss="modal">
+                                            <i class="fa fa-times fa-fw"></i>  Close
+                                        </button>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                }
+
+            </div>
+
+
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>

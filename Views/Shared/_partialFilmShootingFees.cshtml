@@ -1,0 +1,240 @@
+﻿@model FMDSS.Models.Master.FilmShootingFees
+
+
+<link href="~/css/timepicki.css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+     
+    $('#IndianMemberFees,#NonIndianMemberFees,#StudentFees,#Discount,#TaxRate').bind('keypress', function (evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode
+        // var charCode = evt.which;
+        if (charCode != 8) {
+
+            if ((charCode == 46) || (charCode >= 97 && charCode <= 122) || (charCode >= 65 && charCode <= 90)) {
+                return false;
+            }
+            else {
+                if (charCode >= 48 && charCode <= 57 || charCode == 46) {
+                    return true;
+                }
+                else {
+                    evt.preventDefault();
+                }
+            }
+        }
+    });
+
+    $(document).ready(function () {
+
+        $('#btn_submit1').click(function (e) {
+
+            if ($('option:selected', $('#DIST_CODE')).index() == 0) {
+                $("#errDIST_CODE").css("display", "block");
+                $('#errDIST_CODE').focus();
+                return false;
+            }
+            else {
+                $("#errDIST_CODE").css("display", "none");
+            }
+
+            if ($('option:selected', $('#PlaceID')).index() == 0) {
+                $("#errPlaceID").css("display", "block");
+                $('#errPlaceID').focus();
+                return false;
+            }
+            else {
+                $("#errPlaceID").css("display", "none");
+            }
+
+            if ($('#IndianMemberFees').val().trim() == "") {
+                $('#errIndianMemberFees').css("display", "block");
+                $('#errIndianMemberFees').focus();
+                return false;
+            }
+            else {
+                $('#errIndianMemberFees').css("display", "none");
+            }
+
+            if ($('#NonIndianMemberFees').val().trim() == "") {
+                $("#errNonIndianMemberFees").css("display", "block");
+                $('#errNonIndianMemberFees').focus();
+                return false;
+            }
+            else {
+                $("#errNonIndianMemberFees").css("display", "none");
+            }
+
+            if ($('#StudentFees').val().trim() == "") {
+                $("#errStudentFees").css("display", "block");
+                $('#errStudentFees').focus();
+                return false;
+            }
+            else {
+                $("#errStudentFees").css("display", "none");
+            }
+
+            if ($('#Discount').val().trim() == "") {
+                $("#errDiscount").css("display", "block");
+                $('#errDiscount').focus();
+                return false;
+            }
+            else {
+                $("#errDiscount").css("display", "none");
+            }
+
+           
+            
+            if ($('#TaxRate').val().trim() == "") {
+                $("#errTaxRate").css("display", "block");
+                $('#errTaxRate').focus();
+                return false;
+            }
+            else {
+                $("#errTaxRate").css("display", "none");
+            }
+
+            if ($('option:selected', $('#Isactive')).index() == 0) {
+                 $("#errIsactive").css("display", "block");
+                 $('#errIsactive').focus();
+                return false;
+            }
+            else {
+                 $("#errIsactive").css("display", "none");
+            }
+
+
+
+        });
+
+    
+
+        $('#DIST_CODE').change(function (e) {
+
+            $("#PlaceID").empty();            
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'Master/PlaceByDistrict', // we are calling json method
+            dataType: 'json',
+            data: { districtID: $("#DIST_CODE").val() },
+            success: function (circle) {
+                $.each(circle, function (i, items) {
+                    $("#PlaceID").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+
+        });
+        return false;
+    });
+
+    });
+
+</script>
+
+
+@using (Html.BeginForm("ADDUpdateFilmShootingFees", "Master", FormMethod.Post))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @*<label id="lbl_dpt">Add/Edit Place</label>*@
+                @ViewBag.OpType
+            </h4>
+        </div>
+
+        <div class="modal-body">
+            @Html.HiddenFor(model => model.FilmShootingFeesID)
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>District Name: <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.DIST_CODE, (IEnumerable<SelectListItem>)ViewBag.ddlDistrict1, "--Select--", new { @class = "form-control common", id = "DIST_CODE" })
+                    <div id="errDIST_CODE" style="display:none" class="alert-danger1">District Name is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Place Name: <span class="mandatory">*</span></label>                   
+                    @Html.DropDownListFor(Model => Model.PlaceID, (IEnumerable<SelectListItem>)ViewBag.ddlPlace1, "--Select--", new { @class = "form-control common", id = "PlaceID" })
+                    <div id="errPlaceID" style="display:none" class="alert-danger1">Place Name is Required.</div>
+
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Indian Member Fees: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.IndianMemberFees, new { @class = "form-control common", @maxlength = "12" })
+                    <div id="errIndianMemberFees" style="display:none" class="alert-danger1">Indian Member Fees is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Non Indian Member Fees: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.NonIndianMemberFees, new { @class = "form-control common", @maxlength = "12" })
+                    <div id="errNonIndianMemberFees" style="display:none" class="alert-danger1">Non Indian Member Fees is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group"> 
+                    <label>Student Fees : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.StudentFees, new { @class = "form-control common", @maxlength = "12" })
+                    <div id="errStudentFees" style="display:none" class="alert-danger1">Student Fees is Required.</div>
+                </div>
+            </div>
+
+           
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Discount: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Discount, new { @class = "form-control common", @maxlength = "12" })
+                    <div id="errDiscount" style="display:none" class="alert-danger1">Discount is Required.</div>
+                </div>
+            </div> 
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Tax Rate: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.TaxRate, new { @class = "form-control common", @maxlength = "12" })
+                    <div id="errTaxRate" style="display:none" class="alert-danger1">Tax Rate is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Active / Deactive : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.Isactive, (IEnumerable<SelectListItem>)ViewBag.ISactivelst, "--Select--", new { @class = "form-control common", id = "Isactive" })
+                    <div id="errIsactive" style="display:none" class="alert-danger1">Active / Deactive  is Required.</div>
+
+                </div>
+            </div>
+
+
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success"  value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+                
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+}

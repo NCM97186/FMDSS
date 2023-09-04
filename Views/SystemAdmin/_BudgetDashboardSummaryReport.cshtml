@@ -1,0 +1,113 @@
+﻿@model IEnumerable<FMDSS.Models.ForesterDevelopment.BudgetAllocation.ViewModel.MonthlyProgressReportModel>
+<table id="tblSummary" class="table table-striped table-bordered table-hover gridtable">
+    <thead>
+        <tr>
+            <th>
+                S.No
+            </th>
+            @*<th>
+                Finance Year
+            </th>
+            <th>
+                Scheme
+            </th>*@
+            <th>
+                Division Name
+            </th>
+            <th>
+                Total Amount
+            </th>
+            <th>
+                Allocated Amount(in Lakh)
+            </th>
+            <th>
+                Expenditure till last month(in Lakh)
+            </th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @{ int i = 0;}
+        @foreach (var item in Model)
+            {
+            <tr>
+                @{ i++;}
+                <td>
+
+                    @i
+                </td>
+                @*<td>
+                    (@item.FinancialYear)
+
+                </td>
+                <td>
+                    @Html.DisplayFor(model => item.Scheme_Name)
+
+                </td>*@
+                <td>
+                    @item.Division_Name
+                </td>
+
+                <td class="TAmount">
+                    @Html.DisplayFor(model => item.TotalAmount)
+                </td>
+                <td class="AAmount">
+                    @*<a href="javascript:void(0);" onclick="getdivisionlist('@item.FinancialYear', '@item.Scheme_Name', '@item.Division_Code',this)">@Convert.ToDouble(item.AllocatedAmount.ToString("0.00")) </a>*@
+                    <a href="javascript:void(0);" onclick="getdivisionlist('@item.FinancialYear', '@item.Scheme_Name', '@item.Division_Code',this)"><i class="fa fa-plus-circle collapsed_me"> @Convert.ToDouble(item.AllocatedAmount.ToString("0.00"))</i> </a>
+                    <div class="budgetdata"></div>
+                </td>
+                <td class="EAmount EAmountEachTotal_@i">
+                    @Html.DisplayFor(model => item.ExpenditureLastmonth)
+                </td>
+
+            </tr>
+                    }
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#tblSummary').DataTable({
+            "responsive": true,
+            "bSort": true,
+            "aLengthMenu": [[10, 25, 50, 75, -1], [10, 25, 50, 75, "All"]],
+            "iDisplayLength": 10
+        });
+
+    });
+    //function getdivisionlist(fy, scheme, division, cntrlID) {
+    //    $.ajax({
+    //        type: 'GET',
+    //        url: RootUrl + 'SystemAdmin/_BudgetDivisionWiseReport',
+    //        dataType: 'html',
+    //        data: { financialyear: fy, scheme: scheme, division: division },
+    //        success: function (data) {
+    //            $('.budgetdata').html('');
+    //            $(cntrlID).next('div.budgetdata').append(data);
+    //        },
+    //    });
+    //}
+    function getdivisionlist(fy, scheme, division, cntrlID) {
+        if ($(cntrlID).find('i').hasClass('fa-plus-circle')) {
+            $.ajax({
+                type: 'GET',
+                url: RootUrl + 'SystemAdmin/_BudgetDivisionWiseReport',
+                dataType: 'html',
+                data: { financialyear: fy, scheme: scheme, division: division },
+                success: function (data) {
+                    $('.budgetdata').html('');
+                    $('.collapsed_me').removeClass('fa fa-minus-circle collapsed_me').addClass('fa fa-plus-circle collapsed_me');
+                    $(cntrlID).next('div.budgetdata').append(data);
+                    $(cntrlID).find('i').removeClass('fa fa-plus-circle collapsed_me').addClass('fa fa-minus-circle collapsed_me');
+                    //alert($(cntrlID).find('i').attr('class'));
+                },
+            });
+        }
+        else {
+            $(cntrlID).find('i').removeClass('fa fa-minus-circle collapsed_me').addClass('fa fa-plus-circle collapsed_me');
+            $('.budgetdata').html('');
+        }
+    }
+
+
+</script>

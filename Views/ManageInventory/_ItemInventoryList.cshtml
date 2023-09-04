@@ -1,0 +1,65 @@
+﻿<div class="panel-body">
+    <div class="col-lg-3 rgt pull-right padding-bottom10 hide">
+        <button type="button" class="btn btn-success pull-right" data-toggle="modal" onclick="OpenDialog('_AddItemToInventory',0)" id="btnAddNewItemToInventory" data-target="#myModalAddItemDOD" title="Add New Notice">
+            <i class="fa fa-plus"></i> Add New Item in inventory
+        </button>
+    </div>
+    <div class="table-responsive request-id">
+        <table class="table table-striped table-bordered table-hover" id="dtAddItemToInventory">
+            <thead>
+                <tr>
+                    <th>S.No.</th>
+                    <th>Depot Name</th>
+                    <th>TP Name</th>
+                    @*<th>Product Type</th>
+                    <th>Product Name</th>
+                    <th>Unit</th>
+                    <th>Transferred Quantity</th>
+                    <th>Received Quantity</th>*@ 
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in ViewData["lstInventoryProduces"] as IEnumerable<FMDSS.Models.ForestProduction.DODItemAddedToInventory>)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(model => item.SNo)</td>
+                        <td>@Html.DisplayFor(model => item.Depot_Name)</td>
+                        <td>@Html.DisplayFor(model => item.TransitPermitName)</td>
+                        @*<td>@Html.DisplayFor(model => item.ProductType)</td>
+                        <td>@Html.DisplayFor(model => item.ProductName)</td>
+                        <td>@Html.DisplayFor(model => item.UnitName)</td>
+                        <td>@Html.DisplayFor(model => item.TransferQTY)</td>
+                        <td>@Html.DisplayFor(model => item.ReceivedQty)</td>*@ 
+                        <td>
+                            @*<button type="button" id="btnViewItemDetails" class="btn btn-success btn-circle" title="View" data-toggle="modal" data-target="#myViewItemDetails" onclick="GetItemDetails(this,'View')" value="@item.TPID">
+                                <i class="fa fa-eye"></i>
+                            </button>*@
+                            <button type="button" id="btnViewItemDetails" class="btn btn-success btn-circle" title="Edit" data-toggle="modal" data-target="#myModalAddItemDOD" onclick="OpenDialog('_EditItemToInventory','@item.TPID')" value="@item.TPID">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function UpdateItemToInventoryResponse(response) {
+        @{
+            FMDSS.Entity.ResponseMsg result = new FMDSS.Entity.ResponseMsg();
+            if (ViewBag.ResponseMsg != null)
+            {
+                result = (FMDSS.Entity.ResponseMsg)ViewBag.ResponseMsg;
+            }
+        } 
+        if ('@result.ReturnMsg' != null) {
+            alert('@result.ReturnMsg');
+            if ('@result.IsError' == 'False') {
+                $('#myModalAddItemDOD').modal('toggle');
+            }
+        }
+    } 
+</script>

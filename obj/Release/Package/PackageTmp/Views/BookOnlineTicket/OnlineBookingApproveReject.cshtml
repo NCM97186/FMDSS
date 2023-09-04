@@ -1,0 +1,110 @@
+﻿@model IEnumerable<FMDSS.Models.BookOnlineTicket.SaveOnlineBookingApproveReject>
+
+@{
+    ViewBag.Title = "OnlineBookingApproveReject";
+}
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        //$.noConflict();
+        $('#ApproveRejectForm').DataTable({
+            responsive: true,
+            bSort: true
+        });
+
+    });
+</script>
+<script type="text/javascript">
+    var RootURl = '@Url.Content("~/")';
+</script>
+<script type="text/javascript">
+    function GetDataOnRequestID(RequestID) {
+        $.ajax({
+            type: 'GET',
+            url: RootURl + "BookOnlineTicket/GetDetailsWithRequestID?RequestID=" + RequestID + "&IsCitizenOrAdmin=2",
+            dataType: 'html',
+            success: function (data) {
+                $('#modelPlace').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+    }
+</script>
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Half / Full Day Visit Permit</h1>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    @Html.Partial("_ErrorMsg")
+                    <div class="dataTable_wrapper">
+                        <div id="tbl" class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover table-responsive" id="ApproveRejectForm">
+                                <thead>
+                                    <tr style="background-color: lightgray;">
+                                        <th style="width:10%;">Sr No.</th>
+                                        <th style="width:10%;">Request ID</th>
+                                        <th style="width:13%;">Visit Date</th>
+                                        <th style="width:15%;">Enter Date</th>
+                                        <th style="width:20%;">Protected Area</th>
+                                        <th style="width:10%;">Zone</th>
+                                        <th style="width:10%;">Shift</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @foreach (var item in Model)
+                                    {
+
+                                        <tr>
+                                            <td>
+                                                @Html.DisplayFor(model => item.SNO)
+                                                @Html.HiddenFor(model => item.RequestID)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.RequestID)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.DateOfArrival)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.CitizenVisitDate)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.PlaceName)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.ZoneName)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.ShiftTimeName)
+                                            </td>
+                                            <td colspan="2">
+                                                <button type="button" class="btn btn-warning btn-circle EditDepot" data-toggle="modal" data-target="#myModal" title="Approve/Reject" onclick="return GetDataOnRequestID('@item.RequestID');">
+                                                    <i class="fa fa-edit"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade in" id="myModal" role="dialog">
+                <div class="modal-dialog modal-lg" id="modelPlace" style="background-color:#fff !important;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+

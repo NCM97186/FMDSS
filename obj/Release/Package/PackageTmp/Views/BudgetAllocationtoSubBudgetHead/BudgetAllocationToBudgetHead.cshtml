@@ -1,0 +1,605 @@
+﻿@model FMDSS.Models.ForesterDevelopment.BudgetAllocation.ViewModel.View_BudgetHead_Allocation
+
+@{
+    ViewBag.Title = "BudgetAllocationBudgetHead";
+    Layout = "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<script src="~/js/jquery.min.js"></script>
+
+<div id="page-wrapper-inn">
+    @if (TempData["Msg"] != null)
+    {
+        <script type="text/javascript" language="javascript">
+            alert('@TempData["Msg"]');
+        </script>
+    }
+    @Html.Partial("_PartialBudgetLink")
+    <div class="col-lg-12 pad">
+        <div class="col-lg-12 pad">
+            <div class="col-lg-10">
+                <h1 class="page-header">Budget Allocation Master (@Session["User"].ToString())</h1>
+            </div>
+            <div class="col-lg-2">
+                <button type="button" class="btn btn-success confirm-toggle" name="Command" value="0" id="AddMaster">
+                    <i class="fa fa-check"></i> Show Master
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!--<div class="panel-heading">Processing Fees</div>-->
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <!--Add New Btn-->
+                    <div class="col-lg-3 rgt pull-right">
+                        <button type="button" class="btn btn-success pull-right btn_pp" data-toggle="modal" id="btnAddActivity" data-target="#myActivity" title="Add Activity" data-backdrop="static" data-keyboard="false">
+                            <i class="fa fa-plus"></i> Budget-Allocation-Master
+                        </button>
+                    </div>
+                    <div class="dataTable_wrapper table-responsive scroll-x simplebar horizontal">
+
+                        <table class="table table-striped table-bordered table-hover gridtable" id="dataTables-example">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Financial Year
+                                    </th>
+                                    <th>
+                                        Scheme
+                                    </th>
+                                    <th>
+                                        Budget/Sub Budget Head
+                                    </th>
+                                    <th>
+                                        Activity/SubActivity
+                                    </th>
+
+
+                                    <th>
+                                        Allocated Amount
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @foreach (var item in ViewData["BudgetAllocationBudgetHead"] as IEnumerable<FMDSS.Models.ForesterDevelopment.BudgetAllocation.ViewModel.View_BudgetHead_Allocation>)
+                                {
+
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(model => item.FinancialYear)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.SchemeName)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.BudgetHead)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.ActivityName)
+                                        </td>
+
+                                        <td>
+                                            @Html.DisplayFor(model => item.AllocatedAmount)
+                                        </td>
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                    <!--./Add New Btn-->
+                    <!--Table-->
+                    <!-- /.panel -->
+
+                </div>
+                <div class="modal fade" id="myActivity" role="dialog">
+                    <div class="modal-dialog modal-lg">
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">
+                                    &times;
+                                </button>
+                                <h4 class="modal-title" id="activityLabel">Budget Allocation</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div role="form">
+                                    @using (Html.BeginForm("Submit", "BudgetAllocationtoSubBudgetHead", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data", id = "IdFor" }))
+                                    {
+                                        <div class="panel-body">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Financial Year: <span class="mandatory">*</span></label>
+                                                    @Html.DropDownListFor(x => x.FY_ID, (IEnumerable<SelectListItem>)ViewBag.FinancialYear, "--Select--", new { @class = "form-control", @id = "FY_ID", name = "FY_ID" })
+                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.FY_ID)</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Scheme: <span class="mandatory">*</span></label>
+
+                                                    @Html.DropDownListFor(x => x.SchemeID, (IEnumerable<SelectListItem>)ViewBag.Scheme, "--Select--", new { @class = "form-control", @id = "SchemeID", name = "SchemeID" })
+                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.SchemeID)</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Budget Head: <span class="mandatory">*</span></label>
+                                                    @Html.DropDownListFor(x => x.BudgetHeadID, (IEnumerable<SelectListItem>)ViewBag.BudgetHead, "--Select--", new { @class = "form-control", @id = "BudgetHeadID", name = "BudgetHeadID" })
+                                                    @*<div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.BudgetHeadID)</div>*@
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Budget Sub Head: <span class="mandatory"></span></label>
+                                                    @Html.DropDownListFor(x => x.SubBudgetHeadID, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", @id = "SubBudgetHeadID", name = "SubBudgetHeadID" })
+                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.SubBudgetHeadID)</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Activity : <span class="mandatory">*</span></label>
+                                                    @Html.DropDownListFor(x => x.ActivityID, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", @id = "ActivityID", name = "ActivityID" })
+                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.ActivityID)</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Sub Activity: <span class="mandatory">*</span></label>
+                                                    @Html.DropDownListFor(x => x.SubActivityID, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", @id = "SubActivityID", name = "SubActivityID" })
+                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.SubActivityID)</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Unit: <span class="mandatory">*</span></label>
+                                                    @Html.DropDownListFor(x => x.Unit, (IEnumerable<SelectListItem>)ViewBag.Sub_Activity_Unit, "--Select--", new { @class = "form-control", @id = "Unit", name = "Unit" })
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Number: <span class="mandatory"></span></label>
+                                                    @Html.TextBoxFor(s => s.NumberPerUnit, new { @class = "form-control", @id = "NumberPerUnit" })
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Rate: <span class="mandatory"></span></label>
+                                                    @Html.TextBoxFor(s => s.RatePerUnit, new { @class = "form-control", @id = "RatePerUnit" })
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-12">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label>Total Allocated Amount: (lakh) <span class="mandatory">*</span></label>
+                                                        @Html.TextBoxFor(x => x.TotalAllocatedAmount, new { @class = "form-control", @id = "TotalAllocatedAmount", name = "TotalAllocatedAmount" })
+                                                        <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.TotalAllocatedAmount)</div>
+                                                    </div>
+                                                </div>
+
+
+
+                                                <div class="col-lg-4">
+                                                    <div class="form-group">
+                                                        <label>Release Amount: (lakh)<span class="mandatory">*</span></label>
+                                                        @Html.TextBoxFor(x => x.AllocatedAmount, new { @class = "form-control", @id = "AllocatedAmount", name = "AllocatedAmount" })
+                                                        <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.AllocatedAmount)</div>
+                                                    </div>
+                                                </div>
+                                                <label>Get Details:</label><br>
+                                                <button type="button" class="btn btn-success" title="Save" name="Command" value="Submit" id="btnDetails" style="width:auto">
+                                                    <i class="fa fa-plus"></i> Add
+                                                </button>
+                                            </div>
+
+                                            <div class="dataTable_wrapper table-responsive scroll-x simplebar horizontal">
+                                                <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>
+                                                                Scheme
+                                                            </th>
+                                                            <th>
+                                                                Activity
+                                                            </th>
+                                                            <th>
+                                                                Budget/Sub Budget Head
+                                                            </th>
+                                                            <th>
+                                                                Allocated Amount
+                                                            </th>
+                                                            <th>
+                                                                Action
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="tblDetails"></tbody>
+                                                </table>
+
+                                            </div>
+                                            <div id="BudgetCir"></div>
+                                            <div class="btn-padd">
+                                                <div id="btn" class="col-lg-12">
+                                                    <button type="Submit" class="btn btn-success confirm-toggle" name="Command" value="submit" id="Savepermission">
+                                                        <i class="fa fa-check"></i> Submit
+                                                    </button>
+
+                                                    <button type="reset" class="btn btn-warning" onclick="reload(); return false;">
+                                                        <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                                    </button>
+                                                    <button type="submit" name="Command" value="Cancel" class="btn btn-danger" onclick="reload(); return false;">
+                                                        <i class="fa fa-times fa-fw"></i> Cancel
+                                                    </button>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var RootURl = '@Url.Content("~/")';
+</script>
+<script>
+
+
+    $(function () {
+
+        $('.gridtable').DataTable({
+            responsive: true,
+            "bSort": true
+        });
+
+
+
+        $('#BudgetHeadID').change(function (e) {
+
+            $("#SubBudgetHeadID").empty();
+            var option = $("<option />");
+            option.attr("value", '0').text('--Select--');
+            $('#SubBudgetHeadID').append(option);
+            var budgetHead = $('#BudgetHeadID').val();
+            $.ajax({
+                type: 'POST',
+                url: RootURl + 'BudgetAllocationCircle/GetBudgetSubHead',
+                dataType: 'json',
+                data: { budgetHead: budgetHead },
+                success: function (data) {
+                    $.each(data, function (i, items) {
+
+                        $("#SubBudgetHeadID").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+
+                    });
+                    $("#SubBudgetHeadID option").each(function () {
+                        if ($(this).text().trim().toLowerCase() == 'none') {
+                            $(this).attr("selected", "selected");
+                        }
+                    });
+
+                },
+
+            });
+
+        });
+
+
+
+        //$('#SchemeID').change(function (e) {
+
+        //    $("#ActivityID").empty();
+        //    var option = $("<option />");
+        //    option.attr("value", '0').text('--Select--');
+        //    $('#ActivityID').append(option);
+        //    var SchemeID = $('#SchemeID').val();
+        //    $.ajax({
+        //        type: 'POST',
+        //        url: RootURl + 'BudgetAllocationCircle/GetActivity',
+        //        dataType: 'json',
+        //        data: { SchemeID: SchemeID },
+        //        success: function (data) {
+        //            $.each(data, function (i, items) {
+
+        //                $("#ActivityID").append('<option value="' + items.Value + '">' +
+        //                 items.Text + '</option>');
+
+        //            });
+        //        },
+
+        //    });
+
+        //});
+
+        $('#SchemeID').change(function (e) {
+
+            $("#ActivityID").empty();
+
+            var option = $("<option />");
+            option.attr("value", '0').text('--Select--');
+            $('#ActivityID').append(option);
+            if ($('#SchemeID').val() != '') {
+                $.ajax({
+                    type: 'POST',
+                    url: RootURl + "BudgetAllocationCircle/GetMasterActivity",
+                    dataType: 'json',
+                    data: { Action: 'Activity', ID: '0' },
+                    success: function (data) {
+                        $.each(data, function (i, items) {
+
+                            $("#ActivityID").append('<option value="' + items.Value + '">' +
+                             items.Text + '</option>');
+
+                        });
+                    },
+
+                });
+            }
+        });
+
+        $('#ActivityID').change(function (e) {
+
+            $("#SubActivityID").empty();
+            var ActivityID = $('#ActivityID').val();
+
+            if (ActivityID != '') {
+                var option = $("<option />");
+                option.attr("value", '0').text('--Select--');
+                $('#SubActivityID').append(option);
+                $.ajax({
+                    type: 'POST',
+                    url: RootURl + "BudgetAllocationCircle/GetMasterActivity",
+                    dataType: 'json',
+                    data: { Action: 'SubActivity', ID: ActivityID },
+                    success: function (data) {
+                        $.each(data, function (i, items) {
+
+                            $("#SubActivityID").append('<option value="' + items.Value + '">' +
+                             items.Text + '</option>');
+
+                        });
+                        $("#SubActivityID option").each(function () {
+                            if ($(this).text().trim().toLowerCase() == 'none') {
+                                $(this).attr("selected", "selected");
+                            }
+                        });
+                    },
+
+                });
+            }
+        });
+        //$('#ActivityID').change(function (e) {
+
+        //    $("#SubActivityID").empty();
+        //    //var option = $("<option />");
+        //    ////option.attr("value", '0').text('--Select--');
+        //    //$('#SubActivityID').append(option);
+
+        //    var ActivityID = $('#ActivityID').val();
+
+        //    $.ajax({
+        //        type: 'POST',
+        //        url: RootURl + 'BudgetAllocationCircle/GetSubActivity',
+        //        dataType: 'json',
+        //        data: { ActivityID: ActivityID },
+        //        success: function (data) {
+        //            $.each(data, function (i, items) {
+
+        //                $("#SubActivityID").append('<option value="' + items.Value + '">' +
+        //                 items.Text + '</option>');
+
+        //            });
+        //        },
+
+        //    });
+
+        //});
+        $('#SubActivityID').change(function (e) {
+            $('#AllocatedAmount').val('');
+            //$("#tblDetails").empty();
+            var SubActivityID = $('#SubActivityID').val();
+            var values = {
+                FY_ID: $('#FY_ID').val(),
+                BudgetHeadID: $('#BudgetHeadID').val(),
+                SubBudgetHeadID: $('#SubBudgetHeadID').val(),
+
+                SchemeID: $('#SchemeID').val(),
+                ActivityID: $('#ActivityID').val(),
+                SubActivityID: SubActivityID
+
+            }
+            $.ajax({
+                type: 'POST',
+                url: RootURl + 'BudgetAllocationtoSubBudgetHead/GetAllocatedAmtDetails',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                success: function (data) {
+
+                    $('#AllocatedAmount').val(data.totalAvaliableAmount);
+                    $('#TotalAllocatedAmount').val(data.totalAllocatedAmount);
+                },
+
+            });
+
+
+            //$.ajax({
+            //    type: 'POST',
+            //    url: RootURl + 'fdmSubActivity/GetSubActivityDetails',
+            //    //contentType: 'application/json; charset=utf-8',
+            //    data: "ID=" + SubActivityID,
+            //    success: function (result) {
+            //        $.each(result, function (i, itmes) {
+            //            $("#Unit").val(itmes.Unit);
+            //            $("#NumberPerUnit").val(itmes.NumberPerUnit);
+            //            $("#Rate").val(itmes.RatePerUnit);
+
+            //        });
+
+            //    },
+
+            //});
+
+        });
+
+
+
+        $('#btnDetails').click(function () {
+
+            if ($('#FY_ID').val() == '') {
+
+                $('#FY_ID').focus();
+                return false;
+            }
+            if ($('#SchemeID').val() == '') {
+
+                $('#SchemeID').focus();
+                return false;
+            }
+            if ($('#BudgetHeadID').val() == '') {
+
+                $('#BudgetHeadID').focus();
+                return false;
+            }
+
+            if ($('#ActivityID').val() == '') {
+
+                $('#ActivityID').focus();
+                return false;
+            }
+            if ($('#SubActivityID').val() == '') {
+
+                $('#SubActivityID').focus();
+                return false;
+            }
+            if ($('#Unit').val() == '') {
+
+                $('#Unit').focus();
+                return false;
+            }
+            if ($('#TotalAllocatedAmount').val() == '' || $('#TotalAllocatedAmount').val() == '0') {
+                $('#TotalAllocatedAmount').focus();
+                return false;
+            }
+            if ($('#AllocatedAmount').val() == '' || $('#AllocatedAmount').val() == '0') {
+
+                $('#AllocatedAmount').focus();
+                return false;
+            }
+            
+            if (parseFloat($('#TotalAllocatedAmount').val()) < parseFloat($('#AllocatedAmount').val())) {
+                alert("Release amount not greater then to Total Allocated Amount.");
+                $('#AllocatedAmount').focus();
+                return false;
+            }
+
+
+            
+            else {
+                var values = {
+                    SchemeID: $('#SchemeID').val(),
+                    SchemeName: $('#SchemeID option:selected').text(),
+                    ActivityID: $('#ActivityID').val(),
+                    ActivityName: $('#ActivityID option:selected').text(),
+                    SubActivityID: $('#SubActivityID').val(),
+                    SubActivityName: $('#SubActivityID option:selected').text(),
+                    AllocatedAmount: $('#AllocatedAmount').val(),
+                    TotalAllocatedAmount: $('#TotalAllocatedAmount').val(),
+                    FY_ID: $('#FY_ID').val(),
+                    BudgetHeadID: $('#BudgetHeadID').val(),
+                    BudgetHead: $('#BudgetHeadID option:selected').text(),
+                    SubBudgetHeadID: $('#SubBudgetHeadID').val(),
+                    SubBudgetHead: $('#SubBudgetHeadID option:selected').text(),
+                    Unit: $('#Unit option:selected').val(),
+                    RatePerUnit: $('#RatePerUnit').val(),
+                    NumberPerUnit: $('#NumberPerUnit').val()
+
+
+                };
+                $.ajax({
+                    type: 'POST',
+                    url: RootURl + 'BudgetAllocationtoSubBudgetHead/AdddHeadDetails',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(values),
+                    success: function (data) {
+                        if (data.rowid == "0") {
+                            alert(data.ActivityName);
+                        }
+                        else {
+                            var BudgetHead = $("#BudgetHeadID option:selected").text();
+                            var SubBudgetHead = "None";
+                            if ($("#SubBudgetHeadID option:selected").val() != "0") {
+                                SubBudgetHead = $("#SubBudgetHeadID option:selected").text();
+                            }
+                            if (data.rowid != "D") {
+                                var id = "'" + data.rowid + "'";
+                                var rowdata = "<tr><td style=display:none;>" + data.rowid + "</td><td>" + data.SchemeName + "</td><td>" + data.ActivityName + "</td><td>" + BudgetHead + " / " + SubBudgetHead + "</td><td>" + data.AllocatedAmount + "</td><td>" + "<button type=button class='btn btn-danger btn-circle' style=cursor:pointer onclick=DeleteCircle(" + id + ")><i class='fa fa-times'></i></button>" + "</td></tr>";
+                                $("#tblDetails").append(rowdata);
+                                $('#AllocatedAmount').val('');
+                            }
+                            else {
+
+                                alert("Records already added!!");
+                            }
+                        }
+                    }
+                });
+            }
+
+        });
+
+
+
+    });
+
+
+    function DeleteCircle(ID) {
+        $("#tblDetails").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootURl + 'BudgetAllocationtoSubBudgetHead/DeleteHeadDetails',
+            dataType: 'json',
+            data: { Id: ID },
+            success: function (data) {
+                $.each(data, function (i, items) {
+                    var id = "'" + items.rowid + "'";
+                    var rowdata = "<tr><td style=display:none;>" + items.rowid + "</td><td>" + items.SchemeName + "</td><td>" + items.ActivityName + "</td><td>" + items.BudgetHead + "/" + items.SubBudgetHead + "</td><td>" + items.AllocatedAmount + "</td><td>" + "<button type=button class='btn btn-danger btn-circle' style=cursor:pointer onclick=DeleteCircle(" + id + ")><i class='fa fa-times'></i></button>" + "</td></tr>";
+                    $("#tblDetails").append(rowdata);
+                });
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+    }
+
+    function reload() {
+        location.reload(true);
+    }
+
+
+    $("#Savepermission").click(function () {
+
+        if ($("#dataTables-example > tbody >tr").length < 2) {
+            alert('Please add atleast one record');
+            return false;
+        }
+    });
+</script>

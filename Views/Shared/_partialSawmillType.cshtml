@@ -1,0 +1,115 @@
+﻿
+@model FMDSS.Models.Master.SawmillType
+<link href="~/css/timepicki.css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+<script>
+    var $j = jQuery.noConflict();
+    $j('.timepicker').timepicki({ timeFormat: 'h:mm p' });
+
+</script>
+
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+   
+      $(document).ready(function () {
+
+    
+        $('#btn_submit1').click(function (e) {
+
+           
+
+            if ($('#SName').val().trim() == "") {
+                $('#errSName').css("display", "block");
+                $('#errSName').focus();
+                return false;
+            }
+            else {
+                $('#errSName').css("display", "none");
+            }
+
+            if ($('#SawmillDefinition').val().trim() == "") {
+                $('#errSawmillDefinition').css("display", "block");
+                $('#errSawmillDefinition').focus();
+                return false;
+            }
+            else {
+                $('#errSawmillDefinition').css("display", "none");
+            }
+
+
+
+
+        });
+
+    });
+
+
+</script>
+
+@using (Html.BeginForm("ADDUpdateSawmillType", "Master", FormMethod.Post))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @*<label id="lbl_dpt">Add/Edit Place</label>*@
+                @ViewBag.OpType
+            </h4>
+        </div>
+
+        <div class="modal-body">
+            @Html.HiddenFor(model => model.SID)
+            
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Sawmill Name: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.SName, new { @class = "form-control common", @maxlength = "100" })
+                    <div id="errSName" style="display:none" class="alert-danger1">Sawmill Name is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Sawmill Definition: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.SawmillDefinition, new { @class = "form-control common", @maxlength = "100" })
+                    <div id="errSawmillDefinition" style="display:none" class="alert-danger1">Sawmill Definition is Required.</div>
+                </div>
+            </div>
+
+           
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Active / Deactive : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.IsActive, (IEnumerable<SelectListItem>)ViewBag.ISactivelst, "--Select--", new { @class = "form-control common", id = "IsActive" })
+                    <div id="errIsactive" style="display:none" class="alert-danger1">Active / Deactive  is Required.</div>
+
+                </div>
+            </div>
+            <!-- /.Btn Groping -->
+
+
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success" value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+}

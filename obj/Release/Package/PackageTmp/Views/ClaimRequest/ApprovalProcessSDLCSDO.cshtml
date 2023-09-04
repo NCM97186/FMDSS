@@ -1,0 +1,69 @@
+﻿@model FMDSS.Entity.FRAViewModel.WorkFlowApproverVM
+
+<!-- Form design -->
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Forest Rights Act (FRA): Pending for Action</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+
+            <div class="panel panel-default">
+                <div class="panel-body" id="divClaimantDetails">
+                    <!--===========================Claim Request Details===================================-->
+                    @Html.Partial("_ClaimRequestDetails", Model.ClaimRequestDetailsListForApproval)
+                </div>
+            </div>
+            <!-- /.panel-body -->
+            <!-- /.panel -->
+
+        </div> 
+        <div class="modal fade in" data-backdrop="static" id="modalWorkFlowDetails" tabindex="1" role="dialog" aria-hidden="false"></div>
+        <div class="modal fade in" data-backdrop="static" id="modalSurveyDetails" tabindex="2" role="dialog" aria-hidden="false"></div>
+        <div class="modal fade in" data-backdrop="static" id="modalAEvidence" tabindex="3" role="dialog" aria-hidden="false"></div>
+        <!-- /.col-lg-12 --> 
+    </div>
+</div>
+@Html.Hidden("hdnRootURL", Url.Content("~/")) 
+<!-- /.Row --> 
+<script src="~/Scripts/Controller/ClaimRequest/WorkFlowCommon.js"></script> 
+@*<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>*@
+<script>
+    var rootURl = '@Url.Content("~/")';
+
+    function GetWorkFlowDetails(id) { 
+        $.ajax({
+            type: 'GET',
+            url: rootURl + "ClaimRequest/GetWorkFlowDetails?userType=7&ClaimRequestDetailsID=" + id, 
+            dataType: 'html',
+            success: function (data) {
+                $('#modalWorkFlowDetails').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+    };  
+
+    function GetAppealDetails(id) {
+        $.ajax({
+            type: 'GET',
+            url: rootURl + "ClaimRequest/GetAppealDetails?userType=7&parentID=" + id,
+            dataType: 'html',
+            success: function (data) {
+                $('#modalWorkFlowDetails').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+    } 
+</script>
+
+<style>
+    #modalWorkFlowDetails .tbl-scroll { overflow-y: auto; max-height: 600px!important;}
+    #modalWorkFlowDetails .modal-dialog { width: 1092px!important} 
+    #modalWorkFlowDetails .scroll { overflow-y: auto; max-height: 350px!important;}
+</style>

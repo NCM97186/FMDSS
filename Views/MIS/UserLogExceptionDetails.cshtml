@@ -1,0 +1,343 @@
+﻿@model FMDSS.Models.MIS.MISCommonModel
+@{
+    ViewBag.Title = "UserLogExceptionDetails";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_SuperAdmin.cshtml";
+}
+    
+
+<script>
+
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        // date validation ========================================================================
+        
+        var currentYear = (new Date).getFullYear();
+        var Range = '2008:' + (currentYear + 1)
+
+        $("#FromDate,#ToDate").datepicker({ maxDate: new Date(), yearRange: Range, dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, maxDate: new Date(), onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        var currentDate = new Date();
+        //$("#txt_fromdate").datepicker("setDate", currentDate);
+        //$("#txt_todate").datepicker("setDate", currentDate);
+
+        $("#FromDate").change(function () {
+            $("#ToDate").val('');
+        });
+
+        $(document).on('keypress', '#FromDate,#ToDate', function (event) {
+
+            event.preventDefault();
+            return false;
+
+        });
+
+        $('#FromDate,#ToDate').keydown(function (event)
+        { return cancelBackspace(event) });
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+        $("#ToDate").change(function () {
+            var str1 = $("#FromDate").val();
+            var str2 = $("#ToDate").val();
+
+            var L = 3, d1 = $("#FromDate").val().split('/'), d2 = $("#ToDate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#ToDate").val('');
+                alert('Date Must be GreaterThen From Date');
+            }
+        });
+
+        // date validation ========================================================================
+
+
+
+
+        if ($('#ReportType').val() == "UserLog") {
+            $("#UserLog").css("display", "block");
+            $("#Exception").css("display", "none");
+
+        }
+        else if ($('#ReportType').val() == "Exception") {
+            $("#UserLog").css("display", "none");
+            $("#Exception").css("display", "block");
+        }
+        else {
+            $("#UserLog").css("display", "none");
+            $("#Exception").css("display", "none");
+        }
+
+        $('#ReportType').change(function (e) {
+
+            if ($('option:selected', $('#ReportType')).index() == 1) {
+                $("#divSSOID").css("display", "block");
+            }
+            else {
+                $("#divSSOID").css("display", "none");
+            }
+        });
+
+        $('#Modules').change(function (e) {
+            $('#Modules_Text').val($("#Modules option:selected").text());
+        });
+
+        $('#btn_submit1').click(function (e) {
+
+            if ($('option:selected', $('#ReportType')).index() == 0) {
+                $("#errReportType").css("display", "block");
+                $('#errReportType').focus();
+                return false;
+            }
+            else {
+                $("#errReportType").css("display", "none");
+            }
+
+            if ($('#FromDate').val() == '') {
+                $("#errFromDate").css("display", "block");
+                $('#errFromDate').focus();
+                return false;
+            }
+            else {
+                $("#errFromDate").css("display", "none");
+            }
+
+
+            if ($('#ToDate').val() == '') {
+                $("#errToDate").css("display", "block");
+                $('#errToDate').focus();
+                return false;
+            }
+            else {
+                $("#errToDate").css("display", "none");
+            }
+
+            if ($('option:selected', $('#Modules')).index() == 0) {
+                $("#errModules").css("display", "block");
+                $('#errModules').focus();
+                return false;
+            }
+            else {
+                $("#errModules").css("display", "none");
+            }
+
+
+            if ($('#ReportType').val() == "UserLog") {
+                $("#UserLog").css("display", "block");
+                $("#Exception").css("display", "none");
+
+            }
+            else if ($('#ReportType').val() == "Exception") {
+                $("#UserLog").css("display", "none");
+                $("#Exception").css("display", "block");
+            }
+            else {
+                $("#UserLog").css("display", "none");
+                $("#Exception").css("display", "none");
+            }
+        });
+
+    });
+
+
+</script>
+
+
+
+
+ 
+<div class="row">
+    <div class="col-lg-9 pad">
+        <h1 class="page-header"><span>Report : User Log And Exception Details</span></h1>
+    </div>
+
+    @using (Html.BeginForm("UserLogExceptionDetails", "MIS", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <label>Report Type :<span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(model => model.ReportType, (IEnumerable<SelectListItem>)ViewBag.ReportType, new { @class = "form-control", id = "ReportType" })
+                            <div id="errReportType" class="alert-danger1" style="display:none"> Report Type is Required. </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>From Date:<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.FromDate, new { @class = "form-control common ", id = "FromDate" })
+                            <span id="errFromDate" style="display: none" class="alert-danger1">From Date is Required.</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>To Date:<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.ToDate, new { @class = "form-control common ", id = "ToDate" })
+                            <span id="errToDate" style="display: none" class="alert-danger1">To Date is Required.</span>
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Module :<span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(model => model.Modules, (IEnumerable<SelectListItem>)ViewBag.Modules, new { @class = "form-control", id = "Modules" })
+                            <div id="errModules" style="display:none" class="alert-danger1">Modules is Required.</div>
+                           
+                        </div>
+                    </div>
+                    <div id="divSSOID">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>SSOid:<span class="mandatory"></span></label>
+                               
+                                @Html.TextBoxFor(model => model.SSOID, new { @class = "form-control common ", id = "SSOID" })
+                                
+                                <span id="errSSOID" style="display: none" class="alert-danger1">SSOid is Required.</span>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="btn" class="col-lg-12">
+
+                        <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit1">
+                            <i class="fa fa-check"></i> Submit
+                        </button>
+                        <button type="button" class="btn btn-warning" id="btn_reset">
+                            <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                        </button>
+
+                    </div>
+                   
+                </div>
+            </div>
+            @*<div class="col-lg-4 pull-right" id="place">
+                <a class="btn btn-success" title="Export to Excel" target="_blank" href='@Url.Action("UserLogExceptionExport", "MIS", new { ReportType = Encryption.encrypt(Model.ReportType), FromDate = Encryption.encrypt(Model.FromDate), ToDate = Encryption.encrypt(Model.ToDate), Modules = Encryption.encrypt(Model.Modules), SSOID = Encryption.encrypt(Model.SSOID) })' ><i class="fa fa-download"></i> Export to Excel</a>
+            </div>
+            <br /><br /><br />*@
+
+            <div class="panel panel-default" id="UserLog" >
+                <div class="panel-body">
+                    <div class="dataTable_wrapper">
+                        <div id="tbl" class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover table-responsive gridtable" id="dataTables-example">
+
+                                <thead>
+                                    <tr>
+                                        <th style="width:1%">SRNO</th>
+                                        <th style="width:10%">IP Address</th>
+                                        <th style="width:10%">SSO ID</th>
+                                        <th>Module Name</th>
+                                        <th>Service Type Desc</th>
+                                        <th>Sub Permission Desc</th>
+
+                                        <th>Activity Date</th>
+                                        <th>Activity Start Time</th>
+                                        <th>Activity End Time</th>
+                                        <th>Activity Duration</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in ViewData["ListLOG"] as IEnumerable<FMDSS.Models.MIS.MISExceptionUserLog>)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @Html.DisplayFor(model => item.Index)
+                                            </td>
+                                            <td>@Html.DisplayFor(model => item.ClientIPAddress)</td>
+                                            <td>@Html.DisplayFor(model => item.ssoid)</td>
+                                            <td>@Html.DisplayFor(model => item.ModuleName)</td>
+                                            <td>@Html.DisplayFor(model => item.ServiceTypeDesc)</td>
+                                            <td>@Html.DisplayFor(model => item.SubPermissionDesc)</td>
+
+                                            <td>@Html.DisplayFor(model => item.ActivityDate)</td>
+                                            <td>@Html.DisplayFor(model => item.ActivityStartTime)</td>
+                                            <td>@Html.DisplayFor(model => item.ActivityEndTime)</td>
+                                            <td>@Html.DisplayFor(model => item.ActivityDuration)</td>
+
+                                        </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default" id="Exception">
+                <div class="panel-body">
+                    <div class="dataTable_wrapper">
+                        <div id="tbl" class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover table-responsive gridtable" id="dataTables-example">
+
+                                <thead>
+                                    <tr>
+                                        <th style="width:1%">SRNO</th>
+                                        <th style="width:10%">Error Date</th>
+                                        <th style="width:10%">Error Time</th>
+                                        <th>Module</th>
+                                        <th>Function Name </th>
+                                        <th>Error Message</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in ViewData["ListLOG"] as IEnumerable<FMDSS.Models.MIS.MISExceptionUserLog>)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @Html.DisplayFor(model => item.Index)
+                                            </td>
+                                            <td>@Html.DisplayFor(model => item.ErrorDate)</td>
+                                            <td>@Html.DisplayFor(model => item.ErrorTime)</td>
+                                            <td>@Html.DisplayFor(model => item.Module)</td>
+                                            <td>@Html.DisplayFor(model => item.FunctionName)</td>
+                                            <td>@Html.DisplayFor(model => item.ErrorMsg)</td>
+
+                                        </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        
+        
+    }
+</div>
+
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+    $.noConflict(true);
+</script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+@*<script src="~/js/bootstrap.min.js"></script>*@
+@*<script src="~/js/Common.js"></script>*@
+@*<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />*@

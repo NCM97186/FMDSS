@@ -1,0 +1,264 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Noc List";
+}
+<h2>List</h2>
+<div class="container-fluid desh">
+    <!-- Page Content -->
+    <div id="page-wrapper">
+        <div class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <ul class="nav">
+                        <li style="font-size:20px">
+                            Received Applications
+                        </li>
+                        <li class="pull-right"><a href="@Url.Action("ForesterDashboard", "ForesterAction")"><i class="fa fa-exchange"></i> Back To DashBoard </a></li>
+                    </ul>
+                </div>
+                <div class="row">
+                    <div class="col-md-12" style="padding-right:0">
+                        <div class="panel with-nav-tabs panel-default">
+                            <div class="panel-heading">
+                                <ul class="nav nav-tabs">
+                                    <li class="active"><a href="#tab1pdefault" data-toggle="tab"><i class="fa fa-star fa-fw"></i> All Requests</a></li>
+                                    <li class=""><a href="#tab2pdefault" data-toggle="tab"><i class="fa fa-user fa-fw"></i> Pending Requests</a></li>
+                                    <li class=""><a href="#tab3pdefault" data-toggle="tab"><i class="fa fa-comment fa-fw"></i>Re-Assigned</a></li>
+                                </ul>
+                            </div>
+                            <div class="panel-body">
+                                <div class="tab-content">
+                                    <div class="tab-pane fade active in tbl-scroll" id="tab1pdefault">
+                                        <div class="panel-body">
+                                            <div class="table-responsive request-id">
+                                                <table class="table table-striped table-bordered table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Request Id</th>
+                                                            <th>Request Type</th>
+                                                            <th>Application Date</th>
+                                                            <th>Action Taken</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if (ViewBag.NOCMyAction != null)
+                                                        {
+                                                            foreach (var item in ViewBag.NOCMyAction as IEnumerable<FMDSS.Models.CitizenService.PermissionServices.NocList>)
+                                                            {
+                                                                <tr onclick="reqdetail('@item.RequestId','@item.StatusId')">
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item.RequestId)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item.NocType)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item.ReqDate)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item.Status)
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade tbl-scroll" id="tab2pdefault">
+                                        <div class="panel-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Transaction Id</th>
+                                                            <th>Service Type</th>
+                                                            <th>Application Date</th>
+                                                            <th>Application Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if (ViewBag.NOCPending != null)
+                                                        {
+                                                            foreach (var item in ViewBag.NOCPending as IEnumerable<FMDSS.Models.CitizenService.PermissionServices.NocList>)
+                                                            {
+                                                                <tr onclick="reqdetail('@item.RequestId','@item.StatusId')">
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item.RequestId)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item.NocType)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item.ReqDate)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item.Status)
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        }
+                                                        <tr></tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade tbl-scroll" id="tab3pdefault">
+                                        <div class="panel-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Transaction Id</th>
+                                                            <th>Service Type</th>
+                                                            <th>Application Date</th>
+                                                            <th>Application Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if (ViewBag.NOCToBeAssign != null)
+                                                        {
+                                                            foreach (var item in ViewBag.NOCToBeAssign as IEnumerable<FMDSS.Models.CitizenService.PermissionServices.NocList>)
+                                                            {
+                                                                <tr onclick="reqdetail('@item.RequestId','@item.StatusId')">
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item.RequestId)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item.NocType)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item.ReqDate)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(model => item.Status)
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        }
+                                                        <tr></tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #myModalDfo .modal-dialog {
+        width: 900px;
+        margin: 30px auto;
+    }
+</style>
+
+<div class="modal" id="myModalDfo" tabindex="-1" role="dialog" aria-hidden="false" style="display:none;">
+    <div class="modal-dialog mdw">
+        <div class="modal-content" style="height:680px;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="myModalLabel">
+                    Request Details
+                    <button type="button" name="btnprint" id="btnprint" onclick="Print();" class="btn btn-default pull-right">
+                        <i class="fa fa-print"></i> Print
+                    </button>
+                </h4>
+            </div>
+            <div id="divPrint" class="modal-body tbl-scroll divPrintone">
+                <!-- From URL Get -->
+                <table class="table table-striped table-bordered table-hover">
+                    <tbody id="tbReqDetail"></tbody>
+                </table>
+            </div>
+            <br />
+            <div class="btn-padd" style="display:none">
+                <div id="btn" class="col-lg-12">
+                    <a id="btnResub" href="#">Re-Submit Request </a> 
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    var origin = document.location.origin;
+    function reqdetail(reqId, reqStatus) {
+        $.ajax({
+            type: 'GET',
+            url: origin+'/Noc/getDetail',
+            dataType: 'json',
+            data: { requestId: reqId },
+            success: function (data) {
+                $.each(data, function (i, item) {
+                    var reqData = "";
+                    for (var key in item) {
+                        if (item[key] != null && item[key] != '' && item[key] != 'undefined' && item[key] != '0' && item[key] != 'null') {
+                            var str = item[key].toString();
+                            if (str.indexOf('~/') >= 0) {
+                                var lnk = '<a href="' + str.replace('~', origin) + '" target="_blank"> Download </a>';
+                                reqData += "<tr><td>" + key + "</td><td>" + lnk + "</td></tr>";
+                            } else {
+                                reqData += "<tr><td>" + key + "</td><td>" + item[key] + "</td></tr>";
+                            }
+                        }
+                    }
+                    $('#tbReqDetail').empty().append(reqData);
+                    $('#myModalDfo').show();
+
+                    $('#ReqId').val(reqId);
+                    $('#ReqStatus').val(reqStatus);
+
+                    if (reqStatus == 6) {
+                        $('#btnResub').attr('href', '/Noc/index?req=' + reqId);
+                        $('.btn-padd').show();
+                    }
+                    else {
+                        $('.btn-padd').hide();
+                    }
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve Request Data. ' + ex);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        $('#btnprint').click(function (e) {
+            var divContents = $("#divPrint").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            frameDoc.document.write('<html><head><link href="../css/bootstrap.min.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/mobile.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/main.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/dashboard.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/font-awesome.min.css" rel="stylesheet" />');
+            frameDoc.document.write('</head><body>');
+            frameDoc.document.write(divContents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        });
+
+        $('.close').on('click', function () {
+            $('#myModalDfo').hide();
+        });
+    });
+</script>

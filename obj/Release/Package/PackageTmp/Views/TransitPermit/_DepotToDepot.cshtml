@@ -1,0 +1,265 @@
+﻿@model FMDSS.Models.ForestDevelopment.TransitPermit
+
+<div class="border-add" id="dvDepot">
+    <fieldset class="scheduler-border" style="width: 100%;">
+        <legend class="scheduler-border">From Depot</legend>
+
+        <div class="col-lg-6 Depot">
+            <div class="form-group">
+                <label>Range Name: <span class="mandatory">*</span></label>
+
+                @Html.DropDownListFor(m => m.RangeCodeFrom, (IEnumerable<SelectListItem>)ViewBag.FromRangeCode, "--Select--", new { @class = "form-control", title = "Select Range", id = "ddl_RangeCodeFrom", onchange = "OnChange_RangeCodeFrom(this)" }) 
+                <div id="errordiv9" style="display:none" class="alert-danger1"></div>
+            </div>
+        </div>
+        <div class="col-lg-6 Depot">
+            <div class="form-group">
+                <label for="Village">
+                    From Depot:
+                </label>
+                @Html.DropDownListFor(m => m.DepotCodeFrom, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control common", title = "Select Depot Name", id = "ddlDepotFrom", onchange = "OnChange_DepotFrom(this)" })
+
+                <div id="errordiv10" style="display:none" class="alert-danger1"></div>
+
+            </div>
+        </div>
+        <div class="col-lg-6 Depot">
+            <div class="form-group">
+                <label>From Lot Number:<span class="mandatory">*</span></label>
+                @Html.DropDownList("ddlLotNumber", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control multi-ddl-height-102", id = "ddlLotNumber", multiple = "multiple", onchange = "Onchange_LotNumber(this)" })
+                @Html.HiddenFor(X => X.InventoryID, new { id = "hdnLotNumber" })
+                <div id="errordiv11" style="display:none" class="alert-danger1"></div>
+            </div>
+        </div> 
+        <div class="col-lg-6 Depot hide">
+            <div class="form-group">
+                <label>Name of Depot Incharge:</label>
+                @Html.TextBoxFor(m => m.depotInchargefrom, new { @readonly = "ReadOnly", id = "depotInchargefrom", @class = "form-control" })
+            </div>
+        </div>
+        <div id="divProductDetails"></div>
+    </fieldset>
+</div>
+
+<div class="border-add" id="dvdepotto">
+    <fieldset class="scheduler-border">
+        <legend class="scheduler-border">To Depot</legend>
+
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>Division Name: <span class="mandatory">*</span></label>
+                @Html.DropDownListFor(m=>m.ToDivisionCode, (IEnumerable<SelectListItem>)ViewBag.ToDivisionCode, "--Select--", new { @class = "form-control notranslate", title = "Division Name", id = "ToDivisionCode" })
+                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.ToDivisionCode)</div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>Range Name: <span class="mandatory">*</span></label>
+
+                @Html.DropDownListFor(m=>m.ToRangeCode, (IEnumerable<SelectListItem>)ViewBag.ToRangeCode, "--Select--", new { @class = "form-control", title = "Select Range", id = "ddl_RangeCodeto" })
+                @*<span id="errorRange" style="color: Red; display: none" class="alert-danger1">* Please Select Range.</span>*@
+                <div id="errordiv19" style="display:none" class="alert-danger1"></div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label for="Village">
+                    To Depot:<span class="mandatory">*</span>
+                </label>
+                @Html.DropDownListFor(m=>m.ToDepotCode, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control common", title = "Select Depot Name", id = "ddlDepot" })
+
+                <div id="errordiv20" style="display:none" class="alert-danger1"></div>
+
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>Name of Depot Incharge:</label>
+                <input type="text" id="depotInchargeto" name="depotInchargeto" readonly="readonly" class="form-control" />
+            </div>
+        </div>
+    </fieldset>
+</div>
+ 
+<div class="col-lg-6">
+    <div class="form-group">
+        <label>Mode Of Transport: <span class="mandatory">*</span></label>
+        @Html.DropDownListFor(x => x.ModeofTransport, (IEnumerable<SelectListItem>)ViewBag.TransportMode, "--Select--", new { @class = "form-control common", title = "Select Mode Of Transport", id = "ddlModeOfTransport", onchange = "TransportMode_Change(this)" })
+        <div id="errordiv24" style="display:none" class="alert-danger1"></div>
+    </div>
+</div>
+
+<div class="col-lg-6" id="divVehicleNumber">
+    <div class="form-group">
+        <label>Vehicle Number: <span class="mandatory">*</span></label>
+        @Html.TextBoxFor(x => x.VehicleNumber, new { @class = "form-control Alphanumeric", title = "Enter Vehicle Number eg: RJ14SD0223", placeholder = "Enter Vehicle Number", maxlength = 50, @id = "VehicleNumber" })
+        <div id="errordiv25" style="display:none" class="alert-danger1"></div>
+
+    </div>
+    <div class="form-group hide">
+        <button type="button" class="btn btn-success" title="Save" style="width:30%" name="Command" onclick="GetRTODetails()" value="Get RTO Details" id="BtnGetRTODetails">
+            <i class="fa fa-plus"></i> Get RTO Details
+        </button>
+    </div>
+</div>
+
+<div class="col-lg-6">
+    <div class="form-group">
+        <label>Driver License No:</label>
+        @Html.TextBoxFor(x => x.Driver_License_No, new { @class = "form-control Alphanumeric", title = "Enter Driver Licence Number eg: RJ05jsde78945613", placeholder = "Enter Driver License No", maxlength = 50, id = "Driver_License_No" })
+        <div id="errordiv26" style="display:none" class="alert-danger1"></div>
+    </div>
+</div>
+
+<div class="col-lg-6">
+    <div class="form-group">
+        <label>Driver Name:</label>
+        @Html.TextBoxFor(x => x.Driver_Name, new { @class = "form-control Alphanumeric", title = "Enter Driver Name eg: Narendra Singh", placeholder = "Enter Driver Name", maxlength = 50, id = "Driver_Name" })
+        <div id="errordiv27" style="display:none" class="alert-danger1"></div>
+    </div>
+</div>
+
+<div class="col-lg-6">
+    <div class="form-group">
+        <label>Driver Mobile No:</label>
+        @Html.TextBoxFor(x => x.Driver_MobNo, new { @class = "form-control Alphanumeric", title = "Enter Driver Mobile Number eg: 9568985698", placeholder = "Enter Driver Mobile No", maxlength = 10, id = "Driver_MobNo" })
+        <div id="errordiv28" style="display:none" class="alert-danger1"></div>
+    </div>
+</div>
+
+<div class="col-lg-6">
+    <div class="form-group">
+        <label>Validity of Transit Permit:<span class="mandatory">*</span></label>
+        <div data-date-format="mm-dd-yyyy" class="input-group date" id="datepicker">
+            @Html.TextBoxFor(x => x.Permit_ValidUpto, new { @class = "form-control datefield", title = "Enter Date of Permit Validity eg: 02/21/2016", maxlength = 50, @id = "Permit_ValidUpto", @readonly = "readonly" })
+            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+            <div id="errordiv29" style="display:none" class="alert-danger1"></div>
+        </div>
+    </div>
+</div>
+
+<div class="col-lg-6" style="display:none;">
+    <div class="form-group">
+        <label>Amount to be Paid (INR):</label>
+        @Html.TextBoxFor(x => x.Amount_ToBePaid, new { @class = "form-control Numeric", title = "Enter Amt to be Paid eg: 7580.00", placeholder = "Enter Amount to be Paid", maxlength = 50, id = "Amount_ToBePaid" })
+        <div id="errordiv30" style="display:none" class="alert-danger1"></div>
+    </div>
+</div> 
+
+<div class="col-lg-6">
+    <div class="form-group">
+        <label>Remarks/Comment:</label>
+        @Html.TextAreaFor(x => x.Comment, new { @class = "form-control" })
+        <div id="errordiv30" style="display:none" class="alert-danger1"></div>
+    </div>
+</div>
+<script type="text/javascript" src="~/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="~/js/bootstrap-multiselect.js"></script>
+<link href="~/css/bootstrap-multiselect.css" rel="stylesheet" />
+<script type="text/javascript"> 
+    $('#ddlLotNumber').multiselect({
+        includeSelectAllOption: true,
+        maxHeight: 250
+    });
+    $(document).ready(function () {
+        $(".datefield").datepicker({ minDate: 0, dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } }).datepicker("setDate", new Date());
+    });
+
+    function OnChange_RangeCodeFrom(cntrl) {
+        $("#ddlDepotFrom").empty().append("<option value=''>--Select--</option>");
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'TransitPermit/GetFromDepotData',  
+            dataType: 'json',
+            data: { rangeCode: $(cntrl).val() },
+            success: function (response) {
+                $.each(response.data, function (i, items) {
+                    $("#ddlDepotFrom").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) { 
+            }
+
+        });
+    } 
+
+    function OnChange_DepotFrom(cntrl) {
+        var strLotNumber = '';
+        $('#depotInchargefrom').val('');
+
+        if (cntrl.value != '') {
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + "TransitPermit/GetDepotDetails",
+                dataType: 'json',
+                async: true,
+                data: { depotID: $(cntrl).val() },
+                success: function (response) {
+                    $('#depotInchargefrom').val(response.DepotIncharge);
+                    $.each(response.ObjList, function (i, j) {
+                        strLotNumber += "<option value='" + j.Value + "'>" + j.Text + "</option>";
+                    }); 
+
+                    $("#ddlLotNumber").html(strLotNumber); ;
+                    $('#ddlLotNumber').multiselect('rebuild');
+                },
+                error: function (ex) { 
+                }
+            });
+        }
+        else {
+            $("#ddlLotNumber").html(strLotNumber); 
+            $('#ddlLotNumber').multiselect('rebuild');
+        }
+
+    }
+
+    function OnChange_ProductType(cntrl) {
+        var cntrlID = $(cntrl).closest('tr').find("select[id^='ddlProductName_']").attr("id");
+        $("#" + cntrlID).empty().append('<option value="">' + "--Select--" + '</option>');
+        var ddlProduceType = $(cntrl).val();
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'WorkOrder/SelectProductByProduceType',
+            dataType: 'json',
+            data: { ProduceTypeID: ddlProduceType },
+            success: function (range) {
+
+                $.each(range, function (i, items) {
+                    $("#" + cntrlID).append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+            }
+
+        });
+    }
+
+    function Onchange_LotNumber(cntrl) {
+        var cntrlValue = $(cntrl).val() == null ? '' : $(cntrl).val().toString();
+        $('#hdnLotNumber').val(cntrlValue);
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'TransitPermit/GetDTDProductDetails',
+            dataType: 'html',
+            data: { parentID: cntrlValue },
+            success: function (response) { 
+                $('#divProductDetails').html(response);
+            },
+            error: function (ex) {
+            }
+        });
+    } 
+</script>
+<style>
+    select[multiple].multi-ddl-height-102 {
+        height: 102px;
+    }
+
+    select[multiple].multiselect-container > li > a > label.checkbox, .multiselect-container > li > a > label.radio {
+        background: #fff;
+        color: #555;
+    }
+</style>

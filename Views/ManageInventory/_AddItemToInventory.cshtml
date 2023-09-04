@@ -1,0 +1,80 @@
+﻿@using (Ajax.BeginForm("UpdateItemToInventory", "ManageInventory", new AjaxOptions { HttpMethod = "POST", Confirm = FMDSS.Globals.Constant.ConfirmMsg, OnSuccess = "UpdateItemToInventoryResponse", InsertionMode = InsertionMode.Replace, UpdateTargetId = "tab2default" }, new { id = "frmMInventory" }))
+{
+            <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-body">
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Depot Name: <span class="mandatory">*</span></label>
+                    @Html.DropDownList("DepotID", (IEnumerable<SelectListItem>)ViewBag.DepotList, "--Select--", new { @class = "form-control", id = "DepotID", name = "DepotID" })
+
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Product Type: <span class="mandatory">*</span></label>
+                    @Html.DropDownList("ProductTypeID", (IEnumerable<SelectListItem>)ViewBag.ProduceType, "--Select--", new { @class = "form-control", id = "ProductTypeID", onchange = "GetProductByProductType()", name = "ProductTypeID" })
+
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Product: <span class="mandatory">*</span></label>
+                    @Html.DropDownList("ProductID", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddlProductID", name = "ProductID" })
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="form-group">
+                    <label>Unit:</label>
+                    <input class="form-control" type="text" id="txtUnitName" placeholder="Product Unit" readonly="readonly">
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="form-group">
+                    <label>Quantity:<span class="mandatory">*</span></label>
+                    <input class="form-control" type="text" id="txt_qty" name="Qty" onkeypress="AllowNumberOnly(event)">
+                </div>
+            </div>
+        </div>
+
+        <!--/.model body-->
+
+        <div class="modal-footer" style="clear: both">
+
+            <div id="btn" class="col-lg-12">
+                <button type="submit" class="btn btn-success" name="Command" onclick="return ValidateDetails(1)" value="SaveItemToInventory" id="btn_Save">
+                    <i class="fa fa-check"></i>Submit
+                </button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i>  Close
+                </button>
+
+            </div>
+        </div>
+
+    </div>
+}
+
+<script>
+    function ValidateDetails(value) {
+        if (value == 1) {
+            if ($.isEmptyObject($('#DepotID').val())) {
+                alert('please select Depot.');
+                return false;
+            }
+            else if ($.isEmptyObject($('#ProductTypeID').val())) {
+                alert('please select Product Type.');
+                return false;
+            }
+            else if ($.isEmptyObject($('#ddlProductID').val())) {
+                alert('please select product.');
+                return false;
+            }
+            else if ($.isEmptyObject($.trim($('#txt_qty').val()))) {
+                alert('please enter Lot Quantity.');
+                return false;
+            }
+        }
+        return true;
+    }
+</script>

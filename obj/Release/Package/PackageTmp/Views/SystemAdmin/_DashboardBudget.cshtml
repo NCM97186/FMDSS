@@ -1,0 +1,106 @@
+﻿@model IEnumerable<FMDSS.Models.Admin.DashboardBudgetFinancialYearWise>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                @ViewBag.ReportName
+                <button id="btnClose" type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            <!-- .panel-heading -->
+            <div class="panel-body">
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Financial Year: <span class="mandatory"></span></label>
+                        @Html.DropDownList("FinancialYear", (IEnumerable<SelectListItem>)ViewBag.Financial, "--ALL--", new { @class = "form-control", @id = "FinancialYearId" })
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Scheme: <span class="mandatory"></span></label>
+                        @Html.DropDownList("Scheme_Name", (IEnumerable<SelectListItem>)ViewBag.SchemeList, "--ALL--", new { @class = "form-control", @id = "SchemeID" })
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>&nbsp;</label><br />
+                        <input type="button" class="btn btn-info" value="Search" id="btnSubmit" />
+                    </div>
+                </div>
+
+                <div id="dvHTml">
+
+                </div>
+
+            </div>
+            @*<div class="panel-footer">
+                    @System.DateTime.Now
+                </div>*@
+            <div class="modal-footer panel-footer" id="fot-f">
+                <div id="btn" class="col-lg-12">
+                    <a href="/BudgetMnthProgReport/BudgetReportmonth" target="_blank" style="float:left;cursor:pointer;">Click Here To View WildLife Budget Detail Report</a><br />
+                    <a href="/BudgetMnthProgReport/BudgetSummaryReports" target="_blank" style="float:left;cursor:pointer;">Click Here To View Offence WildLife Budget Summary Report</a>
+                    <button id="btnCancel" name="button" class="btn btn-danger" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                        <i class="fa fa-times fa-fw"></i> Close
+                    </button>
+
+                </div>
+            </div>
+        </div>
+        <!-- .panel-body -->
+
+    </div>
+    <!-- /.panel -->
+</div>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+
+    function showDashboardDetails(moduleName, parentID, type, cntrlID) {
+        if ($(cntrlID).find('i').hasClass('fa-minus-circle') == false) {
+
+            $.ajax({
+                type: 'GET',
+                url: RootUrl + 'SystemAdmin/GetDashboardDetails', // we are calling json method
+                dataType: 'html',
+                data: { moduleName: moduleName, parentID: parentID, type: type },
+                success: function (data) {
+                    $(cntrlID).find('i').toggleClass("fa-plus-circle fa-minus-circle");
+                    $('div[data-parentid="' + parentID + '"]').append(data);
+                },
+                error: function (ex) {
+                    alert(ex.error);
+                }
+            });
+        }
+        else {
+            $(cntrlID).find('i').toggleClass("fa-plus-circle fa-minus-circle");
+            $('div[data-parentid="' + parentID + '"]').html('');
+        }
+    }
+
+    $('#btnSubmit').click(function () {
+
+        var financialyear = $('#FinancialYearId').val();
+        var scheme = $('#SchemeID').val();
+
+        $.ajax({
+            type: 'GET',
+            url: RootUrl + 'SystemAdmin/_BudgetDashboardSummaryReport?financialyear=' + financialyear + '&scheme=' + scheme, // we are calling json method
+            dataType: 'html',
+            data: {},
+            success: function (data) {
+                $('#dvHTml').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+    });
+
+
+</script>
+
+
+
+
+

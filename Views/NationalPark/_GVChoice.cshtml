@@ -1,0 +1,284 @@
+﻿@model  FMDSS.Models.NP_ChoiceGuideVehicleBoat.NP_ChoiceView
+@{
+    var cntr = 0;
+}
+<link href="~/css/bootstrap/jquery-ui.css" rel="stylesheet" />
+<link href="~/Select2DropdownJSCSS/css/select2.min.css" rel="stylesheet" />
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Booking History</strong>
+    </div>
+    <div class="row">
+        @{
+            if (Model.NpChoiceList != null)
+            {
+
+                foreach (var item in Model.NpChoiceList)
+                {
+                    item.TotalChoiceAmt = (item.ChoiceType == 1 ? item.GuideChoiceAmt+item.GuideChoiceGSTAmt : (item.ChoiceType == 2 ? item.VehileChoiceAmt+item.VehileChoiceGSTAmt : item.GuideChoiceAmt + item.GuideChoiceGSTAmt + item.VehileChoiceAmt+item.VehileChoiceGSTAmt));
+                    <div class="col-md-12">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Request Id:<span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="RequestId" name="RequestId" title="RequestId" readonly="readonly" value="@item.RequestId" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Place Name:<span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="PlaceName" name="PlaceName" title="PlaceName" readonly="readonly" value="@item.PlaceName" />
+                                <input type="text" style="display:none" class="form-control" id="PlaceId" name="PlaceId" title="PlaceId" readonly="readonly" value="@item.PlaceId" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Zone Name:<span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="ZoneName" name="ZoneName" title="ZoneName" readonly="readonly" value="@item.ZoneName" />
+                                <input type="text" style="display:none" class="form-control" id="ZoneId" name="ZoneId" title="ZoneId" readonly="readonly" value="@item.ZoneId" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Shift Name:<span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="ShiftName" name="ShiftName" title="ShiftName" readonly="readonly" value="@item.ShiftName" />
+                                <input type="text" style="display:none" class="form-control" id="ShiftId" name="ShiftId" title="ShiftId" readonly="readonly" value="@item.ShiftId" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Booking Date:<span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="BookingDate" name="BookingDate" title="BookingDate" readonly="readonly" value="@item.BookingDate" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Visit Date:<span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="VisitDate" name="VisitDate" title="VisitDate" readonly="readonly" value="@item.VisitDate" />
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col-md-12">
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label>Vehicle Name:<span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="VehileName" name="VehileName" title="VehileName" readonly="readonly" value="@item.VehileName" />
+                                <input type="text" style="display:none" class="form-control" id="VehicleId" name="VehicleId" title="VehicleId" readonly="readonly" value="@item.VehicleId" />
+                            </div>
+                        </div>
+                        <div class="col-md-1" style="padding:0px!important">
+
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Total Member:<span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="TotalMember" name="TotalMember" title="TotalMember" readonly="readonly" value="@item.TotalMember" />
+                            </div>
+                        </div>
+                    </div>
+
+                    if (item.ChoiceType == 1 || item.ChoiceType == 3)
+                    {
+
+                    <div class="col-md-12">
+                        <div class="col-md-5">
+
+                            <div class="form-group">
+                                @{
+                                    if (item.GuideName.Length > 0 && item.IsGuideChoice == true)
+                                    {
+                                        @*<input checked="checked" id="IsGuideChoice" name="IsGuideChoice" type="checkbox" value="true" readonly="readonly" /><label>Choose Guide:</label><br />*@
+                                        <label>Guide Name:<span class="mandatory">*</span></label>
+                                        <input type="text" class="form-control" id="GuideName" name="GuideName" title="GuideName" readonly="readonly" value="@item.GuideName" />
+
+                                    }
+                                    else
+                                    {
+                                        @*<input checked="" id="IsGuideChoice" name="IsGuideChoice" type="checkbox" value="true" readonly="readonly" /><label>Choose Guide:</label><br />*@
+                                        <label>Guide Name:<span class="mandatory">*</span></label>
+                                        <select class="form-control myselect" id="ddlGuideName" , name="GuideId">
+                                            <option value="0">Select Guide</option>
+                                            @{
+                                                foreach (var itm in Model.NpGuideSelectList)
+                                                {
+                                                    <option value="@itm.Value">@itm.Text</option>
+                                                }
+                                            }
+
+                                        </select>
+                                        <div class="col-md-12" style="text-align:left!important;color: Red; display: none;padding:0px!important;" id="errorGuideChoice">
+                                            *Select Guide.
+                                        </div>
+
+                                    }
+                                }
+                            </div>
+
+                        </div>
+                        <div class="col-md-1" style="padding:0px!important">
+
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Guide Amount:<span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="GuideChoiceAmt" name="GuideChoiceAmt" title="GuideChoiceAmt" readonly="readonly" value="@item.GuideChoiceAmt" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Guide GST Amount:<span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="GuideChoiceGSTAmt" name="GuideChoiceGSTAmt" title="GuideChoiceGSTAmt" readonly="readonly" value="@item.GuideChoiceGSTAmt" />
+                            </div>
+                        </div>
+                    </div>
+                    }
+                    if (item.ChoiceType == 2 || item.ChoiceType == 3)
+                    {
+                        <div class="col-md-12">
+
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    @{
+                                        if (item.VehicleNumber.Length > 0 && item.IsVehicleChoice == true)
+                                        {
+                                            @*<input checked="checked" id="IsVehicleChoice" name="IsVehicleChoice" type="checkbox" value="true" readonly="readonly" /><label>Choose Vehicle:</label><br />*@
+                                            <label>Vehicle Number:</label>
+                                            <input type="text" class="form-control" id="VehicleNumber" name="VehicleNumber" title="VehicleNumber" readonly="readonly" value="@item.VehicleNumber" />
+                                        }
+                                        else
+                                        {
+                                            @*<input checked="" id="isChoiceVehicle" name="isActive" type="checkbox" value="true" /><label>Choose Vehicle:</label><br />*@
+                                            <label>Vehicle Number:</label>
+                                            <select class="form-control myselect" id="ddlVehicleOrBoatId" , name="VehicleOrBoatId">
+                                                <option value="0">Select Boat Number</option>
+                                                @{
+                                                    foreach (var itm in Model.NpBoatSelectList)
+                                                    {
+                                                        <option value="@itm.BoatId" data-totalseats="@itm.TotalSeats">@itm.BoatNumber</option>
+                                                    }
+                                                }
+
+                                            </select>
+                                            <input type="text" class="form-control" style="display:none" id="VehicleNumber" name="VehicleNumber" title="VehicleNumber" readonly="readonly" value="" />
+                                            <div class="col-md-12" style="text-align:left!important;color: Red; display: none;padding:0px!important;" id="errorVehicleBoatChoice">
+                                                *Select Boat.
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-md-1" style="padding:0px!important">
+                                <div class="form-group" style="padding-top:30px!important;padding-left:0px!important">
+                                    <label>Seat Count :</label>
+                                    <span id="spnSeatCount">0</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Vehicel Amount:<span class="mandatory">*</span></label>
+                                    <input type="text" class="form-control" id="VehileChoiceAmt" name="VehileChoiceAmt" title="VehileChoiceAmt" readonly="readonly" value="@item.VehileChoiceAmt" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Vehicel GST Amount:<span class="mandatory">*</span></label>
+                                    <input type="text" class="form-control" id="VehileChoiceGSTAmt" name="VehileChoiceGSTAmt" title="VehileChoiceGSTAmt" readonly="readonly" value="@item.VehileChoiceGSTAmt" />
+                                </div>
+                            </div>
+                        </div>
+
+                    }
+                    <div class="col-md-12" style="padding:5px!important;">
+                        <div class="col-md-6">
+
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group" style="padding-top:30px!important;padding-left:0px!important">
+                                <label>Total Amount  :</label>
+                                <input type="text" class="form-control" id="VehileChoiceAmt" name="TotalChoiceAmt" title="Total Choice Amount" readonly="readonly" value="@item.TotalChoiceAmt" />
+                            </div>
+                        </div>
+                        <div class="col-md-2" style="padding-top:15px!important;">
+                            <br />
+                            <br />                           
+                            <button type="button" class="form-control btn-primary" id="submit" value="Submit">Confirm & Pay</button>
+                        </div>
+
+                    </div>
+                }                
+            }
+        }
+    </div>
+</div>
+
+<script src="~/Select2DropdownJSCSS/js/select2.min.js"></script>
+<script type="text/javascript">
+    $(".myselect").select2();
+    var choicetype = '@Model.NpChoiceList[0].ChoiceType';
+    $(document).on('change', '[id="ddlVehicleOrBoatId"]', function () {
+      
+        var boatnumber = $("#ddlVehicleOrBoatId option:selected").text();
+        var boatid = $("#ddlVehicleOrBoatId option:selected").val();
+        var seatcount = $("#ddlVehicleOrBoatId option:selected").data('totalseats');
+        $('#VehicleNumber').val(boatnumber);
+        $('#spnSeatCount').text(seatcount);
+        //alert('boatnumber : ' + boatnumber + ' boatid : ' + boatid + ' Total Seat Count : ' + seatcount);
+    });
+    $(document).ready(function () {
+       // alert(choicetype);
+    });
+    $(document).on('change', "[id='ddlGuideName']", function () {
+        $('#errorGuideChoice').hide();
+    });
+    $(document).on('change', "[id='ddlVehicleOrBoatId']", function () {
+        $('#errorVehicleBoatChoice').hide();
+    });
+    $(document).on('click', '[id="submit"]', function (e) {
+        e.preventDefault();
+        var isValid = true;
+        var guideId=  $('#ddlGuideName').val()|0;
+        var vehicleBoatId = $('#ddlVehicleOrBoatId').val()|0;
+        if (choicetype == 1) {
+            if (guideId == 0) {
+                isValid = false;
+                $('#errorGuideChoice').text('Select Guide');
+                $('#errorGuideChoice').show();
+                
+                
+            }
+        }
+        if (choicetype == 2) {
+            if (vehicleBoatId == 0) {
+                isValid = false;
+                $('#errorVehicleBoatChoice').text('Select Vehicle/Boat');
+                $('#errorVehicleBoatChoice').show();
+            }
+        }
+        if (choicetype == 3) {
+            if (guideId == 0) {
+                $('#errorGuideChoice').text('Select Guide');
+                $('#errorGuideChoice').show();
+                isValid = false;
+            }
+            if (vehicleBoatId == 0) {
+                isValid = false;
+                $('#errorVehicleBoatChoice').text('Select Vehicle/Boat');
+                $('#errorVehicleBoatChoice').show();
+            }
+        }
+        if (isValid == false)
+            return false;
+
+        $("#myConfirmDialog").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+        $("#myConfirmDialog").modal('show');
+        //alert('test');
+        //$('#frmChoiceGuideVehicle').submit();
+        //return false;
+    })
+   
+</script>

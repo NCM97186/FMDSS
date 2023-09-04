@@ -1,0 +1,650 @@
+﻿@model FMDSS.Models.ForesterDevelopment.FdmBudgetEstimation
+@{
+    ViewBag.Title = "FdmBudgetEstimation";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //  "~/Views/Shared/Forestlayout.cshtml";
+}
+
+
+
+
+
+
+
+<!-- Form design -->
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Field Budget Estimation</h1>
+        @if (@TempData["ViewSuccessMessage"] != null)
+        {
+            <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["ViewSuccessMessage"]</div>
+        }
+        @if (@TempData["ViewErrorMessage"] != null)
+        {
+            <div class="alert alert-danger1"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["ViewErrorMessage"]</div>
+        }
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!--<div class="panel-heading">Processing Fees</div>-->
+                <!-- /.panel-heading -->
+
+                <div class="panel-body">
+
+                    <!--Add New Btn-->
+                    <div class="col-lg-3 rgt pull-right">
+                        <button type="button" class="btn btn-success pull-right btn_pp" data-toggle="modal" id="btnAddBudget" data-target="#myModal" title="Budget Estimate">
+                            <i class="fa fa-plus"></i> Budget Estimate
+                        </button>
+
+                    </div>
+                    <div class="col-lg-3 rgt pull-left">
+                        <a class="btn btn-success pull-left btn_pp" title="Export to Excel" target="_blank" href="ExportData"><i class="fa fa-download"></i> Export to Excel</a>
+                    </div>
+                    @*<div class="col-lg-3 pull-right">
+                            <button type="button" class="btn btn-success" id="btnAddBudget" data-toggle="modal" data-target="#myModal" title="Budget Estimate">
+                                <i class="fa fa-plus"></i> Budget Estimate
+                            </button>
+                        </div>*@
+                    <!--./Add New Btn-->
+                    <!--Table-->
+                    <div class="dataTable_wrapper">
+                        <table class="table table-striped table-bordered table-hover table-responsive gridtable">
+                            <thead>
+                                <tr>
+                                    <th>S. No</th>
+                                    <th>Financial Year</th>
+                                    <th>Village Name</th>
+                                    <th>Estimated Budget (INR)</th>
+                                    <th>Action</th>
+
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                @foreach (var item in ViewData["BudgetList"] as IEnumerable<FMDSS.Models.ForesterDevelopment.FdmBudgetEstimation>)
+                                {
+
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(model => item.Index)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.FinancialYeartext)
+                                        </td>
+
+                                        <td>
+                                            @Html.DisplayFor(model => item.VILL_CODE_Name)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.EstimatedBudget)
+                                        </td>
+
+                                        <td>
+                                            @if (item.Status == 2)
+                                            {
+                                                <button type="button" class="btn btn-warning btn-circle" id="btnedit_@item.ID" title="Edit" value="@item.ID" data-toggle="modal" data-target="#myModal">
+                                                    <i class="fa fa-edit"></i>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="btn btn-warning btn-circle" title="This records is can not be edit because its processed for reviewed/approval" disabled>
+                                                    <i class="fa fa-edit"></i>
+                                                </button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+
+
+                            </tbody>
+
+
+                        </table>
+
+
+
+                        <!-- /.panel-body -->
+
+                    </div>
+
+                    <!-- /.panel -->
+
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+
+            <div class="modal fade" id="myModal" role="dialog">
+                <div class="modal-dialog modal-lg">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">
+                                &times;
+                            </button>
+                            <h4 class="modal-title" id="myModalLabel">Create Estimate Budget</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-horizontal" role="form">
+
+                                @using (Html.BeginForm("SaveBudget", "FdmBudgetEstimation", FormMethod.Post, new { data_behavior = "confirm" }))
+                                {
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="Proposed">
+                                                Financial Year:<span class="mandatory">*</span>
+                                            </label>
+                                            @Html.DropDownList("ddlFinancialYear", (IEnumerable<SelectListItem>)ViewBag.ddlFinancialYear, "--Select--", new { @class = "form-control input-width", id = "ddlFinancialYear" })
+                                            <div id="errordiv01" style="display:none" class="alert-danger1"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="Tehsil">
+                                                Range Name:<span class="mandatory">*</span>
+                                            </label>
+                                            @Html.DropDownList("ddlRange", (IEnumerable<SelectListItem>)ViewBag.ddlRange, "--Select--", new { @class = "form-control input-width", id = "ddlRange" })
+                                            <div id="errordiv03" style="display:none" class="alert-danger1"></div>
+                                        </div>
+                                    </div>
+
+
+
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="Village">
+                                                Village Name:<span class="mandatory">*</span>
+                                            </label>
+
+                                            @Html.DropDownList("ddlVillName", (IEnumerable<SelectListItem>)ViewBag.ddlVillName, new { @class = "form-control input-width", id = "ddlVillName" })
+                                            <div id="errordiv05" style="display:none" class="alert-danger1"></div>
+
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12"></div>
+                                    <div id="divDDLNoServey" style="display:none" class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="NoServey">
+                                                No Survey Is done in this Village so Please perform Budget Estimation Survey before proceed further!!
+                                            </label>
+
+                                            <a href='@Url.Action("SurveyBudgetEstimation", "SurveyBudgetEstimation")'>
+                                                Go to proposal Details Form
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div id="divDDLServey" style="display:none" class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="Survey">
+                                                Survey ID:<span class="mandatory">*</span>
+                                            </label>
+
+                                            @Html.DropDownList("ddlServey", (IEnumerable<SelectListItem>)ViewBag.ddlBudgerServey, new { @class = "form-control input-width", id = "ddlServey" })
+                                            <div id="errordiv06" style="display:none" class="alert-danger1"></div>
+
+                                        </div>
+                                    </div>
+
+                                    <div id="divServeyDetails" style="display:none">
+
+                                        <table class="table table-striped table-bordered table-hover gridtable">
+                                            <thead>
+                                                <tr>
+                                                    @*<th>Project Name</th>*@
+                                                    <th>Scheme Name</th>
+                                                    <th>Model Name</th>
+                                                    <th>Activity Name</th>
+                                                    <th>Budget Head</th>
+                                                    <th>Estimated Amount (INR)</th>
+
+                                                </tr>
+                                            </thead>
+
+                                            <tbody id="tbody_Budget"></tbody>
+
+
+                                        </table>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Proposal Date:<span class="mandatory"></span></label>
+                                                <input type="text" id="txt_ServeyDate" class="form-control input-width" readonly>
+                                                <div id="errordivSAName" style="display:none" class="alert-danger1"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Total Estimated Budget (INR):<span class="mandatory">*</span></label>
+                                                <input type="text" id="EstimatedBudget" name="EstimatedBudget" class="form-control" placeholder="Enter Estimated Budget" maxlength="15">
+
+                                                <div id="errordiv08" style="display:none" class="alert-danger1"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">   </div>
+                                <!-- Btn Groping -->
+                                    <div class="btn-padd">
+                                        <div id="btn" class="col-lg-12">
+
+                                            <button type="submit" class="btn btn-success" name="Command" value="" id="btn_SaveEstimation">
+                                                <i class="fa fa-check"></i> Submit
+                                            </button>
+                                            <button type="button" name="Command" id="btnCancel" value="Cancel" data-dismiss="modal" class="btn btn-danger" title="Cancel">
+                                                <i class="fa fa-times fa-fw"></i> Cancel
+                                            </button>
+
+                                        </div>
+                                    </div>
+                                <!-- /.Btn Groping -->
+                                }
+
+                                <div class="form-group" id="btn-cont1">
+                                    <div class="col-sm-offset-2 col-sm-10">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+    <!-- /.Row -->
+</div>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
+<script src="~/js/jquery.min.js"></script>
+
+<script type="text/javascript">
+
+    var RootUrl = '@Url.Content("~/")';
+    $(document).ready(function () {
+
+
+        $('input, select').attr('disabled', true);
+        $('.gridtable').DataTable({
+            responsive: true
+        });
+
+
+
+        $("#ddlRange").bind("change", function () {
+            $('#ddlVillName').empty();
+            $("#divDDLNoServey").hide();
+            $("#divDDLServey").hide();
+            $('#txt_ServeyDate').val('');
+            $('#EstimatedBudget').val('');
+            $("#divServeyDetails").hide();
+            $("#ddlVillName").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            var values = {
+                RangeCode: $("#ddlRange option:selected").val()
+            };
+
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'FdmBudgetEstimation/GetVillageNamebyRange',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddlVillName").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+        $("#ddlVillName").bind("change", function () {
+            $('#ddlServey').empty();
+
+            var values = {
+                VILL_CODE: $("#ddlVillName option:selected").val()
+            };
+
+            if ($("#ddlVillName option:selected").val() == "0") {
+                $("#divDDLNoServey").hide();
+                $("#divDDLServey").hide();
+                $('#txt_ServeyDate').val(data.ServeyDate);
+                $('#EstimatedBudget').val(data.EstimatedAmount);
+                $("#divServeyDetails").hide();
+
+            }
+            else {
+                $.ajax({
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    url: RootUrl + 'FdmBudgetEstimation/GetDDLServeyDetails',
+                    data: JSON.stringify(values),
+                    success: function (data) {
+                        if (data.length > 1) {
+                            $("#divDDLServey").show();
+                            $("#divDDLNoServey").hide();
+
+                            $.each(data, function (i, items) {
+                                $("#ddlServey").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                            });
+                        }
+                        else {
+
+                            $("#divDDLServey").hide();
+                            $('#txt_ServeyDate').val(data.ServeyDate);
+                            $('#EstimatedBudget').val(data.EstimatedAmount);
+                            $("#divServeyDetails").hide();
+                            $("#divDDLNoServey").show();
+                        }
+                    },
+                    traditional: true,
+                    error: function (data) { console.log(data) }
+                });
+            }
+        });
+
+        $("#ddlServey").bind("change", function () {
+            $('#txt_ServeyDate').val();
+            $('#EstimatedBudget').val();
+
+            var values = {
+                ServeyID: $("#ddlServey option:selected").val()
+            };
+
+            if ($("#ddlServey option:selected").val() == "0") {
+                $('#txt_ServeyDate').val('');
+                $('#EstimatedBudget').val('');
+                $("#divServeyDetails").hide();
+
+
+            }
+            else {
+
+
+                $.ajax({
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    url: RootUrl + 'FdmBudgetEstimation/GetBudgetServeyDetails',
+                    data: JSON.stringify(values),
+                    success: function (data) {
+                        var bardata;
+                        var totalAmount = 0;
+                        $("#tbody_Budget").html('');
+                        for (var i = 0; i < data.length; i++) {
+
+                            bardata = "<tr><td>" + data[i].SchemeName + "</td><td>" + data[i].ModelName + "</td><td>" + data[i].Activity + "</td><td>" + data[i].BudgetHead + "</td><td>" + data[i].EstimatedAmt + "</td></tr>";
+                            totalAmount = totalAmount + data[i].EstimatedAmt;
+                            $("#tbody_Budget").append(bardata);
+                        }
+
+
+                        $('#EstimatedBudget').val(totalAmount);
+                        $('#txt_ServeyDate').val(data[0].SDate);
+
+
+                        $("#divServeyDetails").show();
+                    },
+                    traditional: true,
+                    error: function (data) { console.log(data) }
+                });
+            }
+        });
+
+        $('#ddlVillName').change(function (e) {
+            $('#errordiv05').hide();
+        })
+
+
+
+
+        $("#btn_SaveEstimation").click(function () {
+
+            if ($('#ddlFinancialYear').val() == '' || $('#ddlFinancialYear').val() == null || $('#ddlFinancialYear').val() == '0') {
+                $('#errordiv01').show();
+                $('#errordiv01').html("Please fill the Financial Year!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#ddlFinancialYear').focus();
+                return false;
+            } else { $('#errordiv01').hide(); }
+
+
+
+            if ($('#ddlRange').val() == '' || $('#ddlRange').val() == null || $('#ddlRange').val() == '0') {
+                $('#errordiv03').show();
+                $('#errordiv03').html("Please select the Range Name!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#ddlRange').focus();
+                return false;
+            }
+            else { $('#errordiv03').hide(); }
+
+            if ($('#ddlVillName').val() == '' || $('#ddlVillName').val() == null || $('#ddlVillName').val() == '0') {
+                $('#errordiv05').show();
+                $('#errordiv05').html("Please select the Village Name!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#ddlVillName').focus();
+                return false;
+            }
+            else { $('#errordiv05').hide(); }
+
+            if ($('#ddlServey').val() == '' || $('#ddlServey').val() == null || $('#ddlServey').val() == '0') {
+                $('#errordiv06').show();
+                $('#errordiv06').html("Please select the Survey ID!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#ddlServey').focus();
+                return false;
+            }
+            else { $('#errordiv06').hide(); }
+
+            if ($('#EstimatedBudget').val() == '') {
+                $('#errordiv08').show();
+                $('#errordiv08').html("Please enter the Estimated Budget !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#EstimatedBudget').focus();
+                return false;
+            }
+            else { $('#errordiv08').hide(); }
+
+            if (($('#EstimatedBudget').val().substr(0, 1) == '.') && ($('#EstimatedBudget').val().length <= 1)) {
+                $('#errordiv08').show();
+                $('#errordiv08').html("Please enter the valid Estimated Budget!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#EstimatedBudget').focus();
+                return false;
+            }
+            else { $('#errordiv08').hide(); }
+
+            if ((parseFloat($('#EstimatedBudget').val())) <= 0) {
+                $('#errordiv08').show();
+                $('#errordiv08').html("Please enter the valid Estimated Budget!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#EstimatedBudget').focus();
+                return false;
+            }
+            else { $('#errordiv08').hide(); }
+            $('input, select').attr('disabled', false);
+        })
+
+        $('#EstimatedBudget').keypress(function (event) {
+            $('#errordiv08').hide();
+            return isNumber(event, this)
+
+        });
+
+        $('#btnAddBudget').click(function () {
+
+            $('input, select').attr('disabled', false);
+            $("#myModalLabel").text("Create Estimate Budget");
+            $("#ddlFinancialYear").val($("#ddlFinancialYear option:first").val());
+            $("#ddlRange").val($("#ddlRange option:first").val());
+            $("#ddlVillName").val($("#ddlVillName option:first").val());
+            $("#ddlServey").val($("#ddlServey option:first").val());
+            $("#txt_ServeyDate").val('');
+            $("#EstimatedBudget").val('');
+        })
+
+        $('#btnCancel').click(function () {
+            $('input, select').attr('disabled', false);
+            $("#myModalLabel").text("Create Estimate Budget");
+            $("#ddlFinancialYear").val($("#ddlFinancialYear option:first").val());
+            $("#ddlRange").val($("#ddlRange option:first").val());
+            $("#ddlVillName").val($("#ddlVillName option:first").val());
+            $("#ddlServey").val($("#ddlServey option:first").val());
+            $("#txt_ServeyDate").val('');
+            $("#EstimatedBudget").val('');
+
+        })
+
+        $('[id^=btnedit_]').click(function () {
+            var ID = { ID: $(this).val() };
+            var ServeyID;
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(ID),
+                url: RootUrl + "FdmBudgetEstimation/EditBudgetData",
+                success: function (data) {
+
+                    $("#ddlVillName").val($("#ddlVillName option:first").val());
+                    $("#ddlRange").val($("#ddlRange option:first").val());
+                    $("#divDDLServey").show();
+                    $("#divServeyDetails").show();
+
+                    $("#ddlServey").val($("#ddlServey option:first").val());
+
+                    $("#txt_ServeyDate").val('');
+                    $("#EstimatedBudget").val('');
+
+                    $("#myModalLabel").text("Edit Estimate Budget");
+                    $("#ddlFinancialYear").val(data.FinancialYear);
+
+
+                    $('#ddlRange').val(data.RANGE_CODE);
+                    $('#ddlServey').val(data.ServeyID);
+                    var serID = data.ServeyID;
+                    var villID = data.VILL_CODE;
+                    $("#txt_ServeyDate").val(data.Servey_Date);
+                    $("#EstimatedBudget").val(data.EstimatedBudget);
+
+
+                    var values = {
+                        RangeCode: data.RANGE_CODE
+                    };
+
+
+                    $.ajax({
+                        type: 'POST',
+                        contentType: 'application/json; charset=utf-8',
+                        url: RootUrl + 'FdmBudgetEstimation/GetVillageNamebyRange',
+                        data: JSON.stringify(values),
+                        success: function (data) {
+                            $.each(data, function (i, items) {
+                                $("#ddlVillName").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                                if (items.Value == villID) {
+                                    $('#ddlVillName option').filter(function () { return $(this).val() == villID }).attr('selected', true);
+                                    return;
+                                }
+                            });
+                        },
+                        traditional: true,
+                        error: function (data) { console.log(data) }
+                    });
+
+                    var values = {
+                        VILL_CODE: data.VILL_CODE
+                    };
+                    $.ajax({
+                        type: 'POST',
+                        contentType: 'application/json; charset=utf-8',
+                        url: RootUrl + 'FdmBudgetEstimation/GetDDLServeyDetails',
+                        data: JSON.stringify(values),
+                        success: function (data) {
+                            if (data.length > 1) {
+                                $.each(data, function (i, items) {
+
+                                    $("#ddlServey").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+
+                                    if (items.Text == serID) {
+
+                                        $('#ddlServey option').filter(function () { return $(this).text() == serID }).attr('selected', true);
+                                        return;
+                                    }
+                                });
+
+                                $.ajax({
+                                    type: 'POST',
+                                    url: RootUrl + 'FdmBudgetEstimation/GetBudgetServeyDetails', // we are calling json method
+                                    dataType: 'json',
+                                    data: { ServeyID: $("#ddlServey option:selected").val() },
+                                    success: function (data) {
+                                        var bardata;
+                                        var totalAmount = 0;
+                                        $("#tbody_Budget").html('');
+                                        for (var i = 0; i < data.length; i++) {
+                                            bardata = "<tr><td>" + data[i].SchemeName + "</td><td>" + data[i].ModelName + "</td><td>" + data[i].Activity + "</td><td>" + data[i].BudgetHead + "</td><td>" + data[i].EstimatedAmt + "</td><td>" + data[i].SDate + "</td></tr>";
+                                            totalAmount = totalAmount + data[i].EstimatedAmt;
+                                            $("#tbody_Budget").append(bardata);
+                                        }
+
+                                        $('#txt_ServeyDate').val(data[0].SDate);
+                                        //$('#EstimatedBudget').val(totalAmount);
+
+
+                                        $("#divServeyDetails").show();
+                                    },
+                                    traditional: true,
+                                    error: function (data) { console.log(data) }
+                                });
+
+                                $("#btn_SaveEstimation").val(data.ID);
+                                $('input, select').attr('disabled', true);
+                                $('#EstimatedBudget').attr('disabled', false);
+
+                            }
+                        },
+                        traditional: true,
+                        error: function (data) { console.log(data) }
+                    });
+
+
+
+                    $('[data-toggle=modal]').on('click', function (e) {
+                        var $target = $($(this).data('target'));
+                        $target.data('triggered', true);
+                        setTimeout(function () {
+                            if ($target.data('triggered')) {
+                                $target.modal('show').data('triggered', false);
+                            };
+                        }, 600); // milliseconds
+                        return false;
+                    });
+
+                }
+            })
+        })
+
+
+    })
+
+
+
+
+    function isNumber(evt, element) {
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+
+        if (
+             (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+            (charCode < 48 || charCode > 57) && (charCode != 8))
+            return false;
+
+
+    }
+
+
+
+
+</script>

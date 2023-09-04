@@ -1,0 +1,551 @@
+﻿@{
+    ViewBag.Title = "Refund";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+@model FMDSS.Models.BookOnlineTicket.BookOnTicket
+
+<script src="~/js/jquery.min.js"></script>
+
+@*<script>
+        $(document).ready(function () {
+
+            $("#myModal").modal();
+
+        });
+    </script>*@
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+
+    $(document).ready(function () {
+
+
+        $('#btn_Submit').click(function (e) {
+            debugger;
+            if ($('#BankName').val().trim() == "") {
+                $('#errBankName').css("display", "block");
+                $('#errBankName').focus();
+                return false;
+            }
+            else {
+                $('#errBankName').css("display", "none");
+            }
+
+            if ($('#BranchName').val().trim() == "") {
+                $('#errBranchName').css("display", "block");
+                $('#errBranchName').focus();
+                return false;
+            }
+            else {
+                $('#errBranchName').css("display", "none");
+            }
+
+            if ($('#IFSCCode').val().trim() == "") {
+                $('#errIFSCCode').css("display", "block");
+                $('#errIFSCCode').focus();
+                return false;
+            }
+            else {
+                $('#errIFSCCode').css("display", "none");
+            }
+
+            if ($('#AccountHolderName').val().trim() == "") {
+                $('#errAccountHolderName').css("display", "block");
+                $('#errAccountHolderName').focus();
+                return false;
+            }
+            else {
+                $('#errAccountHolderName').css("display", "none");
+            }
+
+
+            if ($('option:selected', $('#AccountType')).index() == 0) {
+                $("#errAccountType").css("display", "block");
+                $('#errAccountType').focus();
+                return false;
+            }
+            else {
+                $("#errAccountType").css("display", "none");
+            }
+
+            if ($('#AccountNo').val().trim() == "") {
+                $('#errAccountNo').css("display", "block");
+                $('#errAccountNo').focus();
+                return false;
+            }
+            else {
+                $('#errAccountNo').css("display", "none");
+            }
+
+
+
+
+            if (jQuery("#ConfirmRefundByCitizen").prop("checked")) {
+                $('#errConfirmRefundByCitizen').css("display", "none");
+            }
+            else {
+                $('#errConfirmRefundByCitizen').css("display", "block");
+                $('#errConfirmRefundByCitizen').focus();
+                return false;
+            }
+            var RequestId = $("#RequestId").val();
+            var BankName = $("#BankName").val();
+            var BranchName = $("#BranchName").val();
+            var IFSCCode = $("#IFSCCode").val();
+            var AccountHolderName = $("#AccountHolderName").val();
+            var AccountType = $("#AccountType option:selected").val();
+            var AccountNo = $("#AccountNo").val();
+            $("#lbl_reqId").html(RequestId);
+            $("#lbl_BankName").html(BankName);
+            $("#lbl_BranchName").html(BranchName);
+            $("#lbl_IFSCCode").html(IFSCCode);
+            $("#lbl_AcHolderName").html(AccountHolderName);
+            $("#lbl_AcType").html(AccountType);
+            $("#lbl_AcNumber").html(AccountNo);
+            $("#myModal_TicketRefundConfimation").modal('show');
+        });
+
+    });
+
+    function cancel() {
+        $('#check_confirm').attr('checked', false);
+        $('#btn_confirm').attr('disabled', 'disabled');
+        $("#myModal_TicketRefundConfimation").modal('hide');
+    }
+    function RefundNow() {
+        debugger;
+        var RequestId = $("#RequestId").val();
+        var BankName = $("#BankName").val();
+        var BranchName = $("#BranchName").val();
+        var IFSCCode = $("#IFSCCode").val();
+        var AccountHolderName = $("#AccountHolderName").val();
+        var AccountType = $("#AccountType option:selected").val();
+        var AccountNo = $("#AccountNo").val();
+
+        var obj = {
+            RequestId: RequestId,
+            BankName: BankName,
+            BranchName: BranchName,
+            IFSCCode: IFSCCode,
+            AccountType: AccountType,
+            AccountHolderName: AccountHolderName,
+            AccountNo: AccountNo
+        }
+        //alert(JSON.stringify(obj));
+        var r = confirm("Are you sure you want to Submit ?");
+        if (r == true) {
+            debugger;
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                //url: RootURl + "BookOnlineTicket/Refund",
+                url:'@Url.Action("Refund", "BookOnlineTicket")',
+                data: JSON.stringify(obj),
+                dataType: "json",
+                success: function (result) {
+                    alert(result);
+                    $('#myModal_TicketRefundConfimation').modal('hide');
+                    window.location.href = '/BookOnlineTicket/BookOnlineTicket';
+                },
+                error: function (error) {
+                    console.log(error)
+                    alert("Some Error Occured!!!!!")
+                }
+            });
+
+        } else {
+            $('#myModal_TicketRefundConfimation').modal('hide');
+            $('#check_confirm').attr('checked', false);
+            $('#btn_confirm').attr('disabled', 'disabled');
+            return false;
+        }
+    }
+
+    $(function () {
+        $('#check_confirm').click(function () {
+            if ($(this).is(':checked')) {
+                $('#btn_confirm').removeAttr('disabled');
+            } else {
+                $('#btn_confirm').attr('disabled', 'disabled');
+
+            }
+        });
+    });
+
+    $(document).on('keypress', '[id="AccountNo"]', function (event) {
+        var strLen = $('#AccountNo').val();
+        if (strLen != undefined && strLen != null && strLen != '') {
+            if (strLen.length > 29)
+                return false;
+        }
+        var regex = new RegExp("^[0-9]+$");
+        var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+        if (!regex.test(key)) {
+            event.preventDefault();
+            return false;
+        }
+    })
+    $(document).on('keypress', '[id="BankName"]', function (event) {
+        var strLen = $('#BankName').val();
+        if (strLen != undefined && strLen != null && strLen != '') {
+            if (strLen.length > 49)
+                return false;
+        }
+        //var regex = new RegExp("^[a-zA-Z0-9\\s-/-]+$");
+        var regex = new RegExp("^[a-zA-Z\\s]+$");
+        var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+        if (!regex.test(key)) {
+            event.preventDefault();
+            return false;
+        }
+    })
+    $(document).on('keypress', '[id="BranchName"]', function (event) { 
+        var strLen = $('#BranchName').val();
+        if (strLen != undefined && strLen != null && strLen != '') {
+            if (strLen.length > 49)
+                return false;
+        }
+        var regex = new RegExp("^[a-zA-Z0-9\\s]+$");
+        var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+        if (!regex.test(key)) {
+            event.preventDefault();
+            return false;
+        }
+    })
+    $(document).on('keypress', '[id="IFSCCode"]', function (event) {
+        var strLen = $('#IFSCCode').val();
+        if (strLen != undefined && strLen != null && strLen != '') {
+            if (strLen.length > 19)
+                return false;
+        }
+        var regex = new RegExp("^[a-zA-Z0-9\\s-/-]+$");
+        var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+        if (!regex.test(key)) {
+            event.preventDefault();
+            return false;
+        }
+    })
+    $(document).on('keypress', '[id="AccountHolderName"]', function (event) {
+        var strLen = $('#AccountHolderName').val();
+        if (strLen != undefined && strLen != null && strLen != '') {
+            if (strLen.length > 49)
+                return false;
+        }
+        var regex = new RegExp("^[a-zA-Z\\s]+$");
+        var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+        if (!regex.test(key)) {
+            event.preventDefault();
+            return false;
+        }
+    })
+</script>
+
+<script>
+    $(document).ready(function () {
+
+
+
+
+
+    });
+
+</script>
+
+<style>
+    #myModal .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModal .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModal .modal-footer {
+        background-color: #f9f9f9;
+    }
+</style>
+
+<div class="modal fade" id="myModal_TicketRefundConfimation" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4><i class="fa-fw"></i>Confirmation</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <table class="table table-responsive">
+                            <tr>
+                                <td>Request Id:</td>
+                                <td colspan="3"><label id="lbl_reqId"></label></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">Bank Details:-</td>
+                            </tr>
+                            <tr>
+                                <td>Bank Name:</td>
+                                <td><label id="lbl_BankName"></label></td>
+                                <td>Branch Name:</td>
+                                <td><label id="lbl_BranchName"></label></td>
+                            </tr>
+                            <tr>
+                                <td>IFSC Code:</td>
+                                <td><label id="lbl_IFSCCode"></label></td>
+                                <td>Account Holder Full Name:</td>
+                                <td><label id="lbl_AcHolderName"></label></td>
+                            </tr>
+                            <tr>
+                                <td>Account Type:</td>
+                                <td><label id="lbl_AcType"></label></td>
+                                <td>Account No:</td>
+                                <td><label id="lbl_AcNumber"></label></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">
+                                    <input type="checkbox" id="check_confirm" />
+                                    <label for="check_confirm" id="lbl_Note" style="color:red">* Make sure your bank information is correct !</label>
+                                </td>
+
+                            </tr>
+                        </table>
+                        <input type="button" id="btn_confirm" value="Confirm" onclick="RefundNow()" class="btn btn-success" disabled />
+                        <input type="button" value="Cancel" onclick="cancel();" class="btn btn-success" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="padding:35px 50px;">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4><i class="fa-fw"></i>Ticket Cancellation Policy</h4>
+            </div>
+            <div class="modal-body" style="padding:40px 50px;">
+
+                <ul class="a">
+                    @*<li> As per the policy, if you cancel the booking then 50% amount of charged fees excluding emitra & bank charges will be refunded.</li>*@
+                    <li> As per the policy, if you cancel the booking then below amount of charged fees excluding emitra & bank charges will be refunded.</li>
+                    <table class="table table-striped table-bordered table-hover">
+                        <tr>
+                            <th>अवधि बुकिंग दिवस को शामिल करते हुए <br />(Including period bookings day) </th>
+                            <th>रिफंड टिकट राशि का प्रतिशत <br />(Percent of refund ticket amount)</th>
+                        </tr>
+                        <tr>
+                            <td>बुकिंग दिवस से 90 दिन तक<br /> (Up to 90 days from booking day)</td>
+                            <td>75</td>
+                        </tr>
+                        <tr>
+                            <td>91 से 180 दिवस तक <br /> (From 91 to 180 days)</td>
+                            <td>50</td>
+                        </tr>
+                        <tr>
+                            <td>181 से 270 दिवस तक <br /> (From 181 to 270 days)</td>
+                            <td>25</td>
+                        </tr>
+                        <tr>
+                            <td>270 दिवस अधिक <br /> (270 days more)</td>
+                            <td>0</td>
+                        </tr>
+                    </table>
+
+
+
+                    <li>Before proceeding please keep ready the required bank details i.e. Bank Name, Branch Name, IFSC Code, Account Type (Saving) & Account No. etc.</li>
+
+                </ul>
+            </div>
+            <div class="modal-footer" style="clear:both">
+                <div id="btn" class="col-lg-12">
+
+                    <button type="button" id="btn_cancel" class="btn btn-success" data-dismiss="modal">
+                        Confirm
+                    </button>
+
+                    <a class="btn btn-danger" href='@Url.Action("BookOnlineTicket", "BookOnlineTicket" )'>
+                        Exit
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<div class="row">
+    <div class="col-lg-9 pad">
+        <h1 class="page-header"><span>WildLife Ticket Booking : Refund Process </span></h1>
+    </div>
+    @*@using (Html.BeginForm("Refund", "BookOnlineTicket", FormMethod.Post))
+        {*@
+
+    <div class="col-lg-9 table-responsive">
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr>
+
+                    <th>Member Fee</th>
+                    <th>Camera Fees</th>
+                    <th>Safari Fees</th>
+                    <th>Vehicle Rent Fees</th>
+                    <th>GST on Vehicle Rent Fees</th>
+                    <th>Guide Fees</th>
+                    <th>GST on Guide Fees</th>
+                    <th>Total Amount</th>
+                    <th>Emitra Charges</th>
+                    <th>Grand Total</th>
+                    <th>Refund Amount</th>
+                    <th>Enter By</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="color:Black">
+
+                    <td>@Html.DisplayFor(model => model.TotalMemberFees)  </td>
+                    <td>@Html.DisplayFor(model => model.TotalCameraFees)  </td>
+                    <td>@Html.DisplayFor(model => model.TotalSafariFees)  </td>
+                    <td>@Html.DisplayFor(model => model.VehicleRent)  </td>
+                    <td>@Html.DisplayFor(model => model.GSTonVehicleRent)  </td>
+                    <td>@Html.DisplayFor(model => model.GuideFee)  </td>
+                    <td>@Html.DisplayFor(model => model.GSTGuideFee)  </td>
+
+                    <td>@Html.DisplayFor(model => model.TicketAmount)  </td>
+                    <td>@Html.DisplayFor(model => model.EmitraCharges)  </td>
+
+                    <td>@Html.DisplayFor(model => model.GrandTotal)  </td>
+                    <td>@Html.DisplayFor(model => model.RefundAmount)  </td>
+                    <td>
+                        @Html.DisplayFor(model => model.SSOID)
+                        @Html.HiddenFor(model => model.TicketID)
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-lg-9">
+        <div class="panel panel-default">
+            <div class="panel-body">
+
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+
+                        <label>Request Id:</label>
+                        @Html.TextBoxFor(model => model.RequestId, new { @class = "form-control common datefield", id = "RequestId", @readonly = "readonly" })
+                        @Html.HiddenFor(model => model.RequestId)
+                        <div id="errPermission" style="display:none" class="alert-danger1">Permission is Required.</div>
+                    </div>
+                </div>
+
+
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+
+                        <label>Bank Name:</label>
+                        @Html.TextBoxFor(model => model.BankName, new { @class = "form-control common datefield ", id = "BankName"})
+
+                        <div id="errBankName" style="display:none" class="alert-danger1">Bank Name is Required.</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+
+                        <label>Branch Name: </label>
+                        @Html.TextBoxFor(model => model.BranchName, new { @class = "form-control common datefield", id = "BranchName" })
+
+                        <div id="errBranchName" style="display:none" class="alert-danger1">Branch Name is Required.</div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+
+                        <label>IFSC Code:</label>
+                        @Html.TextBoxFor(model => model.IFSCCode, new { @class = "form-control common datefield", id = "IFSCCode" })
+
+                        <div id="errIFSCCode" style="display:none" class="alert-danger1">IFSC Code is Required.</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+
+                        <label>Account Holder Full Name:</label>
+                        @Html.TextBoxFor(model => model.AccountHolderName, new { @class = "form-control common datefield", id = "AccountHolderName" })
+
+                        <div id="errAccountHolderName" style="display:none" class="alert-danger1">Account Holder Full Name is Required.</div>
+                    </div>
+                </div>
+
+
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+
+                        <label>Account Type:</label>
+
+                        @Html.DropDownListFor(model => model.AccountType,
+                                                                    new SelectList(new List<SelectListItem> {
+                                                                             new SelectListItem { Text = "Current", Value = "Current"},
+                                                                             new SelectListItem { Text = "Saving", Value = "Saving"}
+                                                                         }, "Value", "Text"),
+                                                                     "Select Account Type",
+                                                                      new { @class = "form-control common datefield", id = "AccountType" })
+                        <div id="errAccountType" style="display:none" class="alert-danger1">Account Type is Required.</div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+
+                        <label>Account No:</label>
+                        @Html.TextBoxFor(model => model.AccountNo, new { @class = "form-control common datefield", id = "AccountNo" })
+
+                        <div id="errAccountNo" style="display:none" class="alert-danger1">Account No is Required.</div>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="form-group">
+
+                        @Html.CheckBoxFor(model => model.ConfirmRefundByCitizen, new { id = "ConfirmRefundByCitizen" }) I hereby confirm my request of cancellation of the ticket and want my refundable amount in the above mentioned bank account.
+                        <div id="errConfirmRefundByCitizen" style="display:none;" class="alert-danger1">Confirm Refund is Required.</div>
+                    </div>
+                </div>
+
+
+
+
+
+                <div id="btn" class="col-lg-12">
+
+                    <button type="button" class="btn btn-success" name="Command" value="Submit" id="btn_Submit">
+                        Process To Refund
+                    </button>
+                    <a id="btn_Previous" style="float:none" class="btn btn-warning" href='@Url.Action("BookOnlineTicket", "BookOnlineTicket")'>
+                        Back
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+    @*}*@
+
+</div>

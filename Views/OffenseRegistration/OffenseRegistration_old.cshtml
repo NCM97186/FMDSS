@@ -1,0 +1,2779 @@
+﻿
+@model FMDSS.Models.ForestProtection.OffenseReg
+@{
+    ViewBag.Title = "OffenseRegistration";
+    Layout = "~/Views/Shared/Forestlayout.cshtml";
+}
+<style>
+    #page-wrapper-inn .table > thead > tr > th {
+        width: auto;
+    }
+</style>
+<script src="~/Scripts/jquery-1.8.2.js"></script>
+
+<script>
+
+    var ALERT_TITLE = "";
+    var ALERT_BUTTON_TEXT = "Ok";
+
+    //if (document.getElementById) {
+    //    window.alert = function (txt) {
+    //        createCustomAlert(txt);
+    //    }
+    //}
+
+    function createCustomAlert(txt) {
+        d = document;
+        if (d.getElementById("modalContainer")) return;
+        mObj = d.getElementsByTagName("body")[0].appendChild(d.createElement("div"));
+        mObj.id = "modalContainer";
+        mObj.style.height = d.documentElement.scrollHeight + "px";
+
+        alertObj = mObj.appendChild(d.createElement("div"));
+        alertObj.id = "alertBox";
+        if (d.all && !window.opera) alertObj.style.top = document.documentElement.scrollTop + "px";
+        alertObj.style.left = (d.documentElement.scrollWidth - alertObj.offsetWidth) / 2 + "px";
+        alertObj.style.visiblity = "visible";
+
+        h1 = alertObj.appendChild(d.createElement("h1"));
+        h1.appendChild(d.createTextNode(ALERT_TITLE));
+
+        msg = alertObj.appendChild(d.createElement("p"));
+        //msg.appendChild(d.createTextNode(txt));
+        msg.innerHTML = txt;
+
+        btn = alertObj.appendChild(d.createElement("a"));
+        btn.id = "closeBtn";
+        btn.appendChild(d.createTextNode(ALERT_BUTTON_TEXT));
+        btn.href = "#";
+        btn.focus();
+        btn.onclick = function () { removeCustomAlert(); return false; }
+
+        alertObj.style.display = "block";
+
+    }
+
+    function removeCustomAlert() {
+        document.getElementsByTagName("body")[0].removeChild(document.getElementById("modalContainer"));
+    }
+
+</script>
+<style>
+    #modalContainer {
+        background-color: rgba(0, 0, 0, 0.3);
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0px;
+        left: 0px;
+        z-index: 10000;
+        background-image: url(tp.png); /* required by MSIE to prevent actions on lower z-index elements */
+    }
+
+    #alertBox {
+        position: relative;
+        width: 300px;
+        min-height: 100px;
+        margin-top: 310px;
+        border: 1px solid #666;
+        background-color: #fff;
+        background-repeat: no-repeat;
+        background-position: 20px 30px;
+    }
+
+    #modalContainer > #alertBox {
+        position: fixed;
+    }
+
+    #alertBox h1 {
+        margin: 0;
+        font-size: 18px;
+        background-color: #3073BB;
+        color: #FFF;
+        border-bottom: 1px solid #000;
+        padding: 2px 0 2px 5px;
+    }
+
+    #alertBox p {
+        text-align: center;
+        padding: 20px;
+    }
+
+    #alertBox #closeBtn {
+        display: block;
+        position: relative;
+        margin: 5px auto;
+        padding: 7px;
+        border: 0 none;
+        width: 70px;
+        font: 0.7em verdana,arial;
+        text-transform: uppercase;
+        text-align: center;
+        color: #FFF;
+        background-color: #357EBD;
+        border-radius: 3px;
+        text-decoration: none;
+    }
+
+    /* unrelated styles */
+
+    #mContainer {
+        position: relative;
+        width: 600px;
+        margin: auto;
+        padding: 5px;
+        border-top: 2px solid #000;
+        border-bottom: 2px solid #000;
+        font: 0.7em verdana,arial;
+    }
+
+    h1, h2 {
+        margin: 0;
+        padding: 4px;
+        font: bold 1.5em verdana;
+        border-bottom: 1px solid #000;
+    }
+
+    code {
+        font-size: 1.2em;
+        color: #069;
+    }
+
+    #credits {
+        position: relative;
+        margin: 25px auto 0px auto;
+        width: 350px;
+        font: 0.7em verdana;
+        border-top: 1px solid #000;
+        border-bottom: 1px solid #000;
+        height: 90px;
+        padding-top: 4px;
+    }
+
+        #credits img {
+            float: left;
+            margin: 5px 10px 5px 0px;
+            border: 1px solid #000000;
+            width: 80px;
+            height: 79px;
+        }
+
+    .important {
+        background-color: #F5FCC8;
+        padding: 2px;
+    }
+
+    code span {
+        color: green;
+    }
+
+    #selectedFiles div {
+        background-color: #f1f2f6;
+        height: 35px;
+        width: 100%;
+        padding: 10px;
+        box-shadow: 0 1px 2px #000;
+        font-size: 12px;
+        margin: 0 0 10px;
+    }
+
+        #selectedFiles div a {
+            border-radius: 50%;
+            background: #c9302c;
+            padding: 2px 4px 2px 2px;
+            color: #fff;
+            font-weight: bold;
+            margin: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition-property: background, box-shadow;
+            transition-duration: .3s;
+            transition-timing-function: linear;
+            -webkit-transition-duration: .3s;
+        }
+
+            #selectedFiles div a:hover, .#selectedFiles div a:focus {
+                background: #df8402;
+                box-shadow: 0 5px 10px #5d3701;
+                text-decoration: none;
+            }
+</style>
+
+<script>
+    var nowTemp = new Date();
+    var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+    var files;
+    var storedFiles = [];
+    var upc = 0;
+    var $j = jQuery.noConflict();
+
+    $j(function () {
+
+        $j(":file").attr('title', '  ');
+        var $jloading = $j('#loadingDiv').hide();
+
+        $j("input[id^='fileToUpload']").change(function (e) {           
+            if (($j('#fileToUpload')[0].files[0].size / 1048576) > 2) {
+                createCustomAlert('File Size cannot be more than 2 mb!!!');
+                $j("input[id^='fileToUpload']").val('');
+            }
+            else {
+                doReCreate(e);
+            }            
+        });
+
+        selDiv = $j("#selectedFiles");
+    });
+
+    function doReCreate(e) {
+       // createCustomAlert('File has been Selected!!!');
+        upc = upc + 1;
+        handleFileSelect(e);
+
+        $j("input[id^='fileToUpload']").hide();
+
+        $j('<input>').attr({
+            type: 'file',
+            multiple: 'multiple',
+            id: 'fileToUpload' + upc,
+            class: 'form-control',
+            name: 'fileUpload',
+            style: 'float: left',           
+            title: '  ',
+            onchange: "doReCreate(event)"
+
+        }).appendTo('#uploaders');
+    }
+
+    function handleFileSelect(e) {   
+        selDiv = document.querySelector("#selectedFiles");
+      
+        if (!e.target.files) return;
+        files = e.target.files;
+
+        for (var i = 0; i < files.length; i++) {
+            var f = files[i];
+            if (storedFiles.length <= 2) {
+                if (storedFiles.length == 0) {
+                    selDiv.innerHTML += "<div>" + f.name +
+                    "<a onclick='removeAtt(this)'> X </a></div>";
+                    storedFiles.push(f.name);
+                }
+                else {
+                    var chk = 0;
+                    for (var a = 0; a < storedFiles.length; a++) {
+                        if (storedFiles[a] == f.name) {
+                            chk = 1;
+                        }
+                    }
+                    if (chk == 0) {
+                        selDiv.innerHTML += "<div>" + f.name +
+                        "<a onclick='removeAtt(this)'> X </a></div>";
+                        storedFiles.push(f.name);
+                    }
+                }
+            }
+            else {
+                createCustomAlert('Maximum 3 files can be upload!!!');
+                e.preventDefault();
+            }
+        }
+        $j('#@Html.IdFor(i => i.FilesToBeUploaded)').val(storedFiles);
+    }
+
+    function removeAtt(t) {
+        var serEle = $j(t).parent().text().slice(0, -3);
+        var index = storedFiles.indexOf(serEle);
+        if (index !== -1) {
+            storedFiles.splice(index, 1);
+        }
+        $j(t).parent().remove();
+        $j('#@Html.IdFor(i => i.FilesToBeUploaded)').val(storedFiles);
+
+    }
+</script>
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Offense/Parivad</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">         
+            <div class="panel panel-default">
+                @Html.Hidden("hdFPMOffenseCode", Model.OffenseCode)
+                @Html.Hidden("hdFormNo", Model.RegFormNumber)
+                @Html.Hidden("hdFPMOffenseID", Model.OffenseID)
+                @Html.Hidden("hdfpmUserRole", @Model.UserRole)
+                @if (@Model.RegFormNumber == 1)
+                {
+                    using (Html.BeginForm("SubmitDetails", "OffenseRegistration", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data", id = "IdFor" }))
+                    {
+                        <div class="panel-body">
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label class="checkbox-inline">
+                                        @Html.CheckBoxFor(x => x.Self, new { @id = "Self" }) Self
+                                    </label>
+                                    <label class="checkbox-inline">
+                                        @Html.CheckBoxFor(x => x.Name, new { @id = "Name" }) Applicant Name
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Name of Applicant: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.ApplicantName, new { @class = "form-control", @id = "ApplicantName", name = "ApplicantName" })
+                                    <div id="errordivName" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Circle:</label>
+                                    @Html.TextBox("Circle", (string)ViewBag.circle, new { @class = "form-control", @id = "txt_Circle", @readonly = "readonly" })
+                                    @Html.TextBoxFor(x => x.CircleCode, new { style = "display: none;" })
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Division: <span class="mandatory"></span></label>
+                                    @Html.TextBox("Division", (string)ViewBag.division, new { @class = "form-control", @id = "txt_Division", @readonly = "readonly" })
+                                    @Html.TextBoxFor(x => x.DivisionCode, new { style = "display: none;" })
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>District: <span class="mandatory"></span></label>
+                                    @Html.TextBox("District", (string)ViewBag.district, new { @class = "form-control", @id = "txt_district", @readonly = "readonly" })
+                                    @Html.TextBoxFor(x => x.DistrictCode, new { style = "display: none;" })
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Range: <span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(x => x.RangeCode, (IEnumerable<SelectListItem>)ViewBag.RangeCode1, "--Select--", new { @class = "form-control", id = "ddl_range" })
+                                    <div id="errordivRange" style="display:none" class="alert-danger1"></div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Tehsil: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.Tehsil, new { @class = "form-control", @title = "Please enter the Tehsil", @id = "txt_Tehsil", @maxlength = 50 })
+                                    <div id="errordivTehsil" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>NAKA: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.Naka, new { @class = "form-control", @title = "Please enter the Naka", @id = "txt_Naka", @maxlength = 50 })
+                                    <div id="errordivNaka" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Forest Block: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.ForestBlock, new { @class = "form-control", @title = "Please enter the Forest Block", @id = "txt_ForestBlock", @maxlength = 50 })
+                                    <div id="errordivForestBlock" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Compartment: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.Compartment, new { @class = "form-control", @title = "Please enter the Compartment", @id = "txt_Compartment", @maxlength = 50 })
+                                    <div id="errordivCompartment" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="Areainha">
+                                        Place of Offense/Landmark:<span class="mandatory">*</span>
+                                    </label>
+                                    @Html.TextBoxFor(x => x.OffensePlace, new { @class = "form-control common", @title = "", @placeholder = "Enter Place of Offense ", @maxlength = 50, @id = "txt_OffensePlace" })
+
+                                    <div id="errordivOffensePlace" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+
+                                <div class="form-group">
+                                    <label>Date of Offense:</label>
+                                    <div id="datepicker" class="input-group date">
+                                        @Html.TextBoxFor(x => x.OffenseDate, new { @class = "form-control datefield", @title = "Select the Date of Offense from date picker", @id = "txt_DateOfOffense" })
+                                        <div id="errordivDateOfOffense" style="display:none" class="alert-danger1"></div>
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <div id="errordivOffenseDate" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Time of Visit: <span class="mandatory">*</span></label>
+                                    <div id="datepicker" class="input-group date">
+                                        @Html.TextBoxFor(x => x.OffenseTime, new { @class = "form-control timepicker", title = "Select time", @id = "OffenseTime" })
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <div id="errordivOffenseTime" style="display:none" class="alert-danger1"></div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Latitude: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.Latitude, new { @class = "form-control", @title = "Enter the GPS latitude in the range of 26° - 27°. E.G. 26.52°", @placeholder = "Enter Latitude", @maxlength = 10, @id = "txt_lat" })
+                                    <div id="errordivLatitude" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Longitude: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.Longitude, new { @class = "form-control", @title = "Enter the GPS longitude in the range of 69° - 78°. E.G. 75.52°", @placeholder = "Enter Longitude", @maxlength = 10, @id = "txt_long" })
+                                    <div id="errordivLongitude" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Land Mark: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.LandMark, new { @class = "form-control", @title = "Please enter the LandMark", @id = "txt_LandMark", @maxlength = 50 })
+                                    <div id="errordivLandMark" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Distance from NAKA (In KM.): <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.NakaDistance, new { @class = "form-control", @title = "Please enter the Distance from NAKA", @id = "txt_NakaDistance", @maxlength = 5 })
+                                    <div id="errordivNakaDistance" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Offense Description: <span class="mandatory">*</span></label>
+                                    @Html.TextAreaFor(x => x.Offence_Description, new { @class = "form-control", @title = "Please enter the Offence Description", @id = "Offence_Description", @maxlength = 500 })
+                                    <div id="errordivOffenseDesc" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Type of Forest / Village (Reserved/Protected/Unclassified): <span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(x => x.ForestType, (IEnumerable<SelectListItem>)ViewBag.ForestType1, "--Select--", new { id = "ddl_ForestType", @class = "form-control" })
+                                    <div id="errordivForestType" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12" id="btn">
+                                <button type="submit" class="btn btn-success" name="Command" id="btnNext" value="Save" title="Submit">
+                                    <i class="fa fa-check"></i> Save
+                                </button>
+
+                                <button type="button" name="Command" value="Cancel" class="btn btn-danger" title="Cancel">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+
+                            </div>
+
+
+                        </div>
+                    }
+                }
+
+                                @if (@Model.RegFormNumber == 2)
+                                {
+
+                                    @Html.Hidden("hdfpmOffenseCat", @Model.OffenceCategory)
+                                    @Html.Hidden("hdfpmSettlementAmount", @Model.SettlementAmount)
+                                    @Html.Hidden("hdOCompound", @Model.IsCompoundable)
+                                    @Html.Hidden("hdOIsPaid", @Model.IsAmountPaid)                                      
+                                    @Html.Partial("OffenseDetail1");
+                                                using (Html.BeginForm("SubmitDetails1", "OffenseRegistration", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data" }))
+                                                {
+                                                <div class="panel-body">
+                                                    <div class="col-lg-12">
+                                                        <label>Parivad Details:</label>
+                                                        <div class="divider"></div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Offense Category:<span class="mandatory">*</span></label>
+                                                            @Html.DropDownListFor(x => x.OffenceCategory, (IEnumerable<SelectListItem>)ViewBag.OffenseCategory, "--Select--", new { id = "ddl_OffenceCategory", @class = "form-control" })
+                                                            <div id="errordivOffenseCategory" style="display: none; position: initial !important" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Offense Severity: <span class="mandatory">*</span></label>
+                                                            @Html.DropDownListFor(x => x.OffenseSeverity, (IEnumerable<SelectListItem>)ViewBag.OffenseSeverity1, "--Select--", new { id = "ddl_OffenseSeverity", @class = "form-control" })
+                                                            <div id="errordivOSeverity" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+                                                    <!--Wildlife Data-->
+                                                    <div style="display:none" id="Wildlife-Data">
+                                                        <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label>Section under Wildlife Protection Act 1972:<span class="mandatory">*</span></label>
+                                                                @Html.DropDownListFor(x => x.WildlifeProtectionSection, (IEnumerable<SelectListItem>)ViewBag.WildlifeProtectionAct, "--Select--", new { id = "ddl_WWildlifeProtectionAct", @class = "form-control", @name = "WildlifeProtectionSection" })
+                                                                <div id="errordivSectionWildLife" style="display:none" class="alert-danger1"></div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label>Offense Sub-Category (as per rajasthan wildlife ACT):<span class="mandatory">*</span></label>
+                                                                @Html.DropDownListFor(x => x.OffenseSubCategoryWildLife, (IEnumerable<SelectListItem>)ViewBag.WildLifeSubCategory, "--Select--", new { id = "ddl_WOffenseSubCategoryForest", @class = "form-control", @name = "OffenseSubCategoryWildLife" })
+                                                                <div id="errordivOWildLife" style="display:none" class="alert-danger1"></div>
+                                                            </div>
+                                                        </div>
+                                                       
+                                                    </div>
+                                                    <!--/.Wildlife Data-->
+                                                    <!--Forest Data-->
+                                                    <div style="display:none" id="Forest-Data">
+                                                        <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label>Section under Forest Protection Act 1953:<span class="mandatory">*</span></label>
+                                                                @Html.DropDownListFor(x => x.ForestProtectionSection, (IEnumerable<SelectListItem>)ViewBag.ForestProtectionAct, "--Select--", new { id = "ddl_FForestProtectionAct", @class = "form-control", @name = "ForestProtectionSection" })
+                                                                <div id="errordivOFSection" style="display:none" class="alert-danger1"></div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label>Offense Sub-Category (as per rajasthan forest ACT):<span class="mandatory">*</span></label>                                                              
+                                                                @Html.DropDownListFor(x => x.OffenseSubCategoryForest, (IEnumerable<SelectListItem>)ViewBag.ForestSubCategory, "--Select--", new { id = "ddl_FOffenseSubCategoryForest", @class = "form-control", @name = "OffenseSubCategoryForest" }) 
+                                                                @*@Html.DropDownListFor(x => x.OffenseSubCategoryForest, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "ddl_FOffenseSubCategoryForest", @class = "form-control", @name = "OffenseSubCategoryForest" })*@
+                                                                <div id="errordivOFCategory" style="display:none" class="alert-danger1"></div>
+                                                            </div>
+                                                        </div>                                                       
+                                                    </div>
+                                                    <!--/.Forest Data-->
+                                                    <!--Both Data-->
+                                                    <div class="col-lg-12" style="display:none" id="Both-Data">
+                                                        <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label>Section under Wildlife Protection Act 1972:<span class="mandatory">*</span></label>
+                                                                @Html.DropDownListFor(x => x.WildlifeProtectionSection, (IEnumerable<SelectListItem>)ViewBag.WildlifeProtectionAct, "--Select--", new { id = "ddl_BWildlifeProtectionAct", @class = "form-control", @name = "WildlifeProtectionSection" })
+                                                                <div id="errordivOBWildSection" style="display:none" class="alert-danger1"></div>
+                                                            </div>
+                                                        </div>        
+                                                        <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label>Offense Sub-Category (as per rajasthan wildlife ACT):<span class="mandatory">*</span></label>
+                                                                @Html.DropDownListFor(x => x.OffenseSubCategoryWildLife, (IEnumerable<SelectListItem>)ViewBag.WildLifeSubCategory, "--Select--", new { id = "ddl_BWOffenseSubCategoryForest", @class = "form-control", @name = "OffenseSubCategoryWildLife" })
+                                                                <div id="errordivOBWCategory" style="display:none" class="alert-danger1"></div>
+                                                            </div>
+                                                        </div>                                                        
+                                                        <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label>Section under Forest Protection Act 1953:<span class="mandatory">*</span></label>
+                                                                @Html.DropDownListFor(x => x.ForestProtectionSection, (IEnumerable<SelectListItem>)ViewBag.ForestProtectionAct, "--Select--", new { id = "ddl_BForestProtectionAct", @class = "form-control", @name = "ForestProtectionSection" })
+                                                                <div id="errordivOBForestSection" style="display:none" class="alert-danger1"></div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label>Offense Sub-Category (as per rajasthan forest ACT):<span class="mandatory">*</span></label>
+                                                                @Html.DropDownListFor(x => x.OffenseSubCategoryForest, (IEnumerable<SelectListItem>)ViewBag.ForestSubCategory, "--Select--", new { id = "ddl_BFOffenseSubCategoryForest", @class = "form-control", @name = "OffenseSubCategoryForest" })
+                                                                @*@Html.DropDownListFor(x => x.OffenseSubCategoryForest, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "ddl_FOffenseSubCategoryForest", @class = "form-control", @name = "OffenseSubCategoryForest" })*@
+                                                                <div id="errordivOBFCategory" style="display:none" class="alert-danger1"></div>
+                                                            </div>
+                                                        </div>                                                                                                            
+                                                    </div>
+                                                    <div class="col-lg-12"></div>
+                                                    @Html.Hidden("hdCrimePicUrlPath1", @Model.CrimeScenePhoto1)
+                                                    @Html.Hidden("hdCrimePicUrlPath2", @Model.CrimeScenePhoto2)
+                                                    @Html.Hidden("hdCrimePicUrlPath3", @Model.CrimeScenePhoto3)
+                                                    @if (@Model.IsEditMode)
+                                                    {
+                                                        <div class="col-lg-12 padn-rem">
+                                                          
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                       
+                                                    }
+                                                    <div class="col-lg-12"></div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>
+                                                                Nearest Police Station
+                                                            </label>
+                                                            @Html.TextBoxFor(x => x.OPoliceStation, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OPoliceStation", @name = "OPoliceStation" })
+                                                            <div id="errordivOPoliceStation" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6" id="radio_IsCompoundable">
+                                                        <div class="form-group">
+                                                            <label>Is the case compoundable:</label>
+                                                            <div class="form-group">
+                                                                <input type="radio" id="YesCompundable" value="Yes" name="compoundable"><span> Yes</span>
+                                                                <input type="radio" id="NoCompundable" value="No" name="compoundable"><span> No</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-6" id="Amount_for_Settlement">
+                                                        <div class="form-group">
+                                                            <label>Amount Pay for compound:</label>
+                                                            <div class="form-group">
+                                                                <input type="radio" id="PayNCompound" name="Amount" value="Pay-Now"><span> Pay Now</span>
+                                                                <input type="radio" id="PayLCompound" name="Amount" value="Pay-Later"><span> Pay Later</span>
+
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-12"></div>
+
+                                                    <div class="col-lg-6" id="Amount_for_Settlement">
+                                                        <div class="form-group">
+                                                            <label>Amount for Settlement:</label>
+                                                            @Html.TextBoxFor(x => x.SettlementAmount, new { @class = "form-control", @title = "Please enter the Amount of Settlement", @id = "txt_SettlementAmount" })
+                                                            <div id="errordivOSettlement" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+                                                    <!--/.Both Data-->
+
+                                                    <div class="col-lg-12" id="btn">
+                                                        <button type="submit" class="btn btn-success btnSubmit" name="Command" value="Save" title="Submit">
+                                                            <i class="fa fa-check"></i> Next
+                                                        </button>
+                                                        <button type="submit" name="Command" value="Previous1" id="btn_Previousform2" class="btn btn-warning" title="Cancel">
+                                                            <i class="fa fa-times fa-fw"></i> Previous
+                                                        </button>
+                                                        <button type="button" name="Command" value="Cancel" class="btn btn-danger" title="Cancel">
+                                                            <i class="fa fa-times fa-fw"></i> Cancel
+                                                        </button>
+
+                                                    </div>
+                                                </div>
+                                                }
+                }
+                @if (@Model.RegFormNumber == 3)
+                {                    
+                    @Html.Hidden("hdfpmUserRole", @Model.UserRole)                                    
+                    @Html.Partial("OffenseDetail1");                   
+                    using (Html.BeginForm("SubmitDetails2", "OffenseRegistration", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data" }))
+                    {
+                        @Html.Hidden("hdOffenderType", Model.OffenderType)
+                        <div class="panel-body">
+                            <div class="col-lg-12">
+                                <label>Parivad Details:</label>
+                                <div class="divider"></div>
+                            </div>
+                          
+                            <div class="col-lg-12">
+                                <label>Select Offender Type:</label>
+                                <div class="divider"></div>
+                            </div>
+
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label class="radio-inline">
+                                        <input type="radio" id="Addknown-Offender" value="Known" name="Offender">Known Offender
+                                    </label>
+                                    <label class="radio-inline">
+                                        <input type="radio" id="Unknown-Offender" value="Unknown" name="Offender">Unknown Offender
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!--Accordion Tabs -->
+                            <div class="col-lg-12">
+                                <div class="panel-group" id="accordion">
+                                    <!--Tab For Known Offender-->
+                                    <div class="panel panel-default known" style="display:none">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse1" aria-expanded="false" class="collapsed">
+                                                    <i class="fa  fa-angle-double-right fa-fw"></i> Offender Details
+                                                </a>
+                                            </h4>
+                                        </div>
+                                        <div id="collapse1" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+                                            <div class="panel-body">
+                                                <div class="" role="form">
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>
+                                                                Bhamashah ID:<span class="mandatory">*</span>
+                                                            </label>
+                                                            <select class="form-control">
+                                                                <option value="0">NO</option>
+                                                                <option value="1">YES</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>                                               
+                                                    <div class="col-lg-12"></div>
+                                                    <input type="hidden" id="hdnOOffenderrowid" name="hdnOOffenderrowid">
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>
+                                                                Name of the Offender:<span class="mandatory">*</span>
+                                                            </label>
+                                                            @Html.TextBoxFor(x => x.OffenderName, new { @class = "form-control", @title = "", @placeholder = "", @name = "OffenderName", @maxlength = 50, @id = "txt_OffenderName" })                                                          
+                                                            <div id="errordivOffenderName" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>
+                                                                Father Name:<span class="mandatory">*</span>
+                                                            </label>
+                                                            @Html.TextBoxFor(x => x.OFatherName, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OFatherName", @name = "OFatherName" })
+
+                                                            <div id="errordivOFatherName" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>
+                                                                Spouse Name:<span class="mandatory"></span>
+                                                            </label>
+                                                            @Html.TextBoxFor(x => x.OSpouseName, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OSpouseName", @name = "OSpouseName" })
+
+                                                            <div id="errordivOSpouseName" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <div class="form-group">
+                                                                <label>
+                                                                    Caste:<span class="mandatory">*</span>
+                                                                </label>
+                                                                @*@Html.TextBoxFor(x => x.OCaste, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OCaste", @name = "OCaste" })*@
+                                                                @Html.DropDownList("OCaste", (IEnumerable<SelectListItem>)ViewBag.ddlOCaste, "--Select--", new { @class = "form-control", title = "Select Caste", @id = "txt_OCaste", @name = "OCaste" })
+                                                                <div id="errordivOCaste" style="display:none" class="alert-danger1"></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Clothes Worn: <span class="mandatory">*</span></label>
+                                                            @Html.TextBoxFor(x => x.OClothesWorn, new { @class = "form-control", title = "Enter offender's clothes Worn", @maxlength = 100, @id = "OClothesWorn" })
+                                                            <div id="errordivCloth" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Color of Clothes: <span class="mandatory">*</span></label>
+                                                            @Html.TextBoxFor(x => x.OColorOfClothes, new { @class = "form-control", title = "Enter offender's clothes color", @maxlength = 100, @id = "OColorOfClothes" })
+                                                            <div id="errordivClothColor" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Physical Appearance: <span class="mandatory">*</span></label>
+                                                            @Html.TextBoxFor(x => x.OPhysicalAppearance, new { @class = "form-control", title = "Enter physical appearance", @maxlength = 100, @id = "OPhysicalAppearance" })
+                                                            <div id="errordivPhysicalApp" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Height(Centimeter) : <span class="mandatory">*</span></label>
+                                                            @Html.TextBoxFor(x => x.OHeight, new { @class = "form-control", title = "Enter offender's height", @maxlength = 3, @id = "Height" })
+                                                            <div id="errordivHeight" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Other special details:</label>
+                                                            @Html.TextBoxFor(x => x.OOtherSpecialDetails, new { @class = "form-control", title = "Enter offender's other special details", @maxlength = 100, @id = "OOtherSpecialDetails" })
+                                                            <div id="OtherSpecialDetails" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>
+                                                                Residential Address1:<span class="mandatory">*</span>
+                                                            </label>
+                                                            @Html.TextBoxFor(x => x.OAddress1, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OAddress1", @name = "OAddress1" })
+
+                                                            <div id="errordivOAddress1" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>
+                                                                Residential Address2:<span class="mandatory"></span>
+                                                            </label>
+                                                            @Html.TextBoxFor(x => x.OAddress2, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OAddress2", @name = "OAddress2" })
+
+                                                            <div id="errordivOAddress2" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>State: <span class="mandatory">*</span></label>
+                                                            @Html.DropDownList("ddlOState", (IEnumerable<SelectListItem>)ViewBag.ddlOState, new { @class = "form-control", title = "Select District", @id = "ddlOState", @name = "OStateCode" })
+                                                            <div id="errordivddlDistrict" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group" id="divDDlDistrict">
+                                                            <label>District: <span class="mandatory">*</span></label>
+                                                            @Html.DropDownList("ddlODistrict", (IEnumerable<SelectListItem>)ViewBag.ddlODistrict, "--Select--", new { @class = "form-control", title = "Select District", @id = "ddlODistrict", @name = "ODistrictCode" })
+                                                            <div id="errordivddlDistrict" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6" id="divtxtDistrict" style="display:none">
+                                                        <div class="form-group">
+                                                            <label>District: <span class="mandatory">*</span></label>
+                                                            @Html.TextBoxFor(x => x.txtdistrict, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txtdistrict", @name = "txtdistrict" })
+                                                            <div id="errordivddlODistrict1" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>
+                                                                City/Village Name:<span class="mandatory">*</span>
+                                                            </label>
+                                                            @Html.TextBoxFor(x => x.OVillageCode, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OVillageCode", @name = "OVillageCode" })
+                                                            <div id="errordivddlVillName" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>
+                                                                Pin Code:<span class="mandatory">*</span>
+                                                            </label>
+                                                            @Html.TextBoxFor(x => x.OPincode, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 6, @id = "txt_OPincode", @name = "OPincode" })
+                                                            <div id="errordivOPincode" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>
+                                                               Mobile No.:
+                                                            </label>
+                                                            @Html.TextBoxFor(x => x.OPhoneNo, new { @class = "form-control", title = "Enter Name of Member", @maxlength = 11, @id = "OPhoneNo" })
+                                                            <div id="errordivOPhoneNo" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label for="Village">
+                                                              E-mail ID:
+                                                            </label>
+                                                            @Html.TextBoxFor(x => x.OEmailID, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OEmailID", @name = "OEmailID" })
+                                                            @*<input type="text" class="form-control" id="txt_OEmailID" />*@
+                                                            <div id="errordivOEmailID" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Photo ID (only in case of severe offense):</label>
+                                                            @Html.DropDownList("OPhotoIDType", (IEnumerable<SelectListItem>)ViewBag.OPhotoIDType, "--Select--", new { @class = "form-control", title = "Select District", @id = "ddl_OPhotoIDType" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <div class="col-lg-6" style="padding: 0;">
+                                                                <div>
+                                                                    <label>Upload ID:<a style="display:none;" id="viewdoc">view document</a></label>
+                                                                    <input type="file" class="form-control" id="OPhotoIDURL" title="" name="OPhotoIDURL">
+                                                                    <input type="hidden" id="hdIDProof" value="" name="hdIDProof" />
+                                                                    <div id="errordivOUploadID" style="display:none; position:static" class="alert-danger1"></div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6" style="margin: 26px 0 0;">
+                                                                <div class="form-group">
+
+                                                                    <button type="button" id="btnUpload" name="Command" value="Cancel" style="width:50%" class="btn btn-danger" title="Cancel">
+                                                                        <i class="fa fa-times fa-fw"></i> Upload
+                                                                    </button>
+
+
+                                                                </div>
+                                                            </div>
+                                                            <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>
+                                                                Age of Offender:<span class="mandatory">*</span>
+                                                            </label>
+
+                                                            @Html.TextBoxFor(x => x.OffenderAge, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 2, @id = "txt_OffenderAge", @name = "OffenderAge" })
+                                                            <div id="errordivOffenderAge" style="display:none" class="alert-danger1"></div>
+
+                                                        </div>
+                                                    </div>
+
+
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Add Offender:</label><br>
+                                                            <button type="button" class="btn btn-success" title="Save" name="Command" value="Submit" id="btn_addOffender" style="width:auto">
+                                                                <i class="fa fa-plus"></i> Add Offender
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-12">
+                                                        <table id="tbl_Offenderinfo" class="table table-striped table-bordered table-hover" style="display:none">
+                                                            <thead>
+                                                                <tr>                                                                   
+                                                                    <th>Name</th>
+                                                                    <th>Father Name</th>
+                                                                    <th>Address</th>
+                                                                    <th>Village</th>
+                                                                    <th>Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="tb_OffenderInfo"></tbody>
+                                                        </table>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--/.Tab For Known Offender-->
+                                    <!--Tab For Unknown Offender-->
+                                    <div class="panel panel-default Unknown" style="display:none">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a data-toggle="collapse" data-parent="#accordion" href="#UnknownOffender" aria-expanded="false" class="collapsed">
+                                                    <i class="fa  fa-angle-double-right fa-fw"></i> Offender Details
+                                                </a>
+                                            </h4>
+                                        </div>
+                                        <div id="UnknownOffender" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+                                            <div class="panel-body">
+                                                <div class="" role="form">
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Number of Offenders: <span class="mandatory">*</span></label>
+                                                            @Html.TextBoxFor(x => x.ONumberOfOffender, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 2, @id = "txt_ONumberOfOffender" })
+                                                            @Html.Hidden("hdOffenseID", Model.OffenseID)
+
+                                                            <div id="errordivUNumberOffenders" style="display:none" class="alert-danger1"></div>
+
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Description of the offenders: <span class="mandatory">*</span></label>
+                                                            @Html.TextBoxFor(x => x.OffenderDescription, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OffenderDescription" })
+                                                            <div id="errordivUOffendersDesc" style="display:none" class="alert-danger1"></div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-6">
+                                                        <label>Upload ID:</label>
+                                                        <input type="file" class="form-control" id="OPhotoIDURL" style="width:50%" title="" value="@Model.OPhotoIDURL" name="OPhotoIDURL" />
+                                                        <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                                                        <div id="errordivUOPhotoIDURL" style="display:none" class="alert-danger1"></div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--/.Tab For Unknown Offender-->
+                                    @*<div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>
+                                                Nearest Police Station
+                                            </label>
+
+                                            @Html.TextBoxFor(x => x.OPoliceStation, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OPoliceStation", @name = "OPoliceStation" })
+                                            <div id="errordivOPoliceStation" style="display:none" class="alert-danger1"></div>
+
+                                        </div>
+                                    </div>*@
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Date of Statement: <span class="mandatory">*</span></label>
+                                            <div id="datepicker" class="input-group date">
+                                                @Html.TextBoxFor(x => x.OffenseStatementDate, new { @class = "form-control datefield", @title = "Select the Date of Statement from date picker", @id = "txt_OffenseStatementDate", @name = "OffenseStatementDate" })
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                <div id="errordivOffenseStatementDate" style="display:none" class="alert-danger1"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 known">
+                                        <label>Upload Offender Statement:</label>
+                                        <input type="file" class="form-control" id="fileOffenderStatement" style="width:50%" title="" value="@Model.OffenderStatementDoc" name="OffenderStatementDoc" />
+                                        <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                                        <div id="errordivOffenderStatementDoc" style="display:none" class="alert-danger1"></div>
+                                        <input type="hidden" value="@Model.OffenderStatementDoc" id="hdOffenderStatementDoc" name="hdOffenderStatementDoc" />
+
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <label>Upload Offender Complainant:</label>
+                                        <input type="file" class="form-control" id="fileComplainantStatement" style="width:50%" title="" value="@Model.ComplainantStatementDoc" name="ComplainantStatementDoc" />
+                                        <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                                        <div id="errordivComplainantStatementDoc" style="display:none" class="alert-danger1"></div>
+                                        <input type="hidden" value="@Model.ComplainantStatementDoc" id="hdComplainantStatementDoc" name="hdComplainantStatementDoc" />
+                                    </div>
+                                    <div class="col-lg-6 known">
+                                        <div class="form-group">
+                                            <label>Statement from offender:</label>
+                                            @Html.TextAreaFor(x => x.OffenderStatement, new { @class = "form-control known", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OffenderStatement" })
+                                            <div id="errordivOffenderStatement" style="display:none" class="alert-danger1"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Statement from Complainant:</label>
+                                            @Html.TextAreaFor(x => x.OffenderComplainant, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OffenderComplainant" })
+                                            <div id="errordivOffenderComplainant" style="display:none" class="alert-danger1"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-12" id="btn">
+                                        <button type="submit" class="btn btn-success" name="Command" value="Save" title="Submit">
+                                            <i class="fa fa-check"></i> Next
+                                        </button>
+                                        <button type="submit" name="Command" value="Previous2" class="btn btn-warning" title="Cancel">
+                                            <i class="fa fa-times fa-fw"></i> Previous
+                                        </button>
+                                        <button type="button" name="Command" value="Cancel" class="btn btn-danger" title="Cancel">
+                                            <i class="fa fa-times fa-fw"></i> Cancel
+                                        </button>
+
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+                }
+
+                <!-- /.Row -->
+            </div>
+            <!-- /.page-wrapper-inn -->
+            <!-- /.Form design -->
+
+        </div>
+    </div>
+</div>
+<div class="modal fade in" id="myModalDfo" tabindex="-1" role="dialog" aria-hidden="false">
+    <div class="modal-dialog mdw">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="myModalLabel">
+                    Offense Details
+                </h4>
+            </div>
+            <br />
+            <div class="modal-body tbl-scroll">
+                <!-- From URL Get -->
+                <table class="table table-striped table-bordered table-hover">
+                    <tbody id="tbdyScart"></tbody>
+                </table>
+            </div>
+            <div class="modal-footer" id="fot-f">
+                <div id="btn" class="col-lg-12">
+
+                    <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                        <i class="fa fa-times fa-fw"></i> Close
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+@*
+    <script src="~/js/jquery.min.js"></script>*@
+<link href="~/css/timepicki.css" type="text/css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+<script type="text/javascript">
+
+
+    $(document).ready(function () {
+        $(".datefield").datepicker({ yearRange: "-100:+0", dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+    });
+</script>
+<script type="text/javascript">
+    var errorCount = '1';
+    var $j = jQuery.noConflict();
+
+    $j(document).ready(function () {
+        $j(".timepicker").timepicki();              
+        $j('#txt_OffenderName,#txt_OFatherName,#OClothesWorn,#OColorOfClothes,#OPhysicalAppearance,#txt_OSpouseName,#txt_OVillageCode,#txt_OPoliceStation,#txt_Description').keypress(function (e) {
+            if (e.shiftKey || e.ctrlKey || e.altKey) {
+                e.preventDefault();
+            } else {
+                var key = (e.which) ? e.which : e.keyCode
+                if (!((key == 8) || (key == 32) || (key == 46) || (key >= 35 && key <= 40) || (key >= 65 && key <= 90) || (key >= 97 && key <= 122))) {
+                    e.preventDefault();
+                }
+            }
+        });
+
+        $j('#OHeight,#txt_SettlementAmount').bind('keypress', function (evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode           
+            if ((charCode == 46) || (charCode >= 97 && charCode <= 122) || (charCode >= 65 && charCode <= 90)) {
+                return false;
+            }
+            else {
+                if (charCode >= 48 && charCode <= 57 || charCode == 46) {
+                    return true;
+                }
+                else {
+                    evt.preventDefault();
+                }
+            }
+        });
+
+        $j('#OOtherSpecialDetails,#txt_OAddress1,#txt_OAddress2').keypress(function (e) {
+            var kc = e.which;
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95) || (kc >= 47 && kc <= 57) || (kc >= 44 && kc < 46) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+    });
+</script>
+<script>
+    var RootURl = '@Url.Content("~/")';
+
+    $j(document).ready(function (e) {
+
+
+        if ($j("#hdUserRole").val() == "CITIZEN") {
+            $j("#btn_Previousform2").hide();
+        }
+        else {
+            $j("#btn_Previousform2").show();
+        }
+
+        $j('#btn_addOffender').click(function () {           
+            if (errorCount == '') {
+                PostOffenderInfo();
+            }
+
+        });
+
+        var offcat = $("#hdfpmOffenseCat").val();
+        if (offcat == "3") {
+            $j("#Wildlife-Data").hide();
+            $j("#Forest-Data").hide();
+            $j("#Both-Data").show();
+            $j("#ddl_FOffenseSubCategoryForest").val($j("#ddl_FOffenseSubCategoryForest option:first").val());
+            $j("#ddl_FForestProtectionAct").val($j("#ddl_FForestProtectionAct option:first").val());
+            $j("#ddl_WOffenseSubCategoryForest").val($j("#ddl_WOffenseSubCategoryForest option:first").val());
+            $j("#ddl_WWildlifeProtectionAct").val($j("#ddl_WWildlifeProtectionAct option:first").val());
+
+        }
+        else if (offcat == "2") {
+            $j("#Wildlife-Data").hide();
+            $j("#Both-Data").hide();
+            $j("#Forest-Data").show();
+            $j("#ddl_BWOffenseSubCategoryForest").val($j("#ddl_BWOffenseSubCategoryForest option:first").val());
+            $j("#ddl_BFOffenseSubCategoryForest").val($j("#ddl_BFOffenseSubCategoryForest option:first").val());
+            $j("#ddl_BForestProtectionAct").val($j("#ddl_BForestProtectionAct option:first").val());
+            $j("#ddl_BWildlifeProtectionAct").val($j("#ddl_BWildlifeProtectionAct option:first").val());
+            $j("#ddl_WOffenseSubCategoryForest").val($j("#ddl_WOffenseSubCategoryForest option:first").val());
+            $j("#ddl_WWildlifeProtectionAct").val($j("#ddl_WWildlifeProtectionAct option:first").val());
+
+
+        }
+        else if (offcat == "1") {
+            $j("#Forest-Data").hide();
+            $j("#Both-Data").hide();
+            $j("#Wildlife-Data").show();
+            $j("#ddl_BWOffenseSubCategoryForest").val($j("#ddl_BWOffenseSubCategoryForest option:first").val());
+            $j("#ddl_BFOffenseSubCategoryForest").val($j("#ddl_BFOffenseSubCategoryForest option:first").val());
+            $j("#ddl_FOffenseSubCategoryForest").val($j("#ddl_FOffenseSubCategoryForest option:first").val());
+            $j("#ddl_FForestProtectionAct").val($j("#ddl_FForestProtectionAct option:first").val());
+            $j("#ddl_BForestProtectionAct").val($j("#ddl_BForestProtectionAct option:first").val());
+            $j("#ddl_BWildlifeProtectionAct").val($j("#ddl_BWildlifeProtectionAct option:first").val());
+        }
+
+        $('#ddl_FForestProtectionAct').change(function (e) {
+            var ddldist = $("#ddl_FForestProtectionAct option:selected").val();
+            $("#ddl_FOffenseSubCategoryForest").empty();
+            $("#ddl_FOffenseSubCategoryForest").append('<option value="' + 0 + '">--Select--</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'OffenseRegistration/GetforestSubCat', // we are calling json method
+                dataType: 'json',
+                data: { FProtectionId: ddldist },
+                success: function (SubCat) {
+                    $.each(SubCat, function (i, items) {
+                        $("#ddl_FOffenseSubCategoryForest").append('<option value="' + items.Value + '">  ' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        });
+
+        $('#ddl_BForestProtectionAct').change(function (e) {
+            var ddldist = $("#ddl_BForestProtectionAct option:selected").val();
+            $("#ddl_BFOffenseSubCategoryForest").empty();
+            $("#ddl_BFOffenseSubCategoryForest").append('<option value="' + 0 + '">--Select--</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'OffenseRegistration/GetforestSubCat', // we are calling json method
+                dataType: 'json',
+                data: { FProtectionId: ddldist },
+                success: function (SubCat) {
+                    $.each(SubCat, function (i, items) {
+                        $("#ddl_BFOffenseSubCategoryForest").append('<option value="' + items.Value + '">  ' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        });
+
+
+
+
+        var formval = $("#hdFormNo").val();
+        var userRole = $("#hdfpmUserRole").val();
+        if (formval == "2" || formval == "3") {
+            var rowdata = "";
+            var ID = { id: $j("#hdFPMOffenseCode").val(), UserRole: userRole }
+            $j.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(ID),
+                url: RootURl + 'OffenseRegistration/GetApplicantDetail',
+                success: function (data) {
+
+                    rowdata = "<tr class='rowid'><td>" + data.OffenseCode + "</td><td>" + data.Category + "</td><td>" + data.Forest_Protection_Act + "</td><td>" + data.FOSubCategory + "</td><td>" + data.Wildlife_Protection_Act + "</td><td>" + data.WOSubCategory + "</td></tr>";
+                    //rowdata1 = "<tr class='rowid'><td>" + data.DateOfOffense + "</td><td>" + data.TimeOfOffense + "</td><td>" + data.OffenseDetail + "</td><td>" + data.OffensePlace + "</td><td>" + data.DIST_NAME + "</td><td>" + data.Ssoid + "</td></tr>";
+                    //rowdata2 = "<tr class='rowid'><td>" + data.VisitDate + "</td><td>" + data.VisitPlace + "</td><td>" + data.VisitTime + "</td><td>" + data.InvestiDescription + "</td></tr>";
+                    $j("#tb_ApplicantDetails").append(rowdata);
+                    //$j("#tb_ApplicantDetails11").append(rowdata1);
+                    //$j("#tb_ApplicantDetails12").append(rowdata2);
+                    ////$j("#tbl_Details11").css("display", "block");
+                    //$j("#tbl_Details12").css("display", "block");
+                    //$j("#tbl_Details1").css("display", "block");
+
+                 
+                    $j("#tb_ApplicantDetails21").append(rowdata);
+                    //$j("#tb_ApplicantDetails22").append(rowdata1);
+                    //$j("#tb_ApplicantDetails23").append(rowdata2);                  
+                    ////$j("#tbl_Details21").css("display", "block");
+                    //$j("#tbl_Details22").css("display", "block");
+                    //$j("#tbl_Details23").css("display", "block");
+
+           
+
+                },
+
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+        }
+        //Checked the value in edit mode Is the case compoundable
+
+        var caseCompoundable = $j("#hdOCompound").val();
+
+
+        if (caseCompoundable == "Yes") {
+            $j('#NoCompundable').removeAttr('checked');
+            $j('#YesCompundable').attr('checked', 'checked');
+            $j('#txt_SettlementAmount').attr('disabled', false);
+
+        }
+        else (caseCompoundable == "No")
+        {
+            $j('#YesCompundable').removeAttr('checked');
+            $j('#NoCompundable').attr('checked', 'checked');
+            $j('#txt_SettlementAmount').attr('disabled', true);
+
+        }
+
+
+
+        //Checked the value in edit mode Amount Paid for compound
+
+        var amountPay = $j("#hdOIsPaid").val();
+
+        if (amountPay == "Pay-Now") {
+            $j('#PayLCompound').removeAttr('checked');
+            $j('#PayNCompound').attr('checked', 'checked');
+
+        }
+        else (amountPay == "Pay-Later")
+        {
+            $j('#PayNCompound').removeAttr('checked');
+            $j('#PayLCompound').attr('checked', 'checked');
+        }
+
+
+
+        var hdOffenderType1 = $j('#hdOffenderType').val();
+
+        if (hdOffenderType1 == "Unknown") {
+            $j(".Unknown").show();
+            $j(".known").hide();
+            $j('#Unknown-Offender').attr('checked', true);
+        }
+        else if (hdOffenderType1 == "Known") {
+            $j('#Addknown-Offender').attr('checked', true);
+            $j(".Unknown").hide();
+            $j(".known").show();
+        }
+
+
+        $j('#btnUpload').click(function () {
+
+            //Checking whether FormData is available in browser
+            if (window.FormData !== undefined) {
+
+                var fileUpload = $j("#OPhotoIDURL").get(0);
+                var files = fileUpload.files;
+
+                // Create FormData object
+                var fileData = new FormData();
+
+                // Looping over all files and add it to FormData object
+                for (var i = 0; i < files.length; i++) {
+                    fileData.append(files[i].name, files[i]);
+                }
+                if ($('#txt_EvidenceDocument').val() == '') {
+
+                    alert('Select file to upload!!!');
+                }
+                else {
+                    $j.ajax({
+                        url: RootURl + 'OffenseRegistration/UploadFiles',
+                        type: "POST",
+                        contentType: false, // Not to set any content header
+                        processData: false, // Not to process data
+                        data: fileData,
+                        success: function (result) {
+                            alert(result.list1);
+                            $j("#hdIDProof").val(result.list2);
+                            $j('#OPhotoIDURL').val('');
+                        },
+                        error: function (err) {
+                            alert(err.statusText);
+                        }
+                    });
+                }
+            } else {
+                alert("FormData is not supported.");
+            }
+        });
+
+        $j("#OPhotoIDURL").change(function (e) {
+            var iSize = ($j("#OPhotoIDURL")[0].files[0].size / 1048576);
+            if (iSize > 2) {
+                $j('#OPhotoIDURL').val('');
+                $j('#errordivOUploadID').show();
+                $j('#errordivOUploadID').html("Upload ID should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#OPhotoIDURL').focus();
+                return false;
+            }
+            var file = $j("#OPhotoIDURL").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($j.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $j('#OPhotoIDURL').val('');
+                    $j('#errordivOUploadID').show();
+                    $j('#errordivOUploadID').html("Please upload only jpeg or jpg or pdf or png or gif file format in Upload ID Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#OPhotoIDURL').focus();
+                    return false;
+                } else {
+                    $j('#errordivOUploadID').hide();
+                }
+            }
+            else { $j('#errordivOUploadID').hide(); }
+
+        });
+
+
+        $j("#fileOffenderStatement").change(function (e) {
+            var iSize = ($j("#fileOffenderStatement")[0].files[0].size / 1048576);
+            if (iSize > 2) {
+                $j('#fileOffenderStatement').val('');
+                $j('#errordivOffenderStatementDoc').show();
+                $j('#errordivOffenderStatementDoc').html("Upload ID should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#fileOffenderStatement').focus();
+                return false;
+            }
+            var file = $j("#fileOffenderStatement").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($j.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $j('#fileOffenderStatement').val('');
+                    $j('#errordivOffenderStatementDoc').show();
+                    $j('#errordivOffenderStatementDoc').html("Please upload only jpeg or jpg or pdf or png or gif file format in Upload ID Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#fileOffenderStatement').focus();
+                    return false;
+                } else {
+                    $j('#errordivOffenderStatementDoc').hide();
+                }
+            }
+            else { $j('#errordivOUploadID').hide(); }
+
+        });
+
+      
+
+        $j("#fileComplainantStatement").change(function (e) {
+            var iSize = ($j("#fileComplainantStatement")[0].files[0].size / 1048576);
+            if (iSize > 2) {
+                $j('#fileComplainantStatement').val('');
+                $j('#errordivComplainantStatementDoc').show();
+                $j('#errordivComplainantStatementDoc').html("Upload ID should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#fileComplainantStatement').focus();
+                return false;
+            }
+            var file = $j("#fileComplainantStatement").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($j.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $j('#fileComplainantStatement').val('');
+                    $j('#errordivComplainantStatementDoc').show();
+                    $j('#errordivComplainantStatementDoc').html("Please upload only jpeg or jpg or pdf or png or gif file format in Upload ID Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#fileComplainantStatement').focus();
+                    return false;
+                } else {
+                    $j('#errordivComplainantStatementDoc').hide();
+                }
+            }
+            else { $j('#errordivComplainantStatementDoc').hide(); }
+
+        });
+
+        $j('#btnUpload1').click(function () {
+
+            //Checking whether FormData is available in browser
+            if (window.FormData !== undefined) {
+
+                var fileUpload = $j("#file_CrimeScenePhoto1").get(0);
+                var files = fileUpload.files;
+
+                // Create FormData object
+                var fileData = new FormData();
+
+                // Looping over all files and add it to FormData object
+                for (var i = 0; i < files.length; i++) {
+                    fileData.append(files[i].name, files[i]);
+                }
+
+
+
+                $j.ajax({
+                    url: RootURl+'OffenseRegistration/UploadCrimeSceneFiles',
+                    type: "POST",
+                    contentType: false, // Not to set any content header
+                    processData: false, // Not to process data
+                    data: fileData,
+                    success: function (result) {
+                        var fname = result.list2.split('/');
+                        alert(result.list1);
+                        $j("#hdCrimePicUrlPath1").val(result.list2);
+
+                        $j('#lblUpload1').text("1) " + fname[3]).css('color', 'blue');
+                        $j('#lblUpload2').text("2) " + fname[3]).css('color', 'blue');
+                        $j('#lblUpload3').text("3) " + fname[3]).css('color', 'blue');
+                    },
+                    error: function (err) {
+                        alert(err.statusText);
+                    }
+                });
+            } else {
+                alert("FormData is not supported.");
+            }
+        });
+
+        $j('#btnUpload2').click(function () {
+
+            //Checking whether FormData is available in browser
+            if (window.FormData !== undefined) {
+
+                var fileUpload = $j("#file_CrimeScenePhoto2").get(0);
+                var files = fileUpload.files;
+
+                // Create FormData object
+                var fileData = new FormData();
+
+                // Looping over all files and add it to FormData object
+                for (var i = 0; i < files.length; i++) {
+                    fileData.append(files[i].name, files[i]);
+                }
+
+
+
+
+                $j.ajax({
+                    url: RootURl+'OffenseRegistration/UploadCrimeSceneFiles',
+                    type: "POST",
+                    contentType: false, // Not to set any content header
+                    processData: false, // Not to process data
+                    data: fileData,
+                    success: function (result) {
+
+                        alert(result.list1);
+                        $j("#hdCrimePicUrlPath2").val(result.list2);
+
+                    },
+                    error: function (err) {
+                        alert(err.statusText);
+                    }
+                });
+            } else {
+                alert("FormData is not supported.");
+            }
+        });
+
+        $j('#btnUpload3').click(function () {
+
+            //Checking whether FormData is available in browser
+            if (window.FormData !== undefined) {
+
+                var fileUpload = $j("#file_CrimeScenePhoto3").get(0);
+                var files = fileUpload.files;
+
+                // Create FormData object
+                var fileData = new FormData();
+
+                // Looping over all files and add it to FormData object
+                for (var i = 0; i < files.length; i++) {
+                    fileData.append(files[i].name, files[i]);
+                }
+
+                //    // Adding one more key to FormData object
+
+
+                $j.ajax({
+                    url: RootURl+'OffenseRegistration/UploadCrimeSceneFiles',
+                    type: "POST",
+                    contentType: false, // Not to set any content header
+                    processData: false, // Not to process data
+                    data: fileData,
+                    success: function (result) {
+
+                        alert(result.list1);
+                        $j("#hdCrimePicUrlPath3").val(result.list2);
+
+                    },
+                    error: function (err) {
+                        alert(err.statusText);
+                    }
+                });
+            } else {
+                alert("FormData is not supported.");
+            }
+        });
+
+
+
+        $j("#btnViewFile1").click(function () {
+
+            var path = RootURl + $j("#hdCrimePicUrlPath1").val();
+
+            var pathurl = path.replace('~/', '');
+            window.open(pathurl, '_blank');
+
+        });
+        $("#btnViewFile2").click(function () {
+
+            var path = RootURl + $j("#hdCrimePicUrlPath2").val();
+
+            var pathurl = path.replace('~/', '');
+            window.open(pathurl, '_blank');
+
+        });
+        $j("#btnViewFile3").click(function () {
+
+            var path = RootURl + $j("#hdCrimePicUrlPath3").val();
+
+            var pathurl = path.replace('~/', '');
+            window.open(pathurl, '_blank');
+
+        });
+
+        $j("#Bfile_CrimeScenePhoto1").change(function (e) {
+
+            var iSize = ($j("#Bfile_CrimeScenePhoto1")[0].files[0].size / 1048576);
+
+            if (iSize > 2) {
+                $j('#Bfile_CrimeScenePhoto1').val('');
+                $j('#errordivEvidenceDocURL').show();
+                $j('#errordivEvidenceDocURL').html("Photographs/Document related to offense/crime scene should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#Bfile_CrimeScenePhoto1').focus();
+                return false;
+
+
+            }
+
+            var file = $j("#Bfile_CrimeScenePhoto1").val();
+
+            var exts = ['jpeg', 'jpg', 'png', 'gif', 'pdf'];
+
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($j.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $j('#Bfile_CrimeScenePhoto1').val('');
+                    $j('#errordivEvidenceDocURL').show();
+                    $j('#errordivEvidenceDocURL').html("Please upload only jpeg or jpg or png or gif or pdf file format in Photographs/Document related to offense/crime scene Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#Bfile_CrimeScenePhoto1').focus();
+                    return false;
+                } else {
+                    $j('#errordivEvidenceDocURL').hide();
+                }
+            }
+            else { $j('#errordivEvidenceDocURL').hide(); }
+
+        });
+        $j("#Bfile_CrimeScenePhoto2").change(function (e) {
+
+            var iSize = ($j("#Bfile_CrimeScenePhoto2")[0].files[0].size / 1048576);
+
+            if (iSize > 2) {
+                $j('#Bfile_CrimeScenePhoto2').val('');
+                $j('#errordivEvidenceDocURL').show();
+                $j('#errordivEvidenceDocURL').html("Photographs/Document related to offense/crime scene should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#Bfile_CrimeScenePhoto2').focus();
+                return false;
+
+
+            }
+
+            var file = $j("#Bfile_CrimeScenePhoto2").val();
+
+            var exts = ['jpeg', 'jpg', 'png', 'gif', 'pdf'];
+
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($j.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $j('#Bfile_CrimeScenePhoto2').val('');
+                    $j('#errordivEvidenceDocURL').show();
+                    $j('#errordivEvidenceDocURL').html("Please upload only jpeg or jpg or png or gif or pdf file format in Photographs/Document related to offense/crime scene Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#Bfile_CrimeScenePhoto2').focus();
+                    return false;
+                } else {
+                    $j('#errordivEvidenceDocURL').hide();
+                }
+            }
+            else { $j('#errordivEvidenceDocURL').hide(); }
+
+        });
+        $j("#Bfile_CrimeScenePhoto3").change(function (e) {
+
+            var iSize = ($j("#Bfile_CrimeScenePhoto3")[0].files[0].size / 1048576);
+
+            if (iSize > 2) {
+                $j('#Bfile_CrimeScenePhoto3').val('');
+                $j('#errordivEvidenceDocURL').show();
+                $j('#errordivEvidenceDocURL').html("Photographs/Document related to offense/crime scene should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#Bfile_CrimeScenePhoto3').focus();
+                return false;
+
+
+            }
+
+            var file = $j("#Bfile_CrimeScenePhoto3").val();
+
+            var exts = ['jpeg', 'jpg', 'png', 'gif', 'pdf'];
+
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($j.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $j('#Bfile_CrimeScenePhoto3').val('');
+                    $j('#errordivEvidenceDocURL').show();
+                    $j('#errordivEvidenceDocURL').html("Please upload only jpeg or jpg or png or gif or pdf file format in Photographs/Document related to offense/crime scene Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#Bfile_CrimeScenePhoto3').focus();
+                    return false;
+                } else {
+                    $j('#errordivEvidenceDocURL').hide();
+                }
+            }
+            else { $j('#errordivEvidenceDocURL').hide(); }
+
+        });
+
+        $j("#file_CrimeScenePhoto1").change(function (e) {
+
+            var iSize = ($j("#file_CrimeScenePhoto1")[0].files[0].size / 1048576);
+
+            if (iSize > 2) {
+                $j('#file_CrimeScenePhoto1').val('');
+                $j('#errordivOBCrimeScene').show();
+                $j('#errordivOBCrimeScene').html("Photographs/Document related to offense/crime scene should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#file_CrimeScenePhoto1').focus();
+                return false;
+
+
+            }
+
+            var file = $j("#file_CrimeScenePhoto1").val();
+
+            var exts = ['jpeg', 'jpg', 'png', 'gif', 'pdf'];
+
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($j.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $j('#file_CrimeScenePhoto1').val('');
+                    $j('#errordivOBCrimeScene').show();
+                    $j('#errordivOBCrimeScene').html("Please upload only jpeg or jpg or png or gif or pdf file format in Photographs/Document related to offense/crime scene Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#file_CrimeScenePhoto1').focus();
+                    return false;
+                } else {
+                    $j('#errordivOBCrimeScene').hide();
+                }
+            }
+            else { $j('#errordivOBCrimeScene').hide(); }
+
+        });
+        $j("#file_CrimeScenePhoto2").change(function (e) {
+
+            var iSize = ($j("#file_CrimeScenePhoto2")[0].files[0].size / 1048576);
+
+            if (iSize > 2) {
+                $j('#file_CrimeScenePhoto2').val('');
+                $j('#errordivOBCrimeScene').show();
+                $j('#errordivOBCrimeScene').html("Photographs/Document related to offense/crime scene should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#file_CrimeScenePhoto2').focus();
+                return false;
+
+
+            }
+
+            var file = $j("#file_CrimeScenePhoto2").val();
+
+            var exts = ['jpeg', 'jpg', 'png', 'gif', 'pdf'];
+
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($j.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $j('#file_CrimeScenePhoto2').val('');
+                    $j('#errordivOBCrimeScene').show();
+                    $j('#errordivOBCrimeScene').html("Please upload only jpeg or jpg or png or gif or pdf file format in Photographs/Document related to offense/crime scene Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#file_CrimeScenePhoto2').focus();
+                    return false;
+                } else {
+                    $j('#errordivOBCrimeScene').hide();
+                }
+            }
+            else { $j('#errordivOBCrimeScene').hide(); }
+
+        });
+        $j("#file_CrimeScenePhoto3").change(function (e) {
+
+            var iSize = ($j("#file_CrimeScenePhoto3")[0].files[0].size / 1048576);
+
+            if (iSize > 2) {
+                $j('#file_CrimeScenePhoto3').val('');
+                $j('#errordivOBCrimeScene').show();
+                $j('#errordivOBCrimeScene').html("Photographs/Document related to offense/crime scene should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#file_CrimeScenePhoto3').focus();
+                return false;
+
+
+            }
+
+            var file = $j("#file_CrimeScenePhoto3").val();
+
+            var exts = ['jpeg', 'jpg', 'png', 'gif', 'pdf'];
+
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($j.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $j('#file_CrimeScenePhoto3').val('');
+                    $j('#errordivOBCrimeScene').show();
+                    $j('#errordivOBCrimeScene').html("Please upload only jpeg or jpg or png or gif or pdf or pdf file format in Photographs/Document related to offense/crime scene Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#file_CrimeScenePhoto3').focus();
+                    return false;
+                } else {
+                    $j('#errordivOBCrimeScene').hide();
+                }
+            }
+            else { $j('#errordivOBCrimeScene').hide(); }
+
+        });
+
+        $j(document).on('change', '#ddlOState', function () {
+
+            var oState = $j("#ddlOState option:selected").val();
+
+            if (oState == "1") {
+
+                $j("#txtdistrict").val('');
+                $j('#divtxtDistrict').hide();
+                $j('#divDDlDistrict').show();
+            }
+            else if (oState == "2") {
+                $j("#ddlODistrict").val($j("#ddlODistrict option:first").val());
+                $j('#divtxtDistrict').show();
+                $j('#divDDlDistrict').hide();
+
+            }
+            else {
+                $j('#divtxtDistrict').hide();
+                $j('#divDDlDistrict').show();
+                $j("#ddlODistrict").val($j("#ddlODistrict option:first").val());
+                $j("#txtdistrict").val('');
+            }
+        });
+
+        if ($j("#hdFormNo").val() == "3") {
+            var rowdata = "";
+            var ID = { id: $j("#hdFPMOffenseCode").val() }
+            $j.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(ID),
+                url: RootURl + 'OffenseRegistration/GetMultiOffenderDetails',
+                success: function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        var count = 1;
+                        count = count + i;
+                        var id = "'" + data[i].OOffenderrowid + "'";
+                        rowdata = "<tr class='rowid'><td style=display:none;>" + data[i].OOffenderrowid + "</td><td>" + data[i].OffenderName + "</td><td>" + data[i].OFatherName + "</td><td>" + data[i].OAddress1 + "</td><td>" + data[i].OVillageCode + "</td><td style='border:1px'>" + "<button type=button class=get-view style=cursor:pointer onclick=EditOffender(" + id + ")>Edit</button>" + "</td></tr>";
+                        $j("#tb_OffenderInfo").append(rowdata);
+                        $j("#tbl_Offenderinfo").css("display", "block");
+                    }
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        }
+
+        $j('#btnNext').on('click', function () {
+            if ($j('#ApplicantName').val() == '') {
+                $j('#errordivName').show();
+                $j('#errordivName').html("Please enter the Applicant Name!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#ApplicantName').focus();
+                return false;
+            }
+            else { $j('#errordivTehsil').hide(); }
+            if ($j('#ddl_range').val() == '' || $j('#ddl_range').val() == null || $j('#ddl_range').val() == '0') {
+                $j('#errordivRange').show();
+                $j('#errordivRange').html("Please Select the Range!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#ddl_range').focus();
+                return false;
+            }
+            else { $j('#errordivRange').hide(); }
+            if ($j('#txt_Tehsil').val() == '') {
+                $j('#errordivTehsil').show();
+                $j('#errordivTehsil').html("Please enter the Tehsil!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#txt_Tehsil').focus();
+                return false;
+            }
+            else { $j('#errordivTehsil').hide(); }
+            if ($j('#txt_Naka').val() == '') {
+                $j('#errordivNaka').show();
+                $j('#errordivNaka').html("Please enter the Naka!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#txt_Naka').focus();
+                return false;
+            }
+            else { $j('#errordivNaka').hide(); }
+            if ($j('#txt_ForestBlock').val() == '') {
+                $j('#errordivForestBlock').show();
+                $j('#errordivForestBlock').html("Please enter the Forest Block!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#txt_ForestBlock').focus();
+                return false;
+            }
+            else { $j('#errordivForestBlock').hide(); }
+            if ($j('#txt_Compartment').val() == '') {
+                $j('#errordivCompartment').show();
+                $j('#errordivCompartment').html("Please enter the Compartment!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#txt_Compartment').focus();
+                return false;
+            }
+            else { $j('#errordivCompartment').hide(); }
+
+            if ($j('#txt_OffensePlace').val() == '') {
+                $j('#errordivOffensePlace').show();
+                $j('#errordivOffensePlace').html("Please enter the Place of Offense/Landmark!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#txt_OffensePlace').focus();
+                return false;
+            }
+            else { $j('#errordivOffensePlace').hide(); }
+
+
+            if ($j('#txt_lat').val() == '') {
+                $j('#errordivLatitude').show();
+                $j('#errordivLatitude').html("Please enter the Latitude!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#txt_lat').focus();
+                return false;
+            }
+            else { $j('#errordivLatitude').hide(); }
+
+            if (($j('#txt_lat').val().substr(0, 1) == '.') && ($j('#txt_lat').val().length <= 1)) {
+                $j('#errordivLatitude').show();
+                $j('#errordivLatitude').html("Please enter the Latitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#txt_lat').focus();
+                return false;
+            }
+            else { $j('#errordivLatitude').hide(); }
+
+            if ((parseFloat($j('#txt_lat').val())) <= 0) {
+                $j('#errordivLatitude').show();
+                $j('#errordivLatitude').html("Please enter the Latitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#txt_lat').focus();
+                return false;
+            }
+            else { $j('#errordivLatitude').hide(); }
+
+            if ($j('#txt_long').val() == '') {
+                $j('#errordivLongitude').show();
+                $j('#errordivLongitude').html("Please enter the Longitude !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#txt_long').focus();
+                return false;
+            }
+            else { $j('#errordivLongitude').hide(); }
+
+            if (($j('#txt_long').val().substr(0, 1) == '.') && ($j('#txt_long').val().length <= 1)) {
+                $j('#errordivLongitude').show();
+                $j('#errordivLongitude').html("Please enter the Longitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#txt_long').focus();
+                return false;
+            }
+            else { $j('#errordivLongitude').hide(); }
+
+            if ((parseFloat($j('#txt_long').val())) <= 0) {
+                $j('#errordivLongitude').show();
+                $j('#errordivLongitude').html("Please enter the Longitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#txt_long').focus();
+                return false;
+            }
+            else { $j('#errordivLongitude').hide(); }
+
+            if ($j('#txt_LandMark').val() == '') {
+                $j('#errordivLandMark').show();
+                $j('#errordivLandMark').html("Please enter the Land Mark!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#txt_LandMark').focus();
+                return false;
+            }
+            else { $j('#errordivLandMark').hide(); }
+
+            if ($j('#txt_NakaDistance').val() == '') {
+                $j('#errordivNakaDistance').show();
+                $j('#errordivNakaDistance').html("Please enter the Distance from NAKA(In Km.) field!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#txt_NakaDistance').focus();
+                return false;
+            }
+            else { $j('#errordivNakaDistance').hide(); }
+
+            if (($j('#txt_NakaDistance').val().substr(0, 1) == '.') && ($j('#txt_NakaDistance').val().length <= 1)) {
+                $j('#errordivNakaDistance').show();
+                $j('#errordivNakaDistance').html("Please enter the Distance from NAKA(In Km.) field greator than 0.0001!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#txt_NakaDistance').focus();
+                return false;
+            }
+            else { $j('#errordivNakaDistance').hide(); }
+
+            if ((parseFloat($j('#txt_NakaDistance').val())) < 0.0001) {
+                $j('#errordivNakaDistance').show();
+                $j('#errordivNakaDistance').html("Please enter the Distance from NAKA(In Km.) field greator than 0.0001!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#txt_NakaDistance').focus();
+                return false;
+            }
+            else { $j('#errordivNakaDistance').hide(); }
+
+            if ($j('#Offence_Description').val() == '') {
+                $j('#errordivOffenseDesc').show();
+                $j('#errordivOffenseDesc').html("Please enter valid description!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#Offence_Description').focus();
+                return false;
+            }
+            else { $j('#errordivOffenseDesc').hide(); }
+
+            if ($j('#ddl_ForestType').val() == '' || $j('#ddl_ForestType').val() == null || $j('#ddl_ForestType').val() == '0') {
+                $j('#errordivForestType').show();
+                $j('#errordivForestType').html("Please Select the Type of Forest!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#ddl_ForestType').focus();
+                return false;
+            }
+            else { $j('#errordivForestType').hide(); }
+        });
+        $('#Name').prop('checked', true);
+        $('#Self').click(function (e) {
+            if ($('#Self').prop('checked')) {
+                $('#Name').prop('checked', false);
+                $('#ApplicantName').val('Self');
+            }
+        });
+        $('#Name').click(function (e) {
+            if ($('#Name').prop('checked')) {
+                $('#Self').prop('checked', false);
+                $('#ApplicantName').val('');
+                $('#ApplicantName').focus();
+            }
+        });
+
+        $j('.btnSubmit').on('click', function () {
+
+            if ($j('#ddl_OffenceCategory').val() == '' || $j('#ddl_OffenceCategory').val() == null || $j('#ddl_OffenceCategory').val() == '0') {
+                $j('#errordivOffenseCategory').show();
+                $j('#errordivOffenseCategory').html("Please Select the Offense Category!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#ddl_OffenceCategory').focus();
+                return false;
+            }
+            else { $j('#errordivOffenseCategory').hide(); }
+
+            var drpOcategory = $("#ddl_OffenceCategory").val();
+
+            if (drpOcategory == "1") {
+
+                if ($j('#ddl_WOffenseSubCategoryForest').val() == '' || $j('#ddl_WOffenseSubCategoryForest').val() == null || $j('#ddl_WOffenseSubCategoryForest').val() == '0') {
+                    $j('#errordivOWildLife').show();
+                    $j('#errordivOWildLife').html("Please Select the Offense Sub-Category!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#ddl_WOffenseSubCategoryForest').focus();
+                    return false;
+                }
+                else { $j('#errordivOWildLife').hide(); }
+
+                if ($j('#ddl_WWildlifeProtectionAct').val() == '' || $j('#ddl_WWildlifeProtectionAct').val() == null || $j('#ddl_WWildlifeProtectionAct').val() == '0') {
+                    $j('#errordivSectionWildLife').show();
+                    $j('#errordivSectionWildLife').html("Please Select the Section under Wildlife Protection Act 1972!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#ddl_WWildlifeProtectionAct').focus();
+                    return false;
+                }
+                else { $j('#errordivSectionWildLife').hide(); }
+
+            }
+            else if (drpOcategory == "2") {
+
+                if ($j('#ddl_FOffenseSubCategoryForest').val() == '' || $j('#ddl_FOffenseSubCategoryForest').val() == null || $j('#ddl_FOffenseSubCategoryForest').val() == '0') {
+                    $j('#errordivOFCategory').show();
+                    $j('#errordivOFCategory').html("Please Select the Offense Sub-Category!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#ddl_FOffenseSubCategoryForest').focus();
+                    return false;
+                }
+                else { $j('#errordivOFCategory').hide(); }
+
+                if ($j('#ddl_FForestProtectionAct').val() == '' || $j('#ddl_FForestProtectionAct').val() == null || $j('#ddl_FForestProtectionAct').val() == '0') {
+                    $j('#errordivOFSection').show();
+                    $j('#errordivOFSection').html("Please Select the Section under Forest Protection Act 1953!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#ddl_FForestProtectionAct').focus();
+                    return false;
+                }
+                else { $j('#errordivOFSection').hide(); }
+
+            }
+
+
+            else if (drpOcategory == "3") {
+
+                if ($j('#ddl_BWOffenseSubCategoryForest').val() == '' || $j('#ddl_BWOffenseSubCategoryForest').val() == null || $j('#ddl_BWOffenseSubCategoryForest').val() == '0') {
+                    $j('#errordivOBWCategory').show();
+                    $j('#errordivOBWCategory').html("Please Select Offense Sub-Category (as per rajasthan wildlife ACT)!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#ddl_BWOffenseSubCategoryForest').focus();
+                    return false;
+                }
+                else { $j('#errordivOBWCategory').hide(); }
+                if ($j('#ddl_BFOffenseSubCategoryForest').val() == '' || $j('#ddl_BFOffenseSubCategoryForest').val() == null || $j('#ddl_BFOffenseSubCategoryForest').val() == '0') {
+                    $j('#errordivOBFCategory').show();
+                    $j('#errordivOBFCategory').html("Please Select Offense Sub-Category (as per rajasthan forest ACT)!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#ddl_BFOffenseSubCategoryForest').focus();
+                    return false;
+                }
+                else { $j('#errordivOBFCategory').hide(); }
+
+
+                if ($j('#ddl_BForestProtectionAct').val() == '' || $j('#ddl_BForestProtectionAct').val() == null || $j('#ddl_BForestProtectionAct').val() == '0') {
+                    $j('#errordivOBForestSection').show();
+                    $j('#errordivOBForestSection').html("Please Select the Section under Forest Protection Act 1953!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#ddl_BForestProtectionAct').focus();
+                    return false;
+                }
+                else { $j('#errordivOBForestSection').hide(); }
+
+                if ($j('#ddl_BWildlifeProtectionAct').val() == '' || $j('#ddl_BWildlifeProtectionAct').val() == null || $j('#ddl_BWildlifeProtectionAct').val() == '0') {
+                    $j('#errordivOBWildSection').show();
+                    $j('#errordivOBWildSection').html("Please Select the Section under Wildlife Protection Act 1972!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#ddl_BWildlifeProtectionAct').focus();
+                    return false;
+                }
+                else { $j('#errordivOBWildSection').hide(); }
+
+
+
+
+            }
+            if ($j('#ddl_OffenseSeverity').val() == '' || $j('#ddl_OffenseSeverity').val() == null || $j('#ddl_OffenseSeverity').val() == '0') {
+                $j('#errordivOSeverity').show();
+                $j('#errordivOSeverity').html("Please Select the Offense Severity:!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#ddl_OffenseSeverity').focus();
+                return false;
+            }
+            else { $j('#errordivOSeverity').hide(); }
+            if ($j('#txt_OPoliceStation').val() == '') {
+                $j('#errordivOPoliceStation').show();
+                $j('#errordivOPoliceStation').html("Please enter the Nearest Police Station!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j('#txt_OPoliceStation').focus();
+                errorCount = "1";
+                return false;
+            }
+            else { $j('#errordivOPoliceStation').hide(); errorCount = ""; }
+           
+            if ($('#YesCompundable').is(':checked') || $('#NoCompundable').is(':checked')) {
+                
+            }
+            else {
+                alert("Select radio button for compundable");
+                return false;
+               
+            }
+            if ($('#PayNCompound').is(':checked') || $('#PayLCompound').is(':checked')) {
+                
+            }
+            else {
+                alert("Select radio button for payment");
+                return false;
+              
+            }
+            if ($("#YesCompundable").prop('checked')) {
+                if ($j('#txt_SettlementAmount').val() == '') {
+                    $j('#errordivOSettlement').show();
+                    $j('#errordivOSettlement').html("Please enter the Amount for Settlement !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#txt_SettlementAmount').focus();
+                    return false;
+                }
+                else { $j('#errordivOSettlement').hide(); }
+
+                if (($j('#txt_SettlementAmount').val().substr(0, 1) == '.') && ($j('#txt_SettlementAmount').val().length <= 1)) {
+                    $j('#errordivOSettlement').show();
+                    $j('#errordivOSettlement').html("Please enter the valid Amount for Settlement!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#txt_SettlementAmount').focus();
+                    return false;
+                }
+                else { $j('#errordivOSettlement').hide(); }
+
+                if ((parseFloat($j('#txt_SettlementAmount').val())) <= 0) {
+                    $j('#errordivOSettlement').show();
+                    $j('#errordivOSettlement').html("Please enter the valid Amount for Settlement!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#txt_SettlementAmount').focus();
+                    return false;
+                }
+                else { $j('#errordivOSettlement').hide(); }
+            }
+
+        });
+
+
+        $j('#txt_Naka,#txt_Tehsil,#txt_ForestBlock,#txt_Compartment,#txt_BOffenseSubCategoryForest,#txt_BOffenseSubCategoryWild').keypress(function (e) {
+            var kc = e.which;
+
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 13 || kc == 95 || kc == 37 || kc == 46 || kc == 38) || (kc >= 47 && kc <= 57) || (kc >= 44 && kc < 46) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+        $j('#txt_OffenderName,#txt_OFatherName,#txt_OSpouseName,#txt_OCaste,#txt_OAddress1,#txt_OAddress2,#txt_OVillageCode,#txtdistrict,#txt_OffenderStatement,#txt_OPoliceStation,#OffenderComplainant').keypress(function (e) {
+            var kc = e.which;
+
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 13 || kc == 95 || kc == 37 || kc == 46 || kc == 38) || (kc >= 47 && kc <= 57) || (kc >= 44 && kc < 46) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+        $j('#txt_OPincode,#OPhoneNo,#txt_OffenderAge,txt_ONumberOfOffender,#Height').keypress(function (event) {
+
+            return isOnlyNumber(event, this)
+
+        });
+
+        $j('#txt_lat').keypress(function (event) {
+
+            return isNumber(event, this)
+
+        });
+
+        $j('#txt_long').keypress(function (event) {
+
+            return isNumber(event, this)
+
+        });
+        $j('#txt_NakaDistance').keypress(function (event) {
+
+            return isNumber(event, this)
+
+        });
+
+
+        $j(document).on('change', '#txt_lat', function (event) {
+            var str = $j('#txt_lat').val();
+
+            var lastChar = str.slice(-1);
+            if (lastChar == '.') {
+                str = str.slice(0, -1);
+            }
+            $j('#txt_lat').val(str);
+
+            var str1 = str.match(/.{3}/g);
+
+            var length = str1.length;
+            for (var i = 0; i < 1; i++) {
+
+                if (str1[i].indexOf(".") == -1) {
+
+                    $j('#errordivLatitude').show();
+                    $j('#errordivLatitude').html("Please enter the valid Latitude!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#txt_lat').focus();
+                    $j('#txt_lat').val('');
+                    return false;
+                    //}
+                }
+                else {
+                    $j('#errordivLatitude').hide();
+                }
+
+                if (str.indexOf(".") == 1 && str.length < 2) {
+                    $j('#errordivLatitude').show();
+                    $j('#errordivLatitude').html("Please enter the valid Latitude!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#txt_lat').focus();
+                    $j('#txt_lat').val('');
+                    return false;
+                    //}
+                }
+                else {
+                    $j('#errordivLatitude').hide();
+                }
+
+            }
+
+        })
+        $j(document).on('change', '#txt_long', function (event) {
+            var str = $j('#txt_long').val();
+            var lastChar = str.slice(-1);
+            if (lastChar == '.') {
+                str = str.slice(0, -1);
+
+            }
+            $j('#txt_long').val(str);
+            var str1 = str.match(/.{3}/g);
+
+            var length = str1.length;
+
+            for (var i = 0; i < 1; i++) {
+                if (str1[i].indexOf(".") == -1) {
+
+                    $j('#errordivLongitude').show();
+                    $j('#errordivLongitude').html("Please enter the valid Longitude!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#txt_long').focus();
+                    $j('#txt_long').val('');
+                    return false;
+
+                }
+                else {
+                    $j('#errordivLongitude').hide();
+                }
+                if (str.indexOf(".") == 1 && str.length < 2) {
+
+                    $j('#errordivLongitude').show();
+                    $j('#errordivLongitude').html("Please enter the valid Longitude!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#txt_long').focus();
+                    $j('#txt_long').val('');
+                    return false;
+
+                }
+                else {
+                    $j('#errordivLongitude').hide();
+                }
+            }
+
+        })
+
+        $j("#btn_addOffender").bind("click", function () {
+            if ($j("#Addknown-Offender").prop("checked")) {
+                if ($j('#txt_OffenderName').val() == '') {
+                    $j('#errordivOffenderName').show();
+                    $j('#errordivOffenderName').html("Please enter the Name of the Offender!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#txt_OffenderName').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $j('#errordivOffenderName').hide(); errorCount = ""; }
+
+                if ($j('#txt_OFatherName').val() == '') {
+                    $j('#errordivOFatherName').show();
+                    $j('#errordivOFatherName').html("Please enter the Father Name!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#txt_OFatherName').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $j('#errordivOFatherName').hide(); errorCount = ""; }
+
+               
+
+                if ($j('option:selected', $j('#txt_OCaste')).index() == 0) {
+
+                    $j('#errordivOCaste').show();
+                    $j('#errordivOCaste').html("Please select the Caste!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#txt_OCaste').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $j('#errordivOCaste').hide(); errorCount = ""; }
+
+                if ($j('#OClothesWorn').val() == '') {
+                    $j('#errordivCloth').show();
+                    $j('#errordivCloth').html("Please enter the Cloth Worn!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#OClothesWorn').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $j('#errordivCloth').hide(); errorCount = ""; }
+                if ($j('#OColorOfClothes').val() == '') {
+                    $j('#errordivClothColor').show();
+                    $j('#errordivClothColor').html("Please enter the Color of Cloth!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#OColorOfClothes').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $j('#errordivClothColor').hide(); errorCount = ""; }
+                if ($j('#OPhysicalAppearance').val() == '') {
+                    $j('#errordivPhysicalApp').show();
+                    $j('#errordivPhysicalApp').html("Please enter the physical appearance!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#OPhysicalAppearance').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $j('#errordivPhysicalApp').hide(); errorCount = ""; }
+
+                if ($j('#Height').val() == '') {
+                    $j('#errordivHeight').show();
+                    $j('#errordivHeight').html("Please enter the Height!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#Height').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $j('#errordivHeight').hide(); errorCount = ""; }
+
+                if ($j('#OOtherSpecialDetails').val() == '') {
+                    $j('#errordivOtherDetail').show();
+                    $j('#errordivOtherDetail').html("Please enter the special details!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#OOtherSpecialDetails').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $j('#errordivOtherDetail').hide(); errorCount = ""; }
+
+                if ($j('#txt_OAddress1').val() == '') {
+                    $j('#errordivOAddress1').show();
+                    $j('#errordivOAddress1').html("Please enter the Residential Address1!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#txt_OAddress1').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $j('#errordivOAddress1').hide(); errorCount = ""; }
+
+                if ($j('#ddlOState').val() == '' || $j('#ddlOState').val() == null || $j('#ddlOState').val() == '0') {
+                    $j('#errordivddlOState').show();
+                    $j('#errordivddlOState').html("Please Select the State!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#ddlOState').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $j('#errordivddlOState').hide(); errorCount = ""; }
+
+                var oState = $j("#ddlOState option:selected").val();
+
+                if (oState == "1") {
+
+                    if ($j('#ddlODistrict').val() == '' || $j('#ddlODistrict').val() == null || $j('#ddlODistrict').val() == '0') {
+
+                        $j('#errordivOddlDistrict').show();
+                        $j('#errordivOddlDistrict').html("Please Select the District!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                        $j('#ddlODistrict').focus();
+                        errorCount = "1";
+                        return false;
+                    }
+                    else { $j('#errordivOddlDistrict').hide(); errorCount = ""; }
+                }
+                else if (oState == "2") {
+
+                    if ($j('#txtdistrict').val() == '') {
+                        $j('#errordivddlODistrict1').show();
+                        $j('#errordivddlODistrict1').html("Please enter the District!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                        $j('#txtdistrict').focus();
+                        errorCount = "1";
+                        return false;
+                    }
+                    else { $j('#errordivddlODistrict1').hide(); errorCount = ""; }
+
+                }
+
+
+                if ($j('#txt_OVillageCode').val() == '') {
+                    $j('#errordivddlVillName').show();
+                    $j('#errordivddlVillName').html("Please enter the City/Village Name!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#txt_OVillageCode').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $j('#errordivddlVillName').hide(); errorCount = ""; }
+                if ($j('#txt_OPincode').val() == '') {
+                    $j('#errordivOPincode').show();
+                    $j('#errordivOPincode').html("Please enter the Pin Code!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#txt_OPincode').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $j('#errordivOPincode').hide(); errorCount = ""; }
+
+                if (!validateEmail($j('#txt_OEmailID').val()) && $j('#txt_OEmailID').val() != '') {
+                    $j('#errordivOEmailID').show();
+                    $j('#errordivOEmailID').html("Please enter valid E-mail ID!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#txt_OEmailID').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $j('#errordivOEmailID').hide(); errorCount = ""; }
+
+                if ($j('#txt_OffenderAge').val() == '') {
+                    $j('#errordivOffenderAge').show();
+                    $j('#errordivOffenderAge').html("Please enter the Age of Offender!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#txt_OffenderAge').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $j('#errordivOffenderAge').hide(); errorCount = ""; }
+            
+
+            }
+            else if ($j("#Unknown-Offender").prop("checked")) {
+
+                if ($j('#txt_ONumberOfOffender').val() == '') {
+                    $j('#errordivONumberOfOffender').show();
+                    $j('#errordivONumberOfOffender').html("Please enter the Number of Offenders!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#txt_ONumberOfOffender').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $j('#errordivddlVillName').hide(); errorCount = ""; }
+
+                if ($j('#txt_OffenderDescription').val() == '') {
+                    $j('#errordivONumberOfOffender').show();
+                    $j('#errordivONumberOfOffender').html("Please enter the Number of Offenders!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $j('#txt_OffenderDescription').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $j('#errordivddlVillName').hide(); errorCount = ""; }
+
+            }
+        })
+
+        $j('#YesCompundable').on('click', function () {
+            $j('#PayLCompound').removeAttr('checked');
+            $j('#PayNCompound').removeAttr('checked');
+            $j('#PayNCompound').attr('checked', 'checked');
+            $j('#txt_SettlementAmount').attr('disabled', false);
+            $j('#txt_SettlementAmount').val($j('#hdfpmSettlementAmount').val());
+
+        });
+
+        $j('#NoCompundable').on('click', function () {
+            $j('#PayNCompound').removeAttr('checked');
+            $j('#PayLCompound').removeAttr('checked');
+            $j('#PayLCompound').attr('checked', 'checked');
+            $j('#txt_SettlementAmount').attr('disabled', true);
+            $j('#txt_SettlementAmount').val("0");
+
+
+        });
+
+    });
+
+    $j('#Addknown-Offender').on('click', function () {
+        $j(".Unknown").hide();
+        $j(".known").show();
+
+    });
+
+    $j('#Unknown-Offender').on('click', function () {
+        $j(".known").hide();
+        $j(".Unknown").show();
+
+    });
+
+
+
+    $j('#ddl_OffenceCategory').on('change', function () {
+
+        if ($j(this).val() == "2") {
+            $j("#Wildlife-Data").hide();
+            $j("#Both-Data").hide();
+            $j("#Forest-Data").show();
+            $j("#ddl_BWOffenseSubCategoryForest").val($j("#ddl_BWOffenseSubCategoryForest option:first").val());
+            $j("#ddl_BFOffenseSubCategoryForest").val($j("#ddl_BFOffenseSubCategoryForest option:first").val());
+            $j("#ddl_BForestProtectionAct").val($j("#ddl_BForestProtectionAct option:first").val());
+            $j("#ddl_BWildlifeProtectionAct").val($j("#ddl_BWildlifeProtectionAct option:first").val());
+            j("#ddl_WOffenseSubCategoryForest").val($j("#ddl_WOffenseSubCategoryForest option:first").val());
+            $j("#ddl_WWildlifeProtectionAct").val($j("#ddl_WWildlifeProtectionAct option:first").val());
+        }
+        else if ($j(this).val() == "3") {
+            $j("#Wildlife-Data").hide();
+            $j("#Forest-Data").hide();
+            $j("#Both-Data").show();
+            $j("#ddl_FOffenseSubCategoryForest").val($j("#ddl_FOffenseSubCategoryForest option:first").val());
+            $j("#ddl_FForestProtectionAct").val($j("#ddl_FForestProtectionAct option:first").val());
+            $j("#ddl_WOffenseSubCategoryForest").val($j("#ddl_WOffenseSubCategoryForest option:first").val());
+            $j("#ddl_WWildlifeProtectionAct").val($j("#ddl_WWildlifeProtectionAct option:first").val());
+        }
+        else if ($j(this).val() == "1") {
+            $j("#Forest-Data").hide();
+            $j("#Both-Data").hide();
+            $j("#Wildlife-Data").show();
+            $j("#ddl_BWOffenseSubCategoryForest").val($j("#ddl_BWOffenseSubCategoryForest option:first").val());
+            $j("#ddl_BFOffenseSubCategoryForest").val($j("#ddl_BFOffenseSubCategoryForest option:first").val());
+            $j("#ddl_FOffenseSubCategoryForest").val($j("#ddl_FOffenseSubCategoryForest option:first").val());
+            $j("#ddl_FForestProtectionAct").val($j("#ddl_FForestProtectionAct option:first").val());
+            $j("#ddl_BForestProtectionAct").val($j("#ddl_BForestProtectionAct option:first").val());
+            $j("#ddl_BWildlifeProtectionAct").val($j("#ddl_BWildlifeProtectionAct option:first").val());
+
+        }
+
+    });
+
+
+
+
+    function isOnlyNumber(evt, element) {
+
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode == 8) { return true; }
+        if (charCode < 48 || charCode > 57)
+            return false;
+
+
+    }
+
+    function PostOffenderInfo() {       
+        var oState = $j("#ddlOState option:selected").val();
+
+        if (oState == "1") {
+            var oDistrict = $j("#ddlODistrict option:selected").val()
+        }
+
+        else if (oState == "2") {
+            var oDistrict = $j("#txtdistrict").val();
+        }
+        var offenderInfo = {
+            OOffenderrowid: $j('#hdnOOffenderrowid').val(),
+            OffenderType: $j('input[name="Offender"]:checked').val(),
+            OffenderName: $j("#txt_OffenderName").val(),
+            OFatherName: $j("#txt_OFatherName").val(),
+            OSpouseName: $j("#txt_OSpouseName").val(),
+            OCaste: $j("#txt_OCaste").val(),
+            ClothesWorn: $j("#OClothesWorn").val(),
+            ColorOfClothes: $j("#OColorOfClothes").val(),
+            PhysicalAppearance: $j("#OPhysicalAppearance").val(),
+            Height: $j("#Height").val(),
+            OtherSpecialDetails: $j("#OOtherSpecialDetails").val(),
+            OAddress1: $j("#txt_OAddress1").val(),
+            OAddress2: $j("#txt_OAddress2").val(),
+            OStateCode: $j("#ddlOState  option:selected").val(),
+            ODistrictCode: $j("#ddlODistrict option:selected").val(),
+            OPincode: $j("#txt_OPincode").val(),
+            OVillageCode: $j("#txt_OVillageCode").val(),
+            OPhoneNo: $j("#OPhoneNo").val(),
+            OEmailID: $j("#txt_OEmailID").val(),
+            OPhotoIDType: $j("#ddl_OPhotoIDType option:selected").val(),
+            OffenderAge: $j("#txt_OffenderAge").val(),
+            OPhotoIDURL: $j("#hdIDProof").val()
+        };
+
+        $j.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(offenderInfo),
+            url: RootURl + 'OffenseRegistration/OffenderData',
+            success: function (data) {
+
+                if (data.OffenderName != '') {                                
+                    var id = "'" + data.OOffenderrowid + "'";                   
+                    // Delete Option Commented// var rowdata = "<tr><td>" + count + "</td><td style=display:none;>" + data.OOffenderrowid + "</td><td>" + data.OffenderName + "</td><td>" + data.OFatherName + "</td><td>" + data.OCaste + "</td><td>" + data.OVillageCode + "</td><td style='border:1px'>" + "<button type=button class=get-view style=cursor:pointer onclick=EditOffender(" + id + ")>Edit</button>" + "</td><td>" + "<button class='get-delete' value='" + data.OEmailID + "'>Delete</button>" + "</td></tr>";
+                    var rowdata = "<tr><td style=display:none;>" + data.OOffenderrowid + "</td><td>" + data.OffenderName + "</td><td>" + data.OFatherName + "</td><td>" + data.OAddress1 + "</td><td>" + data.OVillageCode + "</td><td style='border:1px'>" + "<button type=button class=get-view style=cursor:pointer onclick=EditOffender(" + id + ")>Edit</button>" + "</td></tr>";
+                    $('#tbl_Offenderinfo tbody tr td:nth-child(1)').each(function () {                       
+                        if (data.OOffenderrowid == $(this).text()) {
+                            $(this).closest('tr').remove();
+                        }
+                    });
+                    $j("#tb_OffenderInfo").append(rowdata);
+                    $j('#txt_OffenderName').val(''); $j('#txt_OFatherName').val('');
+                    $j('#txt_OSpouseName').val(''); $j('#txt_OCaste').val('');
+                    $j('#OClothesWorn').val(''); $j('#OColorOfClothes').val('');
+                    $j('#OPhysicalAppearance').val(''); $j('#Height').val('');
+                    $j('#OOtherSpecialDetails').val(''); $j('#txt_OAddress1').val(''); $j('#txt_OAddress2').val('');
+                    $j('#ddlOState').filter(function (e) { return $(this).text() == '--Select--' }).attr('selected', true);
+                    $j('#ddlODistrict option').filter(function (e) { return $(this).text() == '--Select--' }).attr('selected', true);
+                    $j('#hdnOOffenderrowid').val('');$j('#txt_OVillageCode').val(''); $j('#txt_OPincode').val('');
+                    $j('#OPhoneNo').val(''); $j('#txt_OEmailID').val(''); $j('#txt_OffenderAge').val('');
+                    $j('#ddl_OPhotoIDType').filter(function (e) { return $(this).text() == '--Select--' }).attr('selected', true);
+                    $j('#viewdoc').hide();
+                }
+                $j("#tbl_Offenderinfo").css("display", "block");
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+        $j(document).on('click', '.get-delete', function (e) {
+
+            jQuery(this).closest('tr').remove();
+            var RowInfo = {
+                emailId: $j(this).val()
+            };
+            $j.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(RowInfo),
+                url: RootURl + 'OffenseRegistration/DeleteOffenderData',
+                success: function (data) {
+                    alert("Offender Saved Successfully!!!!");
+                },
+                error: function (ex) { alert(ex); }
+
+            });
+            e.preventDefault();
+        });
+
+    }
+    function isNumber(evt, element) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (
+             (charCode != 46 || $j(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+            (charCode < 48 || charCode > 57))
+            return false;
+    }
+    function validateEmail($email) {
+        var emailReg = /^([\w-\.]+@@([\w-]+\.)+[\w-]{2,4})?$/;
+        if (!emailReg.test($email)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    function EditOffender(ID) {
+        $j('#hdnOOffenderrowid').val(ID);      
+        var tblinfo = {          
+            ID: ID
+        }
+        $("#tbdyScart").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'OffenseRegistration/EditDetails',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(tblinfo),
+           success: function (data) {                               
+                $('#txt_OffenderName').val(data.OffenderName); $('#txt_OFatherName').val(data.OFatherName);
+                $('#txt_OSpouseName').val(data.OSpouseName); $('#txt_OCaste').val(data.OCaste);
+                $('#OClothesWorn').val(data.OClothesWorn); $('#OColorOfClothes').val(data.OColorOfClothes);
+                $('#OPhysicalAppearance').val(data.OPhysicalAppearance); $('#Height').val(data.OHeight);
+                $('#OOtherSpecialDetails').val(data.OOtherSpecialDetails); $('#txt_OAddress1').val(data.OAddress1);
+                $('#txt_OAddress2').val(data.OAddress2); $('#ddlOState').val(data.OStateCode);
+                $('#ddlODistrict').val(data.ODistrictCode);
+                $('#txt_OVillageCode').val(data.OVillageCode); $('#txt_OPincode').val(data.OPincode);
+                $('#OPhoneNo').val(data.OPhoneNo); $('#txt_OEmailID').val(data.OEmailID);
+                $('#ddl_OPhotoIDType').val(data.OPhotoIDType); $('#txt_OffenderAge').val(data.OffenderAge);
+                $j("#hdIDProof").val(data.OPhotoIDURL);
+                var filename = data.OPhotoIDURL;                              
+                if (data.OPhotoIDURL != '') {
+                    var str = filename.split('/');
+                    $('#viewdoc').show();
+                    $('#viewdoc').attr('href', '.././ForestProtectionDocument/OffenderDetails/' + str[3]);
+                    $('#viewdoc').attr('target', '_blank');
+                }
+
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+
+
+        });
+
+    }
+</script>
+
+
+

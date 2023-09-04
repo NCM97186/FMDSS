@@ -1,0 +1,142 @@
+﻿@model FMDSS.Models.MiddleWareModules
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="~/css/css2.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/font-awesome.css">
+    <link rel="stylesheet" href="~/css/bootstrap.css">
+    <link rel="stylesheet" href="~/css/layout.css">
+    <link rel="stylesheet" href="~/css/mk_layout.css">
+    <link rel="stylesheet" href="~/css/responsive.css">
+    <link rel="icon" href="~/images/favicon.png" type="image/png" sizes="24x24">
+    <title>Forest Department,Government of Rajasthan</title>
+</head>
+<body class="fmmks">
+    <section class="welcome-section content-space fmmks">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12 col-xl-12">
+                    <div class="carousel-caption2 d-md-block text-center">
+                        <div class="container-fluid">
+                            <h3> Aaranyak </h3>
+                            <!--<h5>Forest Management &amp; Decision </h5>-->
+                            <h5 class="mb-5">Forest Management &amp; Decision  Support System (FMDSS)</h5>
+                        </div>
+                    </div>
+                    <ul class="key-list-info mt-5">
+                        @foreach (var itm in Model.MWM_List)
+                        {
+                            string imgsrc = (itm.ModuleImg != null ? @itm.ModuleImg.Replace("~", "") : "");
+                            <li class="mkbox">
+
+
+                                @{
+                                    if (itm.ModuleName == "Wildlife Tourism Permission" && ViewBag.Roles != "DEPTKIOSK")
+                                    {
+                                        @*<span style="color:#fff;">
+                                                <a href="javascript:void(0);" onclick="GetSubModulePages(@itm.ModuleId,'@itm.LinkUrl');">
+                                                    <picture> <img src="@imgsrc" alt=""  > </picture>
+                                                    <br />
+                                                    @itm.ModuleName
+                                                </a>
+                                            </span>*@
+                                        <span style="color:#fff;">
+                                            @{
+                                                string strparam = @itm.ModuleId + "|" + @itm.LinkUrl;
+                                            }
+                                            <a href="/MiddleWare/SubModuleFMDSS1?linkparam=@FMDSS.Models.MySecurity.SecurityCode.EncodeUrl(strparam)">
+                                                <picture> <img src="@imgsrc" alt=""> </picture>
+                                                <br />
+                                                @itm.ModuleName
+                                            </a>
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span style="color:#fff;">
+                                            <a href="@itm.LinkUrl">
+                                                <picture> <img src="@imgsrc" alt=""> </picture>
+                                                <br />
+                                                @itm.ModuleName
+                                            </a>
+                                        </span>
+                                    }
+                                }
+                            </li>
+
+                        }
+
+                    </ul>
+                </div>
+            </div>
+            <div class="row">
+                <div class="modal fade in" id="myModalDashboard" tabindex="-1" role="dialog" aria-hidden="false">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="myModalLabel">
+                                    Booking Types
+                                </h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                            </div>
+
+                            <div class="modal-body tbl-scroll divPrintone">
+                                <div id="subModulesLinks">
+
+                                </div>
+                                <!-- /.modal-body -->
+                                <div class="modal-footer" id="fot-f">
+                                    <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                                        <i class="fa fa-times fa-fw"></i> Close
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- /.modal-content -->
+                        </div>
+                        <!-- /.modal-dialog -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script src="~/Scripts/jquery.blockUI.js"></script>
+    <script src="~/js/jquery-3.js"></script>
+    <script src="~/js/bootstrap.js"></script>
+
+    <script type="text/javascript">
+        $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
+        function GetSubModulePages(moduleId, mainLink) {
+            //alert('test ' + moduleId);
+            $.ajax({
+                type: 'GET',
+                url: "../MiddleWare/GetSubModulePages",
+                dataType: 'html',
+                data: { ModuleId: moduleId, MainLink: mainLink },
+                success: function (MWSMG_List) {
+                    $('#subModulesLinks').html(MWSMG_List);
+                    $("#myModalDashboard").modal({
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    $('#myModalDashboard').modal('show');
+
+                },
+                error: function (ex) {
+                    alert(ex.error);
+                }
+            });
+
+        }
+    </script>
+</body>
+</html>

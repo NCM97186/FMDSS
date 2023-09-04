@@ -1,0 +1,184 @@
+﻿@model FMDSS.Models.Master.AccomodationFee
+
+<link href="~/css/timepicki.css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+<script>
+    var $j = jQuery.noConflict();
+    $j('.timepicker').timepicki();
+
+</script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        $('#RatePerRoom,#TotalRooms').bind('keypress', function (evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode
+            // var charCode = evt.which;
+            if (charCode != 8) {
+
+                if ((charCode == 46) || (charCode >= 97 && charCode <= 122) || (charCode >= 65 && charCode <= 90)) {
+                    return false;
+                }
+                else {
+                    if (charCode >= 48 && charCode <= 57 || charCode == 46) {
+                        return true;
+                    }
+                    else {
+                        evt.preventDefault();
+                    }
+                }
+            }
+        });
+
+        $('#btn_submit1').click(function (e) {
+
+            if ($('option:selected', $('#PlaceID')).index() == 0) {
+                $("#errPlaceID").css("display", "block");
+                $('#errPlaceID').focus();
+                return false;
+            }
+            else {
+                $("#errPlaceID").css("display", "none");
+            }
+
+
+             if ($('option:selected', $('#RoomType')).index() == 0) {
+                $('#errRoomType').css("display", "block");
+                $('#errRoomType').focus();
+                return false;
+            }
+            else {
+                $('#errRoomType').css("display", "none");
+            }
+
+             if ($('#TotalRooms').val().trim() == "") {
+                $('#errTotalRooms').css("display", "block");
+                $('#errTotalRooms').focus();
+                return false;
+            }
+            else {
+                $('#errTotalRooms').css("display", "none");
+            }
+            
+             if ($('#RatePerRoom').val().trim() == "") {
+                $('#errRatePerRoom').css("display", "block");
+                $('#errRatePerRoom').focus();
+                return false;
+            }
+            else {
+                $('#errRatePerRoom').css("display", "none");
+            }
+
+            if ($('option:selected', $('#IsActive')).index() == 0) {
+                $("#errIsActive").css("display", "block");
+                 $('#errIsactive').focus();
+                return false;
+            }
+            else {
+                $("#errIsActive").css("display", "none");
+            }
+
+        });
+
+    });
+
+</script>
+
+
+@using (Html.BeginForm("ADDUpdateAccomodationFee","Master", FormMethod.Post))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @*<label id="lbl_dpt">Add/Edit Place</label>*@
+                @ViewBag.OpType
+            </h4>
+        </div>
+
+        <div class="modal-body">
+            @Html.HiddenFor(model => model.AccommodationID)
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Place : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.PlaceID, (IEnumerable<SelectListItem>)ViewBag.PlaceIDLst, "--Select--", new { @class = "form-control common", id = "PlaceID" })
+                    <div id="errPlaceID" style="display:none" class="alert-danger1">Place is Required.</div>
+                </div>
+            </div> 
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Room Type: <span class="mandatory">*</span></label>
+               
+                         @Html.DropDownListFor(x => x.RoomType, new List<SelectListItem>
+                            {
+                               new SelectListItem{ Text="--Select--", Value = "--Select--" },
+                               new SelectListItem{ Text="Special Room (Large Room& Specially Furnished)", Value = "Special Room (Large Room& Specially Furnished)" },
+                               new SelectListItem{ Text="Ordinary Room", Value = "Ordinary Room" },
+                               new SelectListItem{ Text="Tents 2 Person", Value = "Tents 2 Person" },
+                               new SelectListItem{ Text="Tree Huts", Value = "Tree Huts" },
+                               new SelectListItem{ Text="Jhompas (For Night)", Value = "Jhompas (For Night)" },
+                               new SelectListItem{ Text="Jhompas (For Day)", Value = "Jhompas (For Day)" },
+                               new SelectListItem{ Text="Extra Bads(if Available)", Value = "Extra Bads(if Available)" },
+                               new SelectListItem{ Text="Dormitory", Value = "Dormitory" }
+                            }, new { @class = "form-control common", title = "", id = "RoomType" })
+
+                    @*@Html.TextBoxFor(model => model.RoomType, new { @class = "form-control common" })*@
+                    <div id="errRoomType" style="display:none" class="alert-danger1">Room Type is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Total Rooms: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.TotalRooms, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errTotalRooms" style="display:none" class="alert-danger1">Total Rooms is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Rate Per Room: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.RatePerRoom, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errRatePerRoom" style="display:none" class="alert-danger1">Rate Per Room is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Active / Deactive : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.IsActive, (IEnumerable<SelectListItem>)ViewBag.ISactivelst, "--Select--", new { @class = "form-control common", id = "Isactive" })
+                    <div id="errIsactive" style="display:none" class="alert-danger1">Active / Deactive  is Required.</div>
+
+                </div>
+            </div> 
+
+            <div class="col-lg-12"></div>
+
+        </div>
+     
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success"  value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+                
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+}

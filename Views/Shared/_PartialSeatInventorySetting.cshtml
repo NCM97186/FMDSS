@@ -1,0 +1,152 @@
+﻿
+@model FMDSS.Models.Master.cls_SeatInventorySetting
+
+
+@using (Html.BeginForm("SeatInventorySetting", "Master", FormMethod.Post))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                Add/Edit Seat Inventory Setting
+            </h4>
+        </div>
+
+        <div class="modal-body">
+            @Html.HiddenFor(model => model.SeatInventorySetting)
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Place Name : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(s => s.PlaceId, (IEnumerable<SelectListItem>)ViewBag.ddlPlace, "--Select--", new { @class = "form-control common", id = "PlaceId"})
+                    @Html.ValidationMessageFor(s => s.PlaceId)
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Shift Name : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(s => s.ShiftId, (IEnumerable<SelectListItem>)ViewBag.ddlShiftType, "--Select--", new { @class = "form-control common", id = "ShiftId" })
+                    @Html.ValidationMessageFor(s => s.ShiftId)
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Zone Name: <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(s => s.ZoneId, (IEnumerable<SelectListItem>)ViewBag.ddlZone, "--Select--", new { @class = "form-control common", id = "ZoneId" })
+                    @Html.ValidationMessageFor(s => s.ZoneId)
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>VehicleName: <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(s => s.VehicleName, (IEnumerable<SelectListItem>)ViewBag.VehicleName, "--Select--", new { @class = "form-control common", id = "VehicleName" })
+                    @Html.ValidationMessageFor(s => s.VehicleName)
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Is Advance: <span class="mandatory">*</span></label>
+                    @Html.CheckBoxFor(t => t.isAdvance, new { id = "isAdvance" })
+                    
+                </div>
+                <div class="form-group">
+                    <label>Is Current: <span class="mandatory">*</span></label>
+                    @Html.CheckBoxFor(t => t.isCurrent, new { id = "isCurrent" })
+
+                </div>
+            </div>
+
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Active / Deactive : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(s => s.isActive, (IEnumerable<SelectListItem>)ViewBag.ISactivelst, new { @class = "form-control common", id = "ISactivelst" })
+
+                </div>
+            </div>
+
+            <div class="col-lg-12"></div>
+
+
+            <!-- /.Btn Groping -->
+
+
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success" value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+    @Html.Hidden("hdnRootURL", Url.Content("~/"))
+}
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+<script src="~/Scripts/Controller/Common.js"></script>
+
+
+<script>
+
+    $(document).ready(function () {
+        $('#Circle_Code').change(function () {
+            var ID = $('#Circle_Code').val();
+            console.log(ID);
+            GetData(ID, 'DIV');
+        })
+        $('#Div_Code').change(function () {
+            var ID = $('#Circle_Code').val();
+            console.log(ID);
+            GetData(ID, 'RANGE');
+        })
+    });
+
+
+
+    function GetData(ID, Type) {
+
+        var sUrl = '';
+        switch (Type) {
+            case 'DIV':
+                sUrl = '@Url.Action("GetDivision", "Master")';
+                break;
+            case 'RANGE':
+                sUrl = '@Url.Action("GetRange", "Master")';
+                break;
+            default:
+                sUrl = '';
+        }
+
+        $.ajax({
+            type: 'GET',
+            url: sUrl,
+            dataType: 'json',
+            data: { Id: ID },
+            success: function (data) {
+                $.each(data, function (i, items) {
+                    $('#Div_Code').append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                });
+
+
+               // alert(data);
+            },
+            error: function (data) { console.log(data); }
+        });
+    }
+
+</script>

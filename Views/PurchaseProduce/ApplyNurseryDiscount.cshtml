@@ -1,0 +1,237 @@
+﻿@model List<FMDSS.Models.ForestProduction.ProducePurchase>
+@{
+    ViewBag.Title = "ApplyNurseryDiscount";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+
+<script type="text/javascript" language="javascript">
+
+    $(document).ready(function () {
+
+        function disableBack() { window.history.forward() }
+
+        window.onload = disableBack();
+        window.onpageshow = function (evt) {
+            if (evt.persisted) disableBack()
+        }
+
+        $('.calculate').change(function (e) {
+            var ids = 0;
+            $("#tableDIs").val(ids);
+            $('#tableDIs tbody tr').each(function () {
+               
+                ids = $(this).find('.Discount').val();
+
+                if (ids != 0)
+                {
+                    $("#tableDIs").val(ids);
+
+                }
+            });
+            if ($("#tableDIs").val() != 0) {
+
+                $('#DiscountMandatory').html("*");
+            }
+            else { $('#DiscountMandatory').html(""); }
+            
+
+        });
+
+
+        $('#btnPay').click(function (e) {
+           
+            if ($("#tableDIs").val() != 0) {
+
+                if ($('#UploadNurseryDiscountDocument').val() == "") {
+                    $("#errUploadNurseryDiscountDocument").css("display", "block");
+                    $('#errUploadNurseryDiscountDocument').html("The Upload Nursery Discount Document is required</i>");
+                    $('#errUploadNurseryDiscountDocument').focus();
+                    return false;
+                }
+                else {
+                    $("#errUploadNurseryDiscountDocument").css("display", "none");
+                   
+                }
+
+            }
+            
+
+
+        });
+
+
+    $("#UploadNurseryDiscountDocument").change(function (e) {
+        var iSize = parseFloat($("#UploadNurseryDiscountDocument")[0].files[0].size / 1024).toFixed(2);
+        if (iSize > 2048) {
+            $('#UploadNurseryDiscountDocument').val('');
+            $('#errUploadNurseryDiscountDocument').show();
+            $('#errUploadNurseryDiscountDocument').html("</br>Upload ID should not be larger than 2 MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#UploadNurseryDiscountDocument').focus();
+            return false;
+        }
+        var file = $("#UploadNurseryDiscountDocument").val();
+        var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+        if (file) {
+
+            var get_ext = file.split('.');
+
+            get_ext = get_ext.reverse();
+
+
+            if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                $('#UploadNurseryDiscountDocument').val('');
+                $('#errUploadNurseryDiscountDocument').show();
+                $('#errUploadNurseryDiscountDocument').html("Please upload only jpeg or jpg or pdf or png or gif file format in Document DOC Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#UploadNurseryDiscountDocument').focus();
+                return false;
+            } else {
+                $('#errUploadNurseryDiscountDocument').hide();
+            }
+        }
+        else { $('#errUploadNurseryDiscountDocument').hide(); }
+
+    });
+    });
+</script>
+
+<div id="page-wrapper-inn">
+
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">
+            <!--<i class="fa fa-rupee"></i>--> Apply Nursery Discount
+            <!-- <small class="pull-right pdate">Date: 17/12/2015</small> -->
+        </h1>
+    </div>
+    <!-- /.col-lg-12 -->
+
+    @using (Html.BeginForm("SubmitApplyNurseryDiscount", "PurchaseProduce", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <div class="row">
+            <input type="hidden" value="0" id="validation" />
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <section class="payment">
+                            <!-- Table row -->
+                            <div class="row">
+                                <div class="col-xs-12 table-responsive">
+                                    <table class="table table-striped table-bordered table-hover" id="tableDIs">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No.</th>
+                                                <th>Product Name</th>
+                                                <th>Quantity</th>
+                                                <th>Rate Per Item</th>
+                                               
+                                                <th>Before discount Amount (INR)</th>
+                                                <th>Select Discount Type</th>
+                                                <th>After Discount Payable Amount (INR)</th>
+                                                @if (Convert.ToBoolean(Session["NurseryIncharge"]) == false)
+                                                {
+                                                    <th>Enter By</th>
+                                                }
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            @for (var i = 0; i < Model.Count; i++)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @(i + 1)
+
+                                                    </td>
+                                                    
+                                                    <td>
+                                                        @Html.HiddenFor(x => Model[i].CartID, new { @Value = Model[i].CartID })
+
+                                                        @Html.HiddenFor(x => Model[i].ProductName, new { @Value = Model[i].ProductName })
+
+                                                        @Html.DisplayFor(x => Model[i].ProductName, new { @Value = Model[i].ProductName })
+                                                    </td>
+                                                    <td>
+                                                        @Html.HiddenFor(x => Model[i].Quantity, new { @Value = Model[i].Quantity })
+
+                                                        @Html.DisplayFor(x => Model[i].Quantity, new { @Value = Model[i].Quantity })
+                                                    </td>
+                                                    <td>
+                                                        @Html.HiddenFor(x => Model[i].Amount, new { @Value = Model[i].Amount })
+
+                                                        @Html.DisplayFor(x => Model[i].Amount, new { @Value = Model[i].Amount })
+                                                    </td>
+                                                    <td>
+                                                        @Html.HiddenFor(x => Model[i].BeforeDiscount, new { @Value = Model[i].BeforeDiscount })
+
+                                                        @Html.DisplayFor(x => Model[i].BeforeDiscount, new { @Value = Model[i].BeforeDiscount })
+                                                    </td>
+                                                    <td>
+                                                        @if (Model[i].isdiscountApplicable == 1)
+                                                        { 
+                                                        @Html.DropDownListFor(x => Model[i].DiscountTypeID, (IEnumerable<SelectListItem>)ViewBag.NurseryDiscountLists, new { id = "DiscountTypeID",name="DiscountTypeID", @class = "calculate Discount" })
+                                                        }
+                                                        else
+                                                        { 
+                                                            @Html.DropDownListFor(x => Model[i].DiscountTypeID, (IEnumerable<SelectListItem>)ViewBag.blanklist,"--Discount Not Applicable--", new { id = "DiscountTypeID", name = "DiscountTypeID", @class = "calculate Discount" })
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        @Html.HiddenFor(x => Model[i].AmountToBePaid, new { @Value = Model[i].AmountToBePaid })
+
+                                                        @Html.DisplayFor(x => Model[i].AmountToBePaid, new { @Value = Model[i].AmountToBePaid })
+                                                    </td>
+                                                    @if (Convert.ToBoolean(Session["NurseryIncharge"]) == false)
+                                                    {
+                                                        <td>
+                                                            @Html.HiddenFor(x => Model[i].SSOID, new { @Value = Model[i].SSOID })
+
+                                                            @Html.DisplayFor(x => Model[i].SSOID, new { @Value = Model[i].SSOID })
+                                                        </td>
+                                                    }
+                                                </tr>
+                                            }
+
+
+
+                                        </tbody>
+                                    </table>
+                                </div><!-- /.col -->
+                            </div><!-- /.row -->
+                            <!-- this row will not appear when printing -->
+                           
+                            
+                                <div class="col-lg-12">
+                                        <div class="form-group">
+                                            <label> Upload Nursery Discount Document <span class="mandatory"   id="DiscountMandatory"></span> :  </label>
+                                            <input type="file" style="border:1px solid gray; padding:2px; " name="UploadNurseryDiscountDocument" id="UploadNurseryDiscountDocument"/>
+                                            <span id="errUploadNurseryDiscountDocument" style="color: Red; float:left; display:none" class="alert-danger1"></span>
+                                           
+                                            
+                                        </div>
+                                 </div>
+
+                            <div class="row no-print">
+                                <div class="col-xs-12">                                    
+                                    <label>Total Amount Payable (INR)</label>: <span style="color: #337ab7"> @Html.Raw(HttpContext.Current.Session["FinalAmount"]) </span>
+                                    <br /> 
+                                    <label style="color: Red;">Carry the actual documnet while pickup the products from nursery</label>
+
+                                   
+                                    <div style="text-align:center" class="form-horizontal" role="form">
+                                        <button id="btnPay" type="submit" name="Command" value="pay" class="btn btn-primary pull-right"><i class="fa fa-check"></i> Update Discount </button>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </section>
+
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+                <!-- /.panel -->
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+    }
+</div>

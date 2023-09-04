@@ -1,0 +1,142 @@
+﻿@model FMDSS.Entity.FRAViewModel.ClaimRequestOTVM
+
+<div class="col-md-12">
+    <div class="panel panel-default">
+        <div class="panel-heading" style="font-size:14px;font-weight:700;">
+            Bordering Village
+        </div>
+        <div class="panel-body">
+            <div class="HideInfoForApprover">
+                <div id="divBVillageDetails">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>District Name:<span class="mandatory">*</span> </label>
+                            @Html.DropDownList("ddlDistIDForBV", new SelectList(Model.DistrictList, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddlDistIDForBV", onchange = "ddlDistIDForBV_Change(this)" })
+
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Block:<span class="mandatory">*</span></label>
+                            @Html.DropDownList("ddlBlockIDForBV", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddlBlockIDForBV", onchange = "ddlBlockIDForBV_Change(this)" })
+
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>
+                                Gram Panchayat Name:<span class="mandatory">*</span>
+                            </label>
+
+                            @Html.DropDownList("ddlGPIDForBV", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddlGPIDForBV", onchange = "ddlGPIDForBV_Change(this)" })
+
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>
+                                Village Name:<span class="mandatory">*</span>
+                            </label>
+                            @Html.DropDownList("ddlVillageCodeForBV", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", @id = "ddlVillageCodeForBV" })
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group" id="fields">
+                        <button type="button" class="btn btn-info" onclick="AddBordingVillage()">
+                            <i class="input-group-btn"></i>Add Bordering Village
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-12">
+                <table class="table table-striped table-bordered table-hover gridtable">
+                    <thead>
+                        <tr>
+                            <th>
+                                Village ID
+                            </th>
+                            <th>
+                                Village Name
+                            </th>
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="dtBVillageDetails">
+                        @if (Model.BorderingVillageDetails != null && Model.BorderingVillageDetails.Any())
+                        {
+                            for (int i = 0; i < Model.BorderingVillageDetails.Count; i++)
+                            {
+                                <tr>
+                                    <td>@Model.BorderingVillageDetails[i].VillageCode</td>
+                                    <td>
+                                        @*@if (Model.BorderingVillageDetails[i].tbl_FRA_Village != null)
+                                        {
+                                            @Model.BorderingVillageDetails[i].tbl_FRA_Village.VillageName
+                                        }*@
+                                        @Model.BorderingVillageDetails[i].VillageName
+                                    </td>
+                                    <td style="width:10px;">
+                                        <a onclick="DeleteBorderingVillage(this)" href="javascript:void(0)">Delete</a>
+                                        @Html.HiddenFor(m => Model.BorderingVillageDetails[i].VillageCode, new { id = "hdnBVillageCode_" + i })
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr class="rowSkip"><td colspan="3">No record found.</td></tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Upload Related Documents:<br><i class="small">Upload file up to 2 MB</i></label>
+                    @Html.TextBox("UploadFile", "", new { @class = "form -control HideInfoForApprover", id = "fuBorderVillage", @type = "file", @multiple = "multiple", onchange = "UploadData(3)" })
+                    <div id="errordivUpload" class="alert-danger1"></div>
+                    <div class="tblmax">
+                        <table class="table table-striped table-bordered table-hover gridtable">
+                            <thead>
+                                <tr>
+                                    <th>SNo.</th>
+                                    <th>FileName</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblBorderVillage">
+                                @if (Session["UploadFile"] != null)
+                                {
+                                    var cntr = 1;
+                                    foreach (var item in ((List<FMDSS.Entity.ViewModel.CommonDocument>)Session["UploadFile"]).Where(x => x.DocumentTypeID == Convert.ToInt32(FMDSS.DocumentType.BorderingVillage)))
+                                    {
+                                        <tr>
+                                            <td style=display:none;>@item.TempID</td>
+                                            <td>@string.Format("{0}", cntr++)</td>
+                                            <td><a href="@Url.Content("~/" + item.DocumentPath)" target="_blank"><img src="../images/jpeg.png" Width="30" /></a>@item.DocumentName</td>
+                                            <td style="width:5%"><button type=button class='btn btn-danger btn-circle btnDeleteDocument' style=cursor:pointer><i class='fa fa-times'></i></button></td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr><td colspan="3">No file Uploaded</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div> 

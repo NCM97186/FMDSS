@@ -1,0 +1,714 @@
+﻿@{
+    ViewBag.Title = "Covid Booking For HD/FD";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+@model FMDSS.Models.BookOnlineTicket.CovidBooking
+@using CaptchaMvc.HtmlHelpers
+
+<script src="~/Scripts/jquery_d_1.7.3.js"></script>
+<script src="~/js/jquery.min.js"></script>
+
+<style>
+    .capt {
+        background-color: #f8f8f8;
+        border-color: #e7e7e7;
+        border: 1px solid #e7e7e7;
+        width: 240px;
+        height: 110px;
+        float: left;
+    }
+
+    #mainCaptcha {
+        position: relative;
+        padding-left: 15px;
+    }
+
+    #refresh {
+        width: 42px;
+        height: 26px;
+    }
+
+    #txtInput, #Button1 {
+        position: relative;
+        left: 15px;
+    }
+
+    .refrs {
+        left: 5px;
+        position: relative;
+    }
+
+    .capt h1 {
+        font-size: 14px;
+        padding: 10px 0 5px 15px;
+        margin: 0;
+    }
+
+    #mainCaptcha {
+        margin: 0;
+        text-decoration: line-through;
+        color: #ccc;
+        /*text-shadow: 0px 0 5px rgba(0,0,0,0.5);*/
+    }
+</style>
+<style>
+    /* Modal Content/Box */
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        height: 400px !important;
+    }
+</style>
+
+<div class="modal" id="ModalCovid" role="dialog">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" onclick="closeModelCovid();">×</button>
+                <h4><i class="fa-fw"></i>Covid Booking</h4>
+                <p style="font-weight:bold;margin:0px !important">*Please choose any three tentative dates to plan your visit-</p>
+            </div>
+            <div class="modal-body">
+                @*@using (Html.BeginForm("UserCovidOptionalBooking", "BookOnlineTicket", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {*@
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="col-lg-8">
+                            <div class="form-group un-bold">
+                                <label>Request Id :<span> @Model.RequestID</span></label>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group un-bold">
+                                <label>Shift :<span id="spnShift"></span></label>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group un-bold">
+                        <label>Choose Date:<span class="mandatory">*</span></label>
+                        @Html.TextBox("txtFirstArrivalDate", null, new { @class = "form-control datefield", @id = "txtFirstArrivalDate" })
+                        <span id="errorDate" style="color: Red; display: none" class="alert-danger1">* Please Select Date.</span>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group un-bold">
+                        <label>Choose Date:<span class="mandatory">*</span></label>
+                        @Html.TextBox("txtSecondArrivalDate", null, new { @class = "form-control datefield", @id = "txtSecondArrivalDate" })
+                        <span id="errorDate" style="color: Red; display: none" class="alert-danger1">* Please Select Date.</span>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group un-bold">
+                        <label>Choose Date:<span class="mandatory">*</span></label>
+                        @Html.TextBox("txtthirdArrivalDate", null, new { @class = "form-control datefield", @id = "txtthirdArrivalDate" })
+                        <span id="errorDate" style="color: Red; display: none" class="alert-danger1">* Please Select Date.</span>
+                    </div>
+                </div>
+                @*<div class="col-lg-4">
+                        <div class="form-group un-bold">
+                            <div class="capt">
+                                <p>
+                                    @Html.MathCaptcha()
+                                    @if (@TempData["ErrorMessage"] != null)
+                                    {
+                                        <span style="color:red">@TempData["ErrorMessage"]</span> <br />
+                                    }
+                                </p>
+
+                            </div>
+                        </div>
+                    </div>*@
+
+                <div class="col-lg-12 un-bold">
+
+                    <div class="form-group" id="btn-cont1">
+                        <button type="button" class="btn btn-success" name="Command" value="Submit" id="btn_Submit" onclick="UserCovidOptionalBookingConfirm();">
+                            Submit
+                        </button>
+                        <button type="button" id="btnCancel" class="btn btn-danger" onclick="closeModelCovid();">Cancel</button>
+                    </div>
+                </div>
+                @*}*@
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+@if (Convert.ToString(HttpContext.Current.Session["IsDepartmentalKioskUser"]) == "False")
+{
+    <input type="hidden" value="" id="hdnDeptKiosk" />
+
+}
+else
+{
+    <input type="hidden" value="@Convert.ToString(HttpContext.Current.Session["IsDepartmentalKioskUser"])" id="hdnDeptKiosk" />
+
+}
+
+<input type="hidden" value="@Convert.ToString(HttpContext.Current.Session["IsDepartmentalKioskUser"])" id="hdnDeptKioskStatus" />
+<input type="hidden" id="hdTotalMember" />
+<input type="hidden" id="hdZone" />
+<input type="hidden" id="hdFeesCamera" />
+
+
+<div id="page-wrapper-inn">
+
+    <div class="col-lg-12">
+        <h1 class="page-header">@Session["PlaceLbl"] Covid Permit Booking</h1>
+
+
+        <div style="color: #337ab7; float: right; margin-right: 30px; display: none; " id="getting-started"></div>
+
+        <input type="hidden" id="hfMemberDetailGrid" />
+        <div class="panel-heading">
+            <span style="color:red;">
+                <i class="bg-light-blue" style="color:ButtonText">Your page Session will be Expired in 10 minutes.</i>
+            </span>
+        </div>
+    </div>
+
+    @*<div class="panel-heading">
+            <marquee id="test" style="behavior=" scroll" direction="left" scrolldelay="100" scrollamount="10" onmouseover="this.stop();" onmouseout="this.start();"> *Guest may book online permits for Keoladeo National Park, Bharatpur even for current date.</marquee>
+        </div>*@
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading"> <span style="color:red;">* Mandatory field(s) to fill.</span> <span style="float:right" title="Help doc for onlinebooking"><i class="bg-light-blue" style="color:ButtonText"><a href="~/Help/User_Manual_Online%20_Ticket_Booking.pdf" target="_blank">Help doc for onlinebooking</a> </i>     </span> </div>
+                @using (Html.BeginForm("FinalSubmitForCovidOnlineBookingHDFD", "BookOnlineTicket", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {
+                    <div class="panel-body">
+
+
+                        @Html.AntiForgeryToken()
+
+                        @Html.HiddenFor(t => t.TicketId)
+                        @Html.HiddenFor(x => x.PlaceId)
+                        <div class="col-lg-12">
+                            <div class="panel-body">
+                                <div id="tbl" class="table-responsive">
+                                    <table class="table table-striped table-bordered table-hover" id="tbltemp">
+
+                                        <thead>
+                                            <tr>
+                                                <th>Place and Zone</th>
+                                                <th>Vehicle</th>
+                                                <th>Date of Visit (Previous Date)</th>
+                                                <th>Shift (Previous Shift)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>@Html.DisplayFor(t => t.PlaceName, new { @class = "form-control" })</td>
+                                                <td>@Html.DisplayFor(t => t.VehicleName, new { @class = "form-control" })</td>
+                                                <td>@Html.DisplayFor(t => t.DateofArrival1, new { @class = "form-control" })</td>
+                                                <td>@Html.DisplayFor(t => t.ShiftName, new { @class = "form-control" })</td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </tfoot>
+
+                                    </table>
+                                </div>
+                                <div><hr /></div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group un-bold">
+                                        <label>Next Visit:<span class="mandatory">*</span></label>
+                                        @Html.TextBoxFor(t => t.DateofArrival, new { @class = "form-control datefield", @id = "txt_dateofarrival" })
+
+
+                                        <span id="errorDate" style="color: Red; display: none" class="alert-danger1">* Please Select Date.</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group un-bold">
+
+                                        <label>Choose Shift: <span class="mandatory">*</span></label>
+                                        @if (Model.ShiftName == "Full Day")
+                                        {
+                                            @Html.DropDownListFor(t => t.ShiftName, new List<SelectListItem>
+                                                {
+
+                                                   new SelectListItem{ Text="Full Day", Value = "3" }
+
+                                                }, new { @class = "form-control" })
+                                        }
+                                        else
+                                        {
+                                            @Html.DropDownListFor(t => t.ShiftName, new List<SelectListItem>
+                                                    {
+                                                       new SelectListItem{ Text="Morning", Value = "1" },new SelectListItem{ Text="Evening", Value = "2" }
+
+                                                    }, new { @class = "form-control" })
+                                        }
+                                        <span id="errorShift" style="color: Red; display: none" class="alert-danger1">* Please Select Shift.</span>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-lg-6">
+                                    <div class="capt">
+                                        <h1>Captcha is case sensative</h1>
+                                        <h2 id="mainCaptcha">Captcha is case sensative</h2>
+                                        <p>
+                                            <input type="text" id="txtInput" />
+                                            <button type="button" id="refresh" onclick="Captcha();" /><i class="fa fa-refresh fa-spin fa-fw refrs"></i>
+                                        </p>
+
+                                    </div>
+                                </div>
+
+
+
+
+
+                                <div class="col-lg-6"></div>
+                                <div class="col-lg-6">
+                                    <div class="form-group" id="btn-cont1">
+                                        <label> &nbsp;</label>
+                                        <button type="button" id="btnCheckTicketAvailablity" class="btn btn-success">Check Permit Availability</button>
+                                        <span><label id="lblAvailableTicket"></label> </span>
+                                        <button type="reset" id="btnResetCaptcha" class="btn btn-success" onclick="return Captcha();">Reset</button>
+                                    </div>
+                                </div>
+
+                                @*<div class="col-lg-4">
+
+                                    </div>*@
+                                <div class="col-lg-2">
+                                    <div class="form-group un-bold" style="margin-top: 30px;">
+                                        <label id="lbl_NumberofMembersavailable" for="email"></label>
+
+                                        <input type="hidden" id="hdn_availTicket" />
+                                        <br />
+                                        <label id="lbl_Numberofvehicleavailable" for="email"></label>
+                                        <input type="hidden" id="hdn_availvehicle" />
+                                        <br />
+                                        <label id="lbl_FeePerMember" for="email"></label>
+                                        <br />
+                                        <label id="lbl_ExtraAmount" for="email"></label>
+                                        <input type="hidden" id="hdn_FeeTigerProject" />
+                                        <input type="hidden" id="hdn_FeeSurcharge" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="form-group OptionalCovid" style="margin-top: 30px;display:none">
+                                        <input type="button" class="btn btn-success" value="Indicate Three Choices Of Date" onclick="UserCovidOptionalBooking();" />
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12">
+                                    @Html.Hidden("hdnTableCount", Model.lstMemberDetails.Count)
+                                    <div id="tbl" class="table-responsive">
+                                        <table class="table table-striped table-bordered table-hover" id="tbltemp" style="position:relative;right:35px">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Name</th>
+                                                    <th>Nationality</th>
+                                                    <th>ID Proof</th>
+                                                    <th>Vehicle Name</th>
+                                                    <th>No of Camera</th>
+                                                    <th>Member Fees</th>
+                                                    <th>Camera Fees</th>
+                                                    <th>Vehicle Fees</th>
+                                                    <th>Boarding Vehicle Fee</th>
+
+                                                    <th>Boarding GuideFee GSTAmount</th>
+                                                    <th>Boarding Vehicle FeeGst Amount</th>
+                                                    <th>Boarding Guide Fee</th>
+                                                    <th>Amount</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                @{int index = 1;}
+                                                @foreach (var item in Model.lstMemberDetails)
+                                                {
+
+                                                    <tr>
+                                                        <td>  @index </td>
+                                                        <td>@item.Name  </td>
+                                                        <td>@item.Nationality</td>
+                                                        <td>@item.IdProof</td>
+                                                        <td>@Model.VehicleName</td>
+                                                        <td>@item.NoofCamera</td>
+                                                        <td>@item.MemberFees</td>
+                                                        <td>@item.CameraFees</td>
+                                                        <td>@item.VehicleFees</td>
+                                                        <td>@item.BoardingVehicleFee</td>
+
+                                                        <td>@item.BoardingGuideFeeGSTAmount</td>
+                                                        <td>@item.BoardingVehicleFeeGstAmount</td>
+                                                        <td>@item.BoardingGuideFee</td>
+                                                        <td>@item.Amount</td>
+                                                    </tr>
+                                                    index++;
+                                                }
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th>@Model.TotalAmount</th>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                @if (Convert.ToString(HttpContext.Current.Session["IsDepartmentalKioskUser"]) == "False")
+                                {
+
+                                    <div class="col-lg-12 un-bold" style="clear:both">
+                                        <div class="capt">
+                                            <p>
+                                                @Html.MathCaptcha()
+                                                @if (@TempData["ErrorMessage"] != null)
+                                                {
+                                                    <span style="color:red">@TempData["ErrorMessage"]</span> <br />
+                                                }
+                                            </p>
+
+                                        </div>
+                                    </div>
+                                    <br /><br />
+                                }
+
+
+
+
+
+                                <div class="col-lg-12"></div>
+                                <div class="col-lg-12 un-bold" style="clear:both;margin-top: 115px">
+
+                                    <div class="form-group Submit_block" id="btn-cont1" style="display:none">
+                                        <label> &nbsp;</label>
+                                        <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_Submit" onclick="BookingConfirm();">
+                                            Submit
+                                        </button>
+                                        <button type="button" id="btnReset" class="btn btn-success">Reset</button>
+                                        <button type="button" id="btnCancel" class="btn btn-danger">Cancel</button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+    $(document).ready(function () {
+        Captcha();
+        var RootURl = '@Url.Content("~/")';
+        var PlaceId = '@Model.PlaceId';
+        var values = {
+            PlaceID: PlaceId
+        };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootURl +'BookOnlineTicket/CheckSafariAccomoAvailabilityNewHDFD',
+                //url:'@Url.Action("CheckSafariAccomoAvailabilityNew", "BookOnlineTicket")',
+                success: function (data) {
+                    debugger;
+                    $("#txt_dateofarrival").datepicker("destroy");
+                    var minDateSet = data.list7;
+                    var maxDateSet = data.list8;
+
+
+                    var disabledDays = [7, 8, 9];
+
+                    function nationalDays(date) {
+                        var m = date.getMonth(), d = date.getDate(), y = date.getFullYear();
+                        for (i = 0; i < disabledDays.length; i++) {
+                            if ($.inArray((m + 1), disabledDays) != -1 || new Date() > date) {
+                                return [false];
+                            }
+                        }
+                        return [true];
+                    }
+                    function noWeekendsOrHolidays(date) {
+                        return nationalDays(date);
+                    }
+
+                    $(".datefield").datepicker({
+                        beforeShowDay: noWeekendsOrHolidays,
+                        minDate: minDateSet, maxDate: maxDateSet, dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); }
+                    });
+
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+
+        $('#txt_dateofarrival').bind('change', function () {
+            debugger;
+            var dateofArrival = $('#txt_dateofarrival').val();
+            var oBook = {
+                DateofArrival: dateofArrival,
+                TicketId: TicketId,
+                ShiftName: $('#ShiftName').val(),
+                PlaceName: $('#PlaceId').val()
+            }
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(oBook),
+                url: RootUrl + 'BookOnlineTicket/CheckCovidTicketDateAvailabilityDuration',
+                success: function (IsvalidDate) {
+                    if (IsvalidDate == "False") {
+                        alert("Date of Visit  must be between 01/10/2020 and 30/06/2022 but not booked to July,August and September.");
+                        $('#txt_dateofarrival').val('');
+                        $('.OptionalCovid').hide();
+                        $('#lbl_NumberofMembersavailable').text('');
+                    }
+                }
+            });
+        });
+
+
+        var TicketId = $('#TicketId').val();
+         var RootUrl = '@Url.Content("~/")';
+
+        $("#btnCheckTicketAvailablity").bind("click", function () {
+            debugger;
+            var dateofArrival = $('#txt_dateofarrival').val();
+            if (dateofArrival != '') {
+            var oBook = {
+                DateofArrival: dateofArrival,
+                TicketId: TicketId,
+                ShiftName: $('#ShiftName').val(),
+                PlaceName: $('#PlaceId').val()
+            }
+           
+
+            if (validateAvailablaty()) {
+                $.ajax({
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(oBook),
+                    url: RootUrl + 'BookOnlineTicket/CheckCovidHDFDTicket',
+                    success: function (data) {
+                        console.log(data);
+                        if (data != null) {
+                            $('#lbl_NumberofMembersavailable').text("Available Seats: " + data);
+                            var tableCount = $('#hdnTableCount').val();
+                            if (tableCount <= data) {
+                                if (data > 0) {
+                                    $('.OptionalCovid').hide();
+                                    $('.Submit_block').show();
+                                }
+                                else {
+                                    //$('.OptionalCovid').show();
+                                    //$('.Submit_block').hide();
+                                }
+                            }
+                            else {
+                                alert("Seats are not available for the selected date. Please choose another date.")
+                                //$('.OptionalCovid').show();
+                            }
+                        }
+                        else {
+                            alert('Permit not avaliable');
+                            return false;
+                        }
+                        //$('#lbl_NumberofMembersavailable').text(data);
+                    }
+                })
+            }
+            } else {
+                alert("Please select next visit date");
+                $('.OptionalCovid').hide();
+                $('#lbl_NumberofMembersavailable').text('');
+            }
+        });
+
+
+    })
+
+    $(':submit').click(function (e) {
+        var captchatxt = $('#CaptchaInputText').val();
+        if (captchatxt != '') {
+            return confirm('Are you sure want to reschedule your visit.');
+        }
+        else {
+            e.preventDefault();
+            alert('Please Fill Captcha!');
+            return false;
+        }
+
+    });
+
+
+    function UserCovidOptionalBooking() {
+
+        var ReqID = '@ViewBag.RQid'
+        $("#spnShift").html($("#ShiftName option:selected").text());
+        $("#txtFirstArrivalDate").val('');
+        $("#txtSecondArrivalDate").val('');
+        $("#txtthirdArrivalDate").val('');
+        $("#ModalCovid").show();
+
+
+    }
+
+    function UserCovidOptionalBookingConfirm() {
+        debugger;
+        var firstdate = $("#txtFirstArrivalDate").val();
+        var seconddate = $("#txtSecondArrivalDate").val();
+        var thirddate = $("#txtthirdArrivalDate").val();
+        var Isequal = 0;
+
+        if (firstdate === seconddate | firstdate === thirddate) {
+            Isequal = 1
+        }
+        if (seconddate === firstdate | seconddate === thirddate) {
+            Isequal = 1
+        }
+        if (thirddate === firstdate | thirddate === seconddate) {
+            Isequal = 1
+        }
+        if (Isequal == 1) {
+            alert("Please select different date");
+            return false;
+        }
+        else {
+
+            var oBook = {
+                FirstDate: firstdate,
+                SecondDate: seconddate,
+                ThirdDate: thirddate,
+                TicketId: '@Model.TicketId',
+                ShiftId: $('#ShiftName').val()
+            }
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(oBook),
+                url: RootUrl + 'BookOnlineTicket/UserCovidOptionalBooking',
+                success: function (data) {
+                    alert("You have succesfully submitted your choices of visit date. After approval from concern authority you will be intimated about the final visit schedule.");
+                    $("#ModalCovid").hide();
+                    window.location.href = '/BookOnlineTicket/BookOnlineTicket';
+                }
+            });
+
+
+
+        }
+    }
+
+    function closeModelCovid() {
+        $("#ModalCovid").hide();
+    }
+
+
+    function Captcha() {
+        var alpha = new Array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+        var i;
+        for (i = 0; i < 6; i++) {
+            var a = alpha[Math.floor(Math.random() * alpha.length)];
+            var b = alpha[Math.floor(Math.random() * alpha.length)];
+            var c = alpha[Math.floor(Math.random() * alpha.length)];
+            var d = alpha[Math.floor(Math.random() * alpha.length)];
+            var e = alpha[Math.floor(Math.random() * alpha.length)];
+            var f = alpha[Math.floor(Math.random() * alpha.length)];
+            var g = alpha[Math.floor(Math.random() * alpha.length)];
+        }
+        var code = a + ' ' + b + ' ' + ' ' + c + ' ' + d + ' ' + e + ' ' + f + ' ' + g;
+        if ($("#hdnDeptKioskStatus").val() == "False") {
+            document.getElementById("mainCaptcha").innerHTML = code
+            document.getElementById("mainCaptcha").value = code
+            document.getElementById('txtInput').value = '';
+        }
+    }
+    function ValidCaptcha() {
+        var string1 = removeSpaces(document.getElementById('mainCaptcha').value);
+        var string2 = removeSpaces(document.getElementById('txtInput').value);
+        if (string1 == string2) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    function validateAvailablaty() {
+        ////  Captcha();
+        // command by rajveer sharma check load testing
+        if ($('#txtInput').val() != '') {
+            ////alert('if');
+            var status = ValidCaptcha();
+            // alert('status='+status);
+            if (status == false) {
+                alert('Invalid captcha');
+                Captcha();
+                $('#txtInput').val('');
+                $('#txtInput').focus();
+                return false;
+            }
+        }
+        else {
+            alert('Enter valid captcha');
+            $('#txtInput').focus();
+            //alert('else');
+            return false;
+        }
+        return status;
+    }
+
+    function removeSpaces(string) {
+        return string.split(' ').join('');
+    }
+
+
+</script>
+
+
+
+

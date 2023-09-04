@@ -1,0 +1,271 @@
+﻿@model FMDSS.Models.CitizenRefunds.CitizenRefundViews
+@{
+    ViewBag.Title = "Apply Partial Refund Request";
+    Layout = "~/Views/Shared/_LayoutBookingRoaster.cshtml";
+}
+@section PageCss{
+    <link href="~/css/bootstrap/jquery-ui.css" rel="stylesheet" />
+    <link href="~/Select2DropdownJSCSS/css/select2.min.css" rel="stylesheet" />
+}
+    <div class="row">
+        <div class="col-lg-9 pad">
+            <h1 class="page-header"><span>WildLife Permit Booking : Apply Partial Refund Request </span></h1>
+        </div>
+        @using (Html.BeginForm("ApplyPartialRefundRequest", "RefundPayment", FormMethod.Post))
+        {
+            <div class="col-lg-9 pad">
+                <div class="alert alert-success text-success" id="spanSuccess" style="display: none;">
+                    <strong>@ViewBag.Msg</strong>
+                </div>
+                <div class="alert alert-warning" id="spanFail" style="display: none;">
+                    <strong>@ViewBag.Msg</strong>
+                </div>
+            </div>
+            <div class="col-lg-9">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="col-lg-6" style="display:none">
+                            <div class="form-group">
+                                <label>Ticket No:</label>
+                                @Html.TextBoxFor(model => model.bankDetail.TicketId, new { @class = "form-control ", @name = "TicketId", @id = "TicketId", @readonly = "readonly" })
+                                @*@Html.ValidationMessageFor(model => model.bankDetail.TicketId)*@
+                                <div id="errTicketId" style="display:none; text-align: left !important;padding-left:30px!important;" class="alert-danger1 col-md-12">Ticket Required.</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Request Id:</label>
+                                @Html.TextBoxFor(model => model.bankDetail.RequestId, new { @class = "form-control", @name = "RequestId", @id = "RequestId", @readonly = "readonly" })
+                                @*@Html.ValidationMessageFor(model => model.bankDetail.TicketId)*@
+                                <div id="errTicketId" style="display:none; text-align: left !important;padding-left:30px!important;" class="alert-danger1 col-md-12">Ticket Required.</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Refundable Amount(INR):</label>
+                                @Html.TextBoxFor(model => model.bankDetail.RefundableAmount, new { @class = "form-control", @name = "RefundableAmount", @id = "RefundableAmount", @readonly = "readonly" })
+                                @*@Html.ValidationMessageFor(model => model.bankDetail.RefundableAmount)*@
+                                <div id="errRefundableAmount" style="display:none; text-align: left !important;padding-left:30px!important;" class="alert-danger1 col-md-12">Refund Amount Required.</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Bank Name:</label>
+                                @Html.TextBoxFor(model => model.bankDetail.BankName, new { @class = "form-control onlyletters",  @maxlength = "50", @name = "BankName", @id = "BankName"  })
+                                @*@Html.ValidationMessageFor(model => model.bankDetail.BankName)*@
+                                <div id="errBankName" style="display:none; text-align: left !important;padding-left:30px!important;" class="alert-danger1 col-md-12">Bank Name is Required.</div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+
+                                <label>Branch Name <span style="color:orangered">*</span>:</label>
+                                @Html.TextBoxFor(model => model.bankDetail.BranchName, new { @class = "form-control onlyAlfaNumeric", @maxlength = "50", @name = "BranchName", @id = "BranchName" })
+                                @*@Html.ValidationMessageFor(model => model.bankDetail.BranchName)*@
+
+                                <div id="errBranchName" style="display:none; text-align: left !important;padding-left:30px!important;" class="alert-danger1 col-md-12">Branch Name is Required.</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+
+                                <label>IFSC Code<span style="color:orangered">*</span>:</label>
+                                @Html.TextBoxFor(model => model.bankDetail.IFSCCode, new { @class = "form-control onlyAlfaNumeric", @maxlength = "50", @name = "IFSCCode", @id = "IFSCCode" })
+                                @*@Html.ValidationMessageFor(model => model.bankDetail.IFSCCode)*@
+                                <div id="errIFSCCode" style="display:none; text-align: left !important;padding-left:30px!important;" class="alert-danger1 col-md-12">IFSC Code is Required.</div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+
+                                <label>Account Holder Full Name<span style="color:orangered">*</span>:</label>
+                                @Html.TextBoxFor(model => model.bankDetail.AccountHolderName, new { @class = "form-control onlyletters", @maxlength = "50", @name = "AccountHolderName", @id = "AccountHolderName" })
+                                @*@Html.ValidationMessageFor(model => model.bankDetail.AccountHolderName)*@
+                                <div id="errAccountHolderName" style="display:none; text-align: left !important;padding-left:30px!important;" class="alert-danger1 col-md-12">Account Holder Full Name is Required.</div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+
+                                <label>Account Type<span style="color:orangered">*</span>:</label>
+
+                                @Html.DropDownListFor(model => model.bankDetail.AccountType,
+                                                                               new SelectList(new List<SelectListItem> {
+                                                                                                                                         new SelectListItem { Text = "Current", Value = "Current"},
+                                                                                                                                         new SelectListItem { Text = "Saving", Value = "Saving"}
+                                                                                    }, "Value", "Text"),
+                                                                                "Select Account Type",
+                                                                                 new { @class = "form-control myselect", @name = "AccountType", @id = "AccountType" })
+                                @*@Html.ValidationMessageFor(model => model.bankDetail.AccountType)*@
+                                <div id="errAccountType" style="display:none; text-align: left !important;padding-left:30px!important;" class="alert-danger1 col-md-12">Account Type is Required.</div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+
+                                <label>Account No<span style="color:orangered">*</span>:</label>
+                                @Html.TextBoxFor(model => model.bankDetail.AccountNo, new { @class = "form-control onlyNumber", @maxlength = "35", @name = "AccountNo", @id = "AccountNo" })
+                                @*@Html.ValidationMessageFor(model => model.bankDetail.AccountNo)*@
+                                <div id="errAccountNo" style="display:none; text-align: left !important;padding-left:30px!important;" class="alert-danger1 col-md-12">Account No is Required.</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="form-group" style="text-align:left!important">
+                                @Html.CheckBoxFor(model => model.bankDetail.ConfirmRefundByCitizen, new { @id = "ConfirmRefundByCitizen", @name = "ConfirmRefundByCitizen" }) I hereby confirm my request of cancellation of the permit and want my refundable amount in the above mentioned bank account.
+                                @*@Html.ValidationMessageFor(model => model.bankDetail.ConfirmRefundByCitizen)*@
+                                <div id="errConfirmRefundByCitizen" style="display:none; text-align: left !important;padding-left:30px!important;" class="alert-danger1 col-md-12">Confirmation acceptance for Refund is Required.</div>
+                            </div>
+                        </div>
+
+                        <div id="btn" class="col-lg-12">
+                            <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_Submit">
+                                Apply To Refund
+                            </button>
+                            <a id="btn_Previous" style="float:none" class="btn btn-warning" href='@Url.Action("PartialRefundRequestList", "RefundPayment")'>
+                                Back
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    @section PageScript {
+        <script src="~/Select2DropdownJSCSS/js/select2.min.js"></script>
+        <script src="~/Scripts/jquery.blockUI.js"></script>
+        <script type="text/javascript">
+            $(".myselect").select2();
+            $('#ConfirmRefundByCitizen').prop('selected', false);
+            $(document).ready(function () {
+                var msgstatus = '@ViewBag.msgStatus';
+
+                if (msgstatus != '-1') {
+                    if (msgstatus == '0') {
+                        $('#spanFail').show();
+                        $('#spanFail').delay(10000).fadeOut('slow');
+                    }
+                    if (msgstatus == '1') {
+                        $('#spanSuccess').show();
+                        $('#spanSuccess').delay(10000).fadeOut('slow');
+                    }
+                }
+            });
+            $('#btn_Submit').click(function (e) {
+                var isValid = true;
+                var ticketId = $('#TicketId').val() | 0;
+                $('#errTicketId').hide();
+                if (ticketId == 0) {
+                    $('#errTicketId').css("display", "block");
+                    $('#errTicketId').show();
+                    isValid = false;
+                }
+
+                var refundableAmount = $('#RefundableAmount').val() | 0;
+                $('#errRefundableAmount').hide();
+                if (refundableAmount == 0) {
+                    $('#errRefundableAmount').css("display", "block");
+                    $('#errRefundableAmount').show();
+                    isValid = false;
+                }
+
+                var bankName = $('#BankName').val();
+                $('#errBankName').hide();
+                if (bankName == '' || bankName == undefined || bankName == null) {
+                    $('#errBankName').css("display", "block");
+                    $('#errBankName').show();
+                    isValid = false;
+                }
+
+                var ifscCode = $('#IFSCCode').val();
+                $('#errIFSCCode').hide();
+                if (ifscCode == '' || ifscCode == undefined || ifscCode == null) {
+                    $('#errIFSCCode').css("display", "block");
+                    $('#errIFSCCode').show();
+                    isValid = false;
+                }
+
+
+                var branchName = $('#BranchName').val();
+                $('#errBranchName').hide();
+                if (branchName == '' || branchName == undefined || branchName == null) {
+                    $('#errBranchName').css("display", "block");
+                    $('#errBranchName').show();
+                    isValid = false;
+                }
+
+                var accountHolderName = $('#AccountHolderName').val();
+                $('#errAccountHolderName').hide();
+                if (accountHolderName == '' || accountHolderName == undefined || accountHolderName == null) {
+                    $('#errAccountHolderName').css("display", "block");
+                    $('#errAccountHolderName').show();
+                    isValid = false;
+                }
+
+                var accountType = $('#AccountType').val();
+                $('#errAccountType').hide();
+                if (accountType == '' || accountType == undefined || accountType == null) {
+                    $('#errAccountType').css("display", "block");
+                    $('#errAccountType').show();
+                    isValid = false;
+                }
+                var accountNo = $('#AccountNo').val();
+                $('#errAccountNo').hide();
+                if (accountNo == '' || accountNo == undefined || accountNo == null) {
+                    $('#errAccountNo').css("display", "block");
+                    $('#errAccountNo').show();
+                    isValid = false;
+                }
+                $('#errConfirmRefundByCitizen').hide();
+                if ($("#ConfirmRefundByCitizen").prop('checked') == false) {
+                    $('#errConfirmRefundByCitizen').css("display", "block");
+                    $('#errConfirmRefundByCitizen').show();
+                    isValid = false;
+                }
+
+
+                if (isValid == false) {
+                    return false;
+                }
+            });
+            $('.onlyletters').keydown(function (e) {
+                if (e.shiftKey || e.ctrlKey || e.altKey) {
+                    e.preventDefault();
+                } else {
+                    var key = e.keyCode;
+                    if (!((key == 8) || (key == 32) || (key == 46) || (key >= 35 && key <= 40) || (key >= 65 && key <= 90))) {
+                        e.preventDefault();
+                    }
+                }
+            });
+            $('.onlyNumber').keydown(function (e) {
+                //alert(e.keyCode);
+                if (e.shiftKey || e.ctrlKey || e.altKey) {
+                    e.preventDefault();
+                } else {
+                    var key = e.keyCode;
+                    if (!((key == 8) || (key == 32) || (key == 46) || (key >= 35 && key <= 40) || (key >= 48 && key <= 57) || (key >= 96 && key <= 105))) {
+                        e.preventDefault();
+                    }
+                }
+              
+            });
+            $('.onlyAlfaNumeric').keydown(function (e) {
+                //alert(e.keyCode);
+                if (e.shiftKey || e.ctrlKey || e.altKey) {
+                    e.preventDefault();
+                } else {
+                    var key = e.keyCode;
+                    if (!((key == 8) || (key == 32) || (key == 46) || (key == 16) || (key == 189) || (key == 186) || (key == 187) || (key >= 35 && key <= 40) || (key >= 48 && key <= 57) || (key >= 96 && key <= 105)||(key >= 35 && key <= 40) || (key >= 65 && key <= 90))) {
+                        e.preventDefault();
+                    }
+                }
+            });
+        </script>
+    }

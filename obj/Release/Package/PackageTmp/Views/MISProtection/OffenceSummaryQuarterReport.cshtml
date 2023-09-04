@@ -1,0 +1,310 @@
+﻿@model FMDSS.Entity.Protection.ViewModel.OffenceReportVM
+@{
+    ViewBag.Title = "OffenceReport";
+}
+<script>var RootUrl = '@Url.Content("~/")';</script>
+<style>
+    .hide {
+        display: none;
+    }
+
+    .modal-dialog {
+        width: 1286px;
+    }
+
+    #myModal .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModal .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModal .modal-footer {
+        background-color: #f9f9f9;
+    }
+
+    #myModal .btn-success {
+        width: 100%;
+        padding: 10px;
+    }
+
+    ul.a {
+        list-style-type: circle;
+    }
+
+    #myModalRefund .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModalRefund .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModalRefund .modal-footer {
+        background-color: #f9f9f9;
+    }
+
+    #myModalRefund .btn-success {
+        width: 100%;
+        padding: 10px;
+    }
+
+    ul.a {
+        list-style-type: circle;
+    }
+
+    .capt {
+        background-color: #f8f8f8;
+        border-color: #e7e7e7;
+        border: 1px solid #e7e7e7;
+        width: 202px;
+        float: left;
+    }
+
+        .capt p {
+            margin: 10px;
+        }
+
+    #refresh {
+        width: 28px;
+        height: 26px;
+        padding: 0px;
+    }
+
+    #txtInput {
+        width: 150px;
+    }
+
+    #page-wrapper-inn .table > thead > tr > th {
+        width: auto;
+    }
+</style>
+
+<div id="page-wrapper-inn">
+    <div class="row">
+        <div class="col-lg-9 pad">
+            <h1 class="page-header"><span>Report : Offence Summary Quarter Report</span></h1>
+        </div>
+        @using (Ajax.BeginForm("OffenceSummaryQuarterReport", "MISProtection", new AjaxOptions { HttpMethod = "Post", InsertionMode = InsertionMode.Replace, UpdateTargetId = "divReportDetails" }))
+        {
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        @*<div class="col-lg-12">
+                                <div class="form-group un-bold">
+                                    <label>Report Type:</label>
+                                    @Html.DropDownList("ReportType", new List<SelectListItem>
+                                        {
+                                        new SelectListItem { Text = "Date Wise", Value = "1"},
+                                        new SelectListItem { Text = "Financial Year Wise", Value = "2"},
+                                        },"--Select--", new { @class = "form-control", id = "ddlReportType" })
+                                </div>
+                            </div>*@
+                        @*<div id="dvFinancialyear" style="display:block">
+                                <div class="col-lg-6">
+                                    <div class="form-group un-bold">
+                                        <label>Financial Year:</label>
+                                        @Html.DropDownList("FinancialYear", (IEnumerable<SelectListItem>)ViewBag.FinacialYearList, new { @class = "form-control", id = "ddlFinancialYear", onchange = "SetDateByFinancial(0)" })
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group un-bold">
+                                        <label>Financial Period:</label>
+                                        @Html.DropDownList("FinancialPeriod", new List<SelectListItem>
+                                            {
+                                            new SelectListItem { Text = "Quarter 1(Apr-Jun)", Value = "1"},
+                                            new SelectListItem { Text = "Quarter 2(Jul-Sep)", Value = "2"},
+                                            new SelectListItem { Text = "Quarter 3(Oct-Dec)", Value = "3"},
+                                            new SelectListItem { Text = "Quarter 4(Jan-Mar)", Value = "4"}
+                                            }, new { @class = "form-control ", onchange = "SetDateByFinancial(1)", id = "ddlFinancialPeriod" })
+                                    </div>
+                                </div>
+                            </div>*@
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Circle:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(model => model.CircleCode, (IEnumerable<SelectListItem>)ViewBag.CircleList, "All", new { @class = "form-control", id = "ddlCircle", onchange = "BindDivision(this,'ddlDivision')" })
+                                <div id="errPlace" style="display:none" class="alert-danger1">@Html.ValidationMessageFor(m => m.CircleCode)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Division:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(model => model.DivisionCode, new SelectList(string.Empty, "Value", "Text"), "All", new { @class = "form-control", id = "ddlDivision", onchange = "BindRange(this,'ddlRange')" })
+                                <div id="errPlace" style="display:none" class="alert-danger1">@Html.ValidationMessageFor(m => m.DivisionCode)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>From Date:<span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(model => model.FromDate, new { @class = "form-control common ", id = "txtFromDate", @readonly = true })
+                                <span id="errFromDate" style="display: none" class="alert-danger1">From Date is Required.</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>To Date:<span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(model => model.ToDate, new { @class = "form-control common ", id = "txtToDate", @readonly = true })
+                                <span id="errToDate" style="display: none" class="alert-danger1"></span>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group un-bold">
+                                <label>Offence Category: </label><br />
+                                @Html.DropDownListFor(x => x.OffenceCategory, (IEnumerable<SelectListItem>)ViewBag.OffenceCategory, new { @class = "form-control ", multiple = "multiple" })
+
+
+                            </div>
+                        </div>
+                        <div id="btn" class="col-lg-12">
+                            <button type="submit" id="btnSubmit" class="btn btn-success" name="Command" value="Save">
+                                <i class="fa fa-check"></i> Submit
+                            </button>
+                            <button type="button" class="btn btn-warning" id="btn_reset">
+                                <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12" id="divReportDetails"></div>
+            </div>
+            @Html.Hidden("hdnRootURL", Url.Content("~/"))
+        }
+    </div>
+
+</div>
+
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/js/bootstrap-multiselect.js"></script>
+<link href="~/css/bootstrap-multiselect.css" rel="stylesheet" />
+@*
+    <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>*@
+
+<script src="~/Scripts/Controller/Common.js"></script>
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#txtFromDate,#txtToDate').datepicker({
+            dateFormat: 'dd/mm/yy', changeMonth: true,
+            changeYear: true,
+        });
+        $('#txtFromDate').datepicker('setDate', new Date(new Date(1970,00,01)));
+        $('#txtToDate').datepicker('setDate', new Date());
+
+        //$("#txtFromDate,#txtToDate").datepicker({
+        //    minDate: -1, maxDate: -2, changeMonth: true,
+        //    changeYear: true,
+        //})
+
+        //$('#btnSubmit').click(function () {
+        //    var type = $('#ddlReportType').val();
+        //    if (type == "" || type == undefined) {
+        //        alert("Please select report type.");
+        //        $('#ddlReportType').focus();
+        //        return false;
+        //    }
+        //});
+        //$('#ddlReportType').change(function () {
+        //    var val = $(this).val();
+        //    if (val == "2") {
+        //        $('#dvFinancialyear').show();
+        //    }
+        //    else if (val == "1") {
+        //        $('#dvFinancialyear').hide();
+        //        $('#txtFromDate,#txtToDate').datepicker({ dateFormat: 'dd/mm/yy' });
+        //        $('#txtFromDate,#txtToDate').datepicker('setDate', new Date());
+        //        $("#txtFromDate,#txtToDate").datepicker({ minDate: -1, maxDate: -2 })
+        //    }
+        //    else {
+        //        $('#dvFinancialyear').hide();
+        //    }
+
+        //});
+        SetCurrentFinancialYearDetails();
+    })
+    $('#OffenceCategory').multiselect({
+        allSelectedText: 'All',
+        maxHeight: 200,
+        includeSelectAllOption: true
+    }).multiselect('selectAll', false).multiselect('updateButtonText');
+
+
+
+
+    function SetCurrentFinancialYearDetails() {
+        var currentMonth = new Date().getMonth();
+        var currentYear = new Date().getFullYear();
+        var finYear = '';
+        var finPeriod = 1;
+
+        if (currentMonth < 4) {
+            finYear = (currentYear - 1) + '-' + currentYear
+        }
+        else {
+            finYear = currentYear + '-' + (currentYear + 1)
+        }
+        $("#ddlFinancialYear>option").removeAttr('selected');
+        $("#ddlFinancialYear").find("option:contains('" + finYear + "')").attr('selected', 'selected');
+
+        if (currentMonth <= 2) {
+            finPeriod = 4;
+        }
+        else if (currentMonth >= 3 && currentMonth <= 5) {
+            finPeriod = 1;
+        }
+        else if (currentMonth >= 6 && currentMonth <= 8) {
+            finPeriod = 2;
+        }
+        else {
+            finPeriod = 3;
+        }
+        $('#ddlFinancialPeriod').val(finPeriod);
+        SetDateByFinancial(finPeriod);
+    }
+
+    function SetDateByFinancial(indx) {
+        var finYear = $('#ddlFinancialYear>option:selected').text().split('-');
+        var finPeriod = $('#ddlFinancialPeriod').val();
+
+        if (finYear.length > 1) {
+            switch (finPeriod) {
+                case "1":
+                    $('#txtFromDate').val('01/04/' + finYear[0]);
+                    $('#txtToDate').val('30/06/' + finYear[0]);
+                    break;
+                case "2":
+                    $('#txtFromDate').val('01/07/' + finYear[0]);
+                    $('#txtToDate').val('30/09/' + finYear[0]);
+                    break;
+                case "3":
+                    $('#txtFromDate').val('01/10/' + finYear[0]);
+                    $('#txtToDate').val('31/12/' + finYear[0]);
+                    break;
+                case "4":
+                    $('#txtFromDate').val('01/01/' + finYear[1]);
+                    $('#txtToDate').val('31/03/' + finYear[1]);
+                    break;
+                default:
+                    $('#txtFromDate').val('01/04/' + finYear[0]);
+                    $('#txtToDate').val('31/03/' + finYear[1]);
+
+            }
+        }
+        else {
+            if (indx == 0) {
+                $('#ddlFinancialPeriod').val('');
+            }
+            $('#txtToDate').datepicker('setDate', new Date());
+        }
+    }
+
+
+</script>

@@ -1,0 +1,178 @@
+﻿@model FMDSS.Models.BookOnlineTicket.DepartmentKioskPayment
+@{
+    ViewBag.Title = "PaymentByDepartmentalKioskUserDetails";
+
+
+    if (HttpContext.Current.Session["User"] != null)
+    {
+        Layout = null;
+        if ((HttpContext.Current.Session["DesignationId"].ToString() != "10"))
+        {
+            if (Convert.ToString(HttpContext.Current.Session["IsDepartmentalKioskUser"].ToString()) == "True")
+            {
+                Layout = "~/Views/Shared/_Layout.cshtml";
+            }
+            else
+            {
+                Layout = "~/Views/Shared/Forestlayout.cshtml";
+            }
+        }
+        else
+        {
+            Layout = "~/Views/Shared/_Layout.cshtml";
+
+        }
+    }
+}
+<script src="~/Scripts/jquery-1.10.2.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js" type="text/javascript"></script>
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        var currentDate = new Date();
+        $("#ChequeIssueDate").datepicker({ yearRange: '1947:', dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, maxDate: new Date(), onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+
+        $("#ChequeIssueDate").val('');
+
+        $(document).on('keypress', '#ChequeIssueDate', function (event) {
+            event.preventDefault();
+            return false;
+
+        });
+
+        $('#ChequeIssueDate').keydown(function (event)
+        { return cancelBackspace(event) });
+
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+
+        $('.cash').hide();
+
+        $('#PaymentMode').change(function () {
+
+            if ($('#PaymentMode').val() == 1) {                
+                $('.cash').hide();
+            }
+            else {
+                $('.cash').show();
+            }
+        });
+    });
+</script>
+
+@using (Html.BeginForm("DepartmentKioskPayment", "NationalPark", FormMethod.Post))
+{
+    <div id="page-wrapper-inn">
+        <div class="col-lg-12 pad">
+            <h1 class="page-header">Departmental Kiosk User Transaction </h1>
+        </div>
+        <div class="row">
+            <div class="modal-body">
+                @Html.HiddenFor(model => model.RequestId)
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Request ID: <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.RequestId, new { @class = "form-control common", @readonly = "True" })
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Total Amount: <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.TotalAmount, new { @class = "form-control common", @readonly = "True" })
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Payment Mode: <span class="mandatory">*</span></label>
+                        @Html.DropDownListFor(Model => Model.PaymentMode, new List<SelectListItem>
+                                                                           {
+                                                                             new SelectListItem { Text = "--Select--", Value = ""},
+                                                                             new SelectListItem { Text = "CASH", Value = "1"},
+                                                                             new SelectListItem { Text = "CHEQUE", Value = "2"},
+                                                                             new SelectListItem { Text = "Demand Draft", Value = "3"},
+                                                                          }, new { @class = "form-control common", id = "PaymentMode" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(model => model.PaymentMode)</div>
+
+                    </div>
+                </div>
+
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Vehical Name: <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.VehicleName, new { @class = "form-control common", @readonly = "True" })
+
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Guide Name: <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.GuideName, new { @class = "form-control common" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(model => model.GuideName)</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Vehical Number: <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.VehicleNumber, new { @class = "form-control common" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(model => model.VehicleNumber)</div>
+                    </div>
+                </div>
+
+
+                <div class="col-lg-6">
+                    <div class="form-group cash">
+                        <label>Bank Name: <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.BankName, new { @class = "form-control common" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(model => model.BankName)</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group cash">
+                        <label>IFSC Code: <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.IFSCCode, new { @class = "form-control common" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(model => model.IFSCCode)</div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group cash">
+                        <label>Cheque Number : <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.ChequeNo, new { @class = "form-control common" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(model => model.ChequeNo)</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 cash">
+                    <div class="form-group">
+                        <label>Cheque Date: <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.ChequeIssueDate, new { @class = "form-control common" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(model => model.ChequeIssueDate)</div>
+                    </div>
+                </div>
+                <div id="btn" class="col-lg-12">
+
+                    <button type="submit" class="btn btn-success" value="Save" name="btn_submit1" id="btn_submit1">
+                        <i class="fa fa-check"></i> Submit
+                    </button>
+
+                    <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                        <i class="fa fa-times fa-fw"></i> Close
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+}

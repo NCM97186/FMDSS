@@ -1,0 +1,415 @@
+﻿@model FMDSS.Models.MiddleWareModules
+
+
+    <table class="table tabtext table-striped  table-bordered table-hover" style="width:100%;">
+        <thead>
+            <tr>
+
+                @{
+                    <th>Place & Booking Type</th>
+                    <th>Booking Procedure</th>
+                    <th>Fee Details</th>
+                    string strPlaceList = "1,21,22,30,58,59,61,66,67,71,72";
+                    string[] spl = strPlaceList.Split(',');
+                    bool isExist = Array.Exists(spl, x => x.Equals(Model.MWSMG_List[0].PlaceId.ToString()));
+
+                    if (isExist == false)
+                    {
+                    <th>Check Availability</th>
+                    }
+                    <th>Book Now</th>
+                    }
+            </tr>
+        </thead>
+        <tbody>
+                @{            
+                    if (Model.MWSMG_List != null)
+                    {
+                        foreach (var item in Model.MWSMG_List)
+                        {
+                            string placedetail = item.PlaceName + " " + item.PageTitle;
+
+            <tr>
+                <td>@placedetail</td>
+                <td><a href="@item.BookingProcedure" target="_blank">Click Here</a></td>
+                @*<td><span type="Button" data-toggle="modal" data-target="#modalBookingProcedure" style="color:#fff;" onclick="GetBookingProcedure('@item.PlaceId')"> Click Here </span></td>*@
+                @*<td><span type="Button" id="feeDetail_@item.PlaceId" data-toggle="modal" data-placename="@placedetail" data-placeid="@item.PlaceId" data-bookingtype="@item.BookingType" style="color:#fff;"> Click Here </span></td>*@
+                <td>
+                    @{
+                        if (item.PlaceId != 19 && item.PlaceId != 74 && item.PlaceId != 36)
+                        {
+                            <a href="javascript:void(0);" id="feeDetail_@item.PlaceId" data-toggle="modal" data-placename="@placedetail" data-placeid="@item.PlaceId" data-bookingtype="@item.BookingType" style="color:#fff;"> Click Here </a>
+                        }
+                        
+                   }
+
+                </td>
+                @*data-target="#modalFeeDetail"*@
+                @if (isExist == false)
+                {                   
+                <td>
+
+                    @if (item.PlaceId != 19 && item.PlaceId != 74 && item.PlaceId != 36)
+                    {
+                    <a href="javascript:void(0);" id="btnAvailibity_@item.PlaceId" data-toggle="modal" data-placename="@placedetail" data-placeid="@item.PlaceId" data-bookingtype="@item.BookingType" style="color:#fff;"> Click Here </a>
+                    }
+                </td>
+                }
+                <td><a href="javascript:void(0);" onclick="funBookNow('@item.MainLink')">Book Now</a></td>
+
+            </tr>
+                        }
+                    }
+               }
+            </tbody>
+    </table>
+    <div class="modal fade in " style="display:none" id="myConfirmDialog" tabindex="-1" role="dialog" aria-hidden="false">
+        <div class="modal-dialog mdw">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myConfirm">
+                        <span id="modalHeading">SSO Registration Confirmation</span>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <div hidden="hidden"><span id="spn_status" hidden="hidden"></span></div>
+                </div>
+                <div class="modal-body">
+                    <span id="spnLink" style="display:none"></span>
+                    <span id="spnQuestionMsg">Do you have RajSSOID ?</span>
+                </div>
+                <div class="modal-footer">
+                    <div id="btn" class="col-lg-12">
+                        <button type="button" class="btn btn-success" onclick="SubmitBookNow('y');">
+                            <i class="fa-fa-check"></i>Yes
+                        </button>
+                        <button type="button" class="btn btn-danger" onclick="SubmitBookNow('n');">
+                            <i class="fa-fa-close"></i>No
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+ </div>
+<script src="~/Scripts/jquery.blockUI.js"></script>
+<script type="text/javascript">
+    $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
+    var dateExecpt = dates;
+    $(document).on('click', '[id^="feeDetail_"]', function () {
+        $("#spnFeePlaceID").text($(this).data("placeid"));
+        $("#spnFeeOnPlaceName").text($(this).data("placename"));
+        $("#spnBookingType").text($(this).data("bookingtype"));
+        $("#txtNoOfPerson").val(1);
+        
+        $('#tbl_FeeDetail').html(
+            '<table class="table tabtext table-striped  table-bordered table-hover" style="width:100%;">' +
+            '<thead>' +
+            '<tr>' +
+            '<th class="inth">Sr No.</th>' +
+            '<th class="inth" colspan="2"><b>Gypsy Amount </b> (INR)</th>' +
+            '<th class="inth" colspan="2"><b>Canter Amount </b> (INR)</th>' +
+            '</tr>' +
+            '</thead>' +
+            '<tbody>' +
+            '<tr>' +
+            '<td class="inth" ></td>' +
+            '<td class="inth"><b>Indian</b></td>' +
+            '<td class="inth"><b>Foreigner</b></td>' +
+            '<td class="inth"><b>Indian</b></td>' +
+            '<td class="inth"><b>Foreigner</b></td>' +
+            '</tr>' +
+            '</tbody>' +
+            '</table>');
+        $("#modalFeeDetail").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+        GetFee();
+        $('#modalFeeDetail').modal('show');
+    });
+    $(document).on('click', '[id="btnFeeDetail"]', function () {
+        GetFee();
+    });
+    function GetFee() {
+        var placeid = $('#spnFeePlaceID').text() | 0;
+        var bookingtype = $('#spnBookingType').text() | 0;
+        var noOfPerson = $('#txtNoOfPerson').val() | 0;
+        if (placeid == 0) {
+            alert('select place');
+            return false;
+        }
+        if (noOfPerson == 0) {
+            alert('Enter No of Person');
+            return false;
+        }
+        GetFeeDetails(placeid, bookingtype, noOfPerson);
+    }
+    function GetFeeDetails(placeid, bookingtype, noOfPerson) {
+        $.ajax({
+            type: 'GET',
+            url: "../MiddleWare/GetBookingFee",
+            dataType: 'html',
+            data: { PlaceId: placeid, BookingType: bookingtype, NoOfPersons: noOfPerson },
+            success: function (bookingFeeList) {
+                $('#tbl_FeeDetail').html(bookingFeeList);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+    }
+    
+    $(document).on('click', '[id^="btnAvailibity_"]', function () {
+       
+       
+        $("#spnPlaceID").text($(this).data("placeid"));
+        $("#spnPlaceName").text($(this).data("placename"));
+        $("#spnPlaceType").text($(this).data("bookingtype"));
+        $("#txtFromDate").val(null);
+        SetDate($(this).data("placeid"), $(this).data("bookingtype"));
+        $('#tbl_PermitAvailibility').html(
+            '<table class="table tabtext table-striped  table-bordered table-hover" style="width:100%;">' +
+            '<thead>' +
+                '<tr>' +
+                    '<th class="inth" rowspan="1">Zone</th>' +
+                    '<th class="inth" colspan="2">Morning Shift Availability </th>' +
+                    '<th class="inth" colspan="2">Evening Shift Availability</th>' +
+                '</tr>' +
+            '</thead>' +
+            '<tbody>' +
+            '<tr>' +
+            '<td class="inth"></td>' +
+            '<td class="inth"><b>Gypsy</b></td>' +
+            '<td class="inth"><b>Canter</b></td>' +
+            '<td class="inth"><b>Gypsy</b></td>' +
+            '<td class="inth"><b>Canter</b></td>' +
+            '</tr>' +
+            '</tbody>' +
+            '</table>');
+        $("#modalCheckTicketAvailibity").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+        $('#modalCheckTicketAvailibity').modal('show');
+    });
+    
+    function SetDate(placeId, bookingtype) {
+       
+        if ((placeId == 2 || placeId == 65) && (bookingtype == 2 || bookingtype == 4)) {
+            //advance
+            //alert(placeId + ' advance ' + bookingtype);
+            var fromDate = AddDaysInDate(2);
+            var toDate = AddDaysInDate(365);
+            //alert(fromDate + ' ' + toDate )
+            $("#txtFromDate").datepicker("destroy");
+            $("#txtFromDate").datepicker({
+                beforeShowDay: DisableDates,
+                minDate: fromDate,
+                maxDate: toDate,
+                dateFormat: 'dd/mm/yy',
+                changeYear: true
+            });
+            ////alert(fromDate);
+            ////alert(toDate);
+            //$("#txtFromDate").prop("min", fromDate);
+            //$("#txtFromDate").prop("max", toDate);            
+        }
+        if ((placeId == 2 || placeId == 65) && (bookingtype == 1 || bookingtype == 3)) {
+            //advance
+            //alert(fromDate + ' ' + toDate )
+            var fromDate = AddDaysInDate(0);
+            if (placeId == 65)
+                var fromDate = AddDaysInDate(1);
+
+            var toDate = AddDaysInDate(1);
+            $("#txtFromDate").datepicker("destroy");
+            $("#txtFromDate").datepicker({
+                beforeShowDay: DisableDates,
+                minDate: fromDate,
+                maxDate: toDate,
+                dateFormat: 'dd/mm/yy',
+                changeYear: true
+            });
+            //alert(fromDate);
+            //alert(toDate);
+            //$("#txtFromDate").prop("min", fromDate);
+            //$("#txtFromDate").prop("max", toDate);
+        }
+        if (placeId == 60  && bookingtype ==0) {
+            var fromDate = AddDaysInDate(0);
+            var toDate = AddDaysInDate(90);
+            //alert(fromDate + ' ' + toDate )
+            $("#txtFromDate").datepicker("destroy");
+            $("#txtFromDate").datepicker({
+                //beforeShowDay: DisableDates,
+                minDate: fromDate,
+                maxDate: toDate,
+                dateFormat: 'dd/mm/yy',
+                changeYear: true
+            });
+        }
+        if (placeId == 63 && bookingtype == 5) {
+            var fromDate = AddDaysInDate(0);
+            var toDate = AddDaysInDate(6);
+            $("#txtFromDate").datepicker("destroy");
+            $("#txtFromDate").datepicker({
+                beforeShowDay: DisableDates,
+                minDate: fromDate,
+                maxDate: toDate,
+                dateFormat: 'dd/mm/yy',
+                changeYear: true
+            });
+        }
+        if (placeId == 68 && bookingtype == 1) {
+            var minDate = dates[0];
+            var maxDate = dates[dates.length - 1];
+
+            var fromDate = AddDaysInDate(0);;
+            var toDate = AddDaysInDate(1);
+         
+            dateExecpt = jQuery.grep(dateExecpt, function (value) {
+                return value != fromDate && value != toDate;
+            });
+            
+            $("#txtFromDate").datepicker("destroy");
+            $("#txtFromDate").datepicker({
+                beforeShowDay: DisableDatesExcept,
+                minDate: minDate,
+                maxDate: maxDate,
+                dateFormat: 'dd/mm/yy',
+                changeYear: true
+            });
+        }
+        if ((placeId == 53 || placeId == 57) && bookingtype == 2) {
+            var fromDate = AddDaysInDate(1);
+            var toDate = AddDaysInDate(365);
+            //alert(fromDate + ' ' + toDate )
+            $("#txtFromDate").datepicker("destroy");
+            $("#txtFromDate").datepicker({
+                beforeShowDay: DisableDates,
+                minDate: fromDate,
+                maxDate: toDate,
+                dateFormat: 'dd/mm/yy',
+                changeYear: true
+            });
+        }
+    }
+    function DisableDatesExcept(date) {
+
+        var string = jQuery.datepicker.formatDate('dd/mm/yy', date);
+        return [dateExecpt.indexOf(string) == -1];
+    }
+    function AddDaysInDate(nDays) {
+       
+        var today = new Date(currentDate);
+       // alert(today);
+        today.setDate(today.getDate() + nDays); 
+        const yyyy = today.getFullYear();
+        let mm = today.getMonth() + 1; // Months start at 0!
+        let dd = today.getDate();
+       
+        if (dd < 10) dd = '0' + dd;
+        if (mm < 10) mm = '0' + mm;
+
+        var newDate = dd + '/' + mm + '/' + yyyy;
+        return newDate;
+    }
+    $(document).on('click', '[id="btnReset"]', function () {
+        var permitAvailList = '<table class="table tabtext table-striped  table-bordered table-hover" style="width:100%;">' +
+            '<thead>' +
+            '<tr>' +
+            '<th class="inth" rowspan="1">Zone</th>' +
+            '<th class="inth" colspan="2"> Morning Shift Availability</th>' +
+            '<th class="inth" colspan="2">Evening Shift Availability</th>' +
+            '</tr>' +
+            '</thead>' +
+            '<body>' +
+            '<tr>' +
+            '<td class="inth"></td>' +
+            '<td class="inth"><b>Gypsy</b></td>' +
+            '<td class="inth"><b>Canter</b></td>' +
+            '<td class="inth"><b>Gypsy</b></td>' +
+            '<td class="inth"><b>Canter</b></td>' +
+            '</tr>'+
+            '</body>' +
+            '</table>';
+
+        $('#tbl_PermitAvailibility').html(permitAvailList);
+        $('#spnErrDate').text('');
+        $("#txtFromDate").val(null);
+    });
+    $(document).on('click', '[id="btnCheckAvailibility"]', function () {
+        var placeid= $("#spnPlaceID").text()|0;
+        var fromDate = $("#txtFromDate").val();
+        $('#spnErrDate').text('');
+        if (placeid == 0)
+            alert('Select Place');
+        if (fromDate == null || fromDate == '' || fromDate == undefined) {
+            $('#spnErrDate').text('Select Date')
+            //alert('Select Date');
+            return false;
+        }
+
+        if (placeid > 0 && fromDate != null && fromDate != '' && fromDate!=undefined) {
+            GetPermitAvailibility(placeid, fromDate)
+        }
+        
+    });
+    function GetPermitAvailibility(placeid, fromDate) {
+        $.ajax({
+            type: 'GET',
+            url: "../MiddleWare/GetPermitAvailibility",
+            dataType: 'html',
+            data: { PlaceId: placeid, BookingDate: fromDate },
+            success: function (PermitAvailList) {               
+                $('#tbl_PermitAvailibility').html(PermitAvailList);  
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+    }
+
+    function funBookNow(link) {
+        //alert(link);
+        $('#spnLink').text(link);
+        $("#myConfirmDialog").modal({
+            backdrop: 'static',
+            keyboard: false,            
+        });
+        $("#myConfirmDialog").modal('show');
+    }
+    function SubmitBookNow(yn){       
+        var link = $('#spnLink').text() + '~' + yn;
+        $("#myConfirmDialog").modal('toggle');  
+        $('#spnLink').text('');
+        window.open(link, '_blank').focus();
+    }
+    
+    //function displayLinks(placeType,pos)
+    //{
+
+    //    var rowCount = $('#tbl_SubLinks tr').length;
+    //    //alert(rowCount + ',' + pos + ' ' + placeType);
+    //    pos++;
+    //    var ptypeid = $('#spnChildPlaceType_' + pos).text();
+
+    //    for (var i = pos; i < rowCount - 1; i++) {
+    //        var new_ptypeid = $('#spnChildPlaceType_' + i).text();
+
+    //        if (ptypeid == new_ptypeid) {
+    //            //var pageTitle = $('#spnPageTitle_' + i).text();
+    //            /// alert(ptypeid);
+    //            debugger;
+    //            var isVisible = document.getElementById("linkTr_" + i);
+    //            if (isVisible.style.display === "none") {
+    //                // isVisible.style.display = "block";
+    //                $("#linkTr_" + i).show();
+    //            } else {
+    //                isVisible.style.display = "none";
+    //                $("#linkTr_" + i).hide();
+    //            }
+    //        }
+    //    }
+    //}
+</script>

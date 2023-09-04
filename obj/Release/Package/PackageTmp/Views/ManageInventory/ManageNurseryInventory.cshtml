@@ -1,0 +1,900 @@
+﻿@model FMDSS.Models.ForestProduction.InventoryManagement
+@{
+    ViewBag.Title = "ManageNurseryInventory";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //"~/Views/Shared/Forestlayout.cshtml";
+    int GrandTottal = 0;
+    if (Convert.ToString(Model.nurseryDepotCode) != null)
+    {
+
+        for (var i = 0; i < Model.ListInventory.Count; i++)
+        {
+
+            int TotalStocker = Convert.ToInt32(Model.ListInventory[i].PRODUCE_QTY_Citizen) + Convert.ToInt32(Model.ListInventory[i].PRODUCE_QTY_Citizen1) + Convert.ToInt32(Model.ListInventory[i].PRODUCE_QTY_Citizen2) + Convert.ToInt32(Model.ListInventory[i].PRODUCE_QTY_Department);
+            GrandTottal = GrandTottal + TotalStocker;
+        }
+    }
+}
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+
+    function CallPlaceData(id, ProduceFor) {
+        // alert(id);
+
+        $.ajax({
+            type: 'GET',
+            url: "../Master/GetNurseryFDMProduct?ID=" + id + "&ProduceFor=" + ProduceFor,
+            dataType: 'html',
+            success: function (data) {
+                $('#modelPlace').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+
+    };
+
+
+
+</script>
+
+<script>
+
+    function isNumberKey(evt) {
+        var id = $(evt.target).attr("id");
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57)) {
+
+            evt.preventDefault();
+            return false;
+        }
+        else
+            return true;
+    }
+
+</script>
+<script type="text/javascript">
+
+    function searchs() {
+
+        var val = $("#searchval").val();
+        $('#dataTableInventory tbody tr').each(function (i) {
+            if ($(this).find('td').text().toLowerCase().trim().indexOf(val) > -1) {
+                $(this).show();
+            }
+            else {
+                $(this).hide();
+            }
+            if (val == '') {
+                $(this).show();
+            }
+        });
+
+        //var i, input, filter, table, tr, td, td1, td2, td5;
+        //    input = document.getElementById("searchval");
+        //    filter = input.value.toUpperCase();
+        //    table = document.getElementById("dataTableInventory");
+        //    tr = table.getElementsByTagName("tr");
+        //    for (i = 0; i < tr.length; i++) {
+        //        td = tr[i].getElementsByTagName("td")[0];
+        //        td1 = tr[i].getElementsByTagName("td")[1];
+        //        td2 = tr[i].getElementsByTagName("td")[2];
+        //        td5 = tr[i].getElementsByTagName("td")[5];
+        //        if (td) {
+        //            if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+        //                tr[i].style.display = "";
+        //            } else {
+        //                tr[i].style.display = "none";
+        //            }
+        //        }
+        //        if (td1) {
+        //            if (td1.innerHTML.toUpperCase().indexOf(filter) > -1) {
+        //                tr[i].style.display = "";
+        //            } else {
+        //                tr[i].style.display = "none";
+        //            }
+        //        }
+        //        if (td2) {
+        //            if (td2.innerHTML.toUpperCase().indexOf(filter) > -1) {
+        //                tr[i].style.display = "";
+        //            } else {
+        //                tr[i].style.display = "none";
+        //            }
+        //        }
+        //        if (td5) {
+        //            if (td5.innerHTML.toUpperCase().indexOf(filter) > -1) {
+        //                tr[i].style.display = "";
+        //            } else {
+        //                tr[i].style.display = "none";
+        //            }
+        //        }
+        //    }
+
+    }
+
+
+
+    function cTrigDiscount(box) {
+        if (!box.checked) {
+            if (!confirm("Are you sure you want to Remove Discount ?")) {
+                box.checked = true;
+            }
+        }
+        else {
+            if (!confirm("Are you sure you want to Apply Discount ?")) {
+                box.checked = false;
+            }
+        }
+
+    }
+
+    function cTrigProduce(box) {
+        if (!box.checked) {
+            if (!confirm("Are you sure you want to Deactive this Produce ?")) {
+                box.checked = true;
+            }
+        }
+        else {
+            if (!confirm("Are you sure you want to Active this Produce ?")) {
+                box.checked = false;
+            }
+        }
+
+    }
+
+
+
+
+
+
+</script>
+
+<style>
+    .table > thead > tr > th:first-child {
+        width: 50px !important;
+    }
+
+    #page-wrapper-inn .table > thead > tr > th {
+        width: auto;
+    }
+
+    #dvAddInventory {
+        z-index: 99994;
+    }
+
+
+    .dataTables_wrapper > div:first-child {
+        border-top: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+        padding: 10px 0 5px;
+        margin: 0;
+    }
+
+    .dropdownStyle {
+        height: 28px;
+    }
+</style>
+
+<style>
+    #tbl {
+        overflow-x: auto;
+        overflow-y: auto;
+        padding: 15px;
+        width: 100%;
+        height: 400px;
+    }
+
+
+    .col-lg-2 {
+        width: 13.666667% !important;
+    }
+
+    .col-align-right {
+        text-align: right
+    }
+</style>
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script>
+    $(document).ready(function () {
+        //$('#Date').datepicker().datepicker('setDate', new Date());
+        setDateRangeBasedOnFinacialYear();
+    });
+    function setDateRangeBasedOnFinacialYear() {
+        finacialyear = $("#FinacialYear").val();
+        prevYear = finacialyear - 1;
+        //var currentYear = (new Date).getFullYear();
+        //var Range = '2014:' + (currentYear)
+        $('#Date').datepicker('destroy');
+        $("#Date").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            format: "yy-mm-dd",
+            dateFormat: 'dd-mm-yy',
+            minDate: new Date(prevYear + '-04-01'),
+            maxDate: new Date(finacialyear + '-03-31'),
+        });
+        var currentYear = (new Date).getFullYear();
+        if (currentYear === prevYear) {
+
+            $('#Date').datepicker().datepicker('setDate', new Date());
+
+        }
+        else {
+            $('#Date').datepicker().datepicker('setDate', new Date(prevYear + '-04-01'));
+        }
+    }
+    $(function () {
+        $("#FinacialYear").change(function () {
+            setDateRangeBasedOnFinacialYear();
+        });
+    });
+
+</script>
+
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog modal-lg" id="modelPlace">
+        <!-- Modal content-->
+
+
+    </div>
+</div>
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Manage Nursery Inventory</h1>
+        @if (@TempData["StockStatus"] != null)
+        {
+            @*<div id="divSuccess" class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["StockStatus"]</div>
+                TempData["StockStatus"] = null;*@
+        }
+    </div>
+    @using (Html.BeginForm("ManageNurseryInventory", "ManageInventory", FormMethod.Post, new { id = "nurInventoryForm", enctype = "multipart/form-data" }))
+            {
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="col-lg-2 col-align-right">
+                    <div class="form-group">
+                        <label>Nursery Name <span class="mandatory">*</span></label>
+                    </div>
+                </div>
+                <div class="col-lg-10">
+                    <div class="form-group">
+                        @Html.DropDownListFor(model => model.nurseryDepotCode, Model.NurseryList, "--Select--", new { @class = "form-control common ", id = "nurseryDepotCode" })
+                        <span id="errOLDSSOID" style="display: none" class="alert-danger1">nursery Name is Required.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-12">
+                <div class="col-lg-2" style="padding-left:60px;">
+                    <div class="form-group">
+                        <label>Financial Year <span class="mandatory">*</span></label>
+                    </div>
+                </div>
+                <div class="col-lg-3" style="padding-left:15px;">
+                    <div class="form-group">
+                        <div class="form-group">
+
+                            @Html.DropDownListFor(model => model.FinacialYear, Model.FinacialYearList, new { @class = "form-control ", id = "FinacialYear" })
+                            <span id="errStockName" style="display: none" class="alert-danger1">Stock Name is Required.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-1"></div>
+                <div class="col-lg-2" style="text-align:right">
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success" name="Command" value="GetList" id="btn_submit1">
+                            Display
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-1"></div>
+                <div class="col-lg-2" style="text-align:right">
+                    @{
+                        if (Model.AddNurseryPlantBtn == 1)
+                        {
+                            <div class="form-group">
+                                <button type="button" class="btn btn-success" id="btnAddModel" data-target="#myModal" data-toggle="modal" onclick="return CallPlaceData(0,'TnVyc2VyeSBQcm9kdWNl');" title="Add New Produce">
+                                    <span>Add New Plant</span>
+                                </button>
+                            </div>
+                        }
+                    }
+
+                </div>
+            </div>
+
+
+            <div class="col-lg-12 pull-right" id="place">
+                @if (@GrandTottal != 0)
+                {
+                    <div class="col-md-12" style="padding-left:70px;">
+                        <label style="margin-left: 15px;">Total Commulitive Stock Till Date - @GrandTottal.ToString()</label>
+                    </div>
+                }
+            </div>
+
+            <div class="col-lg-12">
+                <h4>Add Stock</h4>
+                <br />
+                <span style="color:green">Note:-Nursery Incharge can be a set budget head priority for sale of the item </span><br />
+                <span style="color:brown">@TempData["msg"]</span>
+
+            </div>
+
+            <div class="col-lg-12">
+                <div class="panel with-nav-tabs panel-default">
+                    <div class="panel-body">
+                        @*<div class="col-lg-10">
+                                <div class="form-group">
+
+                                </div>
+                            </div>
+                            <div class="col-lg-2" style="display:none">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="Search" id="searchval" onkeyup="searchs();">
+                                </div>
+                            </div>*@
+                        <div id="tbl" class="table-responsive request-id">
+                            <table class="table table-striped table-bordered table-hover" id="dataTableInventory">
+                                <thead>
+                                    <tr>
+                                        <th>S.No</th>
+                                        @*<th>Image</th>*@
+                                        <th hidden="hidden">Plant Category</th>
+                                        <th>Product Type</th>
+                                        <th>Plant Height</th>
+                                        <th>Plant Common Name</th>
+                                        <th hidden="hidden">Plant Age</th>
+                                        <th hidden="hidden">Plant Unit</th>
+                                        @*<th>QTY(for sale)</th>*@
+                                        <th>QTY For Sale/Distribution </th>
+                                        @*<th>QTY For Sale</th>*@
+                                        <th width="15%">Sale Priority</th>
+                                        <th width="5%">QTY For Dept/Plantation Use</th>
+                                        @*<th width="5%">QTY For Department Distribution</th>*@
+                                        <th>Total Stock</th>
+                                        @*<th width="5%">QTY(for dept)</th>*@
+                                        <th>Price (INR)</th>
+                                        <th> Is Discount Applicable </th>
+                                        <th>Is Active</th>
+                                        <th>Action</th> @*added by pooran*@
+                                        <th hidden="hidden">ProductId</th> @*added by pooran*@
+
+                                        @*
+
+                                            <th>Discount Gov (%)</th>
+                                            <th>Discount NGO (%)</th>*@
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Convert.ToString(Model.nurseryDepotCode) != null)
+                                    {
+
+                                        for (var i = 0; i < Model.ListInventory.Count; i++)
+                                        {
+
+                                            int TotalStock = Convert.ToInt32(Model.ListInventory[i].PRODUCE_QTY_Citizen) + Convert.ToInt32(Model.ListInventory[i].PRODUCE_QTY_Citizen1) + Convert.ToInt32(Model.ListInventory[i].PRODUCE_QTY_Citizen2) + Convert.ToInt32(Model.ListInventory[i].PRODUCE_QTY_Department);
+                                            //GrandTottal = GrandTottal + TotalStock;
+                                            <tr>
+                                                <td>
+                                                    @(i + 1)
+
+                                                </td>
+                                                @*<td>
+                                                        <img src="@Model.ListInventory[i].ProductThumbImage" style="width:100%;height:20%" />
+                                                    </td>*@
+                                                <td hidden="hidden">
+                                                    @Html.DisplayFor(x => x.ListInventory[i].PRODUCTCATEGORY, new { id = "ProductCategory" + i, @readonly = "readonly" })
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(x => x.ListInventory[i].PRODUCETYPE, new { id = "PRODUCETYPE" + i, @readonly = "readonly" })
+                                                </td>
+                                                @*<td>
+                                                        @Html.DisplayFor(x => x.ListInventory[i].PRODUCETYPE, new { id = "PRODUCETYPE" + i, @readonly = "readonly" })
+                                                    </td>*@
+                                                <td>
+                                                    @Html.DisplayFor(x => x.ListInventory[i].BASEPRODUCETYPE, new { id = "BASEPRODUCETYPE" + i, @readonly = "readonly" }
+)
+                                                    @Html.HiddenFor(x => x.ListInventory[i].BASEPRODUCETYPE_ID, new { @Value = Model.ListInventory[i].BASEPRODUCETYPE_ID })
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(x => x.ListInventory[i].PRODUCTNAME, new { id = "PRODUCTNAME" + i, @readonly = "readonly" })
+                                                    @Html.HiddenFor(x => x.ListInventory[i].stockID, new { @Value = Model.ListInventory[i].stockID })
+                                                    @Html.HiddenFor(x => x.ListInventory[i].DEPOT_NURSERY_CODE, new { @Value = Model.ListInventory[i].DEPOT_NURSERY_CODE })
+                                                    @Html.HiddenFor(x => x.ListInventory[i].PRODUCETYPEID, new { @Value = Model.ListInventory[i].PRODUCETYPEID })
+                                                    @Html.HiddenFor(x => x.ListInventory[i].PRODUCETYPE, new { @Value = Model.ListInventory[i].PRODUCETYPE })
+                                                    @Html.HiddenFor(x => x.ListInventory[i].PRODUCTID, new { @Value = Model.ListInventory[i].PRODUCTID })
+                                                    @Html.HiddenFor(x => x.ListInventory[i].PRODUCTNAME, new { @Value = Model.ListInventory[i].PRODUCTNAME })
+
+                                                    @Html.HiddenFor(x => x.ListInventory[i].DiscountForCitizen, new { @Value = Model.ListInventory[i].DiscountForCitizen })
+                                                    @Html.HiddenFor(x => x.ListInventory[i].DiscountForGovt, new { @Value = Model.ListInventory[i].DiscountForGovt })
+                                                    @Html.HiddenFor(x => x.ListInventory[i].DiscountForNGO, new { @Value = Model.ListInventory[i].DiscountForNGO })
+                                                </td>
+                                                <td hidden="hidden">
+                                                    @Html.DisplayFor(x => x.ListInventory[i].PlantAgeStr, new { id = "PlantAgeStr" + i, @readonly = "readonly" })
+                                                </td>
+                                                <td hidden="hidden">
+                                                    @Html.HiddenFor(x => x.ListInventory[i].UNITNAME, new { @Value = Model.ListInventory[i].UNITNAME })
+
+                                                    @Html.DisplayFor(x => x.ListInventory[i].UNITNAME, new { id = "UNITNAME" + i, @readonly = "readonly" })
+                                                </td>
+
+                                                <td>
+                                                    @*@Html.RadioButtonFor(s => s.ListInventory[i].PRODUCE_HeadPrimaryStatus, "1", new { @checked = "checked" })*@
+                                                    @{if (Model.ListInventory[i].Citizen_StockOut <= 0)
+                                                        {
+                                                            <span>8235-200-06-RFBP(NP)</span><br />
+                                                            @Html.TextBoxFor(x => x.ListInventory[i].PRODUCE_QTY_Citizen, new { id = "PRODUCE_QTY_Citizen" + i, onkeypress = "return isNumberKey(event);", @Value = Model.ListInventory[i].PRODUCE_QTY_Citizen, @placeholder = "8235-200-06-RFBP(NP)" })
+
+                                                            @Html.Hidden("hdn_PRODUCE_QTY_Citizen", Model.ListInventory[i].PRODUCE_QTY_Citizen, new
+                                                       { id = "hdn_PRODUCE_QTY_Citizen" + i })
+
+                                                            <br />@*@Html.RadioButtonFor(s => s.ListInventory[i].PRODUCE_HeadPrimaryStatus, "2")*@
+                                                            <span>0406-01-80-05(F.V.V)</span>
+                                                            @Html.TextBoxFor(x => x.ListInventory[i].PRODUCE_QTY_Citizen1, new { id = "PRODUCE_QTY_Citizen1" + i, onkeypress = "return isNumberKey(event);", @Value = Model.ListInventory[i].PRODUCE_QTY_Citizen1, @placeholder = "0406-01-80-05" })
+                                                            @Html.Hidden("hdn_PRODUCE_QTY_Citizen1", Model.ListInventory[i].PRODUCE_QTY_Citizen1, new
+                                                { id = "hdn_PRODUCE_QTY_Citizen1" + i })
+                                                            <br />@*@Html.RadioButtonFor(s => s.ListInventory[i].PRODUCE_HeadPrimaryStatus, "3")*@
+                                                            <span>Campa</span>
+                                                            @Html.TextBoxFor(x => x.ListInventory[i].PRODUCE_QTY_Citizen2, new { id = "PRODUCE_QTY_Citizen2" + i, onkeypress = "return isNumberKey(event);", @Value = Model.ListInventory[i].PRODUCE_QTY_Citizen2, @placeholder = "Campa" })
+                                                            @Html.Hidden("hdn_PRODUCE_QTY_Citizen2", Model.ListInventory[i].PRODUCE_QTY_Citizen2, new
+                                                   { id = "hdn_PRODUCE_QTY_Citizen2" + i })
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>8235-200-06-RFBP(NP)</span><br />
+                                                            @Html.TextBoxFor(x => x.ListInventory[i].PRODUCE_QTY_Citizen, new { id = "PRODUCE_QTY_Citizen" + i, onkeypress = "return isNumberKey(event);", @Value = Model.ListInventory[i].PRODUCE_QTY_Citizen, @placeholder = "8235-200-06-RFBP(NP)", @readonly = "readonly" })
+                                                            @Html.Hidden("hdn_PRODUCE_QTY_Citizen", Model.ListInventory[i].PRODUCE_QTY_Citizen, new
+                                                       { id = "hdn_PRODUCE_QTY_Citizen" + i })
+                                                            <br />@*@Html.RadioButtonFor(s => s.ListInventory[i].PRODUCE_HeadPrimaryStatus, "2")*@
+                                                            <span>0406-01-80-05(F.V.V)</span>
+                                                            @Html.TextBoxFor(x => x.ListInventory[i].PRODUCE_QTY_Citizen1, new { id = "PRODUCE_QTY_Citizen1" + i, onkeypress = "return isNumberKey(event);", @Value = Model.ListInventory[i].PRODUCE_QTY_Citizen1, @placeholder = "0406-01-80-05", @readonly = "readonly" })
+                                                            @Html.Hidden("hdn_PRODUCE_QTY_Citizen1", Model.ListInventory[i].PRODUCE_QTY_Citizen1, new
+                                                      { id = "hdn_PRODUCE_QTY_Citizen1" + i })
+                                                            <br />@*@Html.RadioButtonFor(s => s.ListInventory[i].PRODUCE_HeadPrimaryStatus, "3")*@
+                                                            <span>Campa</span>
+                                                            @Html.TextBoxFor(x => x.ListInventory[i].PRODUCE_QTY_Citizen2, new { id = "PRODUCE_QTY_Citizen2" + i, onkeypress = "return isNumberKey(event);", @Value = Model.ListInventory[i].PRODUCE_QTY_Citizen2, @placeholder = "Campa", @readonly = "readonly" })
+                                                            @Html.Hidden("hdn_PRODUCE_QTY_Citizen2", Model.ListInventory[i].PRODUCE_QTY_Citizen2, new
+                                                  { id = "hdn_PRODUCE_QTY_Citizen2" + i })
+                                                        }
+                                                    }
+
+                                                </td>
+                                                <td width="15%">
+                                                    <span style="display:none">8235-200-06-RFBP(NP)</span>
+                                                    @Html.Hidden("PRODUCE_QTY_" + i + "_CitizenPritory", Model.ListInventory[i].PRODUCE_QTY_CitizenPritory)
+                                                    @Html.DropDownListFor(s => s.ListInventory[i].PRODUCE_QTY_CitizenPritory, new List<SelectListItem>
+                                                    {
+                                                      new SelectListItem { Text = "1", Value = "1"},
+                                                      new SelectListItem { Text = "2", Value = "2"},
+                                                      new SelectListItem { Text = "3", Value = "3"}
+                                                     }, new { @title = "The first sale decided in column no 1 would be reflected by budget 8235-200-06-RFBP(NP)", @class = "form-control dropdownStyle", onchange = "FillDropDownPeritory(" + i + ",0)" })
+                                                    <br /><span style="display:none">0406-01-80-05(F.V.V)</span><br />
+                                                    @Html.Hidden("PRODUCE_QTY_" + i + "_CitizenPritory1", Model.ListInventory[i].PRODUCE_QTY_CitizenPritory1)
+                                                    @Html.DropDownListFor(s => s.ListInventory[i].PRODUCE_QTY_CitizenPritory1, new List<SelectListItem>
+                                                    {
+                                                      new SelectListItem { Text = "2", Value = "2"},
+                                                      new SelectListItem { Text = "3", Value = "3"}
+                                                      }, new { @title = "The first sale decided in column no 2 would be reflected by budget 0406-01-80-05(F.V.V)", @class = "form-control dropdownStyle", onchange = "FillDropDownPeritory(" + i + ",1)" })
+                                                    <br /><span style="display:none">
+                                                    </span><br />
+                                                    @Html.Hidden("PRODUCE_QTY_" + i + "_CitizenPritory2", Model.ListInventory[i].PRODUCE_QTY_CitizenPritory2)
+                                                    @Html.DropDownListFor(s => s.ListInventory[i].PRODUCE_QTY_CitizenPritory2, new List<SelectListItem>
+                                                    {
+                                                      new SelectListItem { Text = "3", Value = "3"}
+                                                     }, new { @title = "The first sale decided in column no 3 would be reflected by budget Campa", @class = "form-control dropdownStyle", onchange = "FillDropDownPeritory(" + i + ",2)" })
+
+                                                </td>
+
+                                                <td width="5%">
+
+
+                                                    @{ if (Model.ListInventory
+
+   [i].Dept_StockOut <= 0)
+                                                        {
+                                                            @Html.TextBoxFor(x =>
+
+x.ListInventory[i].PRODUCE_QTY_Department, new
+{
+    id = "PRODUCE_QTY_Department" + i,
+
+    onkeypress = "return isNumberKey(event);",
+    @Value = Model.ListInventory
+
+[i].PRODUCE_QTY_Department,
+})
+                                                            @Html.Hidden("hdn_PRODUCE_QTY_Department", Model.ListInventory[i].PRODUCE_QTY_Department, new
+                                                       { id = "hdn_PRODUCE_QTY_Department" + i })
+                                                        }
+                                                        else
+                                                        {
+                                                            @Html.TextBoxFor(x =>
+
+x.ListInventory[i].PRODUCE_QTY_Department, new
+{
+    id = "PRODUCE_QTY_Department" + i,
+
+    onkeypress = "return isNumberKey(event);",
+    @Value = Model.ListInventory
+
+[i].PRODUCE_QTY_Department,
+    @readonly = "readonly"
+})
+                                                            @Html.Hidden("hdn_PRODUCE_QTY_Department", Model.ListInventory[i].PRODUCE_QTY_Department, new
+                                                       { id = "hdn_PRODUCE_QTY_Department" + i })
+                                                        }
+                                                    }
+
+                                                </td>
+                                                <td>
+                                                    <span>@TotalStock.ToString()</span>
+                                                </td>
+                                                <td>
+                                                    @Html.HiddenFor(x => x.ListInventory[i].PRICE, new { @Value = Model.ListInventory[i].PRICE })
+
+                                                    @Html.DisplayFor(x => x.ListInventory[i].PRICE, new { id = "PRICE" + i, @readonly = "readonly" })
+                                                </td>
+
+                                                <td>
+                                                    @Html.CheckBoxFor(x => x.ListInventory[i].IsDiscountApplicable, new { id = "IsDiscountApplicable" + i, @onchange = "cTrigDiscount(this)", @checked = Model.ListInventory[i].IsDiscountApplicable, @class = "IsDiscountApplicableCHECKED" })
+                                                </td>
+                                                <td>
+                                                    @Html.CheckBoxFor(x => x.ListInventory[i].IsActive, new { id = "IsActive" + i, @onchange = "cTrigProduce(this)", @checked = Model.ListInventory[i].IsActive, @class = "IsActiveCHECKED" })
+                                                </td>
+                                                <td>
+                                                    @*<button type="submit" id="btn_SubmitList" name="Command" value="UpdateSingleRecord,@i" class="btn btn-success">*@
+                                                    @Html.Hidden("hdnSelectedIndex", @i)
+                                                    @{
+                                                        if (Model.ListInventory[i].PRODUCE_QTY_Citizen <= 0 && Model.ListInventory[i].PRODUCE_QTY_Citizen1 <= 0 && Model.ListInventory[i].PRODUCE_QTY_Citizen2 <= 0 && Model.ListInventory[i].PRODUCE_QTY_Department <= 0)
+                                                        {
+                                                            <button id="btn_SubmitList_@i" onclick="return saveRecord(@i);" class="btn btn-success">
+                                                                Save
+                                                            </button>
+
+                                                        }
+                                                        else if ((Model.ListInventory[i].Citizen_StockOut <= 0 || Model.ListInventory[i].Dept_StockOut <= 0) && Model.ListInventory[i].stockID > 0)
+                                                        {
+                                                            <br />
+                                                            <button id="btn_Update_@i" onclick="return UpdateQty(@i);" class="btn btn-success">
+                                                                Update Qty
+                                                            </button>
+
+                                                        }
+                                                    }
+
+
+                                                </td>
+                                                <td hidden="hidden">
+                                                    <input type="text" id="ProductId_@i" value="@Model.ListInventory[i].PRODUCTID" name="PRODUCTID" />
+                                                </td>
+                                            </tr>
+                                                            }
+                                                        }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="form-group">
+                </div>
+            </div>
+            <div class="col-lg-3">
+                @*code commented by pooran*@
+                @*<div class="form-group">
+                        <button type="submit" id="btn_SubmitList" name="Command" value="SubmitList" class="btn btn-success">
+                            Submit Nursery Inventory
+                        </button>
+                    </div>*@
+            </div>
+        </div>
+
+                                                        }
+
+
+
+</div>
+
+@*<script type="text/javascript" src="~/js/jquery.min.js"></script>*@
+<script type="text/javascript">
+    $(function () {
+        //$("#nurseryDepotCode").change(function () {
+        //    var NurseryCode = $("#nurseryDepotCode").val();
+        //    if (NurseryCode != null && NurseryCode != "") {
+        //        $("#StockName").empty();
+        //        $.ajax({
+        //            type: 'POST',
+        //            url: "../ManageInventory/GetCurrentStock?NurseryID=" + NurseryCode,
+        //            dataType: 'json',
+        //            contentType: "application/json",
+        //            success: function (res) {
+        //                $.each(res, function (i, items) {
+        //                    $("#StockName").append('<option value="' + items.Value + '">' +
+        //                        items.Text + '</option>');
+        //                });
+        //            },
+        //            error: function (ex) {
+        //                alert(ex.error);
+        //            }
+        //        });
+        //    }
+        //    else {
+        //        alert("Please Select Nursery");
+        //    }
+
+        //});
+
+        $("#btn_submit1").click(function () {
+            var NurseryCode = $("#nurseryDepotCode").val();
+            if (NurseryCode != null && NurseryCode != "") {
+                $("#errOLDSSOID").attr("style", "display:none");
+
+            }
+            else {
+                $("#errOLDSSOID").attr("style", "display:block");
+                return false;
+            }
+
+        });
+    });
+</script>
+
+<script type="text/javascript">
+    //code added by pooran on 05-07-2019 start
+    //ClientSide Function To Invoke Controller Action In Order To Update Selected Product Information
+    function saveRecord(selectedIndexValue) {
+        debugger;
+        var QTY_Citizen = document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_Citizen")[0].value;
+        var QTY_Citizen1 = document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_Citizen1")[0].value;
+        var QTY_Citizen2 = document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_Citizen2")[0].value;
+        var QTY_Department = document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_Department")[0].value;
+        QTY_Citizen = QTY_Citizen | 0; QTY_Citizen1 = QTY_Citizen1 | 0; QTY_Citizen2 = QTY_Citizen2 | 0; QTY_Department = QTY_Department | 0;
+        if (parseInt(QTY_Citizen) == 0 && parseInt(QTY_Citizen1) == 0 && parseInt(QTY_Citizen2) == 0 && parseInt(QTY_Department) == 0) {
+            alert('Enter value in  citizen or department produce quantity at least in one field');
+            return false;
+        }
+
+        var r = confirm("Are your sure to save record");
+        if (r == false) {
+            return false;
+        }
+        var stockName = document.getElementById("StockName");
+        //alert(stockName.innerText);
+        var model = {
+            PRODUCE_QTY_Citizen: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_Citizen")[0].value,
+            PRODUCE_QTY_Citizen1: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_Citizen1")[0].value,
+            PRODUCE_QTY_Citizen2: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_Citizen2")[0].value,
+
+            PRODUCE_QTY_CitizenPritory: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_CitizenPritory")[0].value,
+            PRODUCE_QTY_CitizenPritory1: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_CitizenPritory1")[0].value,
+            PRODUCE_QTY_CitizenPritory2: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_CitizenPritory2")[0].value,
+
+            PRODUCE_QTY_Department: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_Department")[0].value,
+            IsDiscountApplicable: $('#IsDiscountApplicable' + selectedIndexValue).is(':checked'),
+            IsActive: $('#IsActive' + selectedIndexValue).is(':checked'),
+
+            stockID: document.getElementsByName("ListInventory[" + selectedIndexValue + "].stockID")[0].value,
+            BASEPRODUCETYPE_ID: document.getElementsByName("ListInventory[" + selectedIndexValue + "].BASEPRODUCETYPE_ID")[0].value,
+            DEPOT_NURSERY_CODE: document.getElementsByName("ListInventory[" + selectedIndexValue + "].DEPOT_NURSERY_CODE")[0].value,
+            //StockName: stockName.innerText,
+
+            PRODUCETYPEID: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCETYPEID")[0].value,
+            PRODUCETYPE: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCETYPE")[0].value,
+            PRODUCTID: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCTID")[0].value,
+            UNITNAME: document.getElementsByName("ListInventory[" + selectedIndexValue + "].UNITNAME")[0].value,
+            PRICE: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRICE")[0].value,
+            DiscountForCitizen: document.getElementsByName("ListInventory[" + selectedIndexValue + "].DiscountForCitizen")[0].value,
+            DiscountForGovt: document.getElementsByName("ListInventory[" + selectedIndexValue + "].DiscountForGovt")[0].value,
+            PRODUCTID: $('#ProductId_' + selectedIndexValue).val(),
+            //PRODUCE_HeadPrimaryStatus: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_HeadPrimaryStatus")[0].value,
+        };
+
+        $.post('../ManageInventory/SaveSingleProductRecord?selectedIndex=' + selectedIndexValue, model, function (response) {
+            alert(response);
+            //$(this).attr('disabled');
+            $('#' + document.activeElement.id).attr("disabled", true);
+        });
+        return false;
+
+        //var IsDiscountApplicableTest = document.getElementsByName("ListInventory[" + selectedIndexValue + "].IsDiscountApplicable")[0].value;
+        //var isDis2 = $('#IsDiscountApplicable'+selectedIndexValue).is(':checked');
+        //alert(isDis2);
+
+        //var formData = $('#nurInventoryForm').serialize();
+        //var currentIndex = selectedIndexValue - 1;
+
+    }
+    function ConfirmDialog(message) {
+
+        $('<div></div>').appendTo('body')
+            .html('<div><h6> Are you sure to save?</h6></div>')
+            .dialog({
+                modal: true,
+                title: 'Save',
+                zIndex: 10000,
+                autoOpen: true,
+                width: 'auto',
+                resizable: false,
+                buttons: {
+                    Yes: function () {
+
+                        $(this).dialog("close");
+                    },
+                    No: function () {
+                        //$('body').append('<h1>Confirm Dialog Result: <i>No</i></h1>');
+
+                        $(this).dialog("close");
+                    }
+                },
+                close: function (event, ui) {
+                    $(this).remove();
+                }
+            });
+    }
+    //code added by pooran on 05-07-2019 end
+    function UpdateQty(selectedIndexValue) {
+        debugger;
+        var QTY_Citizen = document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_Citizen")[0].value;
+        var QTY_Citizen1 = document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_Citizen1")[0].value;
+        var QTY_Citizen2 = document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_Citizen2")[0].value;
+        var QTY_Department = document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_Department")[0].value;
+
+        var hdn_QTY_Citizen = $('#hdn_PRODUCE_QTY_Citizen' + selectedIndexValue).val();
+        var hdn_QTY_Citizen1 = $('#hdn_PRODUCE_QTY_Citizen1' + selectedIndexValue).val();
+        var hdn_QTY_Citizen2 = $('#hdn_PRODUCE_QTY_Citizen2' + selectedIndexValue).val();
+        var hdn_QTY_Department = $('#hdn_PRODUCE_QTY_Department' + selectedIndexValue).val();
+       
+        if (QTY_Citizen == hdn_QTY_Citizen && QTY_Citizen1 == hdn_QTY_Citizen1 && QTY_Citizen2 == hdn_QTY_Citizen2 && QTY_Department == hdn_QTY_Department) {
+            alert("Please change any quantity to update stock!");
+            return false;
+        }
+
+
+        QTY_Citizen = QTY_Citizen | 0; QTY_Citizen1 = QTY_Citizen1 | 0; QTY_Citizen2 = QTY_Citizen2 | 0; QTY_Department = QTY_Department | 0;
+        if (parseInt(QTY_Citizen) == 0 && parseInt(QTY_Citizen1) == 0 && parseInt(QTY_Citizen2) == 0 && parseInt(QTY_Department) == 0) {
+            alert('Enter value in  citizen or department produce quantity at least in one field');
+            return false;
+        }
+        var r = confirm("Are your sure to update quantity");
+        if (r == false) {
+            return false;
+        }
+        var stockName = document.getElementById("StockName");
+        //alert(stockName.innerText);
+        var model = {
+            PRODUCE_QTY_Citizen: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_Citizen")[0].value,
+            PRODUCE_QTY_Citizen1: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_Citizen1")[0].value,
+            PRODUCE_QTY_Citizen2: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_Citizen2")[0].value,
+
+            PRODUCE_QTY_CitizenPritory: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_CitizenPritory")[0].value,
+            PRODUCE_QTY_CitizenPritory1: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_CitizenPritory1")[0].value,
+            PRODUCE_QTY_CitizenPritory2: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_CitizenPritory2")[0].value,
+
+            PRODUCE_QTY_Department: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_QTY_Department")[0].value,
+            IsDiscountApplicable: $('#IsDiscountApplicable' + selectedIndexValue).is(':checked'),
+            IsActive: $('#IsActive' + selectedIndexValue).is(':checked'),
+
+            stockID: document.getElementsByName("ListInventory[" + selectedIndexValue + "].stockID")[0].value,
+            DEPOT_NURSERY_CODE: document.getElementsByName("ListInventory[" + selectedIndexValue + "].DEPOT_NURSERY_CODE")[0].value,
+            //StockName: stockName.innerText,
+
+            PRODUCETYPEID: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCETYPEID")[0].value,
+            PRODUCETYPE: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCETYPE")[0].value,
+            PRODUCTID: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCTID")[0].value,
+            UNITNAME: document.getElementsByName("ListInventory[" + selectedIndexValue + "].UNITNAME")[0].value,
+            PRICE: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRICE")[0].value,
+            DiscountForCitizen: document.getElementsByName("ListInventory[" + selectedIndexValue + "].DiscountForCitizen")[0].value,
+            DiscountForGovt: document.getElementsByName("ListInventory[" + selectedIndexValue + "].DiscountForGovt")[0].value,
+            PRODUCTID: $('#ProductId_' + selectedIndexValue).val(),
+            FinancialYear: $("#FinacialYear").val()
+            //PRODUCE_HeadPrimaryStatus: document.getElementsByName("ListInventory[" + selectedIndexValue + "].PRODUCE_HeadPrimaryStatus")[0].value,
+        };
+
+        $.post('../ManageInventory/UpdateSingleProductRecord?selectedIndex=' + selectedIndexValue, model, function (response) {
+            alert(response);
+            $('#btn_SubmitList_' + selectedIndexValue).attr("disabled", true);
+        });
+        return false;
+        //var IsDiscountApplicableTest = document.getElementsByName("ListInventory[" + selectedIndexValue + "].IsDiscountApplicable")[0].value;
+        //var isDis2 = $('#IsDiscountApplicable'+selectedIndexValue).is(':checked');
+        //alert(isDis2);
+
+        //var formData = $('#nurInventoryForm').serialize();
+        //var currentIndex = selectedIndexValue - 1;
+    }
+
+    $(document).ready(function () {
+        //code added by pooran on 09-07-2019 for pagination start
+        $("select#FinacialYear").prop('selectedIndex', 1);
+        $('#dataTableInventory').DataTable({
+            responsive: true
+        });
+        //code added by pooran on 09-07-2019 for pagination end
+
+
+        $("#dataTableInventory tbody tr").each(function (i, v) {
+            var CitizenPritory = $('#PRODUCE_QTY_' + i + '_CitizenPritory').val();
+            var CitizenPritory1 = $('#PRODUCE_QTY_' + i + '_CitizenPritory1').val();
+            var CitizenPritory2 = $('#PRODUCE_QTY_' + i + '_CitizenPritory2').val();
+
+
+            FillPritory(CitizenPritory, CitizenPritory1, 0, i);
+            FillPritory(CitizenPritory, CitizenPritory1, 1, i);
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory").val(CitizenPritory);
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory1").val(CitizenPritory1);
+        });
+
+
+
+    });
+
+
+    function FillDropDownPeritory(i, PeritoryNO) {
+        if (i != null) {
+            var CitizenPritory = $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory").val();
+            var CitizenPritory1 = $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory1").val();
+            var CitizenPritory2 = $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").val();
+
+            FillPritory(CitizenPritory, CitizenPritory1, PeritoryNO, i);
+
+
+        }
+    }
+
+
+    function FillPritory(CitizenPritory, CitizenPritory1, PeritoryNO, i) {
+
+        if (CitizenPritory == 1 && PeritoryNO == 0) {
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory1").empty();
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").empty();
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory1").append('<option value="2">2</option><option value="3">3</option>');
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").append('<option value="3">3</option>');
+
+
+        }
+        else if (CitizenPritory == 2 && PeritoryNO == 0) {
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory1").empty();
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").empty();
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory1").append('<option value="1">1</option><option value="3">3</option>');
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").append('<option value="3">3</option>');
+        }
+        else if (CitizenPritory == 3 && PeritoryNO == 0) {
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory1").empty();
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").empty();
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory1").append('<option value="1">1</option><option value="2">2</option>');
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").append('<option value="2">2</option>');
+        }
+
+        if (CitizenPritory1 == 1 && CitizenPritory == 2 && PeritoryNO == 1) {
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").empty();
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").append('<option value="3">3</option>');
+        }
+        else if (CitizenPritory1 == 1 && CitizenPritory == 3 && PeritoryNO == 1) {
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").empty();
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").append('<option value="2">2</option>');
+        }
+        else if (CitizenPritory1 == 2 && CitizenPritory == 1 && PeritoryNO == 1) {
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").empty();
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").append('<option value="3">3</option>');
+        }
+        else if (CitizenPritory1 == 2 && CitizenPritory == 3 && PeritoryNO == 1) {
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").empty();
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").append('<option value="1">1</option>');
+        }
+        else if (CitizenPritory1 == 3 && CitizenPritory == 1 && PeritoryNO == 1) {
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").empty();
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").append('<option value="2">2</option>');
+        }
+        else if (CitizenPritory1 == 3 && CitizenPritory == 2 && PeritoryNO == 1) {
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").empty();
+            $("#ListInventory_" + i + "__PRODUCE_QTY_CitizenPritory2").append('<option value="1">1</option>');
+        }
+    }
+</script>

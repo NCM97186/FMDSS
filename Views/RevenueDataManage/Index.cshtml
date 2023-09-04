@@ -1,0 +1,230 @@
+﻿@model IEnumerable<FMDSS.Models.Master.AuctionRevenueMaster>
+
+@{
+    ViewBag.Title = "Create";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //"~/Views/Shared/Forestlayout.cshtml";
+}
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<!-- Datepicker Css -->
+<link href="~/css/dashboard/datepicker.css" rel="stylesheet" type="text/css">
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Auction Revenue List</h1>
+    </div>
+
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!--<div class="panel-heading">Processing Fees</div>-->
+                <!-- /.panel-heading -->
+                @{ using (Html.BeginForm())
+                 {
+                    <div class="panel-body">
+                        <div class="col-lg-3 pull-right">
+                            <button type="button" class="btn btn-success btn_pp pull-right" name="btn_addpopip" value="" title="Add New Transit Permit" onclick="location.href='@Url.Action("RevenueDataManage", "RevenueDataManage")'">
+                                <i class=" fa fa-plus">
+                                </i> Add Auction Revenue
+                            </button>
+                        </div>
+                        <div class="dataTable_wrapper">
+                            <div id="tbl" class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                                    <thead>
+                                        <tr>
+                                            <th>S. No</th>
+                                            <th>Range</th>
+                                            <th>Depot</th>
+                                            <th>Product</th>
+                                            <th>Product Type</th>
+                                            <th>Unit</th>
+                                            <th>Year</th>
+                                            <th>Quantity</th>
+                                            <th>Revenue Amount</th>
+                                            <th style="width:100px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+
+                                            <tr>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.RowID)
+
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.RangeCode)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.DepotName)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.ForestProducename)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.ForestProductName)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.ProduceUnit)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.RevenueYear)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Qty)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.RevinueAmount)
+                                                </td>
+                                                <td>
+                                                  
+
+                                                    <a class="btn btn-warning btn-circle" title="Edit"  href="@Url.Action("UpdateRevenue", "RevenueDataManage", new { id = item.RowID })">
+
+                                                        <i class="fa fa-times"></i>
+                                                       </a>
+
+
+                                                        <a class="btn btn-danger btn-circle" title="Delete" onclick="return confirm('Are you absolutely sure you want to delete?')" href="@Url.Action("DeletRevenueeData", "RevenueDataManage", new { id = item.RowID })">
+
+                                                            <i class="fa fa-times"></i>
+                                                        </a>
+
+</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                 }}
+            </div>
+            <!-- /.panel-body -->
+        </div>
+        <div class="modal fade in" id="myViewNoticeModal2" tabindex="-1" role="dialog" aria-hidden="false">
+            <div class="modal-dialog mdw">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+
+                        <h4 class="modal-title" id="myModalLabel">
+                            View Request Details
+                            <button type="button" name="btnprint" id="btnprint" class="btn btn-default pull-right">
+                                <i class="fa fa-print"></i> Print
+                            </button>
+                        </h4>
+                    </div>
+
+                    <div id="divPrint" class="modal-body">
+                        <!-- From URL Get -->
+                        <input type="hidden" id="pHdn_No" name="PHdn_No" />
+                        <div id="divPublish"></div>
+
+                        <!-- /. From URL Get -->
+                    </div>
+                    <!-- /.modal-body -->
+                    <div class="modal-footer" id="fot-f">
+                        <div id="btn" class="col-lg-12">
+
+                            <button name="button" class="btn btn-danger" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                                <i class="fa fa-times fa-fw"></i> Close
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+
+
+    </div>
+</div>
+<script type="text/javascript">
+    if ('@ViewData["Message"]' != '') {
+        alert('@ViewData["Message"]');
+    }
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        $('#dataTables-example').DataTable({
+            responsive: true
+        });
+    });
+
+    function viewNotice(transitID) {
+
+
+        var tblinfo = {
+            transitID: $.trim(transitID)
+        }
+
+
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(tblinfo),
+            url: RootUrl + 'ManageAucscheduler/Viewscheduler',
+            success: function (data) {
+                $("#divPublish").html(data.list1);
+                $("#schedulerId").append(data.list2);
+                //$.each(data.list2, function (i, items) {
+
+                //    bardata = "<tr><td>" + items.RowID + "</td><td>" + items.DepName + "</td><td>" + items.prodName + "</td><td>" + items.DurationFrm + "," + items.DurationT + "</td><td>" + items.DurationFrm + "</td><td>" + items.DurationT + "</td></tr>";
+
+                //    $("#schedulerId").append(bardata);
+                //})
+
+
+
+
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+    }
+
+</script>
+<script type="text/javascript">
+
+    $(function (e) {
+
+        $('#btnprint').click(function (e) {
+            var divContents = $("#divPrint").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            frameDoc.document.write('<html><head><title>Forest Department Rajasthan </title>');
+            frameDoc.document.write('<link href="../css/bootstrap.min.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/mobile.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/main.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/dashboard.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/font-awesome.min.css" rel="stylesheet" />');
+            frameDoc.document.write('</head><body>');
+            frameDoc.document.write(divContents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        })
+    });
+
+
+
+</script>

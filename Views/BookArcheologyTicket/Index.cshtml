@@ -1,0 +1,318 @@
+﻿@{
+    ViewBag.Title = "Archeology Ticket Booking";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model FMDSS.Models.Archeology.ArcheologyModel
+<style>
+    .col-lg-3, .col-lg-4 {
+        padding-left: 10px;
+        padding-right: 5px;
+    }
+
+    #UploadId {
+        width: auto;
+    }
+
+    table.imagetable {
+        font-family: verdana,arial,sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #999999;
+        border-collapse: collapse;
+    }
+
+        table.imagetable th {
+            background: #b5cfd2 url('cell-blue.jpg');
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #999999;
+        }
+
+        table.imagetable td {
+            background: #ccc;
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #999999;
+        }
+</style>
+
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    function sel(data) {
+        var commonvalue = $('#selectedPlaces').val() + "," + data;
+        $('#selectedPlaces').val(commonvalue);
+    }
+
+            function GetDistrictData() {
+            $.ajax({
+                type: 'GET',
+                contentType: 'application/json; charset=utf-8',
+                //data: JSON.stringify(values),
+                url: '@Url.Action("GetDistrict", "BookArcheologyTicket")',
+                success: function (data) {
+
+                    $.each(data, function () {
+                        $("#SelectDistrict").append($("<option     />").val(this.Value).text(this.Text));
+                    });
+                }
+            });
+         }
+    $(document).ready(function () {
+
+
+        $(".datefield").each(function () {
+
+            $(this).datepicker({
+                dateFormat: 'dd/mm/yy', minDate: new Date()
+                });
+        });
+
+
+        GetDistrictData();
+
+        $('#PlaceOfVisit').on('change', function () {
+            debugger;
+
+            $('#divForMultipleCheckBox').empty();
+            $.ajax({
+                type: 'GET',
+                contentType: 'application/json; charset=utf-8',
+                //data: JSON.stringify(values),
+                url: '@Url.Action("CreateArcheologyArea", "BookOnlineZoo")?districtName=' + $(this).val(),
+                success: function (data) {
+
+                    var response = JSON.parse(data);
+                    for (var i = 0; i < response.length; i++)
+                        {
+                              addCheckbox(response[i].AreaName , response[i].PK_Id);
+                        }
+                }
+            });
+
+        });
+
+        function addCheckbox(name, id) {
+            debugger;
+            document.getElementById('divForMultipleCheckBox').innerHTML += "<input type='checkbox' onclick='sel(" + id + ")' value='" + id + "' /> &nbsp;" + name +"&nbsp;&nbsp;&nbsp;";
+            $('#divpersonaldetails').show();
+        }
+
+        function Check(value) {
+
+
+            if (value.checked == true) {
+                $(".chkareacheckbox").prop('checked', true);
+            } else {
+                $(".chkareacheckbox").prop('checked', false);
+            }
+        };
+
+    });
+    // this will turn off all the autocomplete for all the text boxes.
+   
+
+</script>
+<style>
+    .capt {
+        background-color: #f8f8f8;
+        border-color: #e7e7e7;
+        border: 1px solid #e7e7e7;
+        width: 240px;
+        height: 110px;
+        float: left;
+    }
+
+    #mainCaptcha {
+        position: relative;
+        padding-left: 15px;
+    }
+
+    #refresh {
+        width: 42px;
+        height: 26px;
+    }
+
+    #txtInput, #Button1 {
+        position: relative;
+        left: 15px;
+    }
+
+    .refrs {
+        left: 5px;
+        position: relative;
+    }
+
+    .capt h1 {
+        font-size: 14px;
+        padding: 10px 0 5px 15px;
+        margin: 0;
+    }
+
+    #mainCaptcha {
+        margin: 0;
+    }
+    /*#errUploadId {
+            position: relative!important;
+        }*/
+
+    /*.field-validation-error {
+            float: left;
+            padding-left: 14px;
+            margin-top: -12px;
+        }*/
+
+
+    /* table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 70%;
+    }
+
+    td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #dddddd;
+    }*/
+</style>
+<div id="page-wrapper-inn">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span style="color:red;">* Mandatory field(s) to fill.</span>
+                </div>
+            </div>
+
+            @using (Html.BeginForm("FinalSubmit", "BookArcheologyTicket", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                <div style="display:none;">
+                    @Html.TextBoxFor(x => x.selectedPlaces)
+                </div>
+                @*@Html.HiddenFor(x => x.selectedPlaces)*@
+                <div class="panel-body">
+                    <div class="col-lg-3 un-bold">
+                        <div class="form-group">
+                            <label>District: <span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(X => X.PlaceOfVisit, (IEnumerable<SelectListItem>)ViewBag.Place1, "--Select--", new { id = "PlaceOfVisit", name = "PlaceOfVisit", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="col-lg-3 un-bold">
+                        <div class="form-group">
+                            <label>Type of Visitor: <span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(X => X.VistorType, (IEnumerable<SelectListItem>)ViewBag.VistorType, "--Select--", new { id = "PlaceOfVisit", name = "PlaceOfVisit", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="col-lg-3 un-bold">
+                        <div class="form-group">
+                            <label>Date of Visit: <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(X => X.DateOfVisit, new { @class = "form-control datefield", @id = "DateOfVisit", name = "DateOfVisit" })
+                        </div>
+                    </div>
+                    <div class="col-lg-3 un-bold">
+                        <div class="form-group">
+                            <label>Number of Person: <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(X => X.NumberofCitizen, new { @class = "form-control ", @id = "NumberofCitizen", name = "NumberofCitizen" })
+                        </div>
+                    </div>
+
+                    <div id="divForMultipleCheckBox" class="col-lg-12 un-bold" style="color:cadetblue">
+                        @*<div id="cblist" style="display:none;">
+                                <input type="checkbox" value="first checkbox" id="cb1" /> <label for="cb1">first checkbox</label>
+                            </div>*@
+                        <br />
+                    </div>
+                    @*<br />
+                        <br /><br />
+                        <table>
+                            <tr>
+                                <th>Sr#no</th>
+                                <th>Type of Visitor</th>
+                                <th>Number of Visitor</th>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>Indian Visitor</td>
+                                <td> @Html.TextBoxFor(X => X.IndianVisitor, new { @class = "form-control ", @id = "IndianVisitor", name = "IndianVisitor" })</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Indian Student</td>
+                                <td> @Html.TextBoxFor(X => X.IndianStudent, new { @class = "form-control ", @id = "IndianStudent", name = "IndianStudent" })</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Foreigner Citizen</td>
+                                <td> @Html.TextBoxFor(X => X.ForeignerVisitor, new { @class = "form-control ", @id = "ForeignerVisitor", name = "ForeignerVisitor" })</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>Foreigner Student</td>
+                                <td> @Html.TextBoxFor(X => X.ForeignerStudent, new { @class = "form-control ", @id = "ForeignerStudent", name = "ForeignerStudent" })</td>
+                            </tr>
+                        </table>
+                        <br /><br /><br />*@
+                    <div id="divpersonaldetails" style="display:none;">
+                        <div class="col-lg-4 un-bold">
+                            <div class="form-group">
+                                <label>Visitor Name: <span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(X => X.VisitorName, new { @class = "form-control ", @id = "VisitorName", name = "VisitorName" })
+                            </div>
+                        </div>
+                        <div class="col-lg-4 un-bold">
+                            <div class="form-group">
+                                <label>Visitor Email: <span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(X => X.Visitoremail, new { @class = "form-control ", @id = "Visitoremail", name = "Visitoremail" })
+                            </div>
+                        </div>
+                        <div class="col-lg-4 un-bold">
+                            <div class="form-group">
+                                <label>Visitor Mobile: <span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(X => X.Visitormobile, new { @class = "form-control ", @id = "Visitoremail", name = "Visitoremail" })
+                            </div>
+                        </div>
+                        <div class="col-lg-4 un-bold">
+                            <div class="form-group">
+                                <label>Visitor Id Type: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(X => X.VisitorIdType, (IEnumerable<SelectListItem>)ViewBag.VistorTypeId, "--Select--", new { id = "VistorTypeId", name = "VistorTypeId", @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 un-bold">
+                            <div class="form-group">
+                                <label>Visitor Id Number: <span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(X => X.VisitorIdNumber, new { @class = "form-control ", @id = "VisitorIdNumber", name = "VisitorIdNumber" })
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="btn-padd col-lg-12">
+                        <div id="btn" class="col-lg-12">
+                            <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_submit1">
+                                <i class="fa fa-check"></i> Payment
+                            </button>
+                            <button style="display:none" type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_Validate">
+                                <i class="fa fa-check"></i>
+                            </button>
+                            <button type="reset" class="btn btn-warning">
+                                <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                            </button>
+                            <button type="submit" name="Command" value="Cancel" class="btn btn-danger">
+                                <i class="fa fa-times fa-fw"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,202 @@
+﻿@model FMDSS.Models.ForestProtection.ForesterParivad
+@{
+    ViewBag.Title = "OffenseStatus";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<script src="~/Scripts/jquery-1.8.2.js"></script>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+</script>
+<script type="text/javascript">
+
+    $(function (e) {
+
+        $('.gridtable').DataTable({
+            responsive: true
+        });
+
+     
+    });
+
+    function GetDetails(OffenseCode) {      
+        var tblinfo = {
+            OffenseCode: $.trim(OffenseCode)           
+        }
+        $("#tbdyScart").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'ForesterParivadRegistration/ViewDetails',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(tblinfo),
+            success: function (data) {               
+               
+                var bardata = "<tr><td>District</td><td>" + data.District +
+                  "</td></tr><tr><td>Block</td><td>" + data.ForestBlock +
+                  "</td></tr><tr><td>OffensePlace</td><td>" + data.OffensePlace +
+                  "</td></tr><tr><td>OffenseDate</td><td>" + data.OffenseDate +
+                  "</td></tr><tr><td>OffenceCategory</td><td>" + data.OffenceCategory +
+                  "</td></tr><tr><td>TypeoFForest</td><td>" + data.TypeoFForest +
+                  "</td></tr><tr><td>Offence Description</td><td>" + data.Offence_Description +
+                  "</td></tr><tr><td>AssignTo</td><td>" + data.AssignTo +
+                  "</td></tr><tr><td>AssignDate</td><td>" + data.AssignDate +
+                  "</td></tr><tr><td>Complaint Status</td><td>" + data.Complaint_Found +
+                  "</td></tr><tr><td>Mokapunchnama</td><td>" + data.Mokapunchnama+
+                  "</td></tr><tr><td>Najri_Naksha</td><td>" + data.Najri_Naksha +
+                  "</td></tr><tr><td>Witness_Recorded1</td><td>" + data.Witness_Recorded1 +
+                  "</td></tr><tr><td>Witness_Recorded2</td><td>" + data.Witness_Recorded2 +
+                  "</td></tr><tr><td>Witness_Recorded3</td><td>" + data.Witness_Recorded3 +
+                  "</td></tr><tr><td>Seized Item</td><td>" + data.List_of_ArticalSeized +
+                  "</td></tr><tr><td>Recommendation</td><td>" + data.Recommendation +
+                  "</td></tr><tr><td>FieldInspection</td><td>" + data.FieldInspection +
+                  "</td></tr><tr><td>Investigation Completed On</td><td>" + data.InvestigationCompleteDate +
+                  "</td></tr><tr><td>Dispatch Number</td><td>" + data.DispatchNo +
+                  "</td></tr>";
+                $("#tbdyScart").append(bardata);
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+           
+
+        });
+
+    }
+
+    function ViewDetails(OffenseCode) {       
+        var tblinfo = {
+            OffenseCode: $.trim(OffenseCode)
+        }
+        $("#tbdyScart").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'ForesterParivadRegistration/GetParivadeDetails',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(tblinfo),
+            success: function (data) {
+                $('#tbdyScart').html(data.OffenderListPartialView);
+            }
+        });
+    };
+
+</script>
+
+<div style="display:none" id="dvContainer">
+
+</div>
+<div id="page-wrapper-inn">
+  
+    <div class="col-lg-12 pad">
+        <h1 class="page-header" id="Pheader">Investigation Submission Details</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+
+
+                
+                    <div class="panel-body">
+                        <div class="dataTable_wrapper">
+                            <div id="tbl" class="table-responsive">
+
+                                <table class="table table-striped table-bordered table-hover gridtable">
+                                    <thead>
+                                        <tr>
+                                            <th>Offense ID</th>
+                                            <th>Name of Accused</th>
+                                            <th>Place of Offense</th>
+                                            <th>Offense Date</th>
+                                            <th>Description</th>
+                                            <th>Complaint Status</th>
+                                            <th>Case Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        @foreach (var item in ViewData["Offenselist"] as IEnumerable<FMDSS.Models.ForestProtection.ForesterParivad>)
+                                        {
+                                            if (item.OffenseCode != "")
+                                            {
+                                                <tr>
+                                                    <td data-toggle="modal" data-target="#myModalDfo" style="cursor:pointer" onclick="ViewDetails('@Html.DisplayFor(model => item.OffenseCode)')">
+                                                        @Html.DisplayFor(model => item.OffenseCode)
+                                                    </td>
+                                                    <td data-toggle="modal" data-target="#myModalDfo" style="cursor:pointer" onclick="ViewDetails('@Html.DisplayFor(model => item.OffenseCode)')">
+                                                        @Html.DisplayFor(model => item.ApplicantName)
+                                                    </td>
+                                                    <td data-toggle="modal" data-target="#myModalDfo" style="cursor:pointer" onclick="ViewDetails('@Html.DisplayFor(model => item.OffenseCode)')">
+                                                        @Html.DisplayFor(model => item.OffensePlace)
+                                                    </td>
+                                                    <td data-toggle="modal" data-target="#myModalDfo" style="cursor:pointer" onclick="ViewDetails('@Html.DisplayFor(model => item.OffenseCode)')">
+                                                        @Html.DisplayFor(model => item.OffenseDate)
+                                                    </td>
+                                                    <td data-toggle="modal" data-target="#myModalDfo" style="cursor:pointer" onclick="ViewDetails('@Html.DisplayFor(model => item.OffenseCode)')">
+                                                        @Html.DisplayFor(model => item.Offence_Description)
+                                                    </td>
+                                                    <td data-toggle="modal" data-target="#myModalDfo" style="cursor:pointer" onclick="ViewDetails('@Html.DisplayFor(model => item.OffenseCode)')">
+                                                        @Html.DisplayFor(model => item.ComplaintFound)
+                                                    </td>
+                                                    <td data-toggle="modal" data-target="#myModalDfo" style="cursor:pointer" onclick="ViewDetails('@Html.DisplayFor(model => item.OffenseCode)')">
+                                                        @Html.DisplayFor(model => item.OffenseStatus)
+                                                    </td>
+                                                    <td>                                                                                                          
+                                                        <a href='@Url.Action("PdfFIR", "ForesterParivadRegistration", new { OffenseCode = item.OffenseCode})' target="_blank">
+                                                            Print FIR
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+
+
+                       
+                    </div>
+                
+            </div>
+        </div>
+    </div>
+    <div class="modal fade in" id="myModalDfo" tabindex="-1" role="dialog" aria-hidden="false">
+        <div class="modal-dialog mdw">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        Offense Details
+                    </h4>
+                </div>
+                <br />
+                <div class="modal-body tbl-scroll">
+                    <!-- From URL Get -->
+                    <table class="table table-striped table-bordered table-hover">
+                        <tbody id="tbdyScart"></tbody>
+                    </table>
+                </div>
+                @*Defect log Id-272 Done by Rajkumar*@
+
+                <!-- /.modal-body -->
+                <div class="modal-footer" id="fot-f">
+                    <div id="btn" class="col-lg-12">
+                        @*<button id="btnForward" type="submit" class="btn btn-success forward" name="Command" value="Forward">
+                            <i class="fa fa-check"></i> Forward
+                        </button>*@
+
+                        <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                            <i class="fa fa-times fa-fw"></i> Close
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+</div>

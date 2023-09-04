@@ -1,0 +1,495 @@
+﻿@model FMDSS.Entity.FRA.FRAViewModel.UserRegistration
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/js/bootstrap.min.js"></script>
+<script src="~/js/Common.js"></script>
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+</script>
+
+@using (Ajax.BeginForm("UserRegistration", "ClaimRequest", new AjaxOptions { HttpMethod = "POST", Confirm = FMDSS.Globals.Constant.ConfirmMsg, OnSuccess = "BackToList('UserRegistration')" }))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @if (Model == null || Model.RegistrationID == 0)
+                {
+                    <label id="lbl_dpt">Add User</label>
+                }
+                else
+                {
+                    <label id="lbl_dpt">Edit User</label>
+                }
+
+            </h4>
+        </div>
+
+        <div class="modal-body">
+            <div class="col-lg-4">
+                <div class="form-group">
+                    <label>SSO ID: <span class="mandatory">*</span></label>
+                    @if (Model == null || Model.RegistrationID == 0)
+                    {
+                        @Html.TextBoxFor(model => model.SSOID, new { id = "txtSSOID", @class = "form-control common", maxlength = "100" })
+                    }
+                    else
+                    {
+
+                        @Html.TextBoxFor(model => model.SSOID, new { id = "txtSSOID", @class = "form-control common", disabled = "true", maxlength = "100" })
+                    }
+                    <div class="alert-danger1">@Html.ValidationMessageFor(x => x.SSOID)</div>
+                </div>
+            </div> 
+            <div class="col-lg-4">
+                <div class="form-group">
+                    <label>Role:<span class="mandatory">*</span></label>
+                    @if (ViewBag.DesignationList != null)
+                    {
+                        @Html.DropDownListFor(m => m.Designation, (IEnumerable<SelectListItem>)ViewBag.DesignationList, "--Select--", new { @class = "form-control", id = "Designation", onchange= "Designation_OnChange(this)" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.Designation)</div>
+                    }
+
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="form-group">
+                    <label>District:<span class="mandatory">*</span></label>
+                    @if (ViewBag.DistList != null)
+                    {
+                        @Html.DropDownListFor(m => m.DistrictID, new SelectList((List<FMDSS.Entity.FRAViewModel.DropDownListVM>)ViewBag.DistList, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddlDistID", onchange = "ddlDistID_Change(this)" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.DistrictID)</div>
+                    }
+
+                </div>
+            </div>
+            <div class="col-lg-4" id="divTehsil">
+                <div class="form-group">
+                    <label>Tehsil:<span class="mandatory">*</span></label>
+                    @Html.DropDownList("ddlTehsilID", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control multi-ddl-height-102", id = "ddlTehsilID", multiple = "multiple", onchange = "ddlTehsilID_Change(this)" })
+                    @Html.HiddenFor(X => X.TehsilID, new { id = "hdnTehsilID" }) 
+                    <div class="alert-danger1">@Html.ValidationMessageFor(x => x.TehsilID)</div>
+                </div>
+            </div>
+            <div class="col-lg-4" id="divBlock">
+                <div class="form-group">
+                    <label>Block:<span class="mandatory">*</span></label>
+                    @Html.DropDownList("ddlBlockID", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control multi-ddl-height-102", id = "ddlBlockID", onchange = "ddlBlockID_Change(this)", multiple = "multiple" })
+                    @Html.HiddenFor(X => X.BlockID, new { id = "hdnBlockID" })
+                </div>
+            </div>
+            <div class="col-lg-4" id="divGP">
+                <div class="form-group">
+                    <label>Gram Panchayat:<span class="mandatory">*</span></label>
+                    @Html.DropDownList("ddlGPID", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control multi-ddl-height-102", id = "ddlGPID", onchange = "ddlGPID_Change(this)", multiple = "multiple" })
+                    @Html.HiddenFor(X => X.GPID, new { id = "hdnGPID" })
+
+                </div>
+            </div>
+            <div class="col-lg-6 hide" id="divVillage">
+                <div class="form-group">
+                    <label>
+                        Village:
+                    </label>
+                    @Html.DropDownListFor(m => m.VillageCode, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddlVillageCode" })
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>FRA Permission: <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(m => m.ActiveStatus, new List<SelectListItem>
+               {
+                   new SelectListItem { Text="Grant FRA Permission",Value=true.ToString()},
+                   new SelectListItem { Text="Delete FRA Permissiion",Value=false.ToString()}
+               }, new { @class = "form-control common" })
+                    <div class="alert-danger1">@Html.ValidationMessageFor(x => x.ActiveStatus)</div>
+
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+                <button id="btnAddUser" type="submit" class="btn btn-success" name="Command" value="Save">
+                    <i class="fa fa-check"></i> Submit
+                </button>
+
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+    @Html.HiddenFor(model => model.RegistrationID)
+    @Html.HiddenFor(model => model.SSOID)
+}
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jquery-ui.js"></script>
+<script type="text/javascript" src="~/Scripts/Controller/Common.js"></script>
+<script type="text/javascript" src="~/js/bootstrap.min.js"></script>
+<script src="~/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js" type="text/javascript"></script>
+<script src="~/js/bootstrap-multiselect.js"></script>
+<link href="~/css/bootstrap-multiselect.css" rel="stylesheet" />
+<script type="text/javascript">
+    $('#ddlTehsilID,#ddlBlockID,#ddlGPID').multiselect({
+        includeSelectAllOption: true,
+        maxHeight: 250
+    });
+    $(document).ready(function () {
+        $('#txtDOB').datepicker({
+            dateFormat: GetDatePickerFormat(),
+            yearRange: GetYearRange(),
+            changeMonth: true,
+            changeYear: true,
+        });
+
+        if ('@Model' != null) {
+            if ('@Model' != 'null' && '@Model.RegistrationID' != '0') {
+                @*BindTehsilMultiple_Edit('@Model.DistrictID', 'ddlTehsilID', '@Model.TehsilID');
+                BindBlockMultiple_Edit('@Model.DistrictID', 'ddlBlockID', '@Model.BlockID');*@
+
+                BindBlockTehsilMultiple_Edit('@Model.DistrictID', '@Model.TehsilID~@Model.BlockID', '@Model.Designation');
+
+                BindGPsMultiple_Edit('@Model.BlockID', '@Model.GPID', '@Model.Designation');
+                BindVillageNew_Edit('@Model.GPID', 'ddlVillageCode', '@Model.VillageCode', '@Model.Designation');
+
+                if ('@Model.Designation' == '8' || '@Model.Designation' == '19') {
+                    $('#divTehsil,#divBlock,#divGP').removeClass('hide');
+                    $('#ddlTehsilID,#ddlBlockID,#ddlGPID').addClass('required');
+                }
+                else if ('@Model.Designation' == '25') {
+                    $('#divTehsil,#divBlock').removeClass('hide');
+                    $('#ddlTehsilID,#ddlBlockID').addClass('required');
+
+                    $('#divGP').addClass('hide');
+                    $('#ddlGPID').removeClass('required').val('');
+                    $('#hdnGPID').val('');
+                }
+                else if ('@Model.Designation' == '21') {
+                    $('#divTehsil').removeClass('hide');
+                    $('#ddlTehsilID').addClass('required');
+
+                    $('#divBlock, #divGP').addClass('hide');
+                    $('#ddlBlockID,#ddlGPID').removeClass('required').val('');
+                    $('#hdnBlockID,#hdnGPID').val('')
+                }
+
+                else {
+                    $('#divTehsil,#divBlock,#divGP').addClass('hide');
+                    $('#ddlTehsilID,#ddlBlockID,#ddlGPID').removeClass('required').val('');
+                    $('#hdnTehsilID,#hdnBlockID,#hdnGPID').val('')
+                }
+            }
+        }
+
+    });
+
+    function Designation_OnChange(cntrl) {
+        if (cntrl.value == 8 || cntrl.value == 19) {
+            $('#divTehsil,#divBlock,#divGP').removeClass('hide');
+            $('#ddlTehsilID,#ddlBlockID,#ddlGPID').addClass('required');
+        }
+        else if (cntrl.value == '25')
+        {
+            $('#divTehsil,#divBlock').removeClass('hide');
+            $('#ddlTehsilID,#ddlBlockID').addClass('required');
+
+            $('#divGP').addClass('hide');
+            $('#ddlGPID').removeClass('required').val('');
+        }
+        else if (cntrl.value=='21') {
+            $('#divTehsil').removeClass('hide');
+            $('#ddlTehsilID').addClass('required');
+
+            $('#divBlock, #divGP').addClass('hide');
+            $('#ddlBlockID,#ddlGPID').removeClass('required').val('');
+        }
+
+        else {
+            $('#divTehsil,#divBlock,#divGP').addClass('hide');
+            $('#ddlTehsilID,#ddlBlockID,#ddlGPID').removeClass('required').val('');
+        }
+
+
+        var strDistID = '<option value="">--Select--</option>';
+        var rootURl = $('#hdnRootURL').val();
+        $('#ddlDistID').empty();
+
+        if (cntrl.value != '') {
+            $.ajax({
+                type: 'POST',
+                url: rootURl + "ClaimRequest/GetDistrictPermissionWise",
+                dataType: 'json',
+                async: true,
+                data: { designationID: $(cntrl).val() },
+                success: function (response) {
+                    if (!response.isError) {
+                        $.each(response.data, function (i, j) {
+                            strDistID += "<option value='" + j.Value + "'>" + j.Text + "</option>";
+                        });
+                    }
+                    else {
+                        alert(response.msg);
+                    }
+                    $("#ddlDistID").html(strDistID);
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve data.' + ex);
+                }
+            });
+        }
+        else {
+            $("#ddlDistID").html(strDistID);
+        }
+    }
+
+    function ddlDistID_Change(cntrl) {
+        var strBlockID = '';
+        var strTehsilID = '';
+        var rootURl = $('#hdnRootURL').val();
+        $('#ddlGPID').empty();
+        $('#ddlVillageCode').empty().append('<option value="">--Select--</option>');
+
+        if (cntrl.value != '') {
+            $.ajax({
+                type: 'POST',
+                url: rootURl + "ClaimRequest/GetBlockTehsilPermissionWise",
+                dataType: 'json',
+                async: true,
+                data: { distID: $(cntrl).val(), designationID: $('#Designation').val() },
+                success: function (response) {
+                    if (!response.isError) {
+                        $.each(response.blockList, function (i, j) {
+                            strBlockID += "<option value='" + j.Value + "'>" + j.Text + "</option>";
+                        });
+
+                        $.each(response.tehsilList, function (i, j) {
+                            strTehsilID += "<option value='" + j.Value + "'>" + j.Text + "</option>";
+                        });
+                    }
+                    else {
+                        alert(response.msg);
+                    }
+                    $("#ddlBlockID").html(strBlockID);
+                    $("#ddlTehsilID").html(strTehsilID);
+                    $('#ddlTehsilID,#ddlBlockID,#ddlGPID').multiselect('rebuild');
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve data.' + ex);
+                }
+            });
+        }
+        else {
+            $("#ddlBlockID").html(strBlockID);
+            $("#ddlTehsilID").html(strTehsilID);
+            $('#ddlTehsilID,#ddlBlockID,#ddlGPID').multiselect('rebuild');
+        }
+
+    }
+
+    //Get Gram Panchayat by block
+    function ddlBlockID_Change(cntrl) {
+        var $ddlGPID = $("#ddlGPID");
+        var strGPID = '';
+        var rootURl = $('#hdnRootURL').val();
+        var cntrlValue = $(cntrl).val() == null ? '' : $(cntrl).val().toString();
+
+        $('#ddlVillageCode').empty().append('<option value="">--Select--</option>');
+        $('#hdnBlockID').val(cntrlValue);
+
+        if (cntrl.value != '') {
+            $.ajax({
+                type: 'POST',
+                url: rootURl + "ClaimRequest/GetGramPanchayatPermissionWise",
+                dataType: 'json',
+                async: true,
+                data: { blockID: cntrlValue, designationID: $('#Designation').val() },
+                success: function (response) {
+                    if (!response.isError) {
+                        $.each(response.data, function (i, j) {
+                            strGPID += "<option value='" + j.Value + "'>" + j.Text + "</option>";
+                        });
+                    }
+                    else {
+                        alert(response.msg);
+                    }
+                    $ddlGPID.html(strGPID);
+                    $ddlGPID.multiselect('rebuild');
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve data.' + ex);
+                }
+            });
+        }
+        else {
+            $ddlGPID.html(strGPID);
+            $ddlGPID.multiselect('rebuild');
+        }
+    }
+
+    function ddlTehsilID_Change(cntrl) {
+        var cntrlValue = $(cntrl).val() == null ? '' : $(cntrl).val().toString();
+        $('#hdnTehsilID').val(cntrlValue);
+    }
+
+
+    //Get Village by Gram panchayat
+    function ddlGPID_Change(cntrl) {
+        var ddlVillageCode = $("#ddlVillageCode");
+        var strVillageCode = '<option value="">--Select--</option>';
+        var rootURl = $('#hdnRootURL').val();
+        var cntrlValue = $(cntrl).val() == null ? '' : $(cntrl).val().toString();
+        $('#hdnGPID').val(cntrlValue);
+
+        if (cntrl.value != '') {
+            $.ajax({
+                type: 'POST',
+                url: rootURl + "ClaimRequest/GetVillage",
+                dataType: 'json',
+                async: true,
+                data: { gpID: cntrlValue },
+                success: function (response) {
+                    if (!response.isError) {
+                        $.each(response.data, function (i, j) {
+                            strVillageCode += "<option value='" + j.Value + "'>" + j.Text + "</option>";
+                        });
+                    }
+                    else {
+                        alert(response.msg);
+                    }
+                    ddlVillageCode.html(strVillageCode);
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve data.' + ex);
+                }
+            });
+        }
+        else {
+            ddlVillageCode.html(strVillageCode);
+        }
+    }
+
+    function BindBlockTehsilMultiple_Edit(districtID, selectedValue, designation) {
+        var strBlockID = '';
+        var strTehsilID = '';
+        var rootURl = $('#hdnRootURL').val(); 
+
+        if (selectedValue != '') {
+            $.ajax({
+                type: 'POST',
+                url: rootURl + "ClaimRequest/GetBlockTehsilPermissionWise",
+                dataType: 'json',
+                async: true,
+                data: { distID: districtID, selectedValue: selectedValue },
+                success: function (response) { 
+                    if (!response.isError) {
+                        $.each(response.blockList, function (i, j) {
+                            strBlockID += "<option value='" + j.Value + "'>" + j.Text + "</option>";
+                        });
+
+                        $.each(response.tehsilList, function (i, j) {
+                            strTehsilID += "<option value='" + j.Value + "'>" + j.Text + "</option>";
+                        });
+                    }
+                    else {
+                        alert(response.msg);
+                    }
+                    $("#ddlBlockID").html(strBlockID);
+                    $("#ddlTehsilID").html(strTehsilID);
+
+                    try {
+                        $.each(selectedValue.split("~")[0].split(','), function (i, cntrlVal) {
+                            $("#ddlTehsilID").find("option[value=" + cntrlVal + "]").prop("selected", "selected");
+                        });
+
+                        $.each(selectedValue.split("~")[1].split(','), function (i, cntrlVal) {
+                            $("#ddlBlockID").find("option[value=" + cntrlVal + "]").prop("selected", "selected");
+                        });
+                    }
+                    catch{}
+
+                    $('#ddlTehsilID,#ddlBlockID').multiselect('rebuild');
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve data.' + ex);
+                }
+            });
+        }
+        else {
+            $("#ddlBlockID").html(strBlockID);
+            $("#ddlTehsilID").html(strTehsilID);
+            $('#ddlTehsilID,#ddlBlockID').multiselect('rebuild');
+        }
+
+    }
+
+    function BindGPsMultiple_Edit(blockID, selectedValue, designation) {
+        var rootURl = $('#hdnRootURL').val();
+        var strDropdown = '';
+        if (blockID != '') {
+            $.ajax({
+                type: 'POST',
+                url: rootURl + "ClaimRequest/GetGramPanchayatPermissionWise",
+                dataType: 'json',
+                async: true,
+                data: { blockID: blockID, designationID: $('#Designation').val(), selectedValue: selectedValue },
+                success: function (response) {
+                    if (response.data != null && !response.IsError) {
+                        $.each(response.data, function (i, j) {
+                            strDropdown += "<option value='" + j.Value + "'>" + j.Text + "</option>";
+                        });
+                    }
+                    $("#ddlGPID").html(strDropdown);
+
+                    $.each(selectedValue.split(','), function (i, cntrlVal) {
+                        $("#ddlGPID").find("option[value=" + cntrlVal + "]").prop("selected", "selected");
+                    });
+
+                    $("#ddlGPID").multiselect('rebuild');
+                }
+            });
+        }
+        else {
+            $("#ddlGPID").html(strDropdown);
+            $("#ddlGPID").multiselect('rebuild');
+        }
+    }
+
+    function ValidateSSO(cntrl) {
+        var rootURl = $('#hdnRootURL').val();
+        $.ajax({
+            type: 'POST',
+            url: rootURl + "ClaimRequest/ValidateAndGetSSODetails",
+            dataType: 'json',
+            async: true,
+            data: { ssoID: cntrl.value },
+            success: function (response) {
+                if (response.data != null && !response.IsError) {
+                    var data = JSON.parse(response.data);
+                    if (data.SSOID==null || data.SSOID.length < 1) {
+                        $('#txtSSOID').val('');
+                        alert("Please enter valid SSOID.");
+                    }
+                }
+                else {
+                    alert("Please enter valid SSOID.");
+                }
+            }
+        });
+    }
+
+</script>
+<style>
+    select[multiple].multi-ddl-height-102 {
+        height: 102px;
+    }
+</style>

@@ -1,0 +1,253 @@
+﻿@model FMDSS.Models.ForesterDevelopment.FdmBudgetEstimation
+@{
+    ViewBag.Title = "AddBudgetForestOffice";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //  "~/Views/Shared/Forestlayout.cshtml";
+}
+
+
+
+
+
+
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">HQ Budget Estimation</h1>
+
+        @if (@TempData["ViewSuccessMessage"] != null)
+        {
+            <div class="alert alert-success divmsg"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["ViewSuccessMessage"]</div>
+        }
+        @if (@TempData["ViewErrorMessage"] != null)
+        {
+            <div class="alert alert-danger2 divmsg diverror"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["ViewErrorMessage"]</div>
+        }
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+
+
+
+            <!-- /.panel-heading -->
+            <!--From Start-->
+            @using (Html.BeginForm("SaveFOfficeBudget", "FdmBudgetEstimation", FormMethod.Post, new { data_behavior = "confirm" }))
+            {
+
+
+                if (HttpContext.Current.Session["DesignationId"] != null)
+                {
+                    @Html.Hidden("hdDesignation", HttpContext.Current.Session["DesignationId"].ToString())
+                    //if ((HttpContext.Current.Session["DesignationId"].ToString() == "1") || (HttpContext.Current.Session["DesignationId"].ToString() == "2"))
+                    //{
+                                               
+                    //}
+
+                    if (HttpContext.Current.Session["DesignationId"].ToString() == "4")
+                    {
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label for="Proposed">
+                                    Circle Name:<span class="mandatory">*</span>
+                                </label>
+                                @Html.DropDownList("CircleCode", (IEnumerable<SelectListItem>)ViewBag.CircleCode, new { @class = "form-control", id = "ddl_circleCode", @readonly = "readonly" })
+                                <div id="errordiv02" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                    }
+                    else if ((HttpContext.Current.Session["DesignationId"].ToString() == "6") || (HttpContext.Current.Session["DesignationId"].ToString() == "7"))
+                    {
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label for="Proposed">
+                                    Division Name:<span class="mandatory"></span>
+                                </label>
+                                @Html.DropDownList("ddlDivision", (IEnumerable<SelectListItem>)ViewBag.ddlDivision, new { @class = "form-control ", id = "division", @readonly = "readonly" })
+                                <div id="errordiv02" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                    }
+
+
+
+                    else if (HttpContext.Current.Session["DesignationId"].ToString() == "8")
+                    {
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label for="Tehsil">
+                                    Range Name:<span class="mandatory"></span>
+                                </label>
+                                @Html.DropDownList("ddlRange", (IEnumerable<SelectListItem>)ViewBag.ddlRange, new { @class = "form-control input-width", id = "ddlRange", @readonly = "readonly" })
+                                <div id="errordiv03" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+
+                    }
+                }
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label for="Proposed">
+                            Financial Year:<span class="mandatory">*</span>
+                        </label>
+                        @Html.DropDownList("ddlFinancialYear", (IEnumerable<SelectListItem>)ViewBag.ddlFinancialYear, "--Select--", new { @class = "form-control input-width", id = "ddlFinancialYear" })
+                        <div id="errordiv01" style="display:none" class="alert-danger1"></div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+
+
+                    <div class="form-group">
+                        <label>Budget Head:<span class="mandatory">*</span></label>
+                        @Html.DropDownList("DropBudgethead", (IEnumerable<SelectListItem>)ViewBag.Budget, "--Select--", new { @class = "form-control", id = "DropBudgethead"})
+                    </div>
+                </div>
+
+                <div class="col-lg-6" id="DivestAmt" style="display:none">
+                    <div class="form-group">
+                        <label>Estimated Budget:<span class="mandatory">*</span></label>
+                        <input type="text" id="EstimatedBudget" name="EstimatedBudget" class="form-control Amount" placeholder="Enter Estimated Budget" maxlength="15">
+
+                        <div id="errordiv08" style="display:none" class="alert-danger1"></div>
+                    </div>
+                </div>
+
+
+                <div class="col-lg-12"></div>
+
+            <!-- Btn Groping -->
+                <div class="btn-padd">
+                    <div id="btn" class="col-lg-12">
+                        <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_submit1">
+                            <i class="fa fa-check"></i> Submit
+                        </button>
+
+
+                    </div>
+                </div>
+
+
+                <div class="form-group" id="btn-cont1">
+                    <div class="col-sm-offset-2 col-sm-10">
+
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+
+</div>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
+<script src="~/js/jquery.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function (e) {
+        var RootUrl = '@Url.Content("~/")';
+        var Code;
+
+        $("#DropBudgethead").bind("change", function () {
+            var hdDesignation = $("#hdDesignation").val();
+            if (hdDesignation == "1" || hdDesignation == "2") { Code = "ST001" }
+            else if (hdDesignation == "4") { Code = $("#ddl_circleCode option:selected").val(); }
+            else if (hdDesignation == "5" || hdDesignation == "6") { Code = $("#division option:selected").val(); }
+            else if (hdDesignation == "8") { Code = $("#ddlRange option:selected").val(); }
+
+            var ddlfm = $("#ddlFinancialYear option:selected").val();
+            var ddlBHead = $("#DropBudgethead option:selected").val();
+            if (Code != "" && ddlfm != "" && ddlBHead != "") {
+
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'FdmBudgetEstimation/GetBudgetFOfficeDetails', // we are calling json method
+                    data: { Code: Code, Fyear: ddlfm, BdgHead: ddlBHead },
+                    success: function (data) {
+                        $("#DivestAmt").show();
+
+                        if (data == '')
+
+                        { $("#EstimatedBudget").val(0); }
+                        else
+                        { $("#EstimatedBudget").val(data); }
+
+                    }
+
+                });
+            }
+            else {
+                $("#DivestAmt").hide();
+                $("#EstimatedBudget").val(0);
+            }
+
+
+        });
+
+
+
+
+        $("#btn_EditBudget").click(function () {
+
+            var amt = $("#txt_Allocated").val();
+            var id = $("#btn_EditBudget").val();
+            var bdg = { AllocAmt: amt, BdgID: id };
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(bdg),
+                url: RootUrl + "FdmBudgetAllocation/UpdateHQBudgetData",
+                success: function (data) {
+
+                    if (data.id != "0") {
+
+                        window.location = RootUrl + "FdmBudgetAllocation/FdmBudgetAllocation";
+                    }
+                },
+
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+
+
+        })
+
+        
+
+        $(document).on('keypress', '.Amount', function (event) {
+            return isNumber(event, this)
+
+        });
+
+
+
+        $(document).on('click', '#btn_submit1', function () {
+
+            
+
+            if ($("#EstimatedBudget").val() == "0" || $("#EstimatedBudget").val() == "") {
+                alert("Estimated Budget  must be greater than 0 !!"); return false;
+            }
+
+        })
+
+
+
+
+    });
+
+
+    function isNumber(evt, element) {
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+
+        if (
+             (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+            (charCode < 48 || charCode > 57))
+            return false;
+
+
+    }
+
+</script>

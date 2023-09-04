@@ -1,0 +1,370 @@
+﻿@{
+    ViewBag.Title = "Year Wise Offence Report";
+    Layout = "~/Views/Shared/_SuperAdmin.cshtml";
+    //Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //
+}
+@model IEnumerable<FMDSS.Models.Admin.YearWiseOffenceReport>
+
+<link href="~/Content/themes/base/dashboard.css" rel="stylesheet" />
+<script src="~/Content/dashboard.js"></script>
+<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
+<style>
+    select option {
+        text-transform: capitalize;
+    }
+</style>
+<div id="page-wrapper">
+    <div class="col-lg-12">
+
+        <div class="col-md-4">
+            <label>Year</label>
+            <select id="ddlYears" name="Years" class="form-control">
+                @*<option value="0">Please Select Year</option>*@
+                @*<option value="2020">2020-21</option>
+                <option value="2019">2019-20</option>
+                <option value="2018">2018-19</option>
+                <option value="2017">2017-18</option>
+                <option value="2016">2016-17</option>
+                <option value="2015">2015-16</option>
+                <option value="2014">2014-15</option>
+                <option value="2013">2013-14</option>
+                <option value="2012">2012-13</option>
+                <option value="2011">2011-12</option>
+                <option value="2010">2010-11</option>
+                <option value="2009">2009-10</option>
+                <option value="2008">2008-09</option>
+                <option value="2007">2007-08</option>
+                <option value="2006">2006-07</option>
+                <option value="2005">2005-06</option>
+                <option value="2004">2004-05</option>
+                <option value="2003">2003-04</option>
+                <option value="2002">2002-03</option>
+                <option value="2001">2001-02</option>
+                <option value="2000">2000-01</option>
+                <option value="1999">1999-2000</option>
+                <option value="1998">1998-99</option>
+                <option value="1997">1997-98</option>
+                <option value="1996">1996-97</option>
+                <option value="1995">1995-96</option>
+                <option value="1994">1994-95</option>
+                <option value="1993">1993-94</option>
+                <option value="1992">1992-93</option>
+                <option value="1991">1991-92</option>
+                <option value="1990">1990-91</option>
+                <option value="1989">1989-90</option>
+                <option value="1988">1988-89</option>
+                <option value="1987">1987-88</option>
+                <option value="1986">1986-87</option>
+                <option value="1985">1985-86</option>
+                <option value="1984">1984-85</option>
+                <option value="1983">1983-84</option>
+                <option value="1982">1982-83</option>
+                <option value="1981">1981-82</option>
+                <option value="1980">1980-81</option>
+                <option value="1979">1979-80</option>
+                <option value="1978">1978-79</option>
+                <option value="1977">1977-78</option>
+                <option value="1976">1976-77</option>
+                <option value="1975">1975-76</option>
+                <option value="1974">1974-75</option>
+                <option value="1973">1973-74</option>
+                <option value="1972">1972-73</option>
+                <option value="1971">1971-72</option>
+                <option value="1970">1970-71</option>*@
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label>Quarter</label>
+            <select id="ddlQuarters" name="Quarters" class="form-control">
+                <option value="0">Please Select Quarter</option>
+                <option value="1">April, May, June (1st Quarter)</option>
+                <option value="2">July, Aug, Sep (2nd Quarter)</option>
+                <option value="3">Oct, Nov, Dec (3rd Quarter)</option>
+                <option value="4">Jan, Feb, March (4th Quarter)</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label>Offence Category</label>
+            <select id="ddlOffence" name="Offence" class="form-control" style="text-transform: capitalize;">
+                <option value="0">Please Select Offence</option>
+                <option value="All">All</option>
+            </select>
+        </div>
+
+    </div>
+    <div class="col-lg-12" style="margin-top:2%;">
+        <div class="col-md-4">
+            <label>Report Type :</label>
+            <input type="radio" value="Circle Wise" checked="checked" id="ReportType1" name="ReportType" /> Circle Wise
+             <input type="radio" value="Division Wise" id="ReportType2" name="ReportType" /> Division Wise
+        </div>
+        <div class="col-lg-2"><input type="button" value="Search" class="btn btn-success" style="float:left;" id="btnSearch" /></div>
+        <div class="col-lg-6">&nbsp;</div>
+    </div>
+    <div class="col-lg-12">
+        <p style="font-weight:bold;color:red!important;float:right; border:1px solid black;padding:5px;">
+            <input type="button" value="Export to Excel" id="DownloadAttachment" />
+        </p>
+        <div class="row" style="width:100%; overflow-x:scroll;">
+            <table id="tblYearWise" cellpadding="0" cellspacing="0" class="table table-striped table-hover table-responsive">
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#btnSearch").click(function () {
+            Fill_Table();
+        });
+
+        $("#DownloadAttachment").click(function () {
+            var rdval = 1;
+            if ($("#ReportType1").prop("checked")) {
+                rdval = 1;
+            } else
+                rdval = 2;
+
+            var param = {
+                Year: $("#ddlYears").val(),
+                Quarter: $("#ddlQuarters").val(),
+                OffenceCategory: $("#ddlOffence").val(),
+                ReportType: rdval
+            }
+            $.ajax({
+                url: '@Url.Action("Download", "SystemAdmin")',
+                contentType: 'application/json; charset=utf-8',
+                datatype: 'json',
+                data: JSON.stringify({param}),
+                type: "POST",
+                success: function () {
+                    window.location = '@Url.Action("Download", "SystemAdmin")';
+                },error: function (result) {
+                    alert(result.responseText);
+                }
+            });
+
+        });
+        GetFinancialYearList(); 
+        GetOffences();
+        Fill_Table();
+    });
+    function Fill_Table() {
+
+        var rdval = 1;
+        if ($("#ReportType1").prop("checked")) {
+            rdval = 1;
+        } else
+            rdval = 2;
+
+            var param = {
+                Year: $("#ddlYears").val(),
+                Quarter: $("#ddlQuarters").val(),
+                OffenceCategory: $("#ddlOffence").val(),
+                ReportType: rdval
+               }
+            //$('#tblYearWise tr').not(':first').not(':last').remove();
+            $('#tblYearWise tr').remove();
+            $.ajax({
+                url: '@Url.Action("GetYearWiseOffenceReport", "SystemAdmin")',
+                contentType: 'application/json; charset=utf-8',
+                datatype: 'json',
+                data: JSON.stringify({ param }),
+                type: "POST",
+                success: function (data) {
+                    var heading = '';
+                    var html ='';
+                    if (data != undefined && data != null) {
+                        heading = TableHeading(data);
+                        html = heading + ' <tbody>';
+                        $.each(data, function (i, itm) {
+
+                            html += '<tr style="text-align:center; font-size:12px;">' +
+                                '<td style="border:1px solid #000;"> ' + itm.RowNo + '</td > ' +
+                                '<td style="border:1px solid #000;">' + itm.CommonName + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.PendingInDept_LastQtr + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.PendingInCourt_LastQtr + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.Total_LastQtr + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.CaseRegistration_Department_CurrentQtr + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.CaseRegistration_Court_CurrentQtr + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.Total_CaseRegistration_CurrentQTR + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.CaseRegistration_Department_Total + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.CaseRegistration_Court_Total + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.CaseRegistration_Total + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.Close_Depart_ThisYear + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.Close_Court_ThisYear + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.Close_Total_ThisYear + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.CurrentYearCompoundingAmount + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.TotalSeizedItem + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.Pending_Dpt_at_the_end_of_this_Qtr + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.Pending_Court_at_the_end_of_this_Qtr + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.Pending_Total_at_the_end_of_this_Qtr + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.PendingInDept_LessThanOneYrs + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.PendingInDept_btwnOneAndThreeYrs + '</td>' +
+                                '<td style="border:1px solid #000;">' + itm.PendingInDept_GtrThanThreeYrs + '</td>' +
+                                '<td style="border:1px solid #000;">&nbsp;</td>' +
+                                '</tr >';
+                        });
+                        html += '</tbody>';
+                        $('#tblYearWise').html(html);
+                        $('#tblYearWise').draw(false);
+                        //$('#tblYearWise tr').first().after(html);
+                    }
+                }, error: function (result) {
+                    alert(result.responseText);
+                }
+            });
+    }
+    function TableHeading(data) {
+        var offenceCat = data[0].StrOffenceCat; // $('#ddlOffence :selected').text();
+        var StartDateQtr = data[0].StartDateQtr;
+        var EndDateQtr = data[0].EndDateQtr;
+        var rdval = '';
+        if ($("#ReportType1").prop("checked")) {
+            rdval = 'Circle Name';
+        } else
+            rdval = 'Division Name';
+        var heading = '<thead>'+
+                      '< tr >'+
+                       '<th colspan="23" style="text-align:center; font-size:18px; border:1px solid #000; font-weight:700;">Office Principal Chief Conservtor of Forests, Rajasthan Jaipur</th>'+
+                       '</tr>'+
+                       '<tr>'+
+                            '<th colspan="23" style="text-align:center; border:1px solid #000; font-size:16px; font-weight:700;">'+
+            'Quarter Progress Report Of Forest Offences Cases <span style="text-transform: capitalize;">(' + offenceCat + ')</span> From ' + StartDateQtr + ' to ' + EndDateQtr+''+
+                            '</th>'+
+                       '</tr>'+
+                        '<tr style="text-align:center; font-weight:700; font-size:14px;">'+
+                            '<th style="border-left:1px solid #000; border-bottom:1px solid #000;"></th>'+
+                            '<th style="border-bottom:1px solid #000;"></th>'+
+                            '<th colspan="3" style="border:1px solid #000;">Last Quater Pending Cases</th>'+
+                            '<th colspan="3" style="border:1px solid #000;">Case Registerd in current Qtr</th>'+
+                            '<th colspan="3" style="border:1px solid #000;">Total</th>'+
+                            '<th colspan="3" style="border:1px solid #000;">Closed in this Quater</th>'+
+                            '<th style="border-bottom:1px solid #000;"></th>'+
+                            '<th style="border-bottom:1px solid #000;"></th>'+
+                            '<th colspan="3" style="border:1px solid #000;">Pending at the end of this Qtr</th>'+
+                            '<th colspan="3" style="border:1px solid #000;">Number of pending cases in the department</th>'+
+                            '<th style="border-right:1px solid #000; border-bottom:1px solid #000;"></th>'+
+                        '</tr>'+
+                        '<tr style="text-align:center; font-weight:700; font-size:13px;">'+
+                            '<th style="border:1px solid #000;">S.No.</th>'+
+            '<th style="border:1px solid #000;">' + rdval+'</th>'+
+                            '<th style="border:1px solid #000;">Department</th>'+
+                            '<th style="border:1px solid #000;">Court</th>'+
+                            '<th style="border:1px solid #000;">Total (3+4)</th>'+
+                            '<th style="border:1px solid #000;">Department</th>'+
+                            '<th style="border:1px solid #000;">Court</th>'+
+                            '<th style="border:1px solid #000;">Total (6+7)</th>'+
+                            '<th style="border:1px solid #000;">Department (3+6)</th>'+
+                            '<th style="border:1px solid #000;">Court (4+7)</th>'+
+                            '<th style="border:1px solid #000;">Total  (9+10)</th>'+
+                            '<th style="border:1px solid #000;">Department</th>'+
+                            '<th style="border:1px solid #000;">Court</th>'+
+                            '<th style="border:1px solid #000;">Total  (12+13)</th>'+
+                            '<th style="border:1px solid #000;">Compounding Amount(Rs.)</th>'+
+                            '<th style="border:1px solid #000;">Seized forest Produce cost (Rs.)</th>'+
+                            '<th style="border:1px solid #000;">Department (9-12)</th>'+
+                            '<th style="border:1px solid #000;">Court (10-13)</th>'+
+                            '<th style="border:1px solid #000;">Total (17+18)</th>'+
+                            '<th style="border:1px solid #000;">Pending In Dept < 1 Year</th>'+
+                            '<th style="border:1px solid #000;">Pending In Dept betwn 1 & 3 Yrs</th>'+
+                            '<th style="border:1px solid #000;">Pending In Dept > 3 Yrs</th>'+
+                            '<th style="border:1px solid #000;">Remarks</th>'+
+                        '</tr>'+
+                        '<tr style="text-align:center; font-weight:700; font-size:12px;">'+
+                            '<th style="border:1px solid #000;">1</th>'+
+                            '<th style="border:1px solid #000;">2</th>'+
+                            '<th style="border:1px solid #000;">3</th>'+
+                            '<th style="border:1px solid #000;">4</th>'+
+                            '<th style="border:1px solid #000;">5</th>'+
+                            '<th style="border:1px solid #000;">6</th>'+
+                            '<th style="border:1px solid #000;">7</th>'+
+                            '<th style="border:1px solid #000;">8</th>'+
+                            '<th style="border:1px solid #000;">9</th>'+
+                            '<th style="border:1px solid #000;">10</th>'+
+                            '<th style="border:1px solid #000;">11</th>'+
+                            '<th style="border:1px solid #000;">12</th>'+
+                            '<th style="border:1px solid #000;">13</th>'+
+                            '<th style="border:1px solid #000;">14</th>'+
+                            '<th style="border:1px solid #000;">15</th>'+
+                            '<th style="border:1px solid #000;">16</th>'+
+                            '<th style="border:1px solid #000;">17</th>'+
+                            '<th style="border:1px solid #000;">18</th>'+
+                            '<th style="border:1px solid #000;">19</th>'+
+                            '<th style="border:1px solid #000;">20</th>'+
+                            '<th style="border:1px solid #000;">21</th>'+
+                            '<th style="border:1px solid #000;">22</th>'+
+                            '<th style="border:1px solid #000;">23</th>'+
+                        '</tr>'+
+                     '</thead>';
+                return heading;
+            }
+    function GetOffences() {
+        var ddOff = $("#ddlOffence").empty();
+        $.ajax({
+                url: '@Url.Action("GetOffences", "SystemAdmin")',
+                contentType: 'application/json; charset=utf-8',
+                datatype: 'json',
+                type: "GET",
+                success: function (data) {
+                    if (data != undefined && data != null) {
+
+                        ddOff.append($('<option>', {
+                            value: 0,
+                            text: "All"
+                        }));
+                        $.each(data, function (i, item) {
+                            //alert(item.Value + ',' + item.Text);
+                            ddOff.append($('<option>', {
+                                value: item.Value,
+                                text: item.Text
+                            }));
+                        });
+                        ddOff.val(0).change('trigger');
+                    }
+            }, error: function (result) {
+                alert(result.responseText);
+            }
+         });
+    }
+    function GetFinancialYearList() {
+        var ddFYear = $("#ddlYears").empty();
+        $.ajax({
+                url: '@Url.Action("GetFinancialYearList", "SystemAdmin")',
+                contentType: 'application/json; charset=utf-8',
+                datatype: 'json',
+                type: "GET",
+                success: function (data) {
+                    if (data != undefined && data != null) {
+
+                        ddFYear.append($('<option>', {
+                            value: 0,
+                            text: "Please Select Year"
+                        }));
+                        $.each(data, function (i, item) {
+                            //alert(item.Value + ',' + item.Text);
+                            ddFYear.append($('<option>', {
+                                value: parseInt(item.Value)-1,
+                                text: item.Text
+                            }));
+                        });
+                        ddOff.val(0).change('trigger');
+                    }
+            }, error: function (result) {
+                alert(result.responseText);
+            }
+         });
+    }
+</script>
+
+<link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+
+

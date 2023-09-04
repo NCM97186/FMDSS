@@ -1,0 +1,124 @@
+﻿@model FMDSS.Models.Naka_Master.Naka_Master_Model
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/js/bootstrap.min.js"></script>
+<script src="~/js/Common.js"></script>
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+@*<script src="~/Scripts/jquery-1.7.1.min.js"></script>*@
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+</script>
+<script type="text/javascript">
+
+    $(function () {
+        $("#btnSubmit").click(function () {
+            var Data = new Object();
+            Data.RangeCode = $('#ddlRange :selected').val();
+            var r = $('#ddlRange :selected').val();
+            Data.NakaName = $('#NakaName').val();
+            var n = $('#NakaName').val();
+            Data.ActiveStatus = $("input[name='ActiveStatus']:checked").val();
+            var a = $("input[name='ActiveStatus']:checked").val();
+            //debugger;
+            //alert(Data);
+            if (r == null || n == null || a == null) {
+                alert('Please Select Range and Enter Naka Name.')
+                return false;
+            }
+            else {
+                if (Data != null) {
+                    $.ajax({
+                        type: "POST",
+                        url: RootUrl + "/Naka_Master/AddEditNakaMaster",
+                        data: JSON.stringify(Data),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (response) {
+                            alert(response);
+                            if (response != null) {
+                                alert("Hello its right !");
+                                $('#modelPlace').hide();
+                            } else {
+                                alert("Something went wrong");
+                                $('#modelPlace').hide();
+                            }
+                        },
+                        failure: function (response) {
+                            //alert(response.responseText);
+                        },
+                        error: function (response) {
+                            //alert(response.responseText);
+                        }
+                    });
+                }
+            }
+        });
+    });
+</script>
+
+@using (Html.BeginForm("AddEditNakaMaster", "Naka_Master", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data", id = "frmWorkFlow" }))
+{
+    <div class="modal-content">
+
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                <label id="lbl_dpt">  Add/Edit Naka Master</label>
+            </h4>
+            <div class="col-lg-3 pull-left" id="divtempmsg">
+                <label id="tempmsg">@Html.Raw(TempData["msg"])</label>
+            </div>
+        </div>
+
+        <div class="panel-body">
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Range: <span class="mandatory">*</span> </label>
+                    @Html.DropDownListFor(m => @Model.RangeCode, (IEnumerable<SelectListItem>)ViewBag.RangeList, new { id = "ddlRange", @class = "form-control" })
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Naka Name: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(x => x.NakaName, new { @class = "form-control", @id = "NakaName" })
+                </div>
+            </div>
+            <div class="col-lg-12">
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Active Status : <span class="mandatory">*</span></label>
+                        <div>
+                            <label class="radio-inline">
+                                @Html.RadioButtonFor(m => @Model.ActiveStatus, true) Yes
+                            </label>
+                            <label class="radio-inline">
+                                @Html.RadioButtonFor(m => @Model.ActiveStatus, false) No
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" id="fot-f">
+            <div id="btn" class="col-lg-12">
+                <button id="btnSubmit" class="btn btn-success forward hideclass" name="Command">
+                    <i class="fa fa-check"></i> Submit
+                </button>
+
+                <button id="btnCancel" name="button" class="btn btn-danger" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+            <div>
+                @Html.ValidationSummary(true)
+            </div>
+        </div>
+    </div>
+}

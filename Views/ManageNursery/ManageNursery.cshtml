@@ -1,0 +1,763 @@
+﻿@*********************************************************************************************************
+    //  Project      : Forest Management & Decision Support System (FMDSS)
+    //  Project Code : IEISLSSD-2015-16-ENV-004
+    //  Copyright (C): IEISL
+    //  File         : ManageNursery UI
+    //  Description  : File contains HTMLs for Nuresery Management
+    //  Date Created : 31-Dec-2015
+    //  History      :
+    //  Version      : 1.0
+    //  Author       : Arvind Srivastava
+    //  Modified By  :
+    //  Modified On  :
+    //  Reviewed By  :
+    //  Reviewed On  :
+    *********************************************************************************************************@
+
+@model FMDSS.Models.ForestProduction.NurseryManagement
+
+@{
+    ViewBag.Title = "ManageNursery";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+
+
+<style>
+    .Aot {
+        margin: 0 0 10px;
+    }
+</style>
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Manage Nurseries</h1>
+        @if (@Session["ActionStatus"] != null)
+        {
+            <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@Session["ActionStatus"]</div>
+            Session["ActionStatus"] = null;
+        }
+        <div></div>
+        <!--Add New Btn-->
+        <div class="col-lg-3 pull-right">
+            <button type="button" class="btn btn-success AddNewDepot Aot" id="btnAddNew" onclick="AddNewNursury()" name="" value="" title="Add New Nursery" data-toggle="modal" data-target="#newNurseryPage">
+                <i class="fa fa-plus"></i> Add New Nursery
+            </button>
+        </div>
+        <!--./Add New Btn-->
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <!--Table-->
+                    <div id="tbl" class="table-responsive">
+                        <table class="table table-striped table-bordered table-hover" id="dataTableNursery">
+                            <thead>
+                                <tr>
+
+                                    <th style="width:10%;">District Name</th>
+                                    <th style="width:10%;">Range Name</th>
+                                    <th style="width:15%;">Village Name</th>
+                                    <th style="width:15%;">Nursery Name</th>
+                                    <th style="width:10%;">IsActive</th>
+                                    @*<th style="width:8%;display:none">Status</th>*@
+                                    <th style="width:15%;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                @foreach (var item in ViewData["lstNurseries"] as IEnumerable<FMDSS.Models.ForestProduction.NurseryManagement>)
+                                {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(model => item.districtName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.RangeName)
+                                    </td>
+
+                                    <td>
+                                        @Html.DisplayFor(model => item.villName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.nurseryName)
+                                    </td>
+                                    
+                                    <td>
+                                        @*@Html.DisplayFor(model => item.ActiveStatus)*@
+                                        @Html.CheckBoxFor(model => item.ActiveStatus, new { id = "IsActive" , @onchange = "cTrigProduce(this,'"+item.nurseryCode+"')", @checked = item.ActiveStatus, @class = "IsActiveCHECKED" })
+                                    </td>
+                                    @*<td style="display:none">
+                                        @Html.DisplayFor(model => item.statusDesc)
+                                    </td>*@
+                                    <td>
+                                        @*<button type="button" class="btn btn-success btn-circle" title="View" data-toggle="modal" data-target="#myDepotManagement" onclick="FindNursery(this,'VIEW')" value="@item.nurseryCode">
+                <i class="fa fa-eye"></i>
+            </button>*@
+
+                                        <button type="button" class="btn btn-warning btn-circle AddNewDepot" id="btnEdit" title="Edit" data-toggle="modal" data-target="#newNurseryPage" onclick="FindNursery(this, 'UPDATE')" value="@item.nurseryCode">
+                                            <i class="fa fa-edit"></i>
+                                        </button>
+
+                                        @*<a class="btn btn-primary btn-circle" title="Activate/DeActivate" onclick="return confirm('Do you Want To Change Current Nursery Status?');" href="@Url.Action("DeleteNurseryDetail", "ManageNursery", new { nurseryCode = item.nurseryCode, Command = "DELETE" })">
+                                            <i class=" fa fa-times">
+                                            </i>
+                                        </a>*@
+
+                                        <a class="btn btn-info btn-circle" href="javascript:void();" target="_blank" title="View in GIS" onclick="return ShowNursery('@item.nurseryCode');">
+                                            <i class="fa fa-map-marker"></i>
+                                        </a>
+
+
+
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--./Table-->
+                    <!--Popup Model-->
+                    <div class="modal fade" id="myDepotManagement" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+                        <div class="modal-dialog mdw">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                    <h4 class="modal-title" id="myModalLabel"><b>Nursery Detail</b></h4>
+                                </div>
+                                <div class="modal-body">
+                                    <!-- From URL Get -->
+                                    <table class="table table-striped table-bordered table-hover">
+                                        <tbody id="tbdyScart"></tbody>
+                                    </table>
+
+                                    <!-- /. From URL Get -->
+                                </div>
+                                <!-- /.modal-body -->
+
+                                <div id="btn" class="modal-footer">
+                                    <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal">
+                                        <i class="fa fa-times fa-fw"></i> Close
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- /.modal-content -->
+                        </div>
+                        <!-- /.modal-dialog -->
+                    </div>
+                    <!--./Popup Model-->
+                    <!-- New Nursery Form -->
+                    @using (Html.BeginForm("AddEditNurseryDetail", "ManageNursery", FormMethod.Post, new { id = "submitForm" }))
+                    {
+                        <div class="modal fade" id="newNurseryPage" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h4 class="modal-title" id="myModalTitle">Add New Nursery</h4>
+                                    </div>
+
+                                    <div class="modal-body">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Circle Name: <span class="mandatory"></span></label>
+                                                @Html.DropDownList("CircleCode", (IEnumerable<SelectListItem>)ViewBag.CircleCode, "--Select--", new { @class = "form-control", id = "ddl_circleCode", onchange = "Circle_Onchange(this);" })
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Division Name: <span class="mandatory"></span></label>
+                                                @Html.DropDownList("DivisionCode", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddl_divisionCode", onchange = "Division_Onchange(this);" })
+                                            </div>
+                                        </div>
+
+
+                                        @*<div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Range Name: <span class="mandatory">*</span></label>
+                                                    @Html.DropDownList("ddlRange", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddlRange" })
+                                                    <span id="errorRange" style="color: Red; display: none" class="alert-danger1">* Please Select Range.</span>
+                                                </div>
+                                            </div>*@
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Range Name: <span class="mandatory">*</span></label>
+                                                @Html.DropDownList("ddlRange", (IEnumerable<SelectListItem>)ViewBag.ddlRange, "--Select--", new { @class = "form-control", id = "ddlRange" })
+                                                <span id="errorRange" style="color: Red; display: none" class="alert-danger1">* Please Select Range.</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Village Name: </label>
+                                                @Html.DropDownListFor(s => s.ddlVillages, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddlVillages" })
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Address:</label>
+                                                @Html.TextBoxFor(x => x.address, new { @class = "form-control", @id = "txtAddress", @placeholder = "Type Address here...", @maxlength = 50 })
+
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Landmark:</label>
+                                                @Html.TextBoxFor(x => x.landmark, new { @class = "form-control", @id = "txtLandmark", @placeholder = "Type Landmark here...", @maxlength = 50 })
+
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Nursery Incharge SSO ID: </label>
+                                                @Html.DropDownList("NurseryInchargeSSOID", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "NurseryInchargeSSOID" })
+                                            </div>
+                                        </div>
+
+
+
+                                        <div class="col-lg-6">
+                                            <label>
+                                                Nursery Type: <span class="mandatory">*</span>
+                                            </label>
+                                            <div class="form-group">
+                                                <input type="radio" name="NurseryType" id="NurP" value="Permanent" checked="checked" /> Permanent &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                <input type="radio" name="NurseryType" id="NurT" value="Temporary" /> Temporary
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12"></div>
+                                        <div class="col-lg-12"></div>
+                                        <div class="col-lg-12"></div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Nursery Name: <span class="mandatory">*</span></label>
+                                                @Html.TextBoxFor(x => x.nurseryName, new { @class = "form-control", @id = "txtNursery", @placeholder = "Type Nursery Name here...", @maxlength = 50 })
+                                                <input type="hidden" id="nurseryCode" name="nurseryCode">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-3">
+                                            <div class="form-group">
+                                                <label>Latitude:</label>
+                                                @Html.TextBoxFor(x => x.latitude, new { @class = "form-control", @id = "txtLatitude", @placeholder = "Type Latitude here...", @maxlength = 50 })
+                                                <input type="hidden" id="nurseryCode" name="nurseryCode">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="form-group">
+                                                <label>Longitude:</label>
+                                                @Html.TextBoxFor(x => x.longitude, new { @class = "form-control", @id = "txtLongitude", @placeholder = "Type Longitude here...", @maxlength = 50 })
+                                                <input type="hidden" id="nurseryCode" name="nurseryCode">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <label>
+                                                Active Status: <span class="mandatory">*</span>
+                                            </label>
+                                            <div class="form-group">
+                                                <input type="radio" id="rdoActiveStatus" name="ActiveStatus" value=true checked="checked" />                                                    <span>Active</span>
+                                                <input type="radio" id="rdoDeActiveStatus" name="ActiveStatus" value=false /><span>De-Active</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <label>
+                                                Active Status (Citizen End / Department End): <span class="mandatory">*</span>
+                                            </label>
+                                            <div class="form-group">
+                                                @for(int i = 0; i < Model.ActiveStatusCitizenANDDeptUser.Count(); i++)  
+                                                {
+
+                                                    @Html.HiddenFor(it => Model.ActiveStatusCitizenANDDeptUser[i].ID)
+                                                    <span>@Html.DisplayFor(it => Model.ActiveStatusCitizenANDDeptUser[i].Name)</span>
+                                                    @Html.CheckBoxFor(it => Model.ActiveStatusCitizenANDDeptUser[i].Checked, new { Style = "display: inline-block;}" })
+
+                                                    
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-12"></div>
+                                    </div>
+                                    <!-- /.modal-body -->
+
+                                    <div id="btn" class="modal-footer" style="clear:both">
+                                        <button name="Command" class="btn btn-success" id="btn_submit" type="submit" onclick="return ValidateForm();">
+                                            <i class="fa fa-check"></i> Submit
+                                        </button>
+                                        <button type="reset" class="btn btn-warning" id="btn_reset">
+                                            <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                        </button>
+                                        <button name="Command" class="btn btn-danger" id="btn_cancel" type="submit" value="Cancel" data-dismiss="modal">
+                                            <i class="fa fa-times fa-fw"></i> Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- /.modal-content -->
+                            </div>
+                            <!-- /.modal-dialog -->
+                        </div>
+                    }
+                    <!-- ./New Nursery Form -->
+                    <!-- /.panel-body -->
+                </div>
+                <!-- /.panel -->
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+    </div>
+    <!-- /.Row -->
+
+</div>
+
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    function ShowNursery(nurseryID) {
+        document.getElementById("ssoid").value = '@Session["SSOID"]';
+        document.getElementById("reqID").value = nurseryID;
+        //  document.getElementById("postShowNurseryform").action = window.location.hostname + "//fmdssgis/dnm/dnm.aspx";
+        document.getElementById("postShowNurseryform").action = 'https://gistest1.rajasthan.gov.in/fmdssgis/dnm/dnm.aspx';
+
+        document.getElementById("postShowNurseryform").submit();
+        return false;
+    }
+
+    function cTrigProduce(box, nCode) {
+        
+       // alert(box.checked);
+        var Command = "Delete";
+        if (box.checked) {
+           // alert("c");
+            if (confirm("Are you sure you want to Active this Nursery ?")) {
+                box.checked = true;
+                location.href = '@Url.Action("DeleteNurseryDetail", "ManageNursery")?nurseryCode=' + nCode + '&Command=' + Command + '&IsActive=' + true;
+            }
+            else {
+                box.checked = false;
+            }
+        }
+        else {
+            if (confirm("Are you sure you want to DeActive this Nursery ?")) {
+                box.checked = false;
+                location.href = '@Url.Action("DeleteNurseryDetail", "ManageNursery")?nurseryCode=' + nCode + '&Command=' + Command + '&IsActive=' + false;
+            }
+            else {
+                box.checked = true;
+            }
+        }
+
+    }
+</script>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        $('#dataTableNursery').DataTable({
+            responsive: true
+        });
+
+        $('#btnEdit').click(function (e) {
+
+            $('#btn_submit').val('UPDATE');
+            document.getElementById("myModalTitle").innerHTML = "Edit Nursery Detail";
+        });
+
+        $('#ddlDistricts').change(function (e) {
+            $("#ddlBlocks").empty(); $("#ddlGPs").empty(); $("#ddlVillages").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNursery/GetBlocks', // we are calling json method
+                dataType: 'json',
+                data: { distCode: $("#ddlDistricts option:selected").val() },
+                success: function (range) {
+                    $.each(range, function (i, items) {
+                        $("#ddlBlocks").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        });
+
+        $('#ddlBlocks').change(function (e) {
+            $("#ddlGPs").empty(); $("#ddlVillages").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNursery/GetGramPanchayats', // we are calling json method
+                dataType: 'json',
+                data: { distCode: $("#ddlDistricts option:selected").val(), blockCode: $("#ddlBlocks option:selected").val() },
+                success: function (range) {
+                    $.each(range, function (i, items) {
+                        $("#ddlGPs").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+
+        });
+
+        $('#ddlGPs').change(function (e) {
+            $("#ddlVillages").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNursery/GetVillages',
+                dataType: 'json',
+                data: { distCode: $("#ddlDistricts option:selected").val(), blockCode: $("#ddlBlocks option:selected").val(), gpCode: $("#ddlGPs option:selected").val() },
+                success: function (range) {
+                    $.each(range, function (i, items) {
+                        $("#ddlVillages").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        });
+
+        $("#ddlRange").bind("change", function () {
+            $('#ddlVillages').empty();
+            $("#ddlVillages").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+
+            $('#NurseryInchargeSSOID').empty();
+            $("#NurseryInchargeSSOID").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+
+            var values = {
+                RangeCode: $("#ddlRange option:selected").val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'ManageNursery/GetSSOIDbyRange',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#NurseryInchargeSSOID").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+            //var values = {
+            //    RangeCode: $("#ddlRange option:selected").val()
+            //};
+            //$.ajax({
+            //    type: 'POST',
+            //    contentType: 'application/json; charset=utf-8',
+            //    url: RootUrl + 'FdmBudgetEstimation/GetVillageNamebyRange',
+            //    data: JSON.stringify(values),
+            //    success: function (data) {
+            //        $.each(data, function (i, items) {
+            //            $("#ddlVillages").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+            //        });
+            //    },
+            //    traditional: true,
+            //    error: function (data) { console.log(data) }
+            //});
+        });
+    });
+
+    $('.AddNewDepot').on('click', function () {
+        $("#ddlDistricts").val(''); $("#ddlBlocks").empty(); $("#ddlGPs").empty(); $("#ddlVillages").empty();
+        $("#txtNursery").val("");
+        $("#NewNewDepotForm").show();
+        $('html, body').animate({ scrollTop: $("#NewNewDepotForm").offset().top - 120 }, 'slow');
+    });
+
+
+    function AddNewNursury() {
+        $('#btn_submit').val('INSERT');
+        document.getElementById("myModalTitle").innerHTML = "Add New Nursery";
+    }
+
+    function FindNursery(object1, Action) {
+         
+        debugger;
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'ManageNursery/FindFilterdNursery',
+            dataType: 'json',
+            data: { NurseryCode: object1.value },
+            success: function (data) {             
+                debugger;
+                if (data.IsCitizenOrDeptEndOpenNusery == "3") {
+                    $("#ActiveStatusCitizenANDDeptUser_0__Checked").prop("checked", true);
+                    $("#ActiveStatusCitizenANDDeptUser_1__Checked").prop("checked", true);
+                }
+                else if (data.IsCitizenOrDeptEndOpenNusery == "2") {
+                    $("#ActiveStatusCitizenANDDeptUser_0__Checked").prop("checked", false);
+                    $("#ActiveStatusCitizenANDDeptUser_1__Checked").prop("checked", true);
+                }
+                else if (data.IsCitizenOrDeptEndOpenNusery == "1") {
+                    $("#ActiveStatusCitizenANDDeptUser_0__Checked").prop("checked", true);
+                    $("#ActiveStatusCitizenANDDeptUser_1__Checked").prop("checked", false);
+                }
+
+                if (Action == 'VIEW') {
+                    $("#tbdyScart").empty();
+                    bardata = "<tr><td><b>District Name</b></td><td>" + data.districtName +
+            "</td></tr><tr><td><b>Range Name</b></td><td>" + data.RangeName +
+           "</td></tr><tr><td><b>Village Name</b></td><td>" + data.villName +
+            "</td></tr><tr><td><b>Address</b></td><td>" + data.address +
+            "</td></tr><tr><td><b>Landmark</b></td><td>" + data.landmark +
+           "</td></tr><tr><td><b>Nursery Code</b></td><td>" + data.nurseryCode +
+           "</td></tr><tr><td><b>Nursery Name</b></td><td>" + data.nurseryName +
+            "</td></tr><tr><td><b>Latitude</b></td><td>" + data.latitude +
+             "</td></tr><tr><td><b>Longitude</b></td><td>" + data.longitude +
+           "</td></tr><tr><td><b>Nursery Type</b></td><td>" + data.nurseryType +
+           "</td></tr><tr><td><b>Nursery Status</b></td><td>" + data.statusDesc +
+           "</td></tr>";
+                    $("#tbdyScart").append(bardata);
+                }
+
+                console.log(data);
+                if (Action == 'UPDATE') {
+
+                    $("#ddl_divisionCode").empty();
+                    $.ajax({
+                        type: 'POST',
+                        url: RootUrl + 'ManageNursery/DivisionData', // we are calling json method
+                        dataType: 'json',
+                        data: { circleCode: data.CircleCode },
+                        success: function (response) {
+                            $.each(response, function (i, items) {
+                                $("#ddl_divisionCode").append('<option value="' + items.Value + '">' +
+                                    items.Text + '</option>');
+                            });
+                            $("#ddl_divisionCode").val(data.DivisionCode);
+
+                        },
+                        error: function (ex) {
+                            alert('Failed to retrieve data.' + ex);
+                        }
+                    });  
+                    
+                    $("#ddl_circleCode").val(data.CircleCode);
+                    $("#ddlRange").val(data.ddlRange);
+                    debugger;
+
+                    //$("#ddl_divisionCode").val(data.DivisionCode);
+
+                    //$("#ddl_circleCode").val("CIR001");
+                    //$("#ddl_divisionCode").val('DIV007');
+                    @*alert('@(TempData["DivisionList"])');
+                    var divisionList = '@(TempData["DivisionList"])';
+                    alert(divisionList);*@
+                    //$.each(divisionList, function (i, items) {
+                    //    $("#ddl_divisionCode").append('<option value="' + items.Value + '">' +
+                    //        items.Text + '</option>');
+                    //});
+
+
+                    var villcode = data.ddlVillages;
+
+                    $('#ddlVillages').empty();
+                    $("#ddlVillages").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                    var values = {
+                        RangeCode: data.ddlRange
+                    };
+
+
+
+                    //$.ajax({
+                    //    type: 'POST',
+                    //    contentType: 'application/json; charset=utf-8',
+                    //    url: RootUrl + 'FdmBudgetEstimation/GetVillageNamebyRange',
+                    //    data: JSON.stringify(values),
+                    //    success: function (data) {
+                    //        $.each(data, function (i, items) {
+                    //            $("#ddlVillages").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    //            if (items.Value == villcode) {
+                    //                $('#ddlVillages option').filter(function () { return $(this).val() == villcode }).attr('selected', true);
+                    //                return;
+                    //            }
+                    //        });
+                    //    },
+                    //    traditional: true,
+                    //    error: function (data) { console.log(data) }
+                    //});
+
+
+                    $('#NurseryInchargeSSOID').empty();
+                    $("#NurseryInchargeSSOID").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+
+                    var NurseryInchargeSSOID = data.NurseryInchargeSSOID;
+                    var values2 = {
+                        RangeCode: data.ddlRange
+                    };
+
+                    $.ajax({
+                        type: 'POST',
+                        contentType: 'application/json; charset=utf-8',
+                        url: RootUrl + 'ManageNursery/GetSSOIDbyRange',
+                        data: JSON.stringify(values2),
+                        success: function (data) {
+                           
+                            $.each(data, function (i, items) {
+                                $("#NurseryInchargeSSOID").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                                if (items.Value == NurseryInchargeSSOID) {
+                                    $('#NurseryInchargeSSOID option').filter(function () { return $(this).val() == NurseryInchargeSSOID }).attr('selected', true);
+                                    return;
+                                }
+                            });
+                        },
+                        traditional: true,
+                        error: function (data) { console.log(data) }
+                    });
+
+
+
+                    if (data.nurseryType == "Temporary") {
+                        $("#NurT").prop("checked", true);
+                    }
+                    else {
+                        $("#NurP").prop("checked", true);
+                    }
+                    $("#txtAddress").val(data.address);
+                    $("#txtLandmark").val(data.landmark);
+                    $("#txtLatitude").val(data.latitude);
+                    $("#txtLongitude").val(data.longitude);
+                    $("#txtNursery").val(data.nurseryName);
+                    $('#btn_submit').val('UPDATE');
+                    $('#nurseryCode').val(object1.value);
+                    if (data.ActiveStatus == true) {
+                        $('#rdoActiveStatus').attr("checked", "checked");
+                        $('#rdoDeActiveStatus').removeAttr("checked");
+                    }
+                    else {
+                        $('#rdoDeActiveStatus').attr("checked", "checked");
+                        $('#rdoActiveStatus').removeAttr("checked");
+                    }
+                }
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    }
+
+    function UpdateNursery(object1, Action) {
+        if (confirm('Are you sure you wish to de-activate the selected Nursery?')) {
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNursery/AddEditNurseryDetail',
+                dataType: 'json',
+                data: { NurseryCode: object1.value, Command: Action },
+                success: function (data) {
+                    window.location.reload(true);
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        }
+    }
+
+    function ValidateForm() {
+        if ($('#ddlRange option:selected').index() != 0) {
+            if ($('#ddlVillages option:selected').index() != 0) {
+                if ($('#txtNursery').val() != "") {
+                    return true;
+                }
+                else {
+                    alert('Kindly Enter Nursery Name!')
+                    $('#txtNursery').focus();
+                    return false;
+                }
+            }
+            else {
+                //alert('Kindly select a Village!')
+                //$('#ddlVillages').focus();
+                return true;
+            }
+        }
+        else {
+            alert('Kindly select Range!')
+            $('#ddlRange').focus();
+            return false;
+        }
+    }
+
+    $('#txtLatitude,#txtLongitude').keypress(function (event) {
+        return isNumber(event, this)
+    });
+
+    $('#txtNursery,#txtAddress,#txtLandmark').keypress(function (e) {
+
+        var kc = e.which;
+
+        if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95) || (kc >= 44 && kc <= 57) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+        }
+        else {
+            e.preventDefault();
+        }
+    });
+
+    function isNumber(evt, element) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if ((charCode != 46 || $(element).val().indexOf('.') != -1) && (charCode < 48 || charCode > 57))  // “.” CHECK DOT, AND ONLY ONE.
+            return false;
+        else
+            return true;
+    }
+
+    function Circle_Onchange(cntrl) {
+        $("#ddl_divisionCode").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'ManageNursery/DivisionData', // we are calling json method
+            dataType: 'json',
+            data: { circleCode: cntrl.value },
+            success: function (response) {
+                $.each(response, function (i, items) {
+                    $("#ddl_divisionCode").append('<option value="' + items.Value + '">' +
+                        items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve data.' + ex);
+            }
+        });
+    }
+
+    function Division_Onchange(cntrl) {
+        $("#ddlRange").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'ManageNursery/RangeData', // we are calling json method
+            dataType: 'json',
+            data: { divisionCode: cntrl.value },
+            success: function (response) {
+                $.each(response, function (i, items) {
+                    $("#ddlRange").append('<option value="' + items.Value + '">' +
+                        items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve data.' + ex);
+            }
+        });
+    }
+</script>
+
+<form name="postShowNurseryform" id="postShowNurseryform" method="post">
+    <input type="hidden" id="ssoid" name="ssoid" />
+    <input type="hidden" id="portalid" name="portalid" value="portal123" />
+    <input type="hidden" id="requestFor" name="requestFor" value="Nursery" />
+    <input type="hidden" id="reqID" name="reqID" />
+</form>

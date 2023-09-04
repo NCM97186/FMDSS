@@ -1,0 +1,167 @@
+﻿@{
+    ViewBag.Title = "BindVehicles";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+
+@model FMDSS.Models.BookOnlineZoo.BookOnZoo
+
+<style>
+    .col-lg-3, .col-lg-4 {
+        padding-left: 10px;
+        padding-right: 5px;
+    }
+
+    #UploadId {
+        width: auto;
+    }
+</style>
+
+<script src="~/js/jquery.min.js"></script>
+
+<script type="text/javascript">
+
+
+
+    var RootURl = '@Url.Content("~/")';
+
+
+
+
+    $(document).ready(function () {
+
+
+
+
+        $('#btn_GetTickets').click(function (e) {
+
+
+            var PlaceId = $("#RequestId").val();
+            if (!PlaceId) { PlaceId = 0; }
+            var values = {
+                TicketIDs: PlaceId
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootURl + 'BookOnlineZoo/ShowPartialViewUsingTicket',
+                success: function (data) {
+                   
+                        $('#VehicleDIV').html(data.VehiclePartialView);
+                   
+
+                        if (data.TicketStatus != "") {
+                    alert(data.TicketStatus);
+                 }
+
+
+
+                    if (data.VehicleStatus == "TRUE") {
+                        $('#VehicleIDSS').show();
+                        $("#PrivateVehicle").prop("checked", true);
+
+                    }
+                    else {
+                        $('#VehicleIDSS').hide();
+                        $('#PrivateVehicle').removeProp('checked');
+                    }
+
+                }
+            });
+        });
+    });
+
+
+
+
+</script>
+
+<div style="display:none" id="dvContainer">
+
+</div>
+
+<input type="hidden" id="hdPrivateVehicle" value="True" />
+
+<div id="page-wrapper-inn">
+
+    <div class="col-lg-12 pad">
+
+        <h1 class="page-header">Update Vehicles For Zoo Booking</h1>
+
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                  
+
+                </div>
+
+
+
+
+                @using (Html.BeginForm("FinalSubmitBindVehicles", "BookOnlineZoo", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {
+
+
+                    <div class="panel-body">
+
+                        <div class="col-lg-2">
+                            <div class="form-group">
+                                <label>TicketID <span class="mandatory">*</span></label>
+                            </div>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="form-group">
+                                @Html.TextBoxFor(model => model.RequestId, new { @class = "form-control common ", id = "RequestId" })
+                                <span id="errRequestId" class="alert-danger1"></span>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-group">
+                                <input type="button" id="btn_GetTickets" class="btn btn-success" value="Get Tickets" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="VehicleIDSS">
+
+                            <div class="col-lg-12">
+                                <label>Vehicle Details:</label>
+                                <div class="divider"></div>
+                            </div>
+                            <div id="VehicleDIV" class="col-lg-12 vehicle">
+
+                            </div>
+                        </div>
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_submit1">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+                                <button style="display:none" type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_Validate">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                                <button type="reset" class="btn btn-warning">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+                                <button type="submit" name="Command" value="Cancel" class="btn btn-danger">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+            <!-- /.panel -->
+                }
+
+            </div>
+
+            <!-- /.col-lg-12 -->
+        </div>
+    </div>
+    <!-- /.Row -->
+</div>

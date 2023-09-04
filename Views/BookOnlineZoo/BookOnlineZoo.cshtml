@@ -1,0 +1,1600 @@
+﻿@{
+    ViewBag.Title = "Book Online Zoo";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+
+@model FMDSS.Models.BookOnlineZoo.BookOnZoo
+
+<style>
+    .col-lg-3, .col-lg-4 {
+        padding-left: 10px;
+        padding-right: 5px;
+    }
+
+    #UploadId {
+        width: auto;
+    }
+</style>
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var RootURl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+        $('#isAnyEquepment').on('change', function () {
+
+            if (this.checked) {
+                $('#equepmentBlock').show();
+                //    var returnVal = confirm("Are you sure 1 ?");
+                //    $(this).prop("checked", returnVal);
+            } else {
+
+                var rowCount = $('#tblEquepment tr').length;
+
+                if (rowCount != null && rowCount != 'undefined') {
+                    for (var i = 0; i < rowCount; i++) {
+                        $('#NoOfEquipment' + i).val(null);
+                        $('#TotalEquipmentFee' + i).val(null);
+                    }
+                }
+                $('#equepmentBlock').hide();
+            }
+        });
+
+
+        if ($("#hdnDeptKioskStatus").val() == "True") {
+            if ('@ViewBag.statusoftime' == 'True') {
+
+                $("select#PlaceOfVisit").prop('selectedIndex', 1);
+                var PlaceId = $("#PlaceOfVisit option:selected").val();
+                if (!PlaceId) { PlaceId = 0; }
+
+
+                var values = {
+                    PlaceId: PlaceId
+                };
+                $.ajax({
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(values),
+                    url: RootURl + 'BookOnlineZoo/ShowPartialView',
+                    success: function (data) {
+                        //Shaan Pandupoul changes
+                        if (data.PlaceId != "70") {
+                            $('#MemberDIV').html(data.MemberPartialView);
+                            $('#VehicleDIV').html(data.VehiclePartialView);
+
+                            if (data.VehicleStatus == "TRUE") {
+                                $('#VehicleIDSS').show();
+                                $("#PrivateVehicle").prop("checked", true);
+
+                            }
+                            else {
+                                $('#VehicleIDSS').hide();
+                                $('#PrivateVehicle').removeProp('checked');
+                            }
+
+
+                            //end Pandupoul changes
+
+                            //$.each(data.LstShiftType, function (i, items) {
+                            //    $("#ShiftTypeID").append('<option value="' + items.ShiftTypeID + '">' + items.ShiftTypeName + '</option>');
+                            //});
+                            //$("select#ShiftTypeID").prop('selectedIndex', 1);
+
+                            //$.each(data.LstShiftType, function (i, items) {
+                            //    $("#ShiftTypeID").append('<option value="' + items.ShiftTypeID + '">' + items.ShiftTypeName + '</option>');
+                            //});
+
+                            $("select#ShiftTypeID").prop('selectedIndex', 1);
+                            var ShiftTypeIDs = $("#ShiftTypeID").val();
+
+                            CallingSheet(ShiftTypeIDs);
+                        }
+                        else {
+
+                            $('#MemberDIV').html(data.MemberPartialView);
+                            $('#VehicleDIV').html(data.VehiclePartialView);
+                            $('#PVehicle').hide();
+                            $("#PrivateVehicle").prop("checked", true);
+                            //if (data.VehicleStatus == "TRUE") {
+                            //    $('#VehicleIDSS').hide();
+                            //    $("#PrivateVehicle").prop("checked", true);
+
+                            //}
+
+                        }
+
+                    }
+                });
+                $("#DateOfVisit").val('@ViewBag.CurrentDate');
+            }
+
+
+
+        }
+
+    });
+
+
+
+    function CallingSheet(ShiftTypeIDs) {
+        var VisitDate = '@ViewBag.CurrentDate'; //$("#DateOfVisit").val();
+
+
+        var values = {
+            PlaceId: $("#PlaceOfVisit").val(),
+            ShiftType: ShiftTypeIDs,
+            VisitDate: $("#DateOfVisit").val()
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(values),
+            url: RootURl + 'BookOnlineZoo/CheckTicketAvailability',
+            success: function (data) {
+                var d = data.split('#');
+                if (d[0] != '0') {
+                    $('#lbl_AvaliableSeat').text("Currently available seats: " + d[0]);
+                    $('#hdAvaliableSeats').val(d[0]);
+                }
+                if (d[0] == '0') {
+                    $('#lbl_AvaliableSeat').text("Seats not available");
+                    $('#hdAvaliableSeats').val(d[0]);
+                }
+            }
+        });
+
+
+    }
+
+
+
+
+    $(document).ready(function () {
+        $('#EquepmentCheckBoxBlock').hide();
+        $('#hdBookingType').val() === 'Standard' ? ($('.Institutional').hide(), $('.Institute').val(''), $('#hdBookingType').val('Standard')) : ($('.Institutional').show(), $('#hdBookingType').val('Institutional'));
+    });
+
+    $(document).ready(function () {
+        GetMemberVideoCamVehicleDetails(true);
+        $('#PlaceOfVisit').change(function () {
+            GetMemberVideoCamVehicleDetails(false)
+        });
+
+    });
+    function GetMemberVideoCamVehicleDetails(isLoad) {
+        var PlaceId = $("#PlaceOfVisit option:selected").val() | 0;
+        if (!PlaceId) { PlaceId = 0; }
+
+        if (PlaceId == 0) {
+            return false;
+        }
+
+        if (PlaceId == 71 || PlaceId == 76) {
+            $('#EquepmentCheckBoxBlock').show();
+            $('#mobilenumberBlock').show();
+        } else {
+            $('#EquepmentCheckBoxBlock').hide();
+            $('#mobilenumberBlock').hide();
+        }
+		
+		if (PlaceId == 76) {
+            $('#citzennameBlock').show();
+        } else {
+            $('#citzennameBlock').hide();
+        }
+		
+        $('#EquepmentLbl').hide();
+        $('#EquepmentDIV').hide();
+
+        var values = {
+            PlaceId: PlaceId
+        };
+
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(values),
+            url: RootURl + 'BookOnlineZoo/ShowPartialView',
+            success: function (data) {
+               
+                if (data.PlaceId != "70") {
+                    $('#MemberDIV').html(data.MemberPartialView);
+                    $('#VehicleDIV').html(data.VehiclePartialView);
+
+                    if (data.VehicleStatus == "TRUE") {
+                        //Shaan changes 18-12-2020
+                        if (PlaceId == '1') {
+                            $('#hdPrivateVehicle').val(false);
+                            $('#VehicleIDSS').hide();
+                            $('#PrivateVehicle').removeProp('checked');
+                        }
+                        else {
+
+                            if (PlaceId == 71) {
+                                debugger;
+                                var val = $("input[name='PrivateVehicle']:checked").val();
+
+                                // alert(PlaceId);
+                                // $("input[name=PrivateVehicle]").attr("checked", false);
+                                if (val = 'True') {
+                                    // alert(PlaceId);
+                                    $("input:radio[value='False'][name='PrivateVehicle']").prop('checked', true);
+                                    $("#VehicleDIV").hide();
+                                    $("#PVehicle").hide();                                    
+                                }
+                                else {
+                                    $("input:radio[value='True'][name='PrivateVehicle']").prop('checked', true);                                    
+                                }
+
+                            } else {
+                                $('#VehicleIDSS').show();
+                                $("#PrivateVehicle").prop("checked", true);
+                                $("#VehicleDIV").show();
+                                $("#PVehicle").show();
+                            }
+                        }
+
+                        //end changes 18-12-2020
+                        if (data.EquepmentStatus == "TRUE") {
+
+                            $('#EquepmentDIV').html(data.EquepmentPartialView);
+                            $('#EquepmentLbl').show();
+                            $('#EquepmentDIV').show();
+                        }
+
+                    }
+                    else {
+                        $('#VehicleIDSS').hide();
+                        $('#PrivateVehicle').removeProp('checked');
+                    }
+
+
+                    $("#ShiftTypeID").empty();
+                    
+
+                    $("#ShiftTypeID").append('<option value="0">--Select--</option>');
+                    $.each(data.LstShiftType, function (i, items) {
+                        $("#ShiftTypeID").append('<option value="' + items.ShiftTypeID + '">' + items.ShiftTypeName + '</option>');
+                    });
+                    if (isLoad == false) {
+                        $("#DateOfVisit").val('');                                            
+                    } else {
+                        $('#ShiftTypeID option').eq(1).prop('selected', true);
+                    }
+                }
+                else {
+                    $('#MemberDIV').html(data.MemberPartialView);
+                    $('#VehicleDIV').html(data.VehiclePartialView);
+                    $('#PVehicle').hide();
+                    $("#PrivateVehicle").prop("checked", true);
+                    $("#ShiftTypeID").empty();
+                    $("#ShiftTypeID").append('<option value="0">--Select--</option>');
+                    $.each(data.LstShiftType, function (i, items) {
+                        $("#ShiftTypeID").append('<option value="' + items.ShiftTypeID + '">' + items.ShiftTypeName + '</option>');
+                    });
+                }
+
+            }
+        });
+    }
+
+    $(function (e) {
+
+        var disableddates = ["12-3-2014", "12-11-2014", "12-25-2014", "12-20-2014"];
+
+
+        var daysToDisable = [8];
+        var monthsToDisable = [10];
+
+        function disableSpecificWeekDays(date) {
+            var day = date.getDay();
+            if ($.inArray(day, daysToDisable) != -1) {
+                return [true];
+            }
+
+            var month = date.getMonth();
+            if ($.inArray(month, monthsToDisable) != -1) {
+                return [true];
+            }
+            return [true];
+        }
+
+
+        if ($('#hdnDeptKiosk').val() == 'True') {
+
+            $(".datefield").datepicker({
+                beforeShowDay: function (date) {
+                    var day = date.getDay();
+                    disableSpecificWeekDays(date);
+                    return [(day != 9)];
+                }, minDate: new Date(), maxDate: new Date(), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); },
+                //beforeShowDay: function (date) { return [date.getDay() == 1 || date.getDay() == 2 || date.getDay() == 3 || date.getDay() == 4 || date.getDay() == 5 || date.getDay() == 6, ""] },// FOR Sunday Cloase Mukesh Jangid
+                //dateFormat: 'dd/mm/yy'// FOR Sunday Cloase Mukesh Jangid
+            });
+
+
+        }
+        else {
+
+            var d = new Date($('#hdCurrentdate').val());
+            d.setDate(d.getDate() + 89);
+            var day = d.getDate();
+            var month = d.getMonth() + 1;
+            var year = d.getFullYear();
+            if (day < 10) {
+                day = "0" + day;
+            }
+            if (month < 10) {
+                month = "0" + month;
+            }
+            var tdate = day + "/" + month + "/" + year;
+
+            // var tddate = month + "/" + day + "/" + year;
+
+            $(".datefield").datepicker({
+                beforeShowDay: function (date) {
+                    var day = date.getDay();
+                    disableSpecificWeekDays(date);
+                    return [(day != 9)];
+                }, minDate: new Date(), maxDate: tdate, dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); },
+                //beforeShowDay: function (date) { return [date.getDay() == 1 || date.getDay() == 2 || date.getDay() == 3 || date.getDay() == 4 || date.getDay() == 5 || date.getDay() == 6, ""] },// FOR Sunday Cloase Mukesh Jangid
+                //dateFormat: 'dd/mm/yy'// FOR Sunday Cloase Mukesh Jangid
+            });
+        }
+
+
+        $('input:text,select,textarea').focusin(function () {
+            $(this).css({ 'background-color': 'lightgray' });
+        });
+
+        $('input:text,select,textarea').focusout(function () {
+            $(this).css({ 'background-color': 'white' });
+        });
+
+        $('#InstituteOrganisationName,#NameOfHead').keypress(function (e) {
+            if (e.ctrlKey || e.altKey) {
+                e.preventDefault();;
+            } else {
+                var key = (e.which) ? e.which : e.keyCode
+                if (e.shiftKey) {
+                    if (key == 64 || key == 33 || key == 35 || key == 36 || key == 37 || key == 94 || key == 38 || key == 42 || key == 40 || key == 41) {
+                        e.preventDefault();
+                    }
+                }
+                if (!((key == 8) || (key == 32) || (key == 46) || (key >= 35 && key <= 40) || (key >= 65 && key <= 90) || (key >= 97 && key <= 122))) {
+                    e.preventDefault();
+                }
+            }
+        });
+
+        $('.NoOfMember,.NoOfCamera').bind('keypress', function (evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode
+            // var charCode = evt.which;
+
+            if ((charCode == 46) || (charCode >= 97 && charCode <= 122) || (charCode >= 65 && charCode <= 90)) {
+                return false;
+            }
+            else {
+                if (charCode >= 48 && charCode <= 57 || charCode == 46) {
+                    return true;
+                }
+                else {
+                    evt.preventDefault();
+                }
+            }
+        });
+
+
+        $('#IdNumber').keypress(function (e) {
+            var kc = e.which;
+            if (e.shiftKey) {
+                if (kc == 64 || kc == 33 || kc == 35 || kc == 36 || kc == 37 || kc == 94 || kc == 38 || kc == 42 || kc == 40 || kc == 41) {
+                    e.preventDefault();
+                }
+            }
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95) || (kc >= 47 && kc <= 57) || (kc >= 44 && kc < 46) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+
+        $('#ShiftTypeID').change(function () {
+            $("#DateOfVisit").val('');
+
+        });
+
+        Captcha();
+        $('#PhoneNoOfInstitOrgan,#PhoneOfHead').bind('keypress', function (evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode
+            // var charCode = evt.which;
+
+            if ((charCode == 46) || (charCode >= 97 && charCode <= 122) || (charCode >= 65 && charCode <= 90)) {
+                return false;
+            }
+            else {
+                if (charCode >= 48 && charCode <= 57 || charCode == 46) {
+                    return true;
+                }
+                else {
+                    evt.preventDefault();
+                }
+            }
+        });
+
+
+        $('input[name=BookingType]').change(function () {
+            $(this).attr('value') === 'Standard' ? ($('.Institutional').hide(), $('.Institute').val(''), $('#hdBookingType').val('Standard')) : ($('.Institutional').show(), $('#hdBookingType').val('Institutional'));
+
+
+        });
+
+        $('input[name=PrivateVehicle]').change(function () {
+
+            $(this).attr('value') === 'True' ? ($('.vehicle').show(), $('.NoOfVehicle').val(''), $('.TotalVehicleFee').val(''), $('#hdPrivateVehicle').val('True')) : ($('.vehicle').hide(), $('#hdPrivateVehicle').val('False'));
+        });
+
+
+        if ($('#AdultIndianMember').attr('checked', true)) {
+            $('.trMrow0').show();
+            $('.trMrow1,.trMrow2,.trMrow3').hide();
+        }
+
+
+
+        $('#AdultIndianMember').click(function (e) {
+
+            if ($('#AdultIndianMember').prop('checked')) {
+                $('.trMrow0').show();
+            }
+            else {
+                $('.trMrow0').hide();
+                $('#NoOfMember0,#NoOfCamera0,#TotalFeesOfMember0').val('');
+            }
+        });
+        $('#AdultNonIndianMember').click(function (e) {
+
+            if ($('#AdultNonIndianMember').prop('checked')) {
+                $('.trMrow1').show();
+            }
+            else {
+                $('.trMrow1').hide();
+                $('#NoOfMember1,#NoOfCamera1,#TotalFeesOfMember1').val('');
+            }
+        });
+        $('#Student').click(function (e) {
+
+            if ($('#Student').prop('checked')) {
+                $('.trMrow3').show();
+            }
+            else {
+                $('.trMrow3').hide();
+                $('#NoOfMember3,#NoOfCamera3,#TotalFeesOfMember3').val('');
+            }
+        });
+
+        $('#ChildBelowAgeFive').click(function (e) {
+
+            if ($('#ChildBelowAgeFive').prop('checked')) {
+                $('.trMrow2').show();
+            }
+            else {
+                $('.trMrow2').hide();
+                $('#NoOfMember2,#NoOfCamera2,#TotalFeesOfMember2').val('');
+            }
+        })
+        $('#ChildBelowAgeTen').click(function (e) {
+
+            if ($('#ChildBelowAgeTen').prop('checked')) {
+                $('.trMrow3').show();
+            }
+            else {
+                $('.trMrow3').hide();
+                $('#NoOfMember3,#NoOfCamera3,#TotalFeesOfMember3').val('');
+            }
+        })
+        $('#Handicapped').click(function (e) {
+
+            if ($('#Handicapped').prop('checked')) {
+                alert('test');
+                $('.trMrow4').show();
+            }
+            else {
+                alert('test2');
+                $('.trMrow4').hide();
+                //$('#NoOfMember4,#NoOfCamera4,#TotalFeesOfMember4').val('');
+            }
+        });
+        $(".NoOfMember").bind('click focus', function () {
+            var id = $(this).attr('id');
+            var idc = id.substr(10, 1);
+            // alert(idc);
+            $('#' + id).bind("change", function () {
+                $('#NoOfCamera' + idc).val('');
+                $('#TotalFeesOfMember' + idc).val('');
+                var NoOfMember = $(this).val();
+                var FeePerMember = $('#FeePerMember' + idc).val();
+                var totalfee = (parseInt(NoOfMember) * parseInt(FeePerMember));
+                $('#TotalFeesOfMember' + idc).val(totalfee)
+
+            });
+        });
+
+
+
+        $(".NoOfCamera").bind('click focus', function () {
+
+            var id = $(this).attr('id');
+            var idc = id.substr(10, 1);
+            $('#' + id).bind("change", function () {
+                $('#TotalFeesOfMember' + idc).val('');
+
+
+                var NoOfMember = $('#NoOfMember' + idc).val();
+                var FeePerMember = $('#FeePerMember' + idc).val();
+                var totalMemberfee = (parseInt(NoOfMember) * parseInt(FeePerMember));
+
+                var NoOfCamera = $('#NoOfCamera' + idc).val();
+                var FeePerCamera = $('#FeePerCamera' + idc).val();
+                var totalCamerafee = (parseInt(NoOfCamera) * parseInt(FeePerCamera));
+
+                var totalfinalAmount = (parseInt(totalCamerafee) + parseInt(totalMemberfee));
+                $('#TotalFeesOfMember' + idc).val(totalfinalAmount)
+
+            });
+        });
+
+
+
+
+        $("#DocumentForTour").change(function (e) {
+            var iSize = parseFloat($("#DocumentForTour")[0].files[0].size / 1024).toFixed(2);
+            if (iSize > 100) {
+                $('#DocumentForTour').val('');
+                $('#errDocumentForTour').show();
+                $('#errDocumentForTour').html("</br>Upload ID should not be larger than 100 KB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#DocumentForTour').focus();
+                return false;
+            }
+            var file = $("#DocumentForTour").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#DocumentForTour').val('');
+                    $('#errDocumentForTour').show();
+                    $('#errDocumentForTour').html("Please upload only jpeg or jpg or pdf or png or gif file format in Upload ID Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#DocumentForTour').focus();
+                    return false;
+                } else {
+                    $('#errDocumentForTour').hide();
+                }
+            }
+            else { $('#errDocumentForTour').hide(); }
+
+        });
+
+        $("#UploadId").change(function (e) {
+            var iSize = parseFloat($("#UploadId")[0].files[0].size / 1024).toFixed(2);
+            if (iSize > 100) {
+                $('#UploadId').val('');
+                $('#errUploadId').show();
+                $('#errUploadId').html("</br>Upload ID should not be larger than 100 KB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#UploadId').focus();
+                return false;
+            }
+            var file = $("#UploadId").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#UploadId').val('');
+                    $('#errUploadId').show();
+                    $('#errUploadId').html("Please upload only jpeg or jpg or pdf or png or gif file format in Upload ID Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#UploadId').focus();
+                    return false;
+                } else {
+                    $('#errUploadId').hide();
+                }
+            }
+            else { $('#errUploadId').hide(); }
+
+        });
+
+        var datechange;
+        $("#DateOfVisit").bind("click", function (e) {
+            datechange = $(this).val();
+        }).bind("change", function () {
+
+            var PlaceId = $("#PlaceOfVisit option:selected").val();
+            if (!PlaceId) { PlaceId = 0; }
+            var VisitDate = $("#DateOfVisit").val();
+            var ShiftTypeID = $("#ShiftTypeID option:selected").val();
+
+            var values = {
+                PlaceId: PlaceId,
+                ShiftType: ShiftTypeID,
+                VisitDate: VisitDate
+            };
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootURl + 'BookOnlineZoo/CheckTicketAvailability',
+                success: function (data) {
+                    var d = data.split('#');
+                    if (d[0] != '0') {
+                        $('#lbl_AvaliableSeat').text("Currently available seats: " + d[0]);
+                        $('#hdAvaliableSeats').val(d[0]);
+                    }
+                    if (d[0] == '0') {
+                        $('#lbl_AvaliableSeat').text("Seats not available");
+                        $('#hdAvaliableSeats').val(d[0]);
+                    }
+                }
+            });
+        });
+
+        $('#btn_submit1').click(function (e) {
+            var placeidno = $('#PlaceOfVisit').val();
+            if (placeidno == '70') {
+                var result = validatePanduPaul(placeidno);
+                var VehicleCount = $("#tbl_vehicleInfo tbody tr").length;
+                if (VehicleCount == 0) {
+                    alert("Please add vehicle information")
+                    return false;
+                }
+                return result;
+            }
+            if ($('#ChildBelowAgeFive').prop('checked')) {
+                var lasttd = 0;
+                $('table #tblMemberInfom tr').each(function () {
+                    lasttd = lasttd + $(this).find(':last-child').find('input').val();
+                });
+                if (lasttd == 0) {
+                    alert("Please select atleast one child below 5 year");
+                    return false;
+                }
+            }
+            if ($('#ChildBelowAgeTen').prop('checked')) {
+                var lasttd2 = 0;
+                $('table #tblMemberInfom tr').each(function () {
+                    lasttd2 = lasttd2 + $(this).find(':last-child').find('input').val();
+                });
+                if (lasttd2 == 0) {
+                    alert("Please select atleast one child below 10 year");
+                    return false;
+                }
+            }
+            if ($('#InstituteOrganisationName').val() == '' && $('#hdBookingType').val() == 'Institutional') {
+                document.getElementById("errInstituteOrganisationName").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#InstituteOrganisationName").offset().top }, 600);
+                $('#InstituteOrganisationName').focus();
+                return false;
+            }
+            else {
+                document.getElementById("errInstituteOrganisationName").style.display = 'none';
+            }
+            if ($('#AddressOfInstitOrgan').val() == '' && $('#hdBookingType').val() == 'Institutional') {
+                document.getElementById("errAddressOfInstitOrgan").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#AddressOfInstitOrgan").offset().top }, 600);
+                $('#AddressOfInstitOrgan').focus();
+                return false;
+            }
+            else {
+                document.getElementById("errAddressOfInstitOrgan").style.display = 'none';
+            }
+            if (($('#PhoneNoOfInstitOrgan').val() == '' || parseInt($('#PhoneNoOfInstitOrgan').val(), 10) == 0) && $('#hdBookingType').val() == 'Institutional') {
+                document.getElementById("errPhoneNoOfInstitOrgan").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#PhoneNoOfInstitOrgan").offset().top }, 600);
+                $('#PhoneNoOfInstitOrgan').focus();
+                return false;
+            }
+            else {
+                document.getElementById("errPhoneNoOfInstitOrgan").style.display = 'none';
+            }
+            if ($('#PhoneNoOfInstitOrgan').val().length < '10' && $('#hdBookingType').val() == 'Institutional') {
+                document.getElementById("errPhoneNoOfInstitOrgan").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#PhoneNoOfInstitOrgan").offset().top }, 600);
+                $('#PhoneNoOfInstitOrgan').focus();
+                return false;
+            }
+            else {
+                document.getElementById("errPhoneNoOfInstitOrgan").style.display = 'none';
+            }
+            if ($('#NameOfHead').val() == '' && $('#hdBookingType').val() == 'Institutional') {
+                document.getElementById("errNameOfHead").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#NameOfHead").offset().top }, 600);
+                $('#NameOfHead').focus();
+                return false;
+            }
+            else {
+                document.getElementById("errNameOfHead").style.display = 'none';
+            }
+            if ($('#PhoneOfHead').val() != '' && (parseInt($('#PhoneOfHead').val(), 10) == 0 || $('#PhoneOfHead').val().length < '10') && $('#hdBookingType').val() == 'Institutional') {
+                document.getElementById("errPhoneOfHead").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#PhoneOfHead").offset().top }, 600);
+                $('#PhoneOfHead').focus();
+                return false;
+            }
+            else {
+                document.getElementById("errPhoneOfHead").style.display = 'none';
+            }
+            if ($("#hdnDeptKioskStatus").val() == "False") {
+
+                if ($('#DocumentForTour').val() == '' && $('#hdBookingType').val() == 'Institutional') {
+                    document.getElementById("errDocumentForTour").style.display = 'block';
+                    $('html, body').animate({ scrollTop: $("#DocumentForTour").offset().top }, 600);
+                    $('#DocumentForTour').focus();
+                    return false;
+                }
+                else {
+                    document.getElementById("errDocumentForTour").style.display = 'none';
+                }
+            }
+            if ($('#IdType').val() == '' && $('#hdBookingType').val() == 'Institutional') {
+                document.getElementById("errIdType").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#IdType").offset().top }, 600);
+                $('#IdType').focus();
+                return false;
+            }
+            else {
+                document.getElementById("errIdType").style.display = 'none';
+            }
+            if ($('#IdNumber').val() == '' && $('#hdBookingType').val() == 'Institutional') {
+                document.getElementById("errIdNumber").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#IdNumber").offset().top }, 600);
+                $('#IdNumber').focus();
+                return false;
+            }
+            else {
+                document.getElementById("errIdNumber").style.display = 'none';
+            }
+
+
+            if ($("#hdnDeptKioskStatus").val() == "False") {
+
+                if ($('#UploadId').val() == '' && $('#hdBookingType').val() == 'Institutional') {
+                    document.getElementById("errUploadId").style.display = 'block';
+                    $('html, body').animate({ scrollTop: $("#UploadId").offset().top }, 600);
+                    $('#UploadId').focus();
+                    return false;
+                }
+                else {
+                    document.getElementById("errUploadId").style.display = 'none';
+                }
+
+            }
+
+
+            if ($('#PlaceOfVisit').val() == '') {
+                document.getElementById("errPlaceOfVisit").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#PlaceOfVisit").offset().top }, 600);
+                $('#PlaceOfVisit').focus();
+                return false;
+            }
+            else {
+                document.getElementById("errPlaceOfVisit").style.display = 'none';
+            }
+            if ($('#DateOfVisit').val() == '') {
+                document.getElementById("errDateOfVisit").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#DateOfVisit").offset().top }, 600);
+                $('#DateOfVisit').focus();
+                return false;
+            }
+            else {
+                document.getElementById("errDateOfVisit").style.display = 'none';
+            }
+            if (placeidno == '71' || placeidno == '76') {
+                var a = $('#MobileNumber').val();
+                var filter = /^[0-9-+]+$/;
+                if (filter.test(a) && a.length == 10) {
+                    return true;
+                }
+                else {
+                    document.getElementById("errMobileNumber").style.display = 'block';
+                    $('html, body').animate({ scrollTop: $("#MobileNumber").offset().top }, 600);
+                    $('#MobileNumber').focus();
+                    return false;
+                }
+                if ($('#MobileNumber').val() == '') {
+                    document.getElementById("errMobileNumber").style.display = 'block';
+                    $('html, body').animate({ scrollTop: $("#MobileNumber").offset().top }, 600);
+                    $('#MobileNumber').focus();
+                    return false;
+                }
+                else {
+                    document.getElementById("errMobileNumber").style.display = 'none';
+                }
+            }
+
+            if (parseInt($('#hdAvaliableSeats').val(), 0) == 0) {
+                alert("Permit not avaliable");
+                return false;
+            }
+            if ($('#AdultIndianMember').prop('checked') && $('#NoOfMember0').val() == '') {
+                alert('Enter member details');
+                $('#NoOfMember0').focus();
+                return false;
+            }
+            if ($('#AdultNonIndianMember').prop('checked') && $('#NoOfMember1').val() == '') {
+                alert('Enter member details');
+                $('#NoOfMember1').focus();
+                return false;
+            }
+
+            if ($('#Student').prop('checked') && $('#NoOfMember2').val() == '') {
+                alert('Enter member details');
+                $('#NoOfMember2').focus();
+                return false;
+            }
+            if ($('#ChildBelowAgeFive').prop('checked') && $('#NoOfMember3').val() == '') {
+                alert('Enter Below Five Year Child details');
+                $('#NoOfMember3').focus();
+                return false;
+            }
+            if ($('#Handicapped').prop('checked') && $('#NoOfMember4').val() == '') {
+                alert('Enter member details');
+                $('#NoOfMember4').focus();
+                return false;
+            }
+            if ($('#ChildBelowAgeTen').prop('checked') && $('#NoOfMember3').val() == '') {
+                alert('Enter Below Ten Year Child details');
+                $('#NoOfMember3').focus();
+                return false;
+            }
+            if ($('#NoOfMember0').val() == '' && $('#NoOfMember1').val() == '' && $('#NoOfMember2').val() == '' && $('#NoOfMember3').val() == '' && $('#NoOfMember4').val() == '') {
+                alert('Enter member details');
+                $('#NoOfMember0').focus();
+                return false;
+            }
+
+            if (parseInt($('#hdAvaliableSeats').val(), 0) > 0) {
+
+                if ($('#NoOfMember0').val() != '' && $('#NoOfMember0').length == '1') {
+                    var totalmember0 = parseInt($('#NoOfMember0').val(), 0);
+                }
+                else {
+                    var totalmember0 = 0;
+                }
+                if ($('#NoOfMember1').val() != '' && $('#NoOfMember1').length == '1') {
+                    var totalmember1 = parseInt($('#NoOfMember1').val(), 0);
+                }
+                else {
+                    var totalmember1 = 0;
+                }
+                if ($('#NoOfMember2').val() != '' && $('#NoOfMember2').val() == '1') {
+                    var totalmember2 = parseInt($('#NoOfMember2').val(), 0);
+                }
+                else {
+                    var totalmember2 = 0;
+                }
+                if ($('#NoOfMember3').val() != '' && $('#NoOfMember3').val() == '1') {
+                    var totalmember3 = parseInt($('#NoOfMember3').val(), 0);
+                }
+                else {
+                    var totalmember3 = 0;
+                }
+
+                var totalmember = parseInt(totalmember0) + parseInt(totalmember1) + parseInt(totalmember2) + parseInt(totalmember3);
+
+                if (totalmember > 50 && $('#hdBookingType').val() == 'Institutional') {
+
+                    alert('You can book maximum 50 seats in group booking');
+                    $('.NoOfMember').val('');
+                    $('.NoOfCamera').val('');
+                    $('.TotalFeesOfMember').val('');
+                    return false;
+                }
+                if (totalmember > 10 && $('#hdBookingType').val() == 'Standard') {
+
+                    alert('You can book maximum 10 seats in Individual booking');
+                    $('.NoOfMember').val('');
+                    $('.NoOfCamera').val('');
+                    $('.TotalFeesOfMember').val('');
+                    return false;
+                }
+                if (totalmember > parseInt($('#hdAvaliableSeats').val(), 0)) {
+                    alert('You can book only ' + $('#hdAvaliableSeats').val() + ' seats');
+                    $('.NoOfMember').val('');
+                    $('.NoOfCamera').val('');
+                    $('.TotalFeesOfMember').val('');
+                    return false;
+                }
+            }
+            if (placeidno != '71') {
+                if ($('#hdPrivateVehicle').val() == 'True' && $('#NoOfVehicle0').val() == '' && $('#NoOfVehicle1').val() == '' && $('#NoOfVehicle2').val() == '' && $('#NoOfVehicle3').val() == '') {
+                    alert('Enter vehicle details');
+                    $('#NoOfVehicle0').focus();
+                    return false;
+                }
+            }
+            
+            // command by rajveer sharma check load testing
+            //if ($('#txtInput').val() != '') {
+            //    var status = ValidCaptcha();
+            //    if (status == false) {
+            //        alert('Invalid captcha');
+            //        Captcha();
+            //        $('#txtInput').val('');
+            //        $('#txtInput').focus();
+            //        return false;
+            //    }
+            //}
+            //else {
+            //    alert('Enter valid captcha');
+            //    $('#txtInput').focus();
+            //    return false;
+            //}
+
+        });
+        $('#MobileNumber').on('keydown', function (evt) {
+            var a = $('#MobileNumber').val();
+            if (a.length < 10) {
+                document.getElementById("errMobileNumber").style.display = 'none';
+            } else if (evt.keyCode != 8) {
+                evt.keyCode = 0;
+                return false;
+            }
+        });
+        $('#MobileNumber').on('keyup', function (evt) {
+            var a = $('#MobileNumber').val();
+
+            var filter = /^[0-9-+]+$/;
+            if (filter.test(a)) {
+                if (a.length <= 10) {
+                    document.getElementById("errMobileNumber").style.display = 'none';
+                    return true;
+                } else {
+                    $("#errMobileNumber").text('Enter Valid Mobile Number !!');
+                    $("#errMobileNumber").show();
+                    $('#MobileNumber').focus();
+                    return false;
+                }
+            }
+            else {
+                $("#errMobileNumber").text('Enter Valid Mobile Number');
+                document.getElementById("errMobileNumber").style.display = 'block';
+                //$('html, body').animate({ scrollTop: $("#MobileNumber").offset().top }, 600);
+
+                $('#MobileNumber').focus();
+                return false;
+            }
+        })
+        function validatePanduPaul(PlaceId) {
+            if (PlaceId == '70' || PlaceId == '76') {
+                var NoOfMember = $("#NoOfMember").val();
+                var MemberIdType = $("#MemberIdType option:selected").val();
+                var MemberIdNumber = $("#MemberIdNumber").val();
+                var MemberMobileNo = $("#MemberMobileNo").val();
+                var IsValid = 1;
+                $("#errMemberIdType").text('');
+                $("#errMemberIdNumber").text('');
+                $("#errMemberMobileNo").text('');
+                $("#errNoOfMember").text('');
+                if (NoOfMember == '') {
+                    $("#errNoOfMember").text('*Enter Number of Member');
+                    IsValid = 0
+                }
+                if (MemberIdType == '0' || MemberIdType == '') {
+                    $("#errMemberIdType").text('*Select Member ID');
+
+                    IsValid = 0
+                }
+                if (MemberIdNumber == '') {
+                    $("#errMemberIdNumber").text('*Enter Member ID Number');
+
+                    IsValid = 0
+                }
+                if (MemberMobileNo == '') {
+                    $("#errMemberMobileNo").text('*Enter Member Mobile Number');
+
+                    IsValid = 0
+                }
+                if (IsValid == 1) {
+                    return true;
+                } else {
+                    return false;
+                }
+
+            }
+            else {
+                return true;
+            }
+        }
+
+        $('.Print').click(function (e) {
+
+            var $row = jQuery(this).closest('tr');
+            var $columns = $row.find('td');
+            var id = $(this).parents('tr').find('input[type="hidden"]').val();
+            var ticket;
+            $.ajax({
+                type: 'POST',
+                url: RootURl + 'BookOnlineZoo/PrintTicket',
+                data: { ticketid: id },
+                success: function (data) {
+
+                    $("#dvContainer").html(data);
+
+                    var contents = $("#dvContainer").html();
+                    var frame1 = $('<iframe />');
+                    frame1[0].name = "frame1";
+                    //frame1.css({ "position": "absolute", "top": "-1000000px" });
+                    $("body").append(frame1);
+                    var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+                    frameDoc.document.open();
+                    //Create a new HTML document.
+                    frameDoc.document.write('<html><head><title>E-Permit - Forest Department Rajasthan </title>');
+                    //Append the external CSS file.
+                    frameDoc.document.write('<link href="../css/bootstrap.min.css" rel="stylesheet" />');
+                    frameDoc.document.write('<link href="../css/mobile.css" rel="stylesheet" />');
+                    frameDoc.document.write('<link href="../css/dashboard/main.css" rel="stylesheet" />');
+                    frameDoc.document.write('<link href="../css/dashboard/dashboard.css" rel="stylesheet" />');
+                    frameDoc.document.write('<link href="../css/dashboard/font-awesome.min.css" rel="stylesheet" />');
+                    frameDoc.document.write('</head><body>');
+                    //Append the DIV contents.
+                    frameDoc.document.write(contents);
+                    frameDoc.document.write('</body></html>');
+                    frameDoc.document.close();
+                    setTimeout(function () {
+                        window.frames["frame1"].focus();
+                        window.frames["frame1"].print();
+                        frame1.remove();
+                    }, 500);
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+            //var aa = "<div class='wrapper'><section class='print-invoice'> <div class='row border-divider'><div class='col-sm-2'>" +
+            //           "<a href='#' id='myLogo'><img src='../images/logo.png' width='100' alt='Forest Department, Government of Rajasthan' title='Logo' class=''></a></div>" +
+            //          "<div class='col-sm-4 centr'><span class='pdate'>E-Permit - Rajasthan Wildlife</span></div>" +
+            //    	  "<div class='col-sm-4'><span class='pull-right pdate'>Space of QR BAR Code</span></div>" +
+            //          "<div class='divider'></div></div> </section></div>";
+            e.preventDefault();
+        });
+
+    });
+
+    function Captcha() {
+        var alpha = new Array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+           'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+        var i;
+        for (i = 0; i < 6; i++) {
+            var a = alpha[Math.floor(Math.random() * alpha.length)];
+            var b = alpha[Math.floor(Math.random() * alpha.length)];
+            var c = alpha[Math.floor(Math.random() * alpha.length)];
+            var d = alpha[Math.floor(Math.random() * alpha.length)];
+            var e = alpha[Math.floor(Math.random() * alpha.length)];
+            var f = alpha[Math.floor(Math.random() * alpha.length)];
+            var g = alpha[Math.floor(Math.random() * alpha.length)];
+        }
+        var code = a + ' ' + b + ' ' + ' ' + c + ' ' + d + ' ' + e + ' ' + f + ' ' + g;
+        if ($("#hdnDeptKioskStatus").val() == "False") {
+            document.getElementById("mainCaptcha").innerHTML = code
+            document.getElementById("mainCaptcha").value = code
+        }
+
+    }
+
+    function ValidCaptcha() {
+        var string1 = removeSpaces(document.getElementById('mainCaptcha').value);
+        var string2 = removeSpaces(document.getElementById('txtInput').value);
+        if (string1 == string2) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function removeSpaces(string) {
+        return string.split(' ').join('');
+    }
+
+</script>
+<style>
+    .capt {
+        background-color: #f8f8f8;
+        border-color: #e7e7e7;
+        border: 1px solid #e7e7e7;
+        width: 240px;
+        height: 110px;
+        float: left;
+    }
+
+    #mainCaptcha {
+        position: relative;
+        padding-left: 15px;
+    }
+
+    #refresh {
+        width: 42px;
+        height: 26px;
+    }
+
+    #txtInput, #Button1 {
+        position: relative;
+        left: 15px;
+    }
+
+    .refrs {
+        left: 5px;
+        position: relative;
+    }
+
+    .capt h1 {
+        font-size: 14px;
+        padding: 10px 0 5px 15px;
+        margin: 0;
+    }
+
+    #mainCaptcha {
+        margin: 0;
+    }
+    /*#errUploadId {
+        position: relative!important;
+    }*/
+
+    /*.field-validation-error {
+        float: left;
+        padding-left: 14px;
+        margin-top: -12px;
+    }*/
+</style>
+
+<input type="hidden" value="@ViewBag.KioskStatus" id="hdnDeptKiosk" />
+
+
+<input type="hidden" value="@ViewBag.KioskStatus" id="hdnDeptKioskStatus" />
+
+<input type="hidden" id="hdBookingType" value="Standard" />
+<input type="hidden" id="hdPrivateVehicle" value="True" />
+<input type="hidden" id="hdAvaliableSeats" value="True" />
+<input type="hidden" id="hdCurrentdate" value="@TempData["CurrentDate"]">
+<div style="display:none" id="dvContainer">
+
+</div>
+<div id="page-wrapper-inn">
+    @if (TempData["EmptyChk"] != null)
+    {
+        <script type="text/javascript" language="javascript">
+            alert('@TempData["EmptyChk"]');
+        </script>
+    }
+    <div class="col-lg-12 pad">
+
+        @if (ViewBag.KioskStatus == "True")
+        {
+            <h1 class="page-header">Counter booking</h1>
+        }
+        else
+        {
+            <h1 class="page-header">Online booking</h1>
+        }
+
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span style="color:red;">* Mandatory field(s) to fill.</span>
+                    @if (Convert.ToString(Session["IsDepartmentalKioskUser"]) == "True")
+                    {
+                        <a target="_blank" style="float: right; font-size:13px; " href='/ZooTicketReport/ZooTicketView.aspx?ID=@Encryption.encrypt("PrintTest")@Encryption.encrypt(Convert.ToString(HttpContext.Current.Session["UserID"]))'>
+                            &ensp;&ensp;  Print Test Permit
+                        </a>
+
+
+                    }
+                    @if (Session["IsKioskUser"] != null && Convert.ToBoolean(Session["IsKioskUser"]) && Session["KioskCtznName"] != null)
+                    {
+                        <a target="_blank" style="float: right; font-size:13px; " href='/MISZoo/ZooTicketVerification'>
+                            &ensp;&ensp; Verify Online Permits
+                        </a>
+                        <a target="_blank" style="float: right; font-size:13px; " href='/MISZoo/ZooTicketBookingDetails'>
+                            &ensp;&ensp; Zoo Permit Booking Details
+                        </a>
+                        <a target="_blank" style="float: right; font-size:13px; " href='/BookOnlineZoo/BookOnlineZooExtraInventory'>
+                            &ensp;&ensp;  Cemara/Vehicle booking
+                        </a>
+                    }
+                </div>
+
+                <!-- /.panel-heading -->
+                @using (Html.BeginForm("FinalSubmit", "BookOnlineZoo", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {
+
+                    <div class="panel-body">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <div class="radio">
+                                    <label>
+                                        @Html.RadioButtonFor(X => X.BookingType, "Institutional")
+                                        Group Booking
+                                    </label>
+                                    <label>
+                                        @Html.RadioButtonFor(X => X.BookingType, "Standard", new { @checked = "checked" })
+                                        Individual Booking
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Institute/Organizational Details -->
+                        <div class="col-lg-12 Institutional">
+                            <label>Institute/Organizational Details:</label>
+                            <div class="divider"></div>
+                        </div>
+
+                        <div class="col-lg-4 un-bold Institutional">
+                            <div class="form-group">
+                                <label>Name of Institute/ Organization: <span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(X => X.InstituteOrganisationName, new { @class = "form-control Institute", @id = "InstituteOrganisationName", name = "InstituteOrganisationName", @maxlength = 100 })
+                                @*<div id="errInstituteOrganisationName" class="alert-danger1">@Html.ValidationMessageFor(x => x.InstituteOrganisationName)</div>*@
+                                <span id="errInstituteOrganisationName" style="color: Red; display: none" class="alert-danger1">*Enter institute/organisation name</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 un-bold Institutional">
+                            <div class="form-group">
+                                <label>Address of Institute/ Organization: <span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(X => X.AddressOfInstitOrgan, new { @class = "form-control Institute", @id = "AddressOfInstitOrgan", name = "AddressOfInstitOrgan", @maxlength = 100 })
+                                @*<div id="errAddressOfInstitOrgan" class="alert-danger1">@Html.ValidationMessageFor(x => x.AddressOfInstitOrgan)</div>*@
+                                <span id="errAddressOfInstitOrgan" style="color: Red; display: none" class="alert-danger1">*Enter address institute/organisation</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 un-bold Institutional">
+                            <div class="form-group">
+                                <label>Phone No. Of Institution/Organization: <span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(X => X.PhoneNoOfInstitOrgan, new { @class = "form-control Institute", @id = "PhoneNoOfInstitOrgan", name = "PhoneNoOfInstitOrgan", @maxlength = 10 })
+                                @*<div id="errAddressOfInstitOrgan" class="alert-danger1">@Html.ValidationMessageFor(x => x.PhoneNoOfInstitOrgan)</div>*@
+                                <span id="errPhoneNoOfInstitOrgan" style="color: Red; display: none" class="alert-danger1">*Enter phone no of institute/organisation</span>
+                            </div>
+                        </div>
+                        <!-- /.Institute/Organizational Details -->
+                        <!-- Head of Institute/ Group Details -->
+                        <div class="col-lg-12 Institutional">
+                            <label>Head of Institute/ Group Details:</label>
+                            <div class="divider"></div>
+                        </div>
+                        <div class="col-lg-4 un-bold Institutional">
+                            <div class="form-group">
+                                <label>Name of the Head/Group Leader: <span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(X => X.NameOfHead, new { @class = "form-control Institute", @id = "NameOfHead", name = "NameOfHead", @maxlength = 100 })
+                                @*<div id="errNameOfHead" class="alert-danger1">@Html.ValidationMessageFor(x => x.NameOfHead)</div>*@
+                                <span id="errNameOfHead" style="color: Red; display: none" class="alert-danger1">*Enter name of head</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 un-bold Institutional">
+                            <div class="form-group">
+                                <label>Phone No. of Head/Group Leader(Optional):</label>
+                                @Html.TextBoxFor(X => X.PhoneOfHead, new { @class = "form-control Institute", @id = "PhoneOfHead", name = "PhoneOfHead", @maxlength = 10 })
+                                @*<div id="errPhoneOfHead" class="alert-danger1">@Html.ValidationMessageFor(x => x.PhoneOfHead)</div>*@
+                                <span id="errPhoneOfHead" style="color: Red; display: none" class="alert-danger1">*Enter phone no of head</span>
+                                @Html.ValidationMessageFor(t => t.PhoneOfHead)
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 un-bold Institutional">
+                            <div class="form-group">
+
+                                <label>
+                                    Document for Tour request:
+                                </label>
+                                @if (Convert.ToString(HttpContext.Current.Session["IsDepartmentalKioskUser"]) == "False")
+                                {
+                                    <label>
+                                        <span class="mandatory">*</span>
+                                    </label>
+                                }
+                                @Html.TextBoxFor(X => X.DocumentForTour, new { Type = "File", @class = "form-control Institute", @id = "DocumentForTour", name = "DocumentForTour" })
+                                <span style="font-size:11px">
+                                    * Only .jpg /.pdf /.png /.gif file formats are allowed with max size: 100kb.
+                                </span>
+                                @*<div id="errDocumentForTour" class="alert-danger1">@Html.ValidationMessageFor(x => x.DocumentForTour)</div>*@
+                                <span id="errDocumentForTour" style="color: Red; display: none" class="alert-danger1">*Upload document of tour</span>
+                            </div>
+                            <span class="mandatory" style="font-size:11px">(Authorization letter to head group for the visit signed by head of the Institution/Organization)</span>
+                        </div>
+
+                        <div class="col-lg-6 un-bold Institutional">
+                            <div class="form-group">
+                                <label>ID Type of Head/Group Leader:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(X => X.IdType, new List<SelectListItem>
+                                        {
+                                            new SelectListItem { Text = "--Select--", Value = ""},
+                                            new SelectListItem { Text = "Passport", Value = "1"},
+                                            new SelectListItem { Text = "Aadhar", Value = "2"},
+                                            new SelectListItem { Text = "Driving Licence", Value = "3"},
+                                            new SelectListItem { Text = "Voter ID", Value = "4"},
+                                            new SelectListItem { Text = "PAN Card", Value = "5"},
+                                            new SelectListItem { Text = "Office ID", Value = "6"},
+
+                                        }, new { @class = "form-control IdType Institute", id = "IdType" })
+                                @*<div id="errIdType" class="alert-danger1">@Html.ValidationMessageFor(x => x.IdType)</div>*@
+                                <span id="errIdType" style="color: Red; display: none" class="alert-danger1">*Select type of id</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 un-bold Institutional">
+                            <div class="form-group">
+                                <label>ID Number of Head/Group Leader:<span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(X => X.IdNumber, new { @class = "form-control Institute width", @id = "IdNumber", name = "IdNumber", @maxlength = 20 })
+                                @*<div id="errIdNumber" class="alert-danger1">@Html.ValidationMessageFor(x => x.IdNumber)</div>*@
+                                <span id="errIdNumber" style="color: Red; display: none" class="alert-danger1">*Enter id number</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 un-bold Institutional">
+                            <div class="form-group">
+                                <label>
+                                    ID Proof of Head/Group Leader:
+                                </label>
+                                @if (Convert.ToString(HttpContext.Current.Session["IsDepartmentalKioskUser"]) == "False")
+                                {
+                                    <label><span class="mandatory">*</span></label>
+                                }
+                                @Html.TextBoxFor(X => X.UploadId, new { Type = "File", @class = "form-control Institute", @id = "UploadId", name = "UploadId" })
+                                <span style="font-size:11px">* Only .jpg /.pdf /.png /.gif file formats are allowed with max size: 100Kb.</span><br />
+
+                                <span id="errUploadId" style="color: Red; display: none" class="alert-danger1">*Upload id proof</span>
+
+                                <span class="mandatory" style="font-size:11px">Please carry the original photo ID at the time of entry which has been entered in the form.. Any wrong Id will be treated as fake booking and will be prosecuted as per Law</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-12"></div>
+                        <!-- /.Head of Institute/ Group Details -->
+                        <!--  Place Details -->
+                        <div class="col-lg-12">
+                            <label>Place Details:</label>
+                            <div class="divider"></div>
+                        </div>
+
+                        <div class="col-lg-3 un-bold">
+                            <div class="form-group">
+                                <label>Place: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(X => X.PlaceOfVisit, (IEnumerable<SelectListItem>)ViewBag.Place, "--Select--", new { id = "PlaceOfVisit", name = "PlaceOfVisit", @class = "form-control" })
+                                @*<div id="errUploadId" class="alert-danger1">@Html.ValidationMessageFor(x => x.PlaceOfVisit)</div>*@
+                                <span id="errPlaceOfVisit" style="color: Red; display: none" class="alert-danger1">*Select palce of visit</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 un-bold">
+                        <div class="form-group">
+                            <label>Shift Type: <span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(X => X.ShiftTypeID, (IEnumerable<SelectListItem>)ViewBag.ShiftTypes, "--Select--", new { id = "ShiftTypeID", name = "ShiftTypeID", @class = "form-control" })
+                            @*<div id="errUploadId" class="alert-danger1">@Html.ValidationMessageFor(x => x.PlaceOfVisit)</div>*@
+                            <span id="errPlaceOfVisit" style="color: Red; display: none" class="alert-danger1">Select Shift Type</span>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2 un-bold">
+                        <div class="form-group">
+                            <label>Date of Visit: <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(X => X.DateOfVisit, new { @class = "form-control datefield", @id = "DateOfVisit", name = "DateOfVisit" })
+                            @*<div id="errUploadId" class="alert-danger1">@Html.ValidationMessageFor(x => x.DateOfVisit)</div>*@
+                            <span id="errDateOfVisit" style="color: Red; display: none" class="alert-danger1">*Select date of visit</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 un-bold">
+                        <div class="form-group" style="display:none" id="mobilenumberBlock">
+                            <label>Mobile Number: <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(X => X.MobileNumber, new { @class = "form-control", @id = "MobileNumber", @name = "MobileNumber", @type = "number" })
+                            @*<div id="errUploadId" class="alert-danger1">@Html.ValidationMessageFor(x => x.DateOfVisit)</div>*@
+                            <span id="errMobileNumber" style="color: Red; display: none" class="alert-danger1">*Enter Mobile Number(Citizen)</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 un-bold">
+                        <div class="form-group" style="display:none" id="citzennameBlock">
+                            <label>Citizen Name: <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(X => X.ClientName, new { @class = "form-control", @id = "ClientName", @name = "ClientName", @type = "text" })
+                            @*<div id="errUploadId" class="alert-danger1">@Html.ValidationMessageFor(x => x.DateOfVisit)</div>*@
+                            <span id="errMobileNumber" style="color: Red; display: none" class="alert-danger1">*Enter Mobile Number(Citizen)</span>
+                        </div>
+                    </div>
+                        <div class="col-lg-12 un-bold" style="color:cadetblue">
+                            <label id="lbl_AvaliableSeat"></label>
+                        </div>
+                        <br />
+                        @*<div class="col-lg-12">
+                                <div class="form-group">
+                                    <label id="lblAdultIndianMember" class="checkbox-inline">
+                                        @Html.CheckBoxFor(x => x.AdultIndianMember, new { @id = "AdultIndianMember", @checked = "checked" }) Adult Indian Member
+                                    </label>
+                                    <label id="lblAdultNonIndianMember" class="checkbox-inline">
+                                        @Html.CheckBoxFor(x => x.AdultNonIndianMember, new { @id = "AdultNonIndianMember" }) Adult Non Indian Member
+                                    </label>
+                                    <label id="lblChildBelowAgeFive" class="checkbox-inline">
+                                        @Html.CheckBoxFor(x => x.ChildBelowAgeFive, new { @id = "ChildBelowAgeFive" }) Chlid below age 5
+                                    </label>
+                                    <label id="lblStudent" class="checkbox-inline">
+                                        @Html.CheckBoxFor(x => x.Student, new { @id = "Student" })Student
+                                    </label>
+                                </div>
+                            </div>*@
+                        <div id="MemberDIV" class="col-lg-12">
+                            @*@Html.Partial("ZooMemberInfo")*@
+                        </div>
+
+
+                        <div id="EquepmentCheckBoxBlock" class="col-lg-12 form-group">
+
+                            <input type="checkbox" id="isAnyEquepment" /><span style="font-weight:600"> Is Photo Camera/Video Camera</span>
+                            <div id="equepmentBlock" style="display:none">
+                                <div class="col-lg-12" id="EquepmentLbl">
+                                    @*<label>Camera/Equepment Details:</label>*@
+                                    <div class="col-lg-3">
+                                        <input type="checkbox" id="isNon_Commercial_Photography_Camera" /><span style="font-weight:600;font-size:12px;">&nbsp;Non-Commercial Photography Camera</span>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <input type="checkbox" id="isNon_Commercial_Vedio_Camera" /><span style="font-weight:600;font-size:12px;">&nbsp;Non-Commercial Video Camera</span>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <input type="checkbox" id="isDocumentoryVCam" /><span style="font-weight:600;font-size:12px;">&nbsp;Documentory Video Camera</span>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <input type="checkbox" id="isFilmVCam" /><span style="font-weight:600;font-size:12px;">&nbsp;Film Video Camera</span>
+                                    </div>
+                                    <div class="divider"></div>
+                                </div>
+                                <div id="EquepmentDIV" class="col-lg-12">
+
+                                    @*@Html.Partial("ZooVehicleInfo")*@
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div id="VehicleIDSS">
+                            <div class="col-lg-6">
+                                <div class="form-group" id="PVehicle">
+                                    <label>Private Vehicle:</label>
+                                    <div class="radio">
+                                        <label>
+                                            @Html.RadioButtonFor(X => X.PrivateVehicle, true, new { @checked = "checked" })
+                                            Yes
+                                        </label>
+                                        <label>
+                                            @Html.RadioButtonFor(X => X.PrivateVehicle, false)
+                                            No
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <label>Vehicle Details:</label>
+                                <div class="divider"></div>
+                            </div>
+                            <div id="VehicleDIV" class="col-lg-12 vehicle">
+
+                                @*@Html.Partial("ZooVehicleInfo")*@
+
+                            </div>
+                        </div>
+                        <div class="col-lg-12"></div>
+                        @if (ViewBag.KioskStatus == "False")
+                        {
+                            <div class="col-lg-12 un-bold">
+                                <div class="capt">
+                                    <h1>Captcha is case sensative</h1>
+                                    <h2 id="mainCaptcha">Captcha is case sensative</h2>
+                                    <p>
+                                        @*<input type="text" id="txtInput" />*@
+                                        @Html.TextBoxFor(X => X.txtInput, new { @id = "txtInput", name = "txtInput", @maxlength = 100 })
+                                        <button type="button" id="refresh" onclick="Captcha();" /><i class="fa fa-refresh fa-spin fa-fw refrs"></i>
+                                        <div id="errUploadId" class="alert-danger1">@Html.ValidationMessageFor(x => x.txtInput)</div>
+                                    </p>
+
+                                    @*<input id="Button1" type="button" value="Check" onclick="alert(ValidCaptcha());" />*@
+
+                                </div>
+                            </div>
+                        }
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_submit1">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+                                <button style="display:none" type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_Validate">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                                <button type="reset" class="btn btn-warning">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+                                <button type="submit" name="Command" value="Cancel" class="btn btn-danger">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+                        <!-- /.Btn Groping -->
+                        <div id="tbl" class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover" id="tbl_allTicket">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Request ID
+                                        </th>
+                                        <th>
+                                            Transaction ID
+                                        </th>
+                                        <th>
+                                            Total Permits
+                                        </th>
+                                        <th>
+                                            Arrival Date
+                                        </th>
+                                        <th>
+                                            Paid Amount
+                                        </th>
+                                        <th>
+                                            Action
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in ViewData["ticketlist"] as IEnumerable<FMDSS.Models.BookOnlineZoo.BookOnZoo>)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @Html.DisplayFor(model => item.RequestId)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.EmitraTransactionId)
+                                                @Html.HiddenFor(model => item.TicketID)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.TotalMember)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.DateOfArrival)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.TotalAmount)
+                                            </td>
+                                            <td>
+                                                <a href="" class="Print">Print Permit</a>
+
+                                                @*@@Html.ActionLink("Print Permit", "", new { id = item.TicketID }, new { @Class = "Print" })*@
+                                            </td>
+
+                                        </tr>
+
+                                    }
+
+
+                                </tbody>
+                            </table>
+                            <table id="tbl_tkt">
+                                <tbody></tbody>
+                            </table>
+
+                        </div>
+
+                    </div>
+                            <!-- /.panel-body -->
+                }
+            </div>
+            <!-- /.panel -->
+
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>
+<!-- /.Row -->

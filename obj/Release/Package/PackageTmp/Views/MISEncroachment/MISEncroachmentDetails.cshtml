@@ -1,0 +1,339 @@
+﻿@model FMDSS.Models.MIS.MISEncroachmentDetails
+@{
+    ViewBag.Title = "MISEncroachmentDetails";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_SuperAdmin.cshtml";
+}
+
+<style>
+    #tbl {
+        overflow-x: auto;
+        overflow-y: auto;
+        padding: 15px;
+        width: 100%;
+        height: 400px;
+    }
+</style>
+<script>
+    var RootUrl = '@Url.Content("~/")';
+    $(document).ready(function () {
+
+        $('.gridtable').DataTable({
+            responsive: true,
+            "bSort": false
+        });
+
+
+        $('#Circle').change(function (e) {
+
+            $('#Circle_Text').val($("#Circle option:selected").text());
+
+
+            $("#Division").empty();
+            $("#Range").empty();
+            $("#Range").append('<option value="' + "0" + '">' + "--Select--" + '</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MISProducation/DivisionData', // we are calling json method
+                dataType: 'json',
+                data: { circleCode: $("#Circle").val() },
+                success: function (circle) {
+                    $.each(circle, function (i, items) {
+                        $("#Division").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+        $('#Division').change(function (e) {
+            $("#Range").empty();
+            $('#Division_Text').val($("#Division option:selected").text());
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MISProducation/RangeData', // we are calling json method
+                dataType: 'json',
+                data: { DivisionCode: $("#Division").val() },
+                success: function (divCode) {
+                    $.each(divCode, function (i, items) {
+                        $("#Range").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+        $('#btn_submit1').click(function (e) {
+
+            if ($("#Circle option").length > 1) {
+
+                if ($('option:selected', $('#Circle')).index() == 0) {
+                    $("#errCircle").css("display", "block");
+                    $('#errCircle').focus();
+                    return false;
+                }
+                else {
+                    $("#errCircle").css("display", "none");
+                }
+            }
+            if ($("#Division option").length > 1) {
+
+                if ($('option:selected', $('#Division')).index() == 0) {
+                    $("#errDivision").css("display", "block");
+                    $('#errDivision').focus();
+                    return false;
+                }
+                else {
+                    $("#errDivision").css("display", "none");
+                }
+            }
+
+            if ($("#Range option").length > 1) {
+                if ($('option:selected', $('#Range')).index() == 0) {
+                    $("#errRange").css("display", "block");
+                    $('#errRange').focus();
+                    return false;
+                }
+                else {
+                    $("#errRange").css("display", "none");
+                }
+            }
+        });
+    });
+
+    function CallApplicationNo(id) {
+
+        $.ajax({
+            type: 'GET',
+            url: RootUrl + 'MISEncroachment/GetApplicationDetails', // we are calling json method
+            dataType: 'html',
+            data: { ids: id },
+            success: function (data) {
+                $('#modelPlace').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+
+    };
+
+</script>
+
+
+<div class="row">
+   
+    @if (TempData["ZipMsg"] != null)
+    {
+        <script type="text/javascript" language="javascript">
+            alert('@TempData["ZipMsg"]');
+        </script>
+    }
+    
+    <div class="col-lg-9 pad">
+        <h1 class="page-header"><span>Report : MIS Encroachment Details </span></h1>
+    </div>
+
+    @using (Html.BeginForm("MISEncroachmentDetails", "MISEncroachment", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    @Html.HiddenFor(model => model.CircleStatus)
+                    @if (Model.CircleStatus == "True")
+                    {
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Circle:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(model => model.Circle, (IEnumerable<SelectListItem>)ViewBag.CIRCLE, new { @class = "form-control", @readonly = "readonly", id = "Circle" })
+                                <div id="errCircle" style="display:none" class="alert-danger1">Circle is Required.</div>
+                                @Html.Hidden("Circle_Text", new { @class = "form-control", id = "Circle_Text" })
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Circle:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(model => model.Circle, (IEnumerable<SelectListItem>)ViewBag.CIRCLE, new { @class = "form-control", id = "Circle" })
+                                <div id="errCircle" style="display:none" class="alert-danger1">Circle is Required.</div>
+                                @Html.Hidden("Circle_Text", new { @class = "form-control", id = "Circle_Text" })
+                            </div>
+                        </div>
+                    }
+                    @Html.HiddenFor(model => model.DivisionStatus)
+                    @if (Model.DivisionStatus == "True")
+                    {
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Division:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(model => model.Division, (IEnumerable<SelectListItem>)ViewBag.Division, new { @class = "form-control", @readonly = "readonly", id = "Division" })
+                                <div id="errDivision" style="display:none" class="alert-danger1">Division is Required.</div>
+                                @Html.Hidden("Division_Text", new { @class = "form-control", id = "Division_Text" })
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Division:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(model => model.Division, (IEnumerable<SelectListItem>)ViewBag.Division, new { @class = "form-control", id = "Division" })
+                                <div id="errDivision" style="display:none" class="alert-danger1">Division is Required.</div>
+                                @Html.Hidden("Division_Text", new { @class = "form-control", id = "Division_Text" })
+                            </div>
+                        </div>
+                    }
+                    @Html.HiddenFor(model => model.RangeStatus, new { @id = "RangeStatus" })
+                    @if (Model.RangeStatus == "True")
+                    {
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Range:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(model => model.Range, (IEnumerable<SelectListItem>)ViewBag.Range, new { @class = "form-control", @readonly = "readonly", id = "Range" })
+                                <div id="errRange" style="display:none" class="alert-danger1">Range is Required.</div>
+                                @Html.Hidden("Range_Text", new { @class = "form-control", id = "Range_Text" })
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Range:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(model => model.Range, (IEnumerable<SelectListItem>)ViewBag.Range, new { @class = "form-control", id = "Range" })
+                                <div id="errRange" style="display:none" class="alert-danger1">Range is Required.</div>
+                                @Html.Hidden("Range_Text", new { @class = "form-control", id = "Range_Text" })
+                            </div>
+                        </div>
+                    }
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Status :<span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(model => model.Status, (IEnumerable<SelectListItem>)ViewBag.AppStatus, new { @class = "form-control", id = "Status" })
+
+                        </div>
+                    </div>
+
+
+                    <div id="btn" class="col-lg-12">
+                        <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit1">
+                            <i class="fa fa-check"></i> Submit
+                        </button>
+                        <button type="button" class="btn btn-warning" id="btn_reset">
+                            <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-lg-4 pull-right" id="place">
+
+
+                <a class="btn btn-success" title="Export to Excel" target="_blank" href='MISEncroachmentDetailsExport'><i class="fa fa-download"></i> Export to Excel</a>
+            </div>
+            <br /><br /><br />
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="dataTable_wrapper">
+                        <div id="tbl" class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover table-responsive gridtable">
+
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Encroachment Id	</th>
+                                        <th>Name - Father Name & Address</th>
+                                        <th>Year</th>
+                                        <th>Encroched Area (Hact.) </th>
+                                        <th>Division Name</th>
+                                        <th>Block Name</th>
+
+                                        <th>Compartment No.</th>
+                                        <th>Range Name</th>
+                                        <th>LR Act No. </th>
+                                        <th>KML File</th>
+                                        <th>Date Of KML File</th>
+
+                                        <th>Information Gathered By</th>
+                                        <th>Information Approved By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @foreach (var item in ViewData["ListMISEncroachmentDetailsInventory"] as IEnumerable<FMDSS.Models.MIS.MISEncroachmentDetails>)
+                                    {
+                                        <tr>
+                                            <td>@Html.DisplayFor(model => item.Index)</td>
+
+                                            <td>  <a id="btnAddModel" data-target="#myModal" data-toggle="modal" href="javascript:void(0);" onclick='CallApplicationNo("@Html.DisplayFor(model => item.EN_Code)")'>@Html.DisplayFor(model => item.EN_Code)</a></td>
+
+                                            @*<td>@Html.DisplayFor(model => item.EN_Code)</td>*@
+                                            <td>@Html.DisplayFor(model => item.NameAddress)</td>
+                                            <td>@Html.DisplayFor(model => item.Year)</td>
+                                            <td>@Html.DisplayFor(model => item.EncrochedArea)</td>
+                                            <td>@Html.DisplayFor(model => item.DIV_NAME)</td>
+                                            <td>@Html.DisplayFor(model => item.Block_Name)</td>
+
+                                            <td>@Html.DisplayFor(model => item.CompartmentNo)</td>
+                                            <td>@Html.DisplayFor(model => item.RANGE_NAME)</td>
+                                            <td>@Html.DisplayFor(model => item.LRACTNO)</td>
+                                            @*<td>@Html.DisplayFor(model => item.KMLFile)</td>*@
+                                            @*<td>
+                                                <a href='@Url.Action("ZipDownload", "MISEncroachment", new { @En_Code = Encryption.encrypt(item.EN_Code) })'>
+                                                    Download KML File
+                                                </a>
+                                            </td>*@
+
+                                            <td>
+                                                <a href='@item.KMLFile'>Download KML File</a>
+                                            </td>
+
+                                            <td>@Html.DisplayFor(model => item.DateOfKMLFile)</td>
+                                            <td>@Html.DisplayFor(model => item.InformationGatheredBy)</td>
+                                            <td>@Html.DisplayFor(model => item.InformationApprovedBy)</td>
+                                        </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+
+        </div>
+    }
+
+
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog modal-lg" id="modelPlace">
+            <!-- Modal content-->
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $.noConflict(true);
+</script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+

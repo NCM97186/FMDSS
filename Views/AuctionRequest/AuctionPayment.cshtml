@@ -1,0 +1,338 @@
+﻿@model FMDSS.Entity.DOD.ViewModel.AuctionVM
+@{
+    ViewBag.Title = "AuctionPayment";
+    string captchaPrefix = "AuctionRequest";
+    Model.DODProductList = Model.DODProductList.Where(x => x.AuctionStatus.Equals("Won")).ToList();
+}
+
+@using (Ajax.BeginForm("AuctionPayment", "auctionrequest", new AjaxOptions { HttpMethod = "Post", UpdateTargetId = "divAuctionRequest", OnSuccess = "SuccessData" }, new { enctype = "multipart/form-data" }))
+{
+    <div id="page-wrapper-inn">
+        <div class="col-lg-12 pad">
+            @if (@TempData["Status"] != null)
+            {
+                <div id="divSuccess" class="alert alert-success"><i class="fa fa-thumb-tack fa-fw"></i>@TempData["Status"]</div>
+                TempData["Status"] = null;
+            }
+
+            @if (@Session["AuctionTypeold"] != null)
+            {
+                <h1 class="page-header"><span> Active Auction Notices for  @Session["AuctionTypeold"]</span> </h1>
+            }
+            @Html.Partial("_ErrorMsg")
+        </div>
+        <!-- /.col-lg-12 -->
+        <!-- Row -->
+        <div class="row" id="divAuctionRequest">
+            <div class="help"><a href="~/PDFFolder/User Manual_Auction_Citizen.pdf" target="_blank">Help Document</a></div>
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+
+                    <div class="panel-body">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Notice Number: </label>
+                                <input class="form-control" name="NoticeNumber" readonly="readonly" value="@Model.NoticeNumber">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Bidder Name: </label>
+                                <input class="form-control" name="BidderName" readonly="readonly" value="@Model.BidderName">
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group">
+                                <label>Range Name:</label>
+                                <input class="form-control" name="RangeName" readonly="readonly" value="@Model.RangeName">
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group">
+                                <label>Place of Auction:</label>
+                                <input class="form-control" name="PlaceOfAuction" readonly="readonly" value="@Model.PlaceOfAuction">
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <label>Product Details:</label>
+                            <div class="form-group">
+                                <table id="tblTPProductDetails" class="table table-striped table-bordered table-hover notranslate">
+                                    <thead>
+                                        <tr style="color:#999; background-color:#ddd;">
+                                            <td colspan="6"><i>Product Details</i></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Product Type</th>
+                                            <th>Product</th>
+                                            <th>Unit Name</th>
+                                            <th>Notice Qty</th>
+                                            <th>Pending Amt</th>
+                                            <th>@Html.CheckBox("chkSelectAll", true, new { onchange = "SelectProduct(this,'All')" })</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbTPProductDetails" class="tbviewdet">
+
+                                        @if (Model.DODProductList != null && Model.DODProductList.Count > 0)
+                                        {
+                                            for (int i = 0; i < Model.DODProductList.Count; i++)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @Html.HiddenFor(m => m.DODProductList[i].AuctionWinnerID)
+                                                        @Html.HiddenFor(m => m.DODProductList[i].ProductType)
+                                                        @Html.HiddenFor(m => m.DODProductList[i].ProductName)
+                                                        @Html.HiddenFor(m => m.DODProductList[i].UnitName)
+                                                        @Html.HiddenFor(m => m.DODProductList[i].Qty)
+                                                        @Model.DODProductList[i].ProductType
+                                                    </td>
+                                                    <td>@Model.DODProductList[i].ProductName</td>
+                                                    <td>@Model.DODProductList[i].UnitName</td>
+                                                    <td>@Model.DODProductList[i].Qty</td>
+                                                    <td name="lIPendingAmount">@Model.DODProductList[i].PendingAmount</td>
+                                                    <td>
+                                                        @if (Model.DODProductList[i].PendingAmount > 0)
+                                                        {
+                                                            @Html.CheckBox("DODProductList[" + i + "].IsSelected", true, new { onchange = "SelectProduct(this,'Single')" })
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr class="rowSkip">
+                                                <td colspan="6">No record found.</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-2">
+                            <div class="form-group">
+                                <label>Start Date of EMD: </label>
+                                <input class="form-control" name="BiddOpeningDate" readonly="readonly" value="@Model.BidOpeningDate">
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-group">
+                                <label>Date of Auction: </label>
+                                <input class="form-control" name="BidClosingDate" readonly="readonly" value="@Model.BidClosingDate">
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-group">
+                                <label>Pending Amount (INR): </label>
+                                @if (Model.DODProductList != null && Model.DODProductList.Count > 1)
+                                {
+                                    <input readonly="readonly" class="form-control" id="txtPendingAmount" onchange="ValidateAmount(this)" name="PendingAmount" value="@Model.PendingAmount" onkeypress="AllowNumberOnly(event)">
+                                }
+                                else
+                                {
+                                    <input class="form-control" id="txtPendingAmount" onchange="ValidateAmount(this)" name="PendingAmount" value="@Model.PendingAmount" onkeypress="AllowNumberOnly(event)">
+                                }
+                            </div>
+                        </div>
+                        <div class="col-lg-12" style="clear:both">
+                            <div class="capt">
+                                <img alt="Captcha" id="imgCaptcha" src="@Url.Content("~/Captcha/Generate?p=" + captchaPrefix)" />
+                                <p>
+                                    <input type="text" id="txtCaptcha" name="CaptchaValue" style="float:left" autocomplete="off" />
+                                    <button type="button" id="refresh" onclick="Captcha();"><i class="fa fa-refresh fa-spin fa-fw refrs"></i></button>
+                                    <span class="errortext" id="captchaError"></span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-lg-12"></div>
+
+                        <!-- Btn Groping -->
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_Save" onclick="return ValidateData()">
+                                    <i class="fa fa-check"></i> Continue
+                                </button>
+                                <button type="button" value="Cancel" class="btn btn-danger" onclick="BackToList('Index')">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+
+                            </div>
+                        </div>
+                        <!-- /.Btn Groping -->
+
+                    </div>
+                    <!-- /.panel-body -->
+
+                </div>
+                <!-- /.panel -->
+
+            </div>
+            <!-- /.col-lg-12 -->
+
+            <div class="modal fade in" id="myViewNoticeModal2" tabindex="-1" role="dialog" aria-hidden="false">
+                <div class="modal-dialog mdw">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                            <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> </label></h4>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- From URL Get -->
+                            <input type="hidden" id="pHdn_No" name="PHdn_No" />
+                            <div id="divPublish"></div>
+
+                            <!-- /. From URL Get -->
+                        </div>
+                        <!-- /.modal-body -->
+                        <div class="modal-footer" id="fot-f">
+                            <div id="btn" class="col-lg-12">
+
+                                <button name="button" class="btn btn-danger" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                                    <i class="fa fa-times fa-fw"></i> Close
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- /.modal-content -->
+                </div>
+                <!-- /.modal-dialog -->
+            </div>
+        </div>
+        @Html.HiddenFor(m => m.EarnMoneyDeposit)
+        @Html.HiddenFor(m => m.AuctionID)
+        @Html.Hidden("captchaPrefix", captchaPrefix)
+    </div>
+
+}
+<script>var RootUrl = '@Url.Content("~/")';</script>
+<script src="~/Scripts/Controller/Common.js"></script>
+<script>
+    function Captcha() {
+        $("#imgCaptcha").attr("src", RootUrl + "Captcha/Generate?p=@captchaPrefix&d=" + new Date());
+    }
+
+    function SuccessData(response) {
+        if (response != null && response.IsError == true) {
+            location.href = RootUrl +"AuctionRequest/AuctionPayment?auctionID=" + response.ObjID ;
+        }
+    }
+
+    function ValidateData() {
+
+        //if ($('#txtBiddingAmount').val() == '') {
+        //    $('#veBiddingAmount').html('Bidding Amount is required').removeClass('hide');
+        //    return false;
+        //}
+        //else if (parseFloat($('#txtBiddingAmount').val()) < parseFloat($('#txtEMDAmount').val())){
+        //    $('#veBiddingAmount').html('Bidding Amt should be greater than EMD Amt.').removeClass('hide');
+        //    return false;
+        //}
+        //else {
+        //    $('#veBiddingAmount').html('').addClass('hide');
+        //}
+
+        if ($('#txtCaptcha').val() == '') {
+            $("#captchaError").html('Enter valid captcha');
+            $('#txtCaptcha').addClass("error");
+            $('#txtCaptcha').focus();
+            return false;
+        }
+    }
+
+    function ValidateAmount(cntrl) {
+        var pendingAmt = 0;
+        var payAmt = parseFloat(cntrl.value);
+        $('#tbTPProductDetails').find('input[type="checkbox"]:checked').closest('tr').find('td[name="lIPendingAmount"]').each(function (i, j) {
+            pendingAmt = pendingAmt + parseFloat(j.innerHTML);
+        });
+        if (payAmt <= 0) {
+            alert("Amount should be grater than 0.");
+            cntrl.value = pendingAmt;
+        }
+        else if (payAmt > pendingAmt) {
+            alert("Amount should be less than pending amount.");
+            cntrl.value = pendingAmt;
+        }
+    }
+
+    function SelectProduct(cntrl, type) {
+        var isChecked = $(cntrl).is(":checked");
+        var pendingAmt = 0;
+        var cntr = 0;
+        if (type == "All") {
+            $('#tbTPProductDetails').find('input[type="checkbox"]').prop("checked", isChecked);
+            if (!isChecked) {
+                $('#tbTPProductDetails').find('input[type="checkbox"]:first()').prop("checked", true);
+            }
+        }
+        else {
+            $('#chkSelectAll').prop("checked", false);
+            var totalItem = $('#tbTPProductDetails').find('input[type="checkbox"]:checked').length;
+            if (isChecked) {
+                $('#tbTPProductDetails').find('input[type="checkbox"]').prop("checked", false);
+                $(cntrl).prop("checked", isChecked);
+            }
+            else {
+                if (totalItem == 1) {
+                    $(cntrl).prop("checked", isChecked);
+                }
+                else if (totalItem > 1) {
+                    $('#tbTPProductDetails').find('input[type="checkbox"]').prop("checked", false);
+                    $(cntrl).prop("checked", true);
+                }
+                else
+                    $(cntrl).prop("checked", true);
+            }
+        }
+        $('#tbTPProductDetails').find('input[type="checkbox"]:checked').closest('tr').find('td[name="lIPendingAmount"]').each(function (i,j) {
+            cntr++;
+            pendingAmt = pendingAmt + parseFloat(j.innerHTML);
+        });
+        $('#txtPendingAmount').val(pendingAmt);
+        if (cntr > 1) {
+            $('#txtPendingAmount').prop("readonly", true);
+        }
+        else {
+            $('#txtPendingAmount').removeAttr("readonly");
+        }
+    }
+</script>
+
+<style>
+    .errortext {
+        color: red;
+    }
+
+    .capt {
+        background-color: #f8f8f8;
+        border-color: #e7e7e7;
+        border: 1px solid #e7e7e7;
+        width: 224px;
+        float: left;
+    }
+
+        .capt p {
+            margin: 10px;
+        }
+
+    #refresh {
+        width: 28px;
+        height: 26px;
+        padding: 0px;
+    }
+
+    #txtInput {
+        width: 150px;
+    }
+
+    .help {
+        float: right;
+        margin-right: 18px;
+        font-style: italic;
+    }
+</style>

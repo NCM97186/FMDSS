@@ -1,0 +1,585 @@
+﻿@model FMDSS.Models.ForestProtection.DFODecision
+@{
+    ViewBag.Title = "DFODecision";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //  "~/Views/Shared/Forestlayout.cshtml";
+}
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+@*<script src="~/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js" type="text/javascript"></script>
+<script src="~/js/validation.js" type="text/javascript"></script>*@
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+</script>
+<script type="text/javascript">
+
+    $(function (e) {
+        $('#OffenseCategory').change(function (e) {
+            $("#OffenseCode").empty();
+            $("#OffenseCode").append('<option value="' + '' + '">' +
+                     '--Select--' + '</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'DFODecision/GetOffenseCode', // we are calling json method
+                dataType: 'json',
+                data: { OffenseCategory: $("#OffenseCategory").val() },
+                success: function (data) {
+                    $.each(data, function (i, cat) {
+                        $("#OffenseCode").append('<option value="' + cat.Value + '">' +
+                         cat.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        });
+      
+        $('#OffenseCode').change(function (e) {
+            $("#tblSeizedItem").empty();
+            $("#tblOffender").empty();
+            $("#tblWitness").empty();
+            $("#tblSmillercases").empty();
+            $("#tblPunishmentDetail").empty();
+            var OffenseCode = { OffenseCode: $('#OffenseCode option:selected').val() }
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'DFODecision/GetOffenseDetails', // we are calling json method
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(OffenseCode),
+                success: function (data) {                  
+                    $('#SectionWildlife').text(data.list1.SectionForest);
+                    $('#SectionForest').text(data.list1.SectionWildlife);                  
+                                              
+                    if (data.list1.length > 0) {
+                        $.each(data.list1, function (i, items) {
+                            var count = 1;
+                            count = count + i;
+                            var Offenderdata = "<tr style='border:1px'><td>" + count + "</td><td>" + items.OffenseName + "</td><td>" + items.OffenseStatement + "</td><td>" + items.OffenseDate + "</td><td>" + items.OffenseTime + "</td><td>" + items.OffensePlace + "</td><td>" + items.Landmark + "</td></tr>";                         
+                            $("#tblOffender").append(Offenderdata);
+                            $('#SectionWildlife').text(items.SectionWildlife);
+                            $('#SectionForest').text(items.SectionForest);
+                            $('#FineAmount').val(items.FineAmount);
+                        });
+                    }
+
+                    if (data.list2.length > 0) {
+                        $.each(data.list2, function (i, items) {
+                            var count = 1;
+                            count = count + i;
+                            var bardata = "<tr style='border:1px'><td>" + count + "</td><td>" + items.SeizedItem + "</td><td>" + items.RegistrationNo + "</td><td>" + items.Name + "</td><td>" + items.FirstOfficer + "</td><td>" + items.SecondOfficer + "</td></tr>";
+                            $("#tblSeizedItem").append(bardata);                            
+                        });
+                    }
+
+                    if (data.list3.length > 0) {
+                        $.each(data.list3, function (i, items) {
+                            var count = 1;
+                            count = count + i;
+                            var Witnessdata = "<tr style='border:1px'><td>" + count + "</td><td>" + items.WitnessName + "</td><td>" + items.WitnessPhone + "</td><td>" + items.WitnessAddress + "</td><td>" + items.WitnessVillage + "</td><td>" + items.WitnessStatement + "</td></tr>";
+                            $("#tblWitness").append(Witnessdata);
+                        });
+                    }
+
+                    if (data.list4.length > 0) {
+                        $.each(data.list4, function (i, items) {
+                            var count1 = 1;
+                            count1 = count1 + i;
+                            var bardata1 = "<tr style='border:1px'><td>" + count1 + "</td><td>" + items.OffenseCode + "</td><td>" + items.OffenseCategory + "</td><td>" + items.ForestCategory + "</td><td>" + items.SectionForest + "</td><td>" + items.WildlifeCategory + "</td><td>" + items.SectionWildlife + "</td><td>" + items.DFODecisionTaken + "</td><td>" + items.CaseStatus + "</td><td>" + items.FineAmount + "</td><td>" + items.OffenceDescription + "</td><td>" + items.ItemSeized + "</td><td>" + items.Compounding + "</td></tr>";
+                            $("#tblSmillercases").append(bardata1);
+                            $("#tblSimmiler").show();
+                            $("#lblSimmiler").show();
+                        });
+                    }
+                    else {
+                        $("#tblSimmiler").hide();
+                        $("#lblSimmiler").hide();
+
+                    }
+                    if (data.list5.length > 0) {
+                        $.each(data.list5, function (i, items) {
+                            var count1 = 1;
+                            count1 = count1 + i;
+                            var bardata1 = "<tr style='border:1px'><td>" + count1 + "</td><td>" + items.Category + "</td><td>" + items.Details + "</td><td>" + items.Punishment + "</td><td>" + items.Cognition + "</td><td>" + items.Bailable + "</td></tr>";
+                            $("#tblPunishmentDetail").append(bardata1);
+                            $("#tblPunishment").show();
+                            $("#lblPunishment").show();
+                        });
+                    }
+                    else {
+                        $("#tblPunishment").hide();
+                        $("#lblPunishment").hide();
+                    }
+                   
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        });
+
+        $('#DFODecisionTaken,#OffenderDfoStatement').keydown(function (e) {
+            if (e.shiftKey || e.ctrlKey || e.altKey) {
+                e.preventDefault();
+            } else {
+                var key = e.keyCode;
+                if (!((key == 8) || (key == 32) || (key == 46) || (key >= 35 && key <= 40) || (key >= 65 && key <= 90) || (key >= 48 && key <= 57) || (key >= 96 && key <= 105))) {
+                    e.preventDefault();
+                }
+            }
+        });
+        $('#FineAmount').bind('keypress', function (evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode
+            // var charCode = evt.which;
+
+            if ((charCode == 46 && this.value.split('.').length > 1) || (charCode >= 97 && charCode <= 122) || (charCode >= 65 && charCode <= 90)) {
+                return false;
+            }
+            else {
+                if (charCode >= 48 && charCode <= 57 || charCode == 46) {
+                    return true;
+                }
+                else {
+                    evt.preventDefault();
+                }
+            }
+        });
+
+
+        
+        $("#UploadOffenderStatement").change(function (e) {
+            // var iSize = ($("#UploadId")[0].files[0].size / 1048576);
+            var iSize = parseFloat($("#UploadOffenderStatement")[0].files[0].size / 1024).toFixed(2);
+            if (iSize > 100) {
+                $('#UploadOffenderStatement').val('');
+                $('#errordivOffenderStatementDoc').show();
+                $('#errordivOffenderStatementDoc').html("Upload ID should not be larger than 100kb!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#UploadOffenderStatement').focus();
+                return false;
+            }
+            var file = $("#UploadOffenderStatement").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+            if (file) {
+                var get_ext = file.split('.');
+                get_ext = get_ext.reverse();
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#UploadOffenderStatement').val('');
+                    $('#errordivOffenderStatementDoc').show();
+                    $('#errordivOffenderStatementDoc').html("Please upload only jpeg or jpg or pdf or png or gif file format in Upload ID Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#UploadOffenderStatement').focus();
+                    return false;
+                } else {
+                    $('#errordivOffenderStatementDoc').hide();
+                }
+            }
+            else { $('#errordivOffenderStatementDoc').hide(); }
+        });
+
+        $('#btn_submit').click(function (e) {          
+            if($('#DFODecisionTaken').val().length==0){
+                $('#DFODecisionTaken').focus();
+                $('#DFODecisionTaken').attr('placeholder', 'Enter decision');
+                e.preventDefault();
+            }
+           else if ($('#OffenderDfoStatement').val().length == 0) {
+                $('#OffenderDfoStatement').focus();
+                $('#OffenderDfoStatement').attr('placeholder', 'Enter statement');
+                e.preventDefault();
+            }
+            else if ($('#CaseStatus option:selected').val() == '--Select--') {
+                $('#CaseStatus').focus();
+                e.preventDefault();
+            }
+            else if ($('#OffenderPresent option:selected').val() == '--Select--') {
+                $('#OffenderPresent').focus();
+                e.preventDefault();
+            }
+            else if ($('#OffenderAgreeCompoundingAmount option:selected').val() == '--Select--') {
+                $('#OffenderAgreeCompoundingAmount').focus();
+                e.preventDefault();
+            }
+            else if ($('#ItemSeized option:selected').val() == '--Select--') {
+                $('#ItemSeized').focus();
+                e.preventDefault();
+            }           
+            else if ($('#Compounding option:selected').val() == '--Select--') {
+                $('#Compounding').focus();
+                e.preventDefault();
+            }
+            else if ($('#UploadOffenderStatement').val() == '') {
+                $('#UploadOffenderStatement').focus();
+                e.preventDefault();
+            }
+            else {
+
+            }
+                     
+
+        });
+
+          
+       
+    });
+
+</script>
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Decision Recording</h1>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                @if (TempData["status"] != null)
+                {
+                    <script type="text/javascript" language="javascript">
+                             alert('@TempData["status"]');
+                    </script>
+                }
+            @using (Html.BeginForm("Submit", "DFODecision", FormMethod.Post, new { enctype = "multipart/form-data" }))
+              { 
+                    <div class="panel-body">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Offense Category:</label>
+                                @Html.DropDownListFor(x => x.OffenseCategory, (IEnumerable<SelectListItem>)ViewBag.OCategory, "--Select--", new { id = "OffenseCategory", @class = "form-control" })                               
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Offense Id:</label>
+                                @Html.DropDownListFor(x => x.OffenseCode, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "OffenseCode", @class = "form-control" })                              
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Section Wildlife Act:</label>     
+                                <label id="SectionWildlife"></label>                                                        
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Section Forest Act:</label>
+                                <label id="SectionForest"></label>                              
+                            </div>
+                        </div>
+                        @*<div class="col-lg-6">
+                            <div class="form-group">
+                                <label>District:</label>
+                                <label id="District"></label>
+                               
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Offender Name:</label>             
+                                <label id="OffenderName"></label>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Offender Statement:</label>
+                                <label id="OffenderStatement"></label>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Offense Date:</label>
+                                <label id="OffenseDate"></label>                                
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Offense Time:</label>
+                                <label id="OffenseTime"></label>                             
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Offense Place:</label>
+                                <label id="OffenseTime"></label>                  
+                            
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Landmark:</label>
+                                <label id="Landmark"></label>                               
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Distance from naka:</label>
+                                <label id="DistanceFromNaka"></label>                             
+                            </div>
+                        </div>                      
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Witness Name:</label>
+                                <label id="WitnessName"></label>                                
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Witness Phone:</label>
+                                <label id="WitnessPhone"></label>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Witness Address:</label>
+                                <label id="WitnessAddress"></label>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Witness Village:</label>
+                                <label id="WitnessVillage"></label>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Witness Statement:</label>
+                                <label id="WitnessStatement"></label>
+                            </div>
+                        </div>*@
+                        <div class="col-lg-12">
+                            <h4>Offender Details</h4>
+                        </div>
+                        <div id="tbl" class="table-responsive">
+                            <!--Table grid-->
+                            <table class="table table-striped table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width:7%;">S.No</th>
+                                        <th>Offender Name</th>
+                                        <th>Offender Statement</th>
+                                        <th>Offense Date</th>
+                                        <th>Offense Time</th>
+                                        <th>Offense Place</th>
+                                        <th>Landmark</th>                                                                                                                                 
+                                    </tr>
+                                </thead>
+                                <tbody id="tblOffender"></tbody>
+                            </table>
+                        </div>
+                        <div class="col-lg-12">
+                            <h4>Witness Details</h4>
+                        </div>
+                        <div id="tbl" class="table-responsive">
+                            <!--Table grid-->
+                            <table class="table table-striped table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width:7%;">S.No</th>
+                                        <th>Witness Name</th>
+                                        <th>Witness Phone</th>
+                                        <th>Witness Address</th>
+                                        <th>Witness Village</th>
+                                        <th>Witness Statement</th>                                       
+                                    </tr>
+                                </thead>
+                                <tbody id="tblWitness"></tbody>
+                            </table>
+                        </div>
+                        <div class="col-lg-12">
+                            <h4>Seized Item Details</h4>
+                        </div>
+                        <div id="tbl" class="table-responsive">
+                            <!--Table grid-->                         
+                            <table class="table table-striped table-bordered table-hover">                               
+                                <thead>
+                                    <tr>
+                                        <th style="width:7%;">S.No</th>
+                                        <th>SeizedItem</th>
+                                        <th>Identification/Registration No</th>
+                                        <th>Type</th>
+                                        <th>First Officer who seized item</th>
+                                        <th>Second Officer who seized item</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblSeizedItem"></tbody>    
+                            </table>
+                        </div>
+                       
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                              <label>Decision Recording Description:</label>
+                              @Html.TextAreaFor(x => x.DFODecisionTaken, new { @id = "DFODecisionTaken", @class = "form-control", name = "DFODecisionTaken" })
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Statement Of Offender:</label>
+                                @Html.TextAreaFor(x => x.OffenderDfoStatement, new { @id = "OffenderDfoStatement", @class = "form-control", name = "OffenderDfoStatement" })
+                            </div>
+                        </div> 
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Case Status:</label>
+                                    @Html.DropDownListFor(x => x.CaseStatus, new List<SelectListItem>
+                                    {
+                                        new SelectListItem { Text = "--Select--", Value = "--Select--"},
+                                        new SelectListItem { Text = "File court case", Value = "File court case"},
+                                         new SelectListItem { Text = "Close the Case", Value = "Close the Case"},
+                                        new SelectListItem { Text = "Compound the Case with release of Seized Items", Value = "Compound the Case with release of Seized Items"},
+                                        new SelectListItem { Text = "Compound the case without release of Seized Item", Value = "Compound the case without release of Seized Item"},
+                                        new SelectListItem { Text = "New Notice for Appearance", Value = "New Notice for Appearance"},
+                                    },
+                                    new
+                                    {
+                                        @id = "CaseStatus",
+                                        @name = "CaseStatus",
+                                        @class = "form-control"
+                                    })
+                                </div>
+                            </div>                      
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Offender Present:</label>
+                                    @Html.DropDownListFor(x => x.OffenderPresent, new List<SelectListItem>
+                                    {
+                                        new SelectListItem { Text = "--Select--", Value = "--Select--"},
+                                        new SelectListItem { Text = "Yes", Value = "Yes"},
+                                        new SelectListItem { Text = "No", Value = "No"},
+                                    },
+                                    new
+                                    {
+                                        @id = "OffenderPresent",
+                                        @name = "OffenderPresent",
+                                        @class = "form-control"
+                                    })
+                                </div>
+                            </div>  
+                       
+                        
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Agree to pay compounding amount:</label>
+                                @Html.DropDownListFor(x => x.OffenderAgreeCompoundingAmount, new List<SelectListItem>
+                                    {
+                                        new SelectListItem { Text = "--Select--", Value = "--Select--"},
+                                        new SelectListItem { Text = "Yes", Value = "Yes"},
+                                        new SelectListItem { Text = "No", Value = "No"},
+                                    },
+                                    new
+                                    {
+                                        @id = "OffenderAgreeCompoundingAmount",
+                                        @name = "OffenderAgreeCompoundingAmount",
+                                        @class = "form-control"
+                                    })
+                            </div>
+                        </div>                 
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Item Seized:</label>
+                                    @Html.DropDownListFor(x => x.ItemSeized, new List<SelectListItem>
+                                    {
+                                        new SelectListItem { Text = "--Select--", Value = "--Select--"},
+                                        new SelectListItem { Text = "Yes", Value = "Yes"},
+                                        new SelectListItem { Text = "No", Value = "No"},
+                                    },
+                                    new
+                                    {
+                                        @id = "ItemSeized",
+                                        @name = "ItemSeized",
+                                        @class = "form-control"
+                                    })
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Is Compounding:</label>
+                                    @Html.DropDownListFor(x => x.Compounding, new List<SelectListItem>
+                                    {
+                                        new SelectListItem { Text = "--Select--", Value = "--Select--"},
+                                        new SelectListItem { Text = "Yes", Value = "Yes"},
+                                        new SelectListItem { Text = "No", Value = "No"},
+                                    },
+                                    new
+                                    {
+                                        @id = "Compounding",
+                                        @name = "Compounding",
+                                        @class = "form-control"
+                                    })
+                                </div>
+                            </div> 
+                        <div class="col-lg-6 known">
+                            <label>Upload Offender Statement:<a style="display:none;" id="viewStatement">view document</a></label>
+                            @*<input type="file" class="form-control" id="UploadOffenderStatement" style="width:50%" title=""  name="UploadOffenderStatement" />*@
+                            @Html.TextBoxFor(x => x.UploadOffenderStatement, new { @id = "UploadOffenderStatement", @class = "form-control", name = "UploadOffenderStatement", @type = "file" })
+                            <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size:100kb.</span></label>
+                            <div id="errordivOffenderStatementDoc" style="display:none" class="alert-danger1"></div>
+                        </div>                            
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Fine Amount:</label>
+                                    @Html.TextBoxFor(x => x.FineAmount, new { @id = "FineAmount", @class = "form-control", name = "FineAmount" })
+                                </div>
+                            </div>
+                        </div>
+                  <div class="col-lg-12"></div>
+                    <div class="btn-padd">
+                        <div id="btn" class="col-lg-12">
+                            <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_submit">
+                                <i class="fa fa-check"></i> Save
+                            </button>
+
+                            <button type="submit" name="Command" value="Cancel" class="btn btn-danger">
+                                <i class="fa fa-times fa-fw"></i> Cancel
+                            </button>
+                        </div>
+                        <br />
+                        <br />
+                        <br />
+                        <br />
+
+                        <label id="lblPunishment">Punishment Act :</label>
+                        <div id="tblPunishment" class="table-responsive">
+                            <!--Table grid-->
+                            <table class="table table-striped table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width:7%;">S.No</th>
+                                        <th>Category</th>
+                                        <th> Details </th>
+                                        <th>Punishment</th>
+                                        <th>Cognition</th>
+                                        <th>Bailable</th>                                        
+                                    </tr>
+                                </thead>
+                                <tbody id="tblPunishmentDetail"></tbody>
+                            </table>
+                        </div>
+                        <label id="lblSimmiler">Similar case:</label>
+                        <div id="tblSimmiler" class="table-responsive">
+                            <!--Table grid-->
+                            <table class="table table-striped table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width:7%;">S.No</th>
+                                        <th>OffenseCode</th>
+                                        <th> Offense Category </th>
+                                        <th>Forest Category</th>
+                                        <th>Forest Section</th>
+                                        <th>Wildlife Category</th>
+
+                                        <th> Section Wildlife </th>
+                                        <th>DFO Decision</th>
+                                        <th>Case Status</th>
+                                        <th>Fine Amount</th>
+
+                                        <th>Offence Description</th>
+                                        <th>Item Seized </th>
+                                        <th>Compounding </th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody id="tblSmillercases"></tbody>
+                            </table>
+                        </div>
+                    </div>
+              }
+            </div>
+        </div>
+  </div>
+</div>

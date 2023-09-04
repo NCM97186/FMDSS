@@ -1,0 +1,1199 @@
+﻿@{
+    ViewBag.Title = "ManageAucscheduler";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<style>
+    /*#page-wrapper-inn .table > thead > tr > th:last-child {
+        width: 170px !important;
+    }*/
+</style>
+<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<link href="~/css/timepicki.css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+<script type="text/javascript">
+    var $j = jQuery.noConflict();
+    var RootUrl = '@Url.Content("~/")';
+
+    $j(document).ready(function () {
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'ManageAucscheduler/BindRegionCircle', // we are calling json method
+            dataType: 'json',
+            data: {},
+            success: function (data) {
+                var regions = data.split(',');
+
+                $j("#regionCode").val(regions[0]);
+                var regionCode = $j("#regionCode option:selected").text();
+                $j('#regionCode option').filter(function (e) { return $j(this).val() == regions[0] }).attr('selected', true);
+
+                $j.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'ManageNotice/CircleData', // we are calling json method
+                    dataType: 'json',
+                    data: { regionCode: regions[0] },
+                    success: function (region) {
+                        $j.each(region, function (i, items) {
+                            $j("#circleCode").append('<option value="' + items.Value + '">' +
+                            items.Text + '</option>');
+                            if (items.Value == regions[1]) {
+                                $('#circleCode option').filter(function () { return $(this).val() == regions[1] }).attr('selected', true);
+                                return;
+                            }
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve states.' + ex);
+                    }
+
+                });
+
+                $j.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'ManageNotice/DivisionData', // we are calling json method
+                    dataType: 'json',
+                    data: { regionCode: regions[0], circleCode: regions[1] },
+                    success: function (circle) {
+                        $j.each(circle, function (i, items) {
+                            $j("#divisionCode").append('<option value="' + items.Value + '">' +
+                            items.Text + '</option>');
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve states.' + ex);
+                    }
+
+                });
+
+
+
+
+                $("#regionCode").prop("disabled", true);
+                $("#circleCode").prop("disabled", true);
+
+
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+
+        });
+
+
+        var today = new Date();
+        var tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+        $j(".datefield").datepicker({
+            minDate: tomorrow,
+            dateFormat: 'd-MM-yy',
+            changeYear: false,
+            yearRange: "0:+1",
+            onClose: function (dateText, inst) { $j("[id $=auto]").focus(); }
+        });
+        $j('.timepicker').timepicki();
+
+        $j('#durationfrom').change(function (e) {
+            var count = 0;
+
+            var dt = $j("#durationfrom").val().split('-');
+            var newid = dt[1].toString();
+            var flag = 0;
+            var noofmonth = 0;
+            var idNo;
+
+            $j('#temp12 tr').each(function (i) {
+                var $tds = $j(this).find('td');
+                var idNo = $tds.eq(2).text();
+
+                if (newid != '') {
+
+                    if (idNo == newid) {
+
+                        flag = 1;
+
+                        alert('This Auction Month already exist. Please enter another Auction Month.');
+                        //$j('#forestProductID')
+                        return false;
+                    }
+
+
+                }
+            });
+
+
+
+
+            var rowCount = $('#temp12 tr').length;
+
+            var scheduleType = $j("#SchedulerPeriod").val();
+
+            switch (scheduleType) {
+                //case "Monthaly":
+                //    if (rowCount <= 12)
+                //        builDateList(flag, dt)
+                //    else
+                //        alert("Not Allowed Because Period of Scheduler!");
+                //    break;
+                case "Quarterly":
+                    if (rowCount <= 4)
+                        builDateList(flag, dt)
+                    else
+                        alert("Not Allowed Because Period of Scheduler!");
+                    break;
+                case "Half yearly":
+                    if (rowCount <= 6)
+                        builDateList(flag, dt)
+                    else
+                        alert("Not Allowed Because Period of Scheduler!");
+                    break;
+                case "Yearly":
+                    if (rowCount <= 12)
+                        builDateList(flag, dt)
+                    else
+                        alert("Not Allowed Because Period of Scheduler!");
+                    break;
+                default:
+                    alert("Please Select Period of Scheduler!");
+
+            }
+
+
+        });
+
+
+        $('#durationfrom').keydown(function (event)
+        { return cancelBackspace(event) });
+
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+
+        function builDateList(flog, dt) {
+            if (flog == 0) {
+                $j.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'ManageAucscheduler/AddMultipleDate', // we are calling json method
+                    dataType: 'json',
+                    data: { dt: dt.toString(), dID: $j("#DateHdn_ID").val() },
+                    success: function (data) {
+                        var dt = data.split(',');
+                        var bardata = "<tr class='rowid'><td style='display:none;'>" + dt[3] + "</td><td>" + dt[0] + "</td><td>" + dt[1] + "</td><td>" + dt[2] + "</td><td><button type='button' title='Delete'  class='deleteDate btn btn-danger btn-circle'><i class='fa fa-times'></i></button></td></tr>";
+                        $j("#dateschedularTable").append(bardata);
+                        $j("#DateHdn_ID").val(parseInt(dt[3]) + 1);
+
+
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve states.' + ex);
+                    }
+
+                });
+            }
+
+        }
+
+        $j('#SchedulerPeriod').change(function (e) {
+
+            $("#dateschedularTable").empty();
+        });
+
+
+
+        $j('#regionCode').change(function (e) {
+
+            $j("#hd_regionCode").val($j("#regionCode").val());
+
+            $j("#divisionCode").empty();
+            $j("#circleCode").empty();
+            $j("#divisionCode").empty();
+            $j("#rangeCode").empty();
+            $j("#depotId").empty();
+            $j.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/CircleData', // we are calling json method
+                dataType: 'json',
+                data: { regionCode: $j("#regionCode").val() },
+                success: function (region) {
+                    $j.each(region, function (i, items) {
+                        $j("#circleCode").append('<option value="' + items.Value + '">' +
+                        items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $j('#circleCode').change(function (e) {
+            $j("#hd_circleCode").val($j("#circleCode").val());
+            var circleName = $j("#circleCode option:selected").text();
+            $j("#divisionCode").empty();
+            $j("#rangeCode").empty();
+            $j("#depotId").empty();
+            $j.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/DivisionData', // we are calling json method
+                dataType: 'json',
+                data: { regionCode: $j("#regionCode").val(), circleCode: $j("#circleCode").val() },
+                success: function (circle) {
+                    $j.each(circle, function (i, items) {
+                        $j("#divisionCode").append('<option value="' + items.Value + '">' +
+                        items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+
+        $j('#divisionCode').change(function (e) {
+
+            $("#dateschedularTable").empty();
+            $j("#hd_divisionCode").val($j("#divisionCode").val());
+            var DivisionName = $j("#divisionCode option:selected").text();
+            $j("#rangeCode").empty();
+            $j("#depotId").empty();
+            $j.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/RangeData', // we are calling json method
+                dataType: 'json',
+                data: { regionCode: $j("#regionCode").val(), circleCode: $j("#circleCode").val(), divisionCode: $j("#divisionCode").val() },
+                success: function (divCode) {
+                    $j.each(divCode, function (i, items) {
+                        $j("#rangeCode").append('<option value="' + items.Value + '">' +
+                        items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $j('#rangeCode').change(function (e) {
+            $j("#hd_rangeCode").val($j("#rangeCode").val());
+            //var rangeName =  $j("#rangeCode option:selected").text();
+            $j("#depotId").empty();
+
+            $j.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/getDepotData', // we are calling json method
+                dataType: 'json',
+                data: { regionCode: $j("#regionCode").val(), circleCode: $j("#circleCode").val(), divisionCode: $j("#divisionCode").val(), rangeCode: $j("#rangeCode").val() },
+                success: function (range) {
+                    $j.each(range, function (i, items) {
+                        $j("#depotId").append('<option value="' + items.Value + '">' +
+                        items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $j('#depotId').change(function (e) {
+            $j("#hdn_contactNo").val('');
+            $j.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageAucscheduler/DepotInchargeContactByID', // we are calling json method
+                dataType: 'json',
+                data: { depotId: $j("#depotId").val() },
+                success: function (data) {
+                    $j("#hdn_contactNo").val(data)
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+
+
+        $j('#producetype').change(function (e) {
+            $j("#hd_producetype").val($j("#producetype").val());
+            // var ProductType =  $j("#producetype option:selected").text();
+            $j("#forestProductID").empty();
+
+
+            $j.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageAucscheduler/getForesProduct', // we are calling json method
+                dataType: 'json',
+                data: { producetype: $j("#producetype").val() },
+                success: function (produce) {
+                    $j.each(produce, function (i, items) {
+                        $j("#forestProductID").append('<option value="' + items.Value + '">' +
+                        items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+
+
+        $j('#addNewnotice').click(function (e) {
+            $j("#lbl_header").html('Create Notice');
+            $j("#btn_Save").html('Submit');
+            $j("#btn_Save").val('Submit');
+
+        });
+
+        $j('#txt_amount').keypress(function (event) {
+
+            return isNumber(event, this)
+
+        });
+
+
+        $j('#txt_qty').keypress(function (e) {
+            var kc = e.which;
+            //alert(kc);
+
+            if ($("#produceUnit").val() == "Piece") {
+
+                if (kc >= 48 && kc <= 57) {
+
+                }
+                else {
+                    e.preventDefault();
+                }
+            }
+            else {
+
+                if (kc >= 48 && kc <= 57 || (kc == 46)) {
+
+                }
+                else {
+                    e.preventDefault();
+                }
+            }
+
+        })
+        $j('#tottxt_Amount').keypress(function (e) {
+            var kc = e.which;
+            //alert(kc);
+            if (kc >= 48 && kc <= 57 || (kc == 46)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+
+        })
+
+
+
+        $j('#addProduct').click(function (e) {
+
+
+            if ($j('#producetype').val() == '0') {
+                $j('#produceerrordiv1').show();
+                $j('#produceerrordiv1').html("Please Select Product Type" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j("#producetype").focus();
+                return false;
+            }
+            else { $j('#produceerrordiv1').hide(); }
+
+            if ($j('#forestProductID').val() == '0') {
+
+                $j('#produterrordiv2').show();
+                $j('#produterrordiv2').html("Please Select Product" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j("#forestProductID").focus();
+                return false;
+            }
+            else { $j('#produterrordiv2').hide(); }
+
+            if ($j('#produceUnit').val() == '0') {
+
+                $j('#producunieerrordiv3').show();
+                $j('#producunieerrordiv3').html("Please Select Product Unit!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j("#produceUnit").focus();
+                return false;
+            }
+            else { $j('#producunieerrordiv3').hide(); }
+
+            if ($j('#txt_qty').val().trim() == '' || $j('#txt_qty').val() == '0') {
+                $j('#qtyerrordiv3').show();
+                $j('#qtyerrordiv3').html("Please Enter Estimated Quantity and Zero is not Allowed" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j("#txt_qty").focus();
+                return false;
+            }
+            else { $j('#qtyerrordiv3').hide(); }
+
+
+            var idNo;
+            var newid = $j("#forestProductID option:selected").text();
+
+            var SchedularInfo = {
+
+                ID: $j("#Hdn_ID").val(),
+                ForestProduce: $j("#producetype option:selected").text(),
+                ForestProduceID: $j("#producetype").val(),
+                ForestProduct: $j("#forestProductID option:selected").text(),
+                ForestProductID: $j("#forestProductID").val(),
+                Qty: $j("#txt_qty").val(),
+                ProduceUnit: $j("#produceUnit").val()
+
+            }
+            var flag = 0;
+            $j('#temp tr').each(function (i) {
+                var $tds = $j(this).find('td');
+                idNo = $tds.eq(2).text();
+                if (newid != '') {
+                    if (idNo == newid) {
+                        flag = 1;
+                        alert('This Product already exist. Please enter another Product.');
+                        $j('#forestProductID')
+                        return false;
+                    }
+
+
+                }
+            });
+
+            if (flag == 0) {
+                $j.ajax({
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(SchedularInfo),
+                    url: RootUrl + 'ManageAucscheduler/BindproductDetail',
+                    success: function (data) {
+
+                        var bardata = "<tr class='rowid'><td style='display:none;'>" + data.ID + "</td><td>" + data.ForestProduce + "</td><td>" + data.ForestProduct + "</td><td>" + data.Qty + "(In " + data.ProduceUnit + ")" + "</td><td><button type='button' title='Delete'  class='deleteCart btn btn-danger btn-circle'><i class='fa fa-times'></i></button></td></tr>";
+                        $j("#prodschedularTable").append(bardata);
+                        //$j("#unitspan").text("(In " + data.ProduceUnit + ")");
+
+                        $j("#Hdn_ID").val(parseInt(data.ID) + 1);
+
+                        $j('#producetype').val('');
+                        $j('#forestProductID').val('');
+                        $j('#produceUnit').val('');
+                        $j('#txt_qty').val('');
+
+                    },
+
+
+                    traditional: true,
+                    error: function (data) { console.log(data) }
+                });
+            }
+        });
+
+        $(document).on('click', '.deleteCart', function (e) {
+            var $row = jQuery(this).closest('tr');
+            var $columns = $row.find('td');
+            var ProductID = $.trim($columns[0].innerHTML);
+
+            var values = {
+                ProductID: ProductID,
+            };
+            jQuery(this).closest('tr').remove();
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'ManageAucscheduler/DeleteProductFromList',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    $("#prodschedularTable").empty();
+
+                    for (var i = 0; i < data.length; i++) {
+
+
+                        $j("#producetype").val(data[i].ForestProduceID);
+                        var productType = $j("#producetype option:selected").text();
+                        $j('#producetype option').filter(function (e) { return $j(this).text() == '--Select--' }).attr('selected', true);
+
+                      
+
+
+                        var bardata = "<tr class='rowid'><td style='display:none;'>" + data[i].ID + "</td><td>" + productType + "</td><td>" + data[i].prodName + "</td><td>" + data[i].Qty + "(In " + data[i].ProduceUnit + ")" + "</td><td><button type='button' title='Delete'  class='deleteCart btn btn-danger btn-circle'><i class='fa fa-times'></i></button></td></tr>";
+                        $j("#prodschedularTable").append(bardata);
+                    }
+
+                    if (data.length > 0) {
+
+                    }
+                    else {
+                        var ProductData1 = "<tr class='rowid'><td colspan='8'>No Record Exist!!!</td></tr>";
+                        $j("#prodschedularTable").append(bardata);
+
+                    }
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+        });
+
+        $(document).on('click', '.deleteDate', function (e) {
+            var $row = jQuery(this).closest('tr');
+            var $columns = $row.find('td');
+            var DateID = $.trim($columns[0].innerHTML);
+
+            var values = {
+                DateID: DateID,
+            };
+            jQuery(this).closest('tr').remove();
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'ManageAucscheduler/DeleteDateFromList',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    alert(data.length);
+                    $("#dateschedularTable").empty();
+
+                    for (var i = 0; i < data.length; i++) {
+
+
+                        var bardata = "<tr class='rowid'><td style='display:none;'>" + data[i].ID + "</td><td>" + data[i].ScheduleDay + "</td><td>" + data[i].ScheduleMonth + "</td><td>" + data[i].Scheduleyear + "</td><td><button type='button' title='Delete'  class='deleteDate btn btn-danger btn-circle'><i class='fa fa-times'></i></button></td></tr>";
+                        $j("#dateschedularTable").append(bardata);
+
+                    }
+
+
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+        });
+
+        $(document).on('click', '.deleteDepot', function (e) {
+            var $row = jQuery(this).closest('tr');
+            var $columns = $row.find('td');
+            var DepotID = $.trim($columns[0].innerHTML);
+
+            var values = {
+                DepotID: DepotID,
+            };
+            jQuery(this).closest('tr').remove();
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'ManageAucscheduler/DeleteDepotFromList',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    $("#prodschedularTable").empty();
+
+                    for (var i = 0; i < data.length; i++) {
+
+
+                        $j("#depotId").val(data[i].ForestProduceID);
+                        var depot = $j("#depotId option:selected").text();
+                        $j('#depotId option').filter(function (e) { return $j(this).text() == '--Select--' }).attr('selected', true);
+
+
+
+                        var bardata = "<tr class='rowid'><td style='display:none;'>" + data[i].ID + "</td><td>" + depot + "</td><td>" + data[i].Time + "</td><td>" + data[i].Mobile + "</td><td><button type='button' title='Delete'  class='deleteDepot btn btn-danger btn-circle'><i class='fa fa-times'></i></button></td></tr>";
+                        $j("#schedularTable").append(bardata);
+
+                    }
+
+
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+        });
+
+        $j('#addNewnotice').click(function (e) {
+
+            if ($j('#regionCode').val() == '') {
+                $j('#regionerrordiv').show();
+                $j('#regionerrordiv').html("Please Select Region Name" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j("#regionCode").focus();
+                return false;
+            }
+            else { $j('#regionerrordiv').hide(); }
+
+            if ($j('#circleCode').val() == '0') {
+                $j('#circleerrordiv').show();
+                $j('#circleerrordiv').html("Please Select Circle Name" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j("#circleCode").focus();
+                return false;
+            }
+            else { $j('#circleerrordiv').hide(); }
+
+            if ($j('#divisionCode').val() == '0') {
+                $j('#divisionerrordiv').show();
+                $j('#divisionerrordiv').html("Please Select Division Name" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j("#divisionCode").focus();
+                return false;
+            }
+            else { $j('#divisionerrordiv').hide(); }
+
+            if ($j('#rangeCode').val() == '0') {
+                $j('#rangeerrordiv').show();
+                $j('#rangeerrordiv').html("Please Select Range Name." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j("#rangeCode").focus();
+                return false;
+            }
+            else { $j('#rangeerrordiv').hide(); }
+
+            if ($j('#depotId').val() == '0') {
+                $j('#depoterrordiv').show();
+                $j('#depoterrordiv').html("Please Select Depot Name." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j("#depotId").focus();
+                return false;
+            }
+            else { $j('#depoterrordiv').hide(); }
+
+            var finaldate = '';
+            $j('#temp12 tr').each(function (i) {
+                var $tds = $j(this).find('td');
+                var day = $tds.eq(1).text();
+                var month = $tds.eq(2).text();
+
+                finaldate = finaldate + day + " " + month + ",";
+
+            });
+
+            var finaldatestr = finaldate.substring(2, finaldate.length - 1);
+
+            var SchedularInfo = {
+
+                ID: $j("#DHdn_ID").val(),
+                RegionName: $j("#regionCode option:selected").text(),
+                RegionCode: $j("#regionCode").val(),
+                CircleName: $j("#circleCode option:selected").text(),
+                CircleCode: $j("#circleCode").val(),
+                DivisionName: $j("#divisionCode option:selected").text(),
+                DivisionCode: $j("#divisionCode").val(),
+                Rangename: $j("#rangeCode option:selected").text(),
+                RangeCode: $j("#rangeCode").val(),
+                DepotName: $j("#depotId option:selected").text(),
+                ForestProduct: $j("hdn_Product").val(),
+                DepotId: $j("#depotId").val(),
+                Time: $j("#durationto").val(),
+                Mobile: $j("#hdn_contactNo").val(),
+                FinalDate: finaldatestr
+
+            }
+
+            var newid = $j("#depotId option:selected").text();
+
+            var flag1 = 0;
+            $j('#temp1 tr').each(function (i) {
+                var $tds = $j(this).find('td');
+                var idNo = $tds.eq(1).text();
+
+                if (newid != '') {
+
+                    if (idNo == newid) {
+                        flag1 = 1;
+                        alert('This Place/Depot of Auction already exist. Please enter another Place/Depot of Auction.');
+                        //$j('#forestProductID')
+                        return false;
+                    }
+
+                }
+            });
+
+
+            if (flag1 == 0) {
+                $j.ajax({
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(SchedularInfo),
+                    url: RootUrl + 'ManageAucscheduler/BindDepotDetail',
+                    success: function (data) {
+
+                        var finalProd = '';
+
+                        $j('#temp tr').each(function (i) {
+                            var $tds = $j(this).find('td');
+                            var prod = $tds.eq(2).text();
+
+                            finalProd = finalProd + prod + ",";
+
+                        });
+
+                        var fstring = finalProd.substring(1, finalProd.length - 1);//(0, finalProd.length - 1);
+
+
+
+                        var bardata = "<tr class='rowid'><td style='display:none;'>" + data.ID + "</td><td>" + data.DepotName + "</td><td>" + fstring + "</td><td>" + data.FinalDate + "</td><td>" + data.Time + "</td><td>" + data.Mobile + "</td><td><button type='button' title='Delete'  class='deleteDepot btn btn-danger btn-circle'><i class='fa fa-times'></i></button></td></tr>";
+                        $j("#schedularTable").append(bardata);
+
+
+
+                        $j("#DHdn_ID").val(parseInt(data.ID) + 1);
+
+                        $j("#lbl_Auctiondt").text('');
+                        $j("#hdn_mltDt").val("");
+                        $j("#durationfrom").val("");
+
+                    },
+
+                    traditional: true,
+                    error: function (data) { console.log(data) }
+                });
+            }
+        });
+
+
+
+        $j('#btn_Save').click(function (e) {
+           
+            var rowCountprod = $('#temp tr').length;
+            var rowCountdate = $('#temp12 tr').length;
+            var rowCountdepot = $('#temp1 tr').length;
+          
+
+            if (rowCountprod == 1) {
+                alert("Please Add Product!");
+                return false;
+            }
+
+            if (rowCountdate == 1) {
+                alert("Please Enter Auction Date!");
+                return false;
+            }
+
+
+            if (rowCountdepot == 1) {
+                alert("Please Add Depot!");
+                return false;
+            }
+
+
+            if ($j('#tottxt_Amount').val().trim() == '') {
+                $j('#emderrordiv8').show();
+                $j('#emderrordiv8').html("Please Enter EMD Amount." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j("#tottxt_Amount").focus();
+                return false;
+            }
+            else { $j('#emderrordiv8').hide(); }
+
+            if ($j('#description').val().trim() == '') {
+                $j('#descriperrordiv').show();
+                $j('#descriperrordiv').html("Please Enter Description." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $j("#description").focus();
+                return false;
+            }
+            else { $j('#descriperrordiv').hide(); }
+
+
+        });
+
+
+
+        function isNumber(evt, element) {
+
+            var charCode = (evt.which) ? evt.which : event.keyCode
+
+            if (
+                 (charCode != 46 || $j(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+                (charCode < 48 || charCode > 57))
+                return false;
+
+            //return true;
+        }
+    });
+</script>
+<script type="text/javascript">
+    
+    function ClearField() {
+        
+        $j("#producetype").val('');
+        $j("#forestProductID").val();
+        $j("#produceUnit").val();
+        $j("#txt_qty").val();
+        $("#prodschedularTable").empty();
+      
+        $j("#divisionCode").val('');
+        $j("#rangeCode").val('');
+        $j("#txt_qty").val('');
+        $j("#SchedulerPeriod").val('');
+        $j("#durationfrom").val('');
+        $("#dateschedularTable").empty();
+        $j("#durationto").val('');
+        $("#schedularTable").empty();
+        $j("#tottxt_Amount").val('');
+        $j("#description").val('');
+      
+
+    }
+    function reload() {
+        var r = confirm("Do you want to leave page!");
+        if (r) {
+            window.location = RootUrl + "ForesterAction/ForesterAction";
+        }
+        else {
+            //do nothing
+        }
+    }
+
+</script>
+
+
+
+
+
+@using (Html.BeginForm("SubmitAuctionschedularForm", "ManageAucscheduler", FormMethod.Post))
+{
+    <input type="hidden" id="Hdn_ID" name="ID" value="1">
+    <input type="hidden" id="DateHdn_ID" name="DateID" value="1">
+    <input type="hidden" id="DHdn_ID" name="DID" value="1">
+    <div id="page-wrapper-inn">
+
+
+        <div class="col-lg-12 pad">
+            <div class="col-lg-10 pad">
+                <h1 class="page-header"><span>Auction Notice Scheduler</span></h1>
+                @if (@TempData["AUSCH_Status"] != null)
+                {
+                    <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["AUSCH_Status"]</div>
+                }
+            </div>
+            <div class="col-lg-2 pull-right">
+                <button type="button" class="btn btn-success btn_pp pull-right" name="btn_addpopip" value="" title="Auction scheduler" onclick="location.href='@Url.Action("index", "ManageAucscheduler")'">
+                    <i class=" fa fa-th-list ">
+                    </i> Auction Notice Scheduler List
+                </button>
+            </div>
+        </div>
+        <!-- /.col-lg-12 -->
+        <!-- Row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+
+                    <div class="panel-body">
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Product Type: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("ForestProduceID", (IEnumerable<SelectListItem>)ViewBag.ForestProduceID, new { @class = "form-control", id = "producetype" })
+                                <input type="hidden" id="hd_producetype" name="Hd_ForestProduceID" />
+
+
+                                <div id="produceerrordiv1" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Product: <span class="mandatory">*</span></label>
+
+                                @Html.DropDownList("ForestProductID", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "forestProductID" })
+
+                                <input type="hidden" id="hd_forestProductID" name="Hd_ForestProductID" />
+
+                                <div id="produterrordiv2" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Select Unit: <span class="mandatory">*</span></label>
+                                <select name="ProduceUnit" id="produceUnit" class="form-control">
+                                    <option value="0">--Select--</option>
+                                    <option value="Piece">Piece</option>
+                                    <option value="Kg">Kg</option>
+                                    <option value="Quintal">Quintal</option>
+                                    <option value="Metric ton">Metric ton</option>
+
+                                </select>
+                                <span id="errmsg"></span>
+
+
+                                <div id="producunieerrordiv3" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Approximated Quantity:<span class="mandatory">*</span></label>
+                                <input class="form-control" id="txt_qty" name="Qty" maxlength="7">
+                                <input type="hidden" id="hd_Qty" name="Hd_Qty" />
+                                <input type="hidden" id="hdn_avQty" />
+
+                                <label id="lbl_availableQty" for="email" class="pull-left"></label>
+                                <label id="lbl_baserate" for="email" class="pull-right"></label>
+                                <div id="qtyerrordiv3" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6" style="display:none;">
+                            <div class="form-group">
+                                <label>Rate(Per Product Unit): <span class="mandatory">*</span></label>
+                                <input class="form-control" id="hdn_productRate" readonly="readonly">
+                                <input type="hidden" id="hdn_Product" />
+
+                                <div id="produceerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group" id="btn-cont1">
+                                <label> &nbsp;</label>
+                                <button type="button" class="btn btn-success" id="addProduct"> Add</button>
+                                <div id="produceerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <table id="temp" class="table table-bordered" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th width="15%" style='display:none;'>S.No</th>
+                                            <th width="15%">Product Type</th>
+                                            <th width="15%">Product</th>
+                                            <th width="15%">Approximated Quantity</th>
+                                            <th width="15%">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="prodschedularTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Period of Scheduler: <span class="mandatory"></span></label>
+                                <select name="SchedulerPeriod" id="SchedulerPeriod" class="form-control">
+                                    <option value="0">---Select---</option>
+                                    @*<option value="Monthaly">Monthaly</option>*@
+                                    <option value="Quarterly">Quarterly</option>
+                                    <option value="Half yearly">Half Yearly</option>
+                                    <option value="Yearly">Yearly</option>
+
+                                </select>
+
+
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Region Name: <span class="mandatory"></span></label>
+                                @Html.DropDownList("RegionCode", (IEnumerable<SelectListItem>)ViewBag.RegionCode, "--Select--", new { @class = "form-control", id = "regionCode" })
+                                <input type="hidden" id="hd_regionCode" name="Hd_RegionCode" />
+                                <div id="regionerrordiv" style="display:none" class="alert-danger1"></div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Circle Name: <span class="mandatory"></span></label>
+                                @Html.DropDownList("CircleCode", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "circleCode" })
+                                <input type="hidden" id="hd_circleCode" name="Hd_CircleCode" />
+                                <div id="circleerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Division Name: <span class="mandatory"></span></label>
+                                @Html.DropDownList("DivisionCode", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "divisionCode" })
+                                <input type="hidden" id="hd_divisionCode" name="Hd_DivisionCode" />
+                                <div id="divisionerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Range Name: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("RangeCode", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "rangeCode" })
+                                <input type="hidden" id="hd_rangeCode" name="Hd_RangeCode" />
+                                <div id="rangeerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Place/Depot of Auction: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("DepotId", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "depotId" })
+                                <input type="hidden" id="hd_depotId" name="Hd_DepotId" />
+                                <div id="depoterrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+
+                                <label>Auction Date: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control datefield" id="durationfrom" name="BiddOpeningDate" />
+                                <label id="lbl_Auctiondt" for="email" class="pull-right"></label>
+                                <input type="hidden" id="hdn_mltDt" />
+                                <div id="errordiv6" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <table id="temp12" class="table table-bordered" style="width: 519px; height: 100px; overflow-y: scroll; display: table-caption; ">
+                                    <thead>
+                                        <tr>
+                                            <th style='display:none;'>S.No</th>
+                                            <th colspan="4">Multiple Date</th>
+
+
+
+
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dateschedularTable"></tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-12"></div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Time of Auction:</label>
+                                <div id="datepicker" class="input-group date" data-date-format="mm-dd-yyyy">
+                                    <input class="form-control timepicker" type="text" id="durationto" name="BidClosingDate">
+                                    <input type="hidden" id="hdn_contactNo" />
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-lg-6" style="display:none;">
+                            <div class="form-group">
+                                <label>Reserved Price(INR): <span class="mandatory">*</span></label>
+                                <input class="form-control" id="txt_amount" name="ReservedPrice" readonly="readonly">
+
+                                <div id="amounterrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group" id="btn-cont1">
+                                <label> &nbsp;</label>
+                                <button type="button" class="btn btn-success" id="addNewnotice"> Add</button>
+                                @*<button type="button" id="btnView" class="btn btn-success" data-toggle="modal" data-target="#MemberModal">View</button>*@
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <table id="temp1" class="table table-bordered" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th width="15%" style='display:none;'>S.No</th>
+                                            <th width="15%">Place of Auction</th>
+                                            <th width="25%">Product</th>
+                                            <th width="35%">Auction Date</th>
+                                            <th width="15%">Time of Auction</th>
+                                            <th width="15%">Contact Details</th>
+                                            <th width="15%">Action</th>
+
+
+                                        </tr>
+                                    </thead>
+                                    <tbody id="schedularTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>EMD Amount(INR): <span class="mandatory">*</span></label>
+                                <input class="form-control" id="tottxt_Amount" name="EmdAmount" />
+                                <div id="emderrordiv8" style="display:none" class="alert-danger1"></div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Description: <span class="mandatory">*</span></label>
+                                <input class="form-control" id="description" name="Description">
+
+                                <div id="descriperrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12"></div>
+
+
+
+
+                        <!-- Btn Groping -->
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_Save">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+                                <button type="button" class="btn btn-warning" onclick="ClearField();">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+                                <button type="button" value="Cancel" class="btn btn-danger" onclick="reload(); return false;">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+
+                            </div>
+                        </div>
+                        <!-- /.Btn Groping -->
+
+                    </div>
+                    <!-- /.panel-body -->
+
+                </div>
+                <!-- /.panel -->
+
+            </div>
+            <!-- /.col-lg-12 -->
+
+            <div class="modal fade in" id="myViewNoticeModal2" tabindex="-1" role="dialog" aria-hidden="false">
+                <div class="modal-dialog mdw">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                            <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> </label></h4>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- From URL Get -->
+                            <input type="hidden" id="pHdn_No" name="PHdn_No" />
+                            <div id="divPublish"></div>
+
+                            <!-- /. From URL Get -->
+                        </div>
+                        <!-- /.modal-body -->
+                        <div class="modal-footer" id="fot-f">
+                            <div id="btn" class="col-lg-12">
+
+                                <button name="button" class="btn btn-danger" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                                    <i class="fa fa-times fa-fw"></i> Close
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- /.modal-content -->
+                </div>
+                <!-- /.modal-dialog -->
+            </div>
+        </div>
+    </div>
+
+}

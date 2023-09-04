@@ -1,0 +1,776 @@
+﻿@{
+    /**/
+
+    ViewBag.Title = "Index";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString());
+
+    var isOnlineBooking = true;
+
+    #region Check Online User
+    try
+    {
+        if (Session["IsDepartmentalKioskUser"] != null && Convert.ToBoolean(Session["IsDepartmentalKioskUser"]))
+        {
+            isOnlineBooking = false;
+        }
+        else if (Session["IsKioskUser"] != null && Convert.ToBoolean(Session["IsKioskUser"]))
+        {
+            isOnlineBooking = false;
+        }
+    }
+    catch { }
+    #endregion
+}
+@model FMDSS.Models.BookOnlineTicket.Ticket
+@section PageLevelCSS{
+
+
+    <style>
+        .hide {
+            display: none;
+        }
+
+        #myModal .modal-header {
+            background-color: #5cb85c;
+        }
+
+            #myModal .modal-header h4, .close {
+                color: #ffffff;
+                text-align: center;
+                font-size: 30px;
+            }
+
+        #myModal .modal-footer {
+            background-color: #f9f9f9;
+        }
+
+        #myModal .btn-success {
+            width: 100%;
+            padding: 10px;
+        }
+
+        ul.a {
+            list-style-type: circle;
+        }
+
+        #myModalRefund .modal-header {
+            background-color: #5cb85c;
+        }
+
+            #myModalRefund .modal-header h4, .close {
+                color: #ffffff;
+                text-align: center;
+                font-size: 30px;
+            }
+
+        #myModalRefund .modal-footer {
+            background-color: #f9f9f9;
+        }
+
+        #myModalRefund .btn-success {
+            width: 100%;
+            padding: 10px;
+        }
+
+        ul.a {
+            list-style-type: circle;
+        }
+
+        .capt {
+            background-color: #f8f8f8;
+            border-color: #e7e7e7;
+            border: 1px solid #e7e7e7;
+            width: 202px;
+            float: left;
+        }
+
+            .capt p {
+                margin: 10px;
+            }
+
+        #refresh {
+            width: 28px;
+            height: 26px;
+            padding: 0px;
+        }
+
+        #txtInput {
+            width: 150px;
+        }
+
+        #page-wrapper-inn .table > thead > tr > th {
+            width: auto;
+        }
+    </style>
+
+    <link href="~/Content/Images/bookingpopupimages/owl.carousel.min.css" rel="stylesheet" />
+    <link href="~/Content/Images/bookingpopupimages/owl.theme.default.css" rel="stylesheet" />
+    <link href="~/css/css2.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/responsive.css">
+}
+
+
+
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <input type="hidden" id="BookingPopUpStatus" value="abc" />
+        <!-- Modal content-->
+        <div class="modal-content" style="margin-top:50px;">
+            <div class="modal-header" style="padding:15px 25px;">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4><i class="fa-fw"></i>Public Notice </h4>
+            </div>
+            <div class="">
+
+                <div class="col-sm-12">
+                    <div class="owl-carousel owl-theme" style="  display:block;">
+                        <div class="item"><img src="~/Content/Images/bookingpopupimages/img/banner01.png" /></div>
+                        <div class="item"><img src="~/Content/Images/bookingpopupimages/img/banner02.png" /></div>
+                    </div>
+                </div>
+
+                @*<div class="col-lg-12">
+                        <iframe src="~/MiddleWare/BookingSliderView" id="myIframe" class="modal-lg" style="overflow:scroll;height:625px; width:750px; border:2px solid; text-align:center;margin-left:5px;margin-right:5px;"></iframe>
+                    </div>*@
+
+                <div class="modal-footer">
+                    <div class="col-sm-12">
+                        <button name="button" class="btn btn-danger ml-2" type="button" value="Cancel" data-dismiss="modal" style="width: auto; float:right;">Close</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script src="~/js/jquery.min.js"></script>
+@*<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>*@
+<script>var RootUrl = '@Url.Content("~/")';</script>
+
+
+<script>
+    function Success(data) {
+        if (data.status != undefined && data.status == false) {
+            if (data.error == "")
+                data.error = "We are facing some technical issue, please contact FMDSS if you are facing this issue on regular basis.";
+            if (data.error.indexOf("captcha") > -1) {
+                $("#txtInput").addClass("error");
+                $("#captchaError").html(data.error);
+            }
+            else {
+                $("#captchaError").html('');
+                $("#txtInput").removeClass("error");
+                alert(data.error);
+                $("html, body").animate({ scrollTop: 0 }, "slow");
+            }
+        }
+        else {
+            $("#page-wrapper-inn").html(data);
+            $("html, body").animate({ scrollTop: 0 }, "slow");
+        }
+
+    }
+</script>
+
+
+<div class="modal fade" id="myModal_TicketRefund" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="padding:35px 50px;">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4><i class="fa-fw"></i>Permit Refund Policy(For 18th March to 30th June 2020 Visitors)</h4>
+            </div>
+            <div class="modal-body">
+
+                <ul class="a">
+                    <li>As per the policy, if the booking cancelled by the guest, then the full amount of charged fees excluding emitra & bank charges will be refunded.</li>
+                    <li>पॉलिसी के अनुसार, आगंतुक के द्वारा बुकिंग निरस्त करने पर पूरी जमा राशि ,ई-मित्र और बैंक शुल्क को छोड़कर वापस कर दी जाएगी।</li>
+                    <li>Before proceeding please keep ready the required bank details i.e. Bank Name, Branch Name, IFSC Code, Account Type (Saving) & Account No. etc.</li>
+                </ul>
+            </div>
+            <div class="modal-footer" style="clear:both; padding-left: 50px;">
+                <div id="btn" class="col-lg-12">
+                    <a class="btn btn-danger" target="_blank" id="btn_Refund" href='javascript:void(0)'>
+                        Refund
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
+
+<div id="page-wrapper-inn">
+    <div id="frmInvalid" class="row" style="display:none">
+        <div class="col-lg-12 pad">
+            <h1 class="page-header">INVALID PERMIT BOOKING PAGE</h1>
+            <div class="panel-heading">
+                <span style="color:red;">
+                    <i class="bg-light-blue">Sorry, this is a invalid booking URL.</i>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="frmBooking">
+        <div class="col-lg-12 pad">
+            <h1 class="page-header">Online Permit Booking</h1>
+            <div style="color: #337ab7; float: right; margin-right: 30px; display: none; " id="getting-started"></div>
+            <span style="color: #337ab7; float: right; margin-right: 3px; " id="PlaceAndTime"></span>
+            <div class="panel-heading">
+                <span style="color:red;">
+                    <i class="bg-light-blue" style="color:ButtonText">Your page Session will be Expired in 10 minutes.</i>
+                </span>
+            </div>
+        </div>
+        @*<div class="panel-heading">
+                <marquee id="test" style="behavior="scroll" direction="left" scrolldelay="100" scrollamount="10" onmouseover="this.stop();" onmouseout="this.start();"> *Guest may book online Permits for Keoladeo National Park, Bharatpur even for current date.</marquee>
+            </div>*@
+
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span style="color:red;">* Mandatory field(s) to fill.</span>
+                    <span style="float:right" title="Help doc for onlinebooking">
+                        <i class="bg-light-blue" style="color:ButtonText">
+                            <a href="~/Help/User_Manual_Online%20_Ticket_Booking.pdf" target="_blank">Help doc for onlinebooking</a>
+                        </i>
+                    </span>
+                    @if (Session["IsKioskUser"] != null && Convert.ToBoolean(Session["IsKioskUser"]) && Session["KioskCtznName"] != null)
+                    {
+                        <a target="_blank" style="float: right; font-size:13px; " href='@Url.Content("~/NationalPark/Boardingpass")'>
+                            &ensp;&ensp; Verify Online Permits
+                        </a>
+
+                    }
+                </div>
+                <div class="panel-body" id="formBody">
+                    @using (Ajax.BeginForm("Index", "NationalPark", new AjaxOptions { HttpMethod = "Post", OnSuccess = "Success" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                @Html.Hidden("btype", (string)(Convert.ToString(ViewBag.Btype)))
+                                <label>Select Place: <span class="mandatory">*</span></label>
+                                <select id="PlaceId" name="PlaceId" class="form-control ddlPlace"></select>
+                                <span id="errorPlace" style="color: Red; display: none" class="alert-danger1">* Please Select Place.</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 zone divZone" style="display:none;">
+                            <div class="form-group un-bold">
+                                <label>Select Zone: <span class="mandatory">*</span></label>
+                                <select id="ZoneId" name="ZoneId" class="form-control ddlZone">
+                                    <option value="">--Select Zone--</option>
+                                </select>
+                                <span id="errorZone" style="color: Red; display: none" class="alert-danger1">* Please Select Zone.</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6  divDate" style="display:none;">
+                            <div class="form-group un-bold">
+                                <label>Date of Visit:<span class="mandatory">*</span></label>
+                                <input type="text" class="form-control datefield ddlDate" id="VisitingDate" name="VisitingDate" title="Enter the date" onkeydown="return false" />
+                                <span id="errorDate" style="color: Red; display: none" class="alert-danger1">* Please Select Date.</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6  divShift" style="display:none;">
+                            <div class="form-group un-bold">
+                                <label>Choose Shift: <span class="mandatory">*</span></label>
+                                <select id="ShiftId" name="ShiftId" class="form-control ddlShift">
+                                    <option value="">--Select Shift--</option>
+                                </select>
+                                <span id="errorShift" style="color: Red; display: none" class="alert-danger1">* Please Select Shift.</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold  divVehicle" style="display:none;">
+                            <div class="form-group">
+                                <label>Select Vehicle:</label>
+                                <select id="VehicleId" name="VehicleId" class="form-control ddlVehicle"><option value="">--Select Vehicle--</option></select>
+                                <span id="errorVehicle" style="color: Red; display: none" class="alert-danger1">* Please Select Vehicle.</span>
+                                <input type="hidden" id="hdn_vehiclefee" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold  divVisitors" style="display:none;">
+                            <div class="form-group">
+                                <label>Select No of Visitors:</label>
+                                <select id="Visitors" name="Visitors" class="form-control ddlVisitors"><option value="">--Select Visitors--</option></select>
+                                <span id="errorVehicle" style="color: Red; display: none" class="alert-danger1">* Please Select Visitors.</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 divSeats" style="display:none;">
+                            <div class="form-group un-bold" style="margin-top: 30px;">
+                                <label id="lblSeats" for="email">Currently available seats: 5</label>
+                                @*<input type="hidden" id="hdn_availTicket" value="5">
+                                    <br>
+                                    <label id="lbl_FeePerMember" for="email">Vehicle Fees Per Member: 134.00</label>
+                                    <input type="hidden" id="hdn_FeeTigerProject">
+                                    <input type="hidden" id="hdn_FeeSurcharge">*@
+                            </div>
+                        </div>
+                        <div class="col-lg-12 un-bold">
+                            <div class="divTicket"></div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        @if (ViewBag.BookingList != null)
+        {
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <strong>Booking History</strong>
+                    </div>
+                    <div class="panel-body">
+                        <div id="tbl" class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Booking No.
+                                        </th>
+                                        <th>
+                                            Booking Date & Time
+                                        </th>
+                                        <th>
+                                            Place Name
+                                        </th>
+                                        <th>
+                                            Visit Date
+                                        </th>
+                                        <th>
+                                            Total Permits
+                                        </th>
+
+                                        <th>
+                                            Paid Amount
+                                        </th>
+                                        <th>
+                                            Action
+                                        </th>
+                                    </tr>
+                                    @foreach (var item in ViewBag.BookingList)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @item.RequestId
+                                            </td>
+                                            <td>
+                                                @item.BookingDate.ToString("dd-MMM-yyyy hh:mm:ss tt")
+                                            </td>
+                                            <td>
+                                                @item.PlaceName
+                                            </td>
+                                            <td>
+                                                @item.VisitDate.ToString("dd-MMM-yyyy")
+                                            </td>
+                                            <td>
+                                                @item.TotalMember
+                                            </td>
+                                            <td>
+                                                @item.TotalPaidAmount
+                                            </td>
+                                            <td>
+                                                @if (item.BookingStatus == FMDSS.BookingStatus.Booked)
+                                                {
+                                                    if (item.RefundStatus == 0)
+                                                    {
+                                                        @Html.ActionLink("Download Ticket", "PrintTicket", "NationalPark", new { @ticketId = @item.TicketId }, new { @target = "_blank" })
+                                                    }
+                                                    else
+                                                    {
+                                                        @Html.ActionLink("Download Ticket", "PrintTicket", "NationalPark", new { @ticketId = "00000" }, new { @target = "_blank" })
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    @item.BookingStatus
+                                                }
+                                               
+                                                @*chnages done by shaan 27/10/2020*@
+                                                @if (item.COVIDStatus == 1 && item.TicketMemberBordingStatus == 0)
+                                                {
+                                                    if (item.RefundStatus == 0)
+                                                    {
+                                                        <span style="color: #337ab7">&nbsp; | &nbsp;  </span>
+                                                        <a onclick="TicketRefund('@Encryption.encrypt(Convert.ToString(item.TicketId))')" style="cursor:pointer;">
+                                                            Refund
+                                                        </a>
+                                                    }
+                                                }
+                                                @*shaan end changes 27/10/2020*@
+                                            </td>
+                                        </tr>
+                                    }
+                                </thead>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+@section PageLevelJS{
+
+    <script src="~/Content/Images/bookingpopupimages/js/owl.carousel.min.js"></script>
+   
+    <script type="text/javascript">
+        function DisplayPublicePopup() {
+
+            $("#myModal").modal({
+                backdrop: 'static',
+                keyboard: false,
+            });
+            $("#myModal").modal('show');
+        }
+        $(document).ready(function () {
+            $('.owl-carousel').owlCarousel({
+                loop: true,
+                margin: 10,
+                nav: true,
+                autoplay: true,
+                autoplayTimeout: 5000,
+                responsive: {
+                    0: {
+                        items: 1
+                    },
+                    600: {
+                        items: 1
+                    },
+                    1000: {
+                        items: 1
+                    }
+                }
+            });
+            DisplayPublicePopup();
+        });
+
+    </script>
+}
+<script type="text/javascript">
+    var places = [];
+    var zoneAvailable = 0;
+    var shiftAvailable = 0;
+    var vehicleAvailable = 0;
+    var route = '@ViewContext.RouteData.Values["id"]';
+
+    $(document).ready(function () {
+
+
+        var Url_GetData = RootUrl + 'NationalPark/getData';
+        var Url_TicketData = RootUrl + 'NationalPark/getTickets';
+        $("#VisitingDate").datepicker({
+            beforeShowDay: function (date) { return [date.getDay() == 1 || date.getDay() == 2 || date.getDay() == 3 || date.getDay() == 4 || date.getDay() == 5, "" || date.getDay() == 6, ""] },
+            dateFormat: 'dd/mm/yy'
+        });
+        $('#VisitingDate').datepicker({ dateFormat: 'dd/mm/yy' });
+        //$('#VisitingDate').datepicker({ dateFormat: 'dd/mm/yy' });
+        //$('#VisitingDate').datepicker('setDate', '11/23/2017');
+        //$('#VisitingDate').datepicker('setDate', '11/23/2017');//Test by dipak
+        getDate();
+        fillDropdown(Url_GetData, getSelectData('place'), 'Place');
+
+        $('.ddlPlace').on('change', function () {
+
+            var place = $.grep(places, function (i) {
+                return i.Id == $('.ddlPlace').val();
+            });
+            hideAll();
+            zoneAvailable = place[0].Zone;
+            shiftAvailable = place[0].Shift;
+            vehicleAvailable = place[0].Vehicle;
+            var option = '';
+            $('.divDate').show();
+            if (zoneAvailable > 0) {
+                $('.divZone').show();
+                option = 'Zone';
+            }
+            if (shiftAvailable > 0) {
+                $('.divShift').show();
+                option = (option == '' ? 'Shift' : option);
+            }
+            if (vehicleAvailable > 0) {
+                $('.divVehicle').show();
+                option = (option == '' ? 'Vehicle' : option);
+            }
+            else {
+                $('.divVisitors').show();
+                var $visitor = $(".ddlVisitors");
+                $visitor.empty();
+                $visitor.append("<option value='0'>--Select Visitors--</option>");
+                for (var i = 1; i <= place[0].MaxSeats; i++) {
+                    $visitor.append("<option value='" + i + "'>" + i + "</option>");
+                };
+
+            }
+            //clearData('Place');
+            if (option != '')
+                fillDropdown(Url_GetData, getSelectData(option), option);
+            getDate(); // line added by shaan 09-03-2021
+        });
+
+        $('.ddlZone').on('change', function () {
+            $('.ddlDate').val('');
+            clearData('Zone');
+            if (shiftAvailable)
+                //fillDropdown(Url_GetData, getSelectData('shift'), 'Shift');  // commented by shhan 09-03-2021
+                getDate();  // line added bys shaan 09-03-2021
+        });
+
+        //event added by shaan 09-03-2021
+        $("#VisitingDate").bind("click", function (e) {
+            datechange = $(this).val();
+        }).bind("change", function (e) {
+            fillDropdown(Url_GetData, getSelectData('shiftopenaccordingtime'), 'Shift');
+        });
+        // end shaan
+
+        $('.ddlDate').on('change', function () {
+            clearData('Date');
+        });
+
+        $('.ddlShift').on('change', function () {
+            clearData('Shift');
+            if (vehicleAvailable)
+                fillDropdown(Url_GetData, getSelectData('vehicle'), 'Vehicle');
+        });
+
+        $('.ddlVehicle, .ddlVisitors').on('change', function () {
+            if ($(this).val() == "0" || $(this).val() == "") {
+                $(".divTicket").hide();
+                $(".divTicket").html('');
+            }
+            else {
+                clearData('Vehicle');
+                fillTicket(Url_TicketData, getSelectData('vehicle'), 'divTicket');
+                //$('#lblSeats').text('');
+                //$('#lblSeats').text('Currently available seats: ' + $('#tbdMemberInfo').children('tr').length);
+                //$('.divSeats').show();
+                //$('#lbl_FeePerMember').text('Currently available seats: ' + $('#tbdMemberInfo').children('tr').length);
+            }
+        });
+
+        function hideAll(id) {
+            var ar = ['divPlace', 'divZone', 'divDate', 'divShift', 'divVehicle', 'divTicket', 'divVisitors'];
+            for (var i = 0; i < 7; i++) {
+                $('.' + ar[i]).hide();
+                $('.' + ar[i]).find("select").html('<option value="">--Select--</option>');
+            }
+            $('#lblSeats').text('');
+            $('.divSeats').hide();
+        }
+
+        function clearData(id) {
+            //var ar = ['divPlace', 'divZone', 'divDate', 'divShift', 'divVehicle', 'divTicket'];
+            //var idx = parseInt(ar.indexOf('div' + id)) + parseInt(parseInt($('.ddl' + id).val()) > 0 ? 1 : 0);
+            //$('.' + ar[idx++]).show();
+            //for (var i = idx; i < 6; i++) {
+            //    $('.' + ar[i]).deho();
+            //}
+        }
+
+        //Generic method for fill dropdown
+        function fillDropdown(url, data, id) {
+            $.ajax({
+                url: url,
+                type: 'POST',
+                dataType: 'json',
+                data: data,
+                success: function (data) {
+                    if (id.toLowerCase() == 'place') {
+                        places = data;
+                        $(".ddl" + id).empty();
+                        var items = '';
+                        if (data.length > 1)
+                            items = "<option value='0'>--Select " + id + "--</option>";
+
+                        $.each(data, function (index, optiondata) {
+                            items += "<option value='" + optiondata.Id + "'>" + optiondata.Name + "</option>";
+                        });
+
+                        $(".ddl" + id).append(items);
+                        if (data.length == 1) {
+                            $(".ddl" + id).trigger("change");
+                        }
+                        else if (data.length == 0) {
+                            $("#frmBooking").remove();
+                            $("#frmInvalid").show();
+                        }
+                    }
+                    else {
+                        $(".ddl" + id).empty();
+                        $(".ddl" + id).append("<option value='0'>--Select " + id + "--</option>");
+                        $.each(data, function (index, optiondata) {
+                            $(".ddl" + id).append("<option value='" + optiondata.Id + "'>" + optiondata.Name + "</option>");
+                        });
+
+                    }
+                }
+            });
+        }
+
+        //Generic method to get parameter
+        function getSelectData(option) {
+            var PlaceId = $(".ddlPlace option:selected").val();
+            var ZoneId = $(".ddlZone option:selected").val();
+            var ShiftId = $(".ddlShift option:selected").val();
+            var VehicleId = $(".ddlVehicle option:selected").val();
+            var Visitors = $(".ddlVisitors option:selected").val();
+            var selDate = $("#VisitingDate").val();
+            return {
+                option: option, placeid: PlaceId, zoneid: ZoneId, shiftid: ShiftId,
+                vehicleid: VehicleId, visitors: Visitors, route: route, seldate: selDate
+            };
+        }
+
+        //Get Ticket Data
+        function fillTicket(url, data, id) {
+            $('#hdntotalRows').val('');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                dataType: 'html',
+                data: data,
+                success: function (data) {
+                    $("." + id).show();
+                    $("." + id).html(data);
+                    if (id == 'divTicket') {
+                        $('#lblSeats').text('');
+                        $('#lblSeats').text('Currently available seats: ' + $('#hdntotalRows').val());
+                        $('.divSeats').show();
+                    }
+                },
+                error: function (jqXHR, exception) {
+                    var msg = '';
+                    if (jqXHR.status === 0) {
+                        msg = 'Not connect.\n Verify Network.';
+                    } else if (jqXHR.status == 404) {
+                        msg = 'Requested page not found. [404]';
+                    } else if (jqXHR.status == 500) {
+                        msg = 'Internal Server Error [500].';
+                    } else if (exception === 'parsererror') {
+                        msg = 'Requested JSON parse failed.';
+                    } else if (exception === 'timeout') {
+                        msg = 'Time out error.';
+                    } else if (exception === 'abort') {
+                        msg = 'Ajax request aborted.';
+                    } else {
+                        msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                    }
+                },
+            });
+        }
+
+        //Get server Date fro Datepicker
+         function DisableDatesAdvance(date) {
+            var string = jQuery.datepicker.formatDate('dd/mm/yy', date);
+            return [dates.indexOf(string) == -1];
+        }
+        //Get server Date fro Datepicker
+        function getDate() {
+            dates = [];
+            var btype = $('#btype').val();
+            $.ajax({
+                url: RootUrl + 'NationalPark/getDate',
+                type: 'POST',
+                dataType: 'json',
+                success: function (data) {
+                    
+                    //Get the End date
+                    var endDate = new Date(data.cDate);
+                    if (btype == "1") {
+                        endDate.setDate(endDate.getDate() + 90);
+                    }
+                    var currentdate = new Date(data.cDate);
+                    //New code   09-03-2021 added by shaan
+                    var PlaceId = $(".ddlPlace option:selected").val();
+                    
+                    if ('@isOnlineBooking' == 'True') {
+                        if (PlaceId == 60 || PlaceId == 36 || PlaceId == 12 || PlaceId == 49 || PlaceId == 75) {
+                            if (PlaceId == 49 || PlaceId == 75) {
+                                for (var i = 0; i < data.ExcludeDateList.length; i++) {
+                                    dates.push(data.ExcludeDateList[i]);
+                                }
+                                $('#VisitingDate').datepicker('option', {
+                                    minDate: currentdate,
+                                    maxDate: endDate,
+                                    beforeShowDay: DisableDatesAdvance,
+                                });
+                            } else {
+                                $('#VisitingDate').datepicker('option', {
+                                    minDate: new Date(data.cDate),
+                                    maxDate: endDate
+                                });
+                            }                           
+                        }
+                        else {
+                            currentdate.setDate(currentdate.getDate() + 1)
+                            $('#VisitingDate').datepicker('option', {
+                                minDate: currentdate,
+                                maxDate: endDate
+                            });
+                        }
+                    }
+                    else {
+                        //disable the previous date and after 90 days date
+                        $('#VisitingDate').datepicker('option', {
+                            minDate: new Date(data.cDate),
+                            maxDate: endDate
+                        });
+                    }                   
+                }
+            });
+        }
+
+        //Generic Method for Ajax call
+        function ajxcall(url, data, callbk, dataType, mType) {
+            mType = mType || "POST";
+            dataType = dataType || "json";
+            $.ajax({
+                url: url,
+                type: mType,
+                dataType: dataType,
+                data: data,
+                success: callbk,
+                error: function (jqXHR, exception) {
+                    var msg = '';
+                    if (jqXHR.status === 0) {
+                        msg = 'Not connect.\n Verify Network.';
+                    } else if (jqXHR.status == 404) {
+                        msg = 'Requested page not found. [404]';
+                    } else if (jqXHR.status == 500) {
+                        msg = 'Internal Server Error [500].';
+                    } else if (exception === 'parsererror') {
+                        msg = 'Requested JSON parse failed.';
+                    } else if (exception === 'timeout') {
+                        msg = 'Time out error.';
+                    } else if (exception === 'abort') {
+                        msg = 'Ajax request aborted.';
+                    } else {
+                        msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                    }
+                    return msg;
+                },
+            });
+        }
+    });
+    function TicketRefund(id) {
+        // alert(id);
+        $("#myModal_TicketRefund").modal('show');
+        var RootUrl = '@Url.Content("~/")';
+        $('#TicketID').val(id);
+        $('#btn_Refund').attr('href', RootUrl + 'NationalPark/Refund?TicketId=' + id);
+
+    };
+</script>
+
+

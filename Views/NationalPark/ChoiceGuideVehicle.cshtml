@@ -1,0 +1,198 @@
+﻿@{
+    ViewBag.Title = "ChoiceGuideVehicle";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString());
+
+}
+
+    <link href="~/css/bootstrap/jquery-ui.css" rel="stylesheet" />
+    <link href="~/Select2DropdownJSCSS/css/select2.min.css" rel="stylesheet" />
+
+<div id="page-wrapper-inn">
+    <div id="frmInvalid" class="row" style="display:none">
+        <div class="col-lg-12 pad">
+            <h1 class="page-header">INVALID TICKET BOOKING PAGE</h1>
+            <div class="panel-heading">
+                <span style="color:red;">
+                    <i class="bg-light-blue">Sorry, this is a invalid booking URL.</i>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="frmBooking">
+
+
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span style="color:red;">* Mandatory field(s) to fill.</span>
+                    <span style="float:right" title="Help doc for onlinebooking">
+                        <i class="bg-light-blue" style="color:ButtonText">
+                            <a href="~/Help/User_Manual_Online%20_Ticket_Booking.pdf" target="_blank">Help doc for onlinebooking</a>
+                        </i>
+                    </span>
+                </div>
+                <div class="panel-body" id="formBody">
+                    @using (Ajax.BeginForm("ChoiceGuideVehicle", "NationalPark", new AjaxOptions { HttpMethod = "Post", OnSuccess = "Success" },new {@class="" , @enctype = "multipart/form-data" , @id = "frmChoiceGuideVehicle" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        
+                        
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label>Enter Request Id:<span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="RequestId" name="RequestId" title="Enter RequestId" />
+                                <div class="col-md-12" style="text-align:left!important;color: Red; display: none;padding:0px!important;" id="errorRequest">
+                                    * Enter RequestId.
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label>Select Choice:<span class="mandatory">*</span></label>
+                                <select class="form-control myselect2First" id="ddlChoiceType" , name="ChoiceType">
+                                    <option value="0">Select Choice</option>
+                                    <option value="1">Guide</option>
+                                    <option value="2">Vehicle/Boat</option>
+                                    <option value="3">Both</option>
+                                </select>
+                                <div class="col-md-12" style="text-align:left!important;color: Red; display: none;padding:0px!important;" id="errorChoice">
+                                    *Select Choice.
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group" style="padding-top:10px;">
+                                <br />
+                                <input type="button" value="Display" id="btnDisplay" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 divTicket"></div>
+                    }
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="modal fade in " style="display:none" id="myConfirmDialog" tabindex="-1" role="dialog" aria-hidden="false">
+            <div class="modal-dialog mdw">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="myConfirm">
+                            <span id="modalHeading">Choice Guide/Vehicle/Boat</span>
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <div hidden="hidden"><span id="spn_status" hidden="hidden"></span></div>
+                    </div>
+                    <div class="modal-body">
+                        <span id="spnQuestionMsg">Are you sure to payment?</span>
+                    </div>
+                    <div class="modal-footer">
+                        <div id="btn" class="col-lg-12">
+                            <button type="button" class="btn btn-success" onclick="SubmitToPay();">
+                                <i class="fa-fa-check"></i>Yes
+                            </button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal">
+                                <i class="fa-fa-close"></i>No
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+    <script src="~/Select2DropdownJSCSS/js/select2.min.js"></script>
+    <script type="text/javascript">
+        $(".myselect2First").select2();
+        $(document).ready(function () {
+
+
+        });
+        $(document).on('keydown', "[id='RequestId']", function () {
+            $('#errorRequest').hide();
+        });
+        $(document).on('change', "[id='ddlChoiceType']", function () {
+            $('#errorChoice').hide();
+        });
+        $(document).on('click', "[id='btnDisplay']", function () {
+            var isvalid = true;
+            var requestId = $('#RequestId').val();
+            var choiceId = $('#ddlChoiceType').val()|0;
+            if (requestId === null || requestId === undefined || requestId === '') {
+                $('#errorRequest').text('Enter Request Id');
+                $('#errorRequest').show();
+                isvalid= false;
+            }
+           
+            if (choiceId === 0) {
+                $('#errorChoice').text('Select Choice');
+                $('#errorChoice').show();
+                isvalid = false;
+            }
+            if (isvalid === false)
+                return false;
+
+            var data = {
+                RequestId: requestId,
+                ChoiceType: choiceId
+            };
+
+            FillTicketDetail(data);
+        });
+
+        // //Get Ticket Data
+        function FillTicketDetail(data) {
+            $('#errorRequest').hide();
+            $(".divTicket").hide();
+            var url = '../NationalPark/GetRequestDetails';
+            $.ajax({
+                url: url,
+                type: 'POST',
+                dataType: 'html',
+                data: data,
+                success: function (data) {
+                    if (data.indexOf("PlaceId") >= 0) {
+                        $(".divTicket").show();
+                        $(".divTicket").html(data);
+                    } else {
+                        let jsonObject = JSON.parse(data);
+                        // alert(jsonObject.status);
+                        if (jsonObject.status == 0) {
+                            $('#errorRequest').text(jsonObject.respone);
+                            $('#errorRequest').show();
+                        }
+                    }
+
+                },
+                error: function (jqXHR, exception) {
+                    var msg = '';
+                    if (jqXHR.status === 0) {
+                        msg = 'Not connect.\n Verify Network.';
+                    } else if (jqXHR.status == 404) {
+                        msg = 'Requested page not found. [404]';
+                    } else if (jqXHR.status == 500) {
+                        msg = 'Internal Server Error [500].';
+                    } else if (exception === 'parsererror') {
+                        msg = 'Requested JSON parse failed.';
+                    } else if (exception === 'timeout') {
+                        msg = 'Time out error.';
+                    } else if (exception === 'abort') {
+                        msg = 'Ajax request aborted.';
+                    } else {
+                        msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                    }
+                },
+            });
+        }
+        function SubmitToPay() {
+            $("#myConfirmDialog").modal('toggle');
+            $('#frmChoiceGuideVehicle').submit();
+        }
+    </script>

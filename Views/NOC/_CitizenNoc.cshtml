@@ -1,0 +1,1077 @@
+﻿@model FMDSS.Models.CitizenService.PermissionServices.NocData
+@{
+    Layout = "~/Views/Shared/_SWCSLayout.cshtml";
+    string rootPath = "http://10.68.128.179";
+}
+<style>
+    #tbldistmapping {
+        margin: 15px;
+        width: 97%;
+    }
+
+    #page-wrapper-inn #tbldistmapping > thead > tr > th {
+        width: auto;
+        background-color: #dff0d8;
+        border-color: #d6e9c6;
+    }
+
+    #page-wrapper-inn #btnUploadSHPKML {
+        width: auto;
+    }
+
+    .spanmark {
+        color: #222;
+        font-size: 12px;
+        font-weight: normal;
+    }
+
+    #Industrial_Type {
+        width: 49%;
+    }
+
+    .fix-tbl {
+        height: 154px !important;
+        display: block;
+        overflow: auto;
+        width: 100%;
+    }
+
+    #page-wrapper-inn .fix-tbl > thead > tr > th {
+        width: 16%;
+    }
+
+    .err {
+        border-color: red !important;
+    }
+
+    .plant_list {
+        list-style: none;
+            float: left;
+    width: 100%;
+    }
+
+        .plant_list li {
+            float: left;
+            width: 15.6%;
+            vertical-align: middle;
+            line-height: 55px;
+            margin-right: 1%;
+        }
+</style>
+<div class="main_investor_registration">
+    <div class="line">
+        <h2 class="section-title" style="color: #fff;" id="nocheader" name="nocheader">Online application form for NOC</h2>
+    </div>
+    @using (Html.BeginForm("Submit", "NOC", FormMethod.Post, new { enctype = "multipart/form-data", data_behavior = "confirm", id = "nocForm", name = "nocForm" }))
+    {
+        <div class="container-fluid investor_registration_box">
+            <fieldset>
+                <legend>A. Personal Details/ व्यक्तिगत विवरण</legend>
+                <!----------------------------------------------------------------------------------------->
+                <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin">
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_left_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">Applicant  Name/ आवेदक का नाम<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            @Html.TextBox("FirstName", Model.personInfo.FirstName + " " + Model.personInfo.LastName, new { @readonly = "readonly", @class = "form-control name_input_signup BRNDATACLASS" })
+                            @Html.HiddenFor(x=>x.personInfo.FirstName)
+                            @Html.HiddenFor(x => x.personInfo.LastName)
+                        </div>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">Father/ Husband Name/ पिता/ पति का नाम<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            @Html.TextBoxFor(x => x.personInfo.FatherName, new { @readonly = "readonly", @class = "form-control name_input_signup" })
+                        </div>
+                    </div>
+                </div>
+                <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin">
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_left_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">Gender/ लिंग<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            <table id="content_rbtnGender" class="aspNetDisabled RuralUrbanPers">
+                                <tr>
+                                    <td><span class="aspNetDisabled" class="radio_btn_first"><input id="content_rbtnGender_0" type="radio" name="ctl00$content$rbtnGender" value="Male" checked="checked" disabled="disabled" tabindex="2" /><label for="content_rbtnGender_0">Male/ पुरुष</label></span></td>
+                                    <td><span class="aspNetDisabled" class="radio_btn_coman"><input id="content_rbtnGender_1" type="radio" name="ctl00$content$rbtnGender" value="Female" disabled="disabled" tabindex="2" /><label for="content_rbtnGender_1">Female/ महिला</label></span></td>
+                                    <td><span class="aspNetDisabled" class="radio_btn_coman"><input id="content_rbtnGender_2" type="radio" name="ctl00$content$rbtnGender" value="Transgender" disabled="disabled" tabindex="2" /><label for="content_rbtnGender_2">Transgender/ अन्य</label></span></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">Date of Birth/ जन्म दिनांक<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            @Html.TextBoxFor(x => x.personInfo.DOB, new { @readonly = "readonly", @class = "form-control name_input_signup BRNDATACLASS" })
+
+                        </div>
+                    </div>
+                </div>
+                <!--------------------StartState/UrbanRural------------------------------------------------>
+                <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin">
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_left_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">Urban/ Rural/ शहरी/ ग्रामीण</label>
+                        <div id="content_UpdatePanel13">
+                            <table id="content_rbtnPersUR" class="aspNetDisabled RuralUrbanPers">
+                                <tr>
+                                    <td><span class="aspNetDisabled" class="radio_btn_first"><input id="content_rbtnPersUR_0" type="radio" name="ctl00$content$rbtnPersUR" value="Urban" checked="checked" disabled="disabled" tabindex="3" /><label for="content_rbtnPersUR_0">Urban/ शहरी</label></span></td>
+                                    <td><span class="aspNetDisabled" class="radio_btn_coman"><input id="content_rbtnPersUR_1" type="radio" name="ctl00$content$rbtnPersUR" value="Rural" disabled="disabled" onclick="javascript:setTimeout(&#39;__doPostBack(\&#39;ctl00$content$rbtnPersUR$1\&#39;,\&#39;\&#39;)&#39;, 0)" tabindex="3" /><label for="content_rbtnPersUR_1">Rural/ ग्रामीण</label></span></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_mo">
+                    </div>
+                </div>
+                <!----------------------end StateUranRural-------------------------------------------------->
+                <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin">
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_left_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text" for="pwd">House Number/ मकान संख्या<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            @Html.TextBoxFor(x => x.personInfo.PlotNo, new { @readonly = "readonly", @class = "form-control " })
+
+                        </div>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">Lane/ Street Name/ लेन/ गली/ सड़क<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            @Html.TextBoxFor(x => x.personInfo.Street, new { @readonly = "readonly", @class = "form-control " })
+
+                        </div>
+                    </div>
+                </div>
+                <!-----------------------StartDistrict------------------------------------------------------>
+                <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin">
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_left_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">Locality/ मोहल्ला<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            @Html.TextBoxFor(x => x.personInfo.Area, new { @readonly = "readonly", @class = "form-control " })
+
+                        </div>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">District/ ज़िला<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            <div id="content_UpdatePanel9">
+                                @Html.TextBoxFor(x => x.personInfo.District, new { @readonly = "readonly", @class = "form-control " })
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin">
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_left_mo">
+                        <div id="content_UpdatePanel10">
+                            <label id="content_lblCityBlockPers" class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">City/ शहर<span class="errormsg">*</span></label>
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                                @Html.TextBoxFor(x => x.personInfo.City, new { @readonly = "readonly", @class = "form-control " })
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_mo">
+                        <div id="content_UpdatePanel11">
+                            <label id="content_lblWardGPPers" class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">Ward Number/ वार्ड संख्या<span class="errormsg">*</span></label>
+                            @Html.TextBoxFor(x => x.personInfo.Ward, new { @readonly = "readonly", @class = "form-control " })
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-----------------------------endDistrict-------------------------------------------------->
+                <!-----------------------StartWardLocality-------------------------------------------------->
+                <div id="content_UpdatePanel12">
+                </div>
+                <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin">
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_left_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text" for="pwd">PIN Code/ पिन कोड<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            @Html.TextBoxFor(x => x.personInfo.PIN, new { @readonly = "readonly", @class = "form-control " })
+
+                        </div>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">State/ राज्य</label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            <input type="text" value="RAJASTHAN" maxlength="50" id="content_txt_State" disabled="disabled" tabindex="12" class="aspNetDisabled form-control" />
+                        </div>
+                    </div>
+                </div>
+                <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin">
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_left_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text" for="pwd">Mobile No./  मोबाइल नंबर<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            @Html.TextBoxFor(x => x.personInfo.Mobile, new { @maxlength = 15, @class = "form-control numonly " })
+
+                        </div>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">Email/ ई-मेल</label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            @Html.TextBoxFor(x => x.personInfo.Email, new { @maxlength = 15, @class = "form-control " })
+
+                        </div>
+                    </div>
+                </div>
+                <!-----------------------------endPostal---------------------------------------------------->
+            </fieldset>
+            <fieldset>
+                <legend>B. Reg. Office Details/ पंजीकृत कार्यालय का विवरण</legend>
+                <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin">
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_left_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">Urban/ Rural/ शहरी/ ग्रामीण</label>
+                        <div id="content_UpdatePanel14">
+                            <table id="content_rbtnOfcUR" class="RuralUrbanOfc">
+                                <tr>
+                                    <td><span class="radio_btn_first"><input id="content_rbtnOfcUR_0" type="radio" name="ctl00$content$rbtnOfcUR" value="Urban" checked="checked" tabindex="34" /><label for="content_rbtnOfcUR_0">Urban/ शहरी</label></span></td>
+                                    <td><span class="radio_btn_coman"><input id="content_rbtnOfcUR_1" type="radio" name="ctl00$content$rbtnOfcUR" value="Rural" tabindex="34" /><label for="content_rbtnOfcUR_1">Rural/ ग्रामीण</label></span></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_mo">
+                    </div>
+                </div>
+                <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin">
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_left_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">Establishment Name/ प्रतिष्ठान का नाम<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            @Html.TextBoxFor(x => x.personInfo.Establishmentname, new { @readonly = "readonly", @class = "form-control " })
+                        </div>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text" for="pwd">House/ Building Number/ घर/ बिल्डिंग संख्या<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            @Html.TextBoxFor(x => x.personInfo.Est_PlotNo, new { @readonly = "readonly", @class = "form-control " })
+
+                        </div>
+                    </div>
+                </div>
+                <!----------------------end StateUranRural-------------------------------------------------->
+                <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin">
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_left_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">Lane/ Street Name/ लेन/ गली/ सड़क<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            @Html.TextBoxFor(x => x.personInfo.Est_PlotNo, new { @readonly = "readonly", @class = "form-control " })
+
+                        </div>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">Locality/ मोहल्ला<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            @Html.TextBoxFor(x => x.personInfo.Est_Area, new { @readonly = "readonly", @class = "form-control " })
+
+                        </div>
+                    </div>
+                </div>
+                <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin">
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_left_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">District/ ज़िला<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            @Html.TextBoxFor(x => x.personInfo.Est_District, new { @readonly = "readonly", @class = "form-control " })
+
+                        </div>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">State/ राज्य<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            <input type="text" value="RAJASTHAN" maxlength="50" readonly="readonly" id="content_txtStatsOfc" disabled="disabled" class="aspNetDisabled form-control " />
+                        </div>
+                    </div>
+                </div>
+                <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin">
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_left_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text" for="pwd">PIN Code/ पिन कोड<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            @Html.TextBoxFor(x => x.personInfo.Est_PIN, new { @readonly = "readonly", @class = "form-control " })
+                        </div>
+                    </div>
+                </div>
+                <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin">
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_left_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text" for="pwd">Telephone (With STD Code)/ टेलीफोन नंबर (STD कोड के साथ)</label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            @Html.TextBoxFor(x => x.personInfo.Mobile, new { @readonly = "readonly", @class = "form-control " })
+                        </div>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">Fax No. (With STD Code)/ फैक्स नंबर (STD कोड के साथ)</label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            @Html.TextBoxFor(x => x.personInfo.STDCode, new { @readonly = "readonly", @class = "form-control " })
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>C. NOC Details/ NOC का विवरण</legend>
+                <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin">
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_left_mo" style="display:none;">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">
+                            Request ID  @Model.RequestedID
+                        </label>
+                    </div>
+                </div>
+                <!----------------------end StateUranRural-------------------------------------------------->
+                <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin">
+                    <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin no_padding_left_mo editpanel">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text" for="pwd">
+                            Upload KML/SHP<span class="mandatory">* All details will be generated automatically by uploading KML file, Applicant will enter only Khasra number(s).</span>
+                        </label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            <button type="button" class="btn btn-warning" name="" value="" id="btnUploadSHPKML">
+                                <i class="fa fa-check"></i> Upload
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin no_padding_mo">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            @if (Model.gislist != null)
+                            {
+                                @Html.Partial("_gisLIst", Model)
+                            }
+                        </div>
+                    </div>
+                </div>
+                <!-----------------------StartDistrict------------------------------------------------------>
+                <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin">
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_left_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">Area (In Hectare)<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            <div id="content_UpdatePanel20">
+                                @Html.TextBoxFor(x => x.Area_Size, new { @class = "form-control common", @title = "Enter the total area of the field under activity in square kilometer. E.G. 1400 sqkm", @placeholder = "Enter Area ", @maxlength = 50, @readonly = "readonly" })
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_mo">
+                        <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">Proposed Area (In Hectare)<span class="errormsg">*</span></label>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                            <div id="content_UpdatePanel5">
+                                @Html.TextBoxFor(x => x.PerposedArea, new { @class = "form-control common numonly", @title = "Enter the total area of the field under activity in square kilometer. E.G. 1400 sqkm", @placeholder = "Enter proposed Area ", @maxlength = 50 })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <fieldset>
+                    <legend> GPS Address</legend>
+                    <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin">
+                        <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_left_mo">
+                            <label id="content_lblCityBlockCon" class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">Latitude<span class="errormsg">*</span></label>
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                                @Html.TextBoxFor(x => x.GPSLat, new { @class = "form-control common", @title = "Enter the GPS latitude in the range of 26° - 27°. E.G. 26.52°", @placeholder = "Latitude", @maxlength = 10, @readonly = "readonly" })
+                            </div>
+                        </div>
+                        <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_mo">
+                            <label id="content_lblCityBlockCon" class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text">Longitude<span class="errormsg">*</span></label>
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                                @Html.TextBoxFor(x => x.GPSLong, new { @class = "form-control common", @title = "Enter the GPS longitude in the range of 69° - 78°. E.G. 75.52°", @placeholder = "Longitude", @maxlength = 10, @readonly = "readonly" })
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+                <div id="content_UpdatePanel8">
+                </div>
+                @*<div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin" style="display:none">
+                        <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12 no_margin no_padding_left_mo">
+                            <label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding form_text" for="pwd">Other Permission<span class="errormsg">*</span></label>
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding">
+                                @Html.TextBoxFor(x => x.OtherPermission, new { @class = "form-control common", @title = "Enter the permission required for any other activity not mentioned in the list", @placeholder = "Enter Other Permission", @maxlength = 100, @id = "otherpermission" })
+                            </div>
+                        </div>
+                    </div>*@
+
+                <fieldset class="corner Edithide" id="miningId" style="margin: 10px; min-height: 300px; width:99%; border: 1px Solid #ccc;">
+                    <legend>
+                        <u>Natural features details from Uploaded KML</u> <span style="color:red;">*</span> Not valid for Legal Purposes.
+                    </legend>
+
+                    <div class="divider"></div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="Nearest_WaterSource">
+                                Water Source
+                            </label>
+                            @Html.TextBoxFor(x => x.Nearest_WaterSource, new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="WaterSource_Distance">
+                                Distance From Nearest Water Source(Kms.)
+                            </label>
+                            @Html.TextBoxFor(x => x.WaterSource_Distance, new { @class = "form-control", @readonly = "readonly", @id = "WaterSource_Distance" })
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="Forest_Distance">
+                                Distance From Nearest Forest boundary(Kms.)
+                            </label>
+                            @Html.TextBoxFor(x => x.Forest_Distance, new { @class = "form-control", @readonly = "readonly", @id = "Forest_Distance" })
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="Wildlife_Distance">
+                                Distance From Wildlife Sanctuary/NP/ES Zone Area(Kms.)
+                            </label>
+                            @Html.TextBoxFor(x => x.Wildlife_Distance, new { @class = "form-control", @readonly = "readonly", @id = "Wildlife_Distance" })
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="Tree_species">
+                                Number of Trees in Proposed Area<span class="mandatory">*</span>
+                            </label>
+                            @Html.TextBoxFor(x => x.Tree_species, new { @class = "form-control ", @title = "Enter the number of tress falling in the entire area along with the name of species. E.G. 780 Dhok trees", @maxlength = 15 })
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="Tree_species">
+                                Density of Forest (In Hectare)
+                            </label>
+                            <input class="form-control" type="text" id="txtForestDensity" name="txtForestDensity" readonly />
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="AravalliHills">
+                                Whether the Area Falls in Aravali Hills<span class="mandatory">*</span>
+                            </label>
+                            @Html.RadioButtonFor(x => x.AravalliHills, "1", new { @id = "yesAravalliHills", @disabled = "disabled" }) Yes
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            @Html.RadioButtonFor(x => x.AravalliHills, "0", new { @checked = "checked", @id = "noAravalliHills", @disabled = "disabled" }) No
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="ForestLand">
+                                Whether the area is a Part of Forest Land<span class="mandatory">*</span>
+                            </label>
+                            @Html.RadioButtonFor(x => x.ForestLand, "1", new { @id = "yesForestLand", @disabled = "disabled" }) Yes
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            @Html.RadioButtonFor(x => x.ForestLand, "0", new { @checked = "checked", @id = "noForestLand", @disabled = "disabled" }) No
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="Proposed">
+                                Whether the Area Falls in Plantation Area<span class="mandatory">*</span>
+                            </label>
+                            @Html.RadioButtonFor(x => x.Plantation_Area, "1", new { @id = "yesPlantation_Area", @disabled = "disabled" }) Yes
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            @Html.RadioButtonFor(x => x.Plantation_Area, "0", new { @checked = "checked", @id = "noPlantation_Area", @disabled = "disabled" }) No
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <label>Species Details<span class="mandatory">*</span></label>
+                        <div class="divider"></div>
+                    </div>
+                    <div class="col-lg-12">
+                        @*<thead>
+                                <tr>
+                                    <th>Species Name</th>
+                                    <th>Number</th>
+                                </tr>
+                            </thead>*@
+                        <ul class="plant_list">
+                            @{
+        if (ViewBag.PlantList != null)
+        {
+
+            Model.plantList = ViewBag.PlantList;
+            for (int i = 0; i < Model.plantList.Count(); i++)
+            {
+
+                <li>
+                    @Html.DisplayFor(x => x.plantList[i].PlantName)
+                </li>
+                                <li>
+                                    @Html.HiddenFor(x => x.plantList[i].PlantID)
+                                    @Html.TextBoxFor(x => x.plantList[i].PlantCount, new { @class = "plantmap numonly" })
+                                </li>
+
+            }
+        }
+                            }
+
+                           
+                        </ul>
+                        <ul class="plant_list">
+                            <li>
+                                <label>
+                                    OTHERS
+                                </label> 
+                            </li>
+                            <li>
+                                <input type="text" class="plantmap" name="txtplantOthers" id="txtplantOthers" value="" />
+                                
+                            </li>
+                            <li><input type="text" class="plantmap numonly" name="txtplantOthersNo" id="txtplantOthersNo" value="0" /></li>
+                        </ul>
+
+                    </div>
+                </fieldset>
+                <div class="col-lg-6 Edithide" style="display:none;">
+                    <div class="form-group" id="showsawmilltype">
+                        <label for="Sawmill_Type">
+                            Type of Sawmill<span class="mandatory">*</span>
+                        </label>
+                        @Html.DropDownListFor(x => x.Sawmill_Type, (IEnumerable<SelectListItem>)ViewBag.Sawmill_Types, "--Select--", new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="col-lg-6 Edithide" style="display:none;">
+                    <div class="form-group" id="showsawmillsize">
+                        <label for="Sawmill_Size">
+                            Size of Sawmill<span class="mandatory">*</span>
+                        </label>
+                        @Html.TextBoxFor(x => x.Sawmill_Size, new { @class = "form-control", @maxlength = 15, @title = "Enter the Size of Sawmill in millimeters. E.G. 710mm", @placeholder = "Enter Size of Sawmill" })
+                    </div>
+                </div>
+                <div class="col-lg-12 Edithide" style="display:none;">
+                    <div class="form-group" id="Industry">
+                        <label for="Industrial_Type">
+                            Industry Type<span class="mandatory">*</span>
+                        </label>
+                        @Html.DropDownListFor(x => x.Industrial_Type, (IEnumerable<SelectListItem>)ViewBag.Industrial_Types, "--Select--", new { @class = "form-control" })
+                    </div>
+                </div>
+
+                <div class="col-lg-12 Edithide" style="display:none">
+                    <label>Duration<span class="mandatory">*</span></label>
+                    <div class="divider"></div>
+                </div>
+                <div class="col-lg-6 un-bold Edithide" style="display:none">
+                    <div class="form-group">
+                        <label>From</label>
+                    </div>
+                </div>
+                <div class="col-lg-6 un-bold Edithide" style="display:none">
+                    <div class="form-group">
+                        <label>To</label>
+                    </div>
+                </div>
+                <div class="col-lg-6 Edithide">
+                    <div class="form-group">
+                        <label>
+                            Project Description
+                        </label>
+                        @Html.TextAreaFor(x => x.Citizen_Comment, new { @class = " form-control", @maxlength = 250, @title = "Enter the specific remarks.", @placeholder = "Enter the Project Description" })
+                    </div>
+                </div>
+
+                <div class="col-lg-12"></div>
+                <div id="divPayment" class="Edithide" style="display:none">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="Amount">
+                                Fee Amount (in INR)
+                            </label>
+                            @Html.TextBoxFor(x => x.Final_Amount, new { @class = "form-control", @id = "Final_Amount", @readonly = "readonly" })
+                            <input type="hidden" class="form-control" id="hdAmount" readonly name="Amount" value="@Model.Amount" />
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label class="form-group">
+                            </label>
+                            <label class="form-group">
+                                <span class="mandatory">* The fee is non-transferable and non-refundable.</span>
+                            </label>
+                            <input type="hidden" class="form-control" id="hdDiscount" readonly name="Discount" value="@Model.Discount" />
+                            <input type="hidden" class="form-control" id="hdTax" readonly name="Tax" value="@Model.Tax" />
+                            <input type="hidden" class="form-control" id="hdFinal_Amount" readonly name="Final_Amount" value="@Model.Final_Amount" />
+                            <input type="hidden" class="form-control" id="hdDuration_To" readonly name="Duration_To" value="" />
+                            <input type="hidden" class="form-control" id="hdDuration_From" readonly name="Duration_From" value="" />
+                        </div>
+                    </div>
+                    <div class="col-lg-6" style="display:none">
+                        <div class="form-group">
+                            <label for="Discount">
+                                Discount %
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-lg-6" style="display:none">
+                        <div class="form-group">
+                            <label for="Final_Amount">
+                                Tax Calculated %
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-lg-6" style="display:none">
+                        <div class="form-group">
+                            <label for="Final_Amount">
+                                Final Amount
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>D. Attachments/ दस्तावेज</legend>
+                <div class="panel panel-default ">
+                    <div class="panel-heading editpanel">
+                        Note: Valid File Types: JPG/JPEG/PNG/BMP/GIF/PDF,  Max. File Size: 2 MB per attachment/ केवल JPG/JPEG/PNG/BMP/GIF/PDF ही मान्य, अधिकतम फाइल साइज़ 2 MB प्रति फाइल
+                    </div>
+                    <div class="col-lg-6 editpanel">
+                        <div class="form-group">
+                            <label for="Revenue_Record">
+                                Revenue Record<span class="mandatory">*</span>
+                            </label>
+                            <input type="file" class="form-control common" id="Revenue_Record" title="Enter the Revenue Record number(s) of the area" name="Revenue_Record" />
+                            <div id="Revenue_Record_err" style="display:none" class="alert-danger1"></div>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Revenue_Record_Path))
+                    {
+                        <div class="col-lg-6 viewpanel">
+                            <div class="form-group">
+                                <label for="Revenue_Record">
+                                    Uploaded Revenue Record
+                                </label>
+                                <a href="@rootPath@Model.Revenue_Record_Path.Replace("~/","/").Trim()" target="_blank"> Download </a>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="col-lg-6 editpanel">
+                        <div class="form-group">
+                            <label for="Revenue_Map">
+                                Revenue Map<span class="mandatory">*</span>
+                            </label>
+
+                            <input type="file" class="form-control common" id="Revenue_Map" name="Revenue_Map" title="Upload the Revenue map of the area" />
+                            <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                            <div id="Revenue_Map_err" style="display:none" class="alert-danger1"></div>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Revenue_Map_Path))
+                    {
+                        <div class="col-lg-6 viewpanel">
+                            <div class="form-group">
+                                <label>
+                                    Uploaded Revenue Map
+                                </label>
+                                <a href="@rootPath@Model.Revenue_Map_Path.Replace("~/", "/").Trim()" target="_blank"> Download </a>
+                            </div>
+                        </div>
+                    }
+                    <div class="col-lg-12 Edithide">
+                        <div class="form-group">
+                            <label for="Revenue_Map_Signed">
+                                Revenue Map-Signed By Tehsildar<span class="mandatory">*</span>
+                            </label>
+
+                            <input type="radio" name="Revenue_Map_Signed" id="yesRevenue_Map_Signed" value="1" /><span> Yes</span>
+                            <input type="radio" name="Revenue_Map_Signed" id="yesRevenue_Map_Signed" value="1" checked="checked" /><span> No</span>
+
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 Edithide editpanel">
+                        <div class="form-group">
+                            <label for="Additional">  Detailed Project Report (DPR)</label>
+                            <input type="file" class="form-control common" title="Upload the DPR" id="Additional_Document" name="Additional_Document">
+                            <label><span class="spanmark"> Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Additional_Document))
+                    {
+                        <div class="col-lg-6 viewpanel">
+                            <div class="form-group">
+                                <label for="Revenue_Record">
+                                    Uploaded Additional Document
+                                </label>
+                                <a href="@rootPath@Model.Additional_Document.Replace("~/", "/").Trim()" target="_blank"> Download </a>
+                            </div>
+                        </div>
+                    }
+
+
+                </div>
+            </fieldset>
+            <div class=" row col-lg-12 col-md-12 col-sm-12 col-xs-12 no_margin text-center">
+
+                <button type="button" class="investor_registration_btn editpanel" value="@Model.RequestedID" name="btnSavePermission" id="btnSavePermission">
+                    Submit
+                </button>
+                <button type="button" id="btnCancelSwcs" name="btnCancelSwcs" value="Close" class="investor_registration_btn viewpanel" style="display:none;">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            @Html.HiddenFor(x => x.GISID)
+            @Html.HiddenFor(x => x.SSOID)
+            @Html.HiddenFor(x => x.RequestedID)
+            @Html.HiddenFor(x => x.SWSID)
+            @Html.HiddenFor(x => x.Userdetails)
+            @Html.HiddenFor(x => x.IsSWCS)
+            @Html.HiddenFor(x => x.IsView)
+
+            @Html.HiddenFor(x => x.KML_Path)
+            @Html.HiddenFor(x => x.Revenue_Record_Path)
+            @Html.HiddenFor(x => x.Revenue_Map_Path)
+            @Html.HiddenFor(x => x.Additional_Document)
+            @Html.HiddenFor(x => x.NOCPurpose)
+            @Html.HiddenFor(x => x.NOCType)
+            @Html.HiddenFor(x => x.personStr)
+        </div>
+        <script type="text/javascript">
+            var origin = document.location.origin;
+            $(document).ready(function(){
+                var noctype=parseInt($("#NOCType").val());
+                var headerstr= nocHeader(noctype)
+                $('#nocheader').html(headerstr);
+                if (noctype == 4) {
+                    $('#divPayment').show();
+                }
+                var isSwcs= $('#IsSWCS').val();
+                var isView= $('#IsView').val();
+
+                if(isSwcs !=null && isSwcs.toLowerCase() =='true' ){
+                    $('#backsso').hide();
+                }else{
+                    $('#backsso').show();
+                }
+
+                if(isView !=null && isView.toLowerCase() =='true' ){
+                    viewEnable(true);
+                }
+
+                function viewEnable(isEnable){
+                    if(isEnable){
+                        enableEle('personInfo_Mobile',false);
+                        enableEle('personInfo_Email',false);
+                        enableEle('PerposedArea',false);
+                        enableEle('Tree_species',false);
+                        enableEle('Citizen_Comment',false);
+                        enableEle('Revenue_Map_Signed',false);
+                        
+                        enableElebyclass('plantmap',false);
+                        enableElebyclass('kno',false); 
+                        
+                        $('#yesRevenue_Map_Signed').attr('disabled','disabled');                        
+
+                        $('.editpanel').each(function(){
+                            $(this).hide();
+                        });
+                        $('.viewpanel').each(function(){
+                            $(this).show();
+                        });
+                    }else{
+                        enableEle('personInfo_Mobile',true);
+                        enableEle('personInfo_Email',true);
+                        enableEle('PerposedArea',true);
+                        enableEle('Tree_species',true);
+                        enableEle('Citizen_Comment',true);
+
+                        $('.editpanel').each(function(){
+                            $(this).show();
+                        });
+                        $('.viewpanel').each(function(){
+                            $(this).hide();
+                        });
+                    }
+                }
+
+                function enableElebyclass(cls, isEnable){
+                    var Elem = $('.'+cls);
+                    if(isEnable){
+                        Elem.removeAttr('readonly');
+                    }else{
+                        Elem.attr('readonly','readonly');
+                    }
+                }
+
+                function enableEle(id, isEnable){
+                    var Elem = $('#'+id);
+                    if(isEnable){
+                        Elem.removeAttr('readonly');
+                    }else{
+                        Elem.attr('readonly','readonly');
+                    }
+                }
+
+                function checkSize(fileid){
+                    var iSize = ($('#'+ fileid )[0].files[0].size / 1048576);
+                    if (iSize > 2) {
+                        $('#'+ fileid ).val('');
+                        $('#'+ fileid ).focus();
+                        return false;
+                    }else{return true;}
+                }
+                function checkExt(id){
+                    var file = $('#'+id).val();
+                    var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+
+                    if (file) {
+                        // split file name at dot
+                        var get_ext = file.split('.');
+                        // reverse name to check extension
+                        get_ext = get_ext.reverse();
+                        // check file type is valid as given in 'exts' array
+                        if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                            $('#'+ id).val('');
+                            $('#'+id).focus();
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    }
+                }
+                function Err(id, msg){
+                    $('#'+id).show();
+                    $('#'+id).html(msg);
+                }
+                $("#Revenue_Record").change(function (e) {
+                    if(!checkSize('Revenue_Record')){
+                        // alert('Size Error');
+                        Err('Revenue_Record_err', "Revenue Record file size should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                        return false;
+                    }
+                    if(!checkExt('Revenue_Record')){
+                        Err('Revenue_Record_err',"Please upload only jpeg or jpg or pdf or png or gif file format Revenue Record Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                        return false;
+                    }
+                });
+
+                $("#Revenue_Map").change(function (e) {
+                    if(!checkSize('Revenue_Map')){
+                        Err('Revenue_Map_err', "Revenue Map file size should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                        return false;
+                    }
+                    if(!checkExt('Revenue_Map')){
+                        Err('Revenue_Map_err',"Please upload only jpeg or jpg or pdf or png or gif file format Revenue Map Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                        return false;
+                    }
+                });
+                function checkEle(id){
+                    var Ele= $('#'+id);
+                    var eleVal= Ele.val()
+
+                    if(eleVal!=null && eleVal.length > 0 && parseInt(eleVal) >0){
+                        Ele.removeClass('err');
+                    }
+                    else{
+                        Ele.addClass('err');
+                    }
+
+                    $('#'+id).change(function() {
+                        checkEle(id);
+                    });
+                }
+
+                $('#btnSavePermission').on('click', function () {
+                    // Revenue_Record file input
+                    // Revenue_Record_Path edit case path
+                    // err_Revenue_Record error
+
+                    //checkEle('NOCPurpose');
+                    //checkEle('NOCType');
+                    //checkEle('ApplicantType');
+                    checkEle('PerposedArea');
+                    checkEle('Tree_species');
+                    checkEle('GPSLat');
+                    checkEle('GPSLong');
+
+                    if($('#Revenue_Record_Path').val() =='' && $('#Revenue_Record').val() == ''){
+                        Err('Revenue_Record_err','Please upload Revenue Record file');
+                        return false;
+                    }
+                    if($('#Revenue_Map_Path').val() =='' && $('#Revenue_Map').val() == ''){
+                        Err('Revenue_Map_err','Please upload Revenue Map file');
+                        return false;
+                    }
+
+                    if(!($('.err').length >0)){
+                        $('#nocForm').submit();
+                    }
+                });
+                $('#btnCancelSwcs').on('click',function(){
+                    $('#Usrdetails').val($('#Userdetails').val());
+                    var form = $('#jform');
+                    form.submit();
+                });
+
+                $("#NOCPurpose").bind("change", function () {
+                    if (parseInt($("#NOCPurpose").val()) > 0) {
+                        $.ajax({
+                            type: 'POST',
+                            contentType: 'application/json; charset=utf-8',
+                            data: JSON.stringify({ NOCPuproseId: $("#NOCPurpose").val() }),
+                            url: origin+ '/NOC/GetNOCType',
+                            success: function (data) {
+                                $('#NOCType').empty();
+                                $("#NOCType").append('<option value="' + "" + '">' + "--Select--" + '</option>');
+                                $.each(data, function (i, NOCPurpose) {
+                                    $("#NOCType").append('<option value="' + NOCPurpose.Value + '">' + NOCPurpose.Text + '</option>');
+                                });
+                            },
+                            error: function (data) { console.log(data) }
+                        });
+                    } else {
+                        $('#NOCType').empty();
+                        $("#NOCType").append('<option value="' + "" + '">' + "--Select--" + '</option>');
+                    }
+                });
+                $("#NOCType").bind("change", function () {
+                    if (parseInt($("#NOCType").val()) == 4) {
+                        $('#divPayment').show();
+                    }
+                });
+                $("#btnUploadSHPKML").click(function () {
+                    var nocPurpose = $("#NOCPurpose").val();
+                    var nocType = $("#NOCType").val();
+                    if (nocType != '' && nocType != '0') {
+                        var purposeStr = $("#NOCPurpose option:selected").text();
+                        var typeStr = $("#NOCType option:selected").text();
+                        var swsId =$('#SWSID').val();
+                        var isSWCS =$('#IsSWCS').val();
+                        var swsId =$('#SWSID').val();
+                        var userDetail =$('#Userdetails').val();
+                        var revenuePath= $('#Revenue_Record_Path').val();
+                        var revenueMap= $('#Revenue_Map_Path').val();
+                        var addiDoc= $('#Additional_Document').val();
+                        var reqId= $('#RequestedID').val();
+                        var personStr= $('#personStr').val();
+
+
+                        $("#requestFor").val(GISPerName(nocType));
+                        $("#returnurl").val( origin + "/NOC/getGISData?nocpurpose=" + nocPurpose + "&noctype=" + nocType + "&nocpurposestr=" + purposeStr
+                            + "&noctypestr=" + typeStr + "&swcsid=" + swsId +"&isswcs="+ isSWCS+"&userdetail="+ userDetail+"&personStr="+personStr
+                            +"&Revenue_Record_Path="+revenuePath+ "&Revenue_Map_Path="+revenueMap+"&Additional_Document="+addiDoc+"&RequestedID="+ reqId);
+                        document.getElementById("form11").submit();
+                    }
+                    else { alert('Kindly select NOC Perpose first!!'); return; }
+                });
+                function GISPerName(id) {
+                    var arr = [{ Id: 1, GisName: "Cable" }, { Id: 2, GisName: "Transmission" }, { Id: 3, GisName: "Industry" }, { Id: 4, GisName: "Mines" }
+                    , { Id: 5, GisName: "Hospital" }, { Id: 6, GisName: "Power" }, { Id: 7, GisName: "School" }, { Id: 8, GisName: "Roads" }
+                    , { Id: 9, GisName: "Sawmill" }, { Id: 10, GisName: "Telephone" }, { Id: 11, GisName: "Other" }, { Id: 12, GisName: "Forest" }];
+                    return arr.find(x=>x.Id == id).GisName;
+                }
+                function nocHeader(id){
+                    var arr = [
+                        { Id: 1, GisName: "Clearance/ NOC for Cable Lines (For Non Forest Land Outside PAs)" },
+                        { Id: 2, GisName: "Clearance/ NOC for Electricity Lines (For Non Forest Land Outside PAs)" },
+                        { Id: 3, GisName: "Clearance/ NOC for Industry Setup (For Non Forest Land Outside PAs)" },
+                        { Id: 4, GisName: "Clearance/ NOC for Mining Permission (For Non Forest Land Outside PAs)" },
+                        { Id: 5, GisName: "Clearance/ NOC for Hospital (For Non Forest Land Outside PAs)" },
+                        { Id: 6, GisName: "Clearance/ NOC for Power Plant (For Non Forest Land Outside PAs)" },
+                        { Id: 7, GisName: "Clearance/ NOC for School Permission (For Non Forest Land Outside PAs)" },
+                        { Id: 8, GisName: "Clearance/ NOC for Road/ Highway (For Non Forest Land Outside PAs)" },
+                        { Id: 9, GisName: "Clearance/ NOC for Clearance and NOCs Services for Sawmill Permission (For Non Forest Land Outside PAs)" },
+                        { Id: 10, GisName: "Clearance/ NOC for Telephone Lines (For Non Forest Land Outside PAs)" },
+                        { Id: 11, GisName: "Clearance/ NOC for Other Permissions (For Non Forest Land Outside PAs)" },
+                        { Id: 12, GisName: "Clearance/ NOC for Apply for Forest Rights (For Non Forest Land Outside PAs)" }
+                    ];
+                    return arr.find(x=>x.Id == id).GisName;
+                }
+                $("#btnKMLViewFile").click(function (e) {
+                    var path = $("#KML_file")[0].defaultValue;
+                    //$.ajax({
+                    //    type: 'POST',
+                    //    url: '/FixedPermission/ViewFile', // we are calling json method
+                    //    data: { filePath: path },
+                    //    success: function (data) {
+                    //    }
+                    //    //error: function (ex) {
+                    //    //    alert('Failed to retrieve states.' + ex);
+                    //    //}
+
+                    //});
+                    //var path = $("#KML_file")[0].defaultValue;
+                    //var pathurl = path.replace('~/', '');
+                    //window.location.href = 'ViewFile?filePath=' + path
+
+                    var path = RootUrl + $("#KML_file")[0].defaultValue;
+                    var pathurl = path.replace('~/', '');
+                    window.open(pathurl, 'download');
+                });
+
+                $("#btnRevViewFile").click(function () {
+                    var path = RootUrl + $("#Revenue_Record")[0].defaultValue;
+                    var pathurl = path.replace('~/', '');
+                    window.open(pathurl, '_blank');
+                });
+
+                $("#btnRevMapViewFile").click(function () {
+                    var path = RootUrl + $("#Revenue_Map")[0].defaultValue;
+                    var pathurl = path.replace('~/', '');
+                    window.open(pathurl, '_blank');
+                });
+
+                $('#Areainha').keypress(function (event) {
+                    return isNumber(event, this)
+                });
+
+                $('#Tree_species').keypress(function (event) {
+                    return isOnlyNumber(event, this);
+                }).keyup(function (event) {
+                    var treeSpecies =$('#Tree_species').val();
+                    var perposedArea=  $('#PerposedArea').val();//$('#Area_Size').val();
+                    //console.log('treeSpecies: '+treeSpecies+ ' :: areaSize: '+ areaSize+ ' :: density: '+ treeSpecies/areaSize);
+                    var density = treeSpecies/perposedArea;
+                    $('#txtForestDensity').val(density);
+                    // alert($('#Tree_species').val() + ' :: ' + $('#Area_Size').val() + ' density ' + density + ' :: ' + $('#txtForestDensity').val());
+                });
+
+                $('.numonly').keypress(function (event) {
+                    return isOnlyNumber(event, this);
+                });
+                
+
+            });
+
+
+            function isOnlyNumber(evt, element) {
+                var charCode = (evt.which) ? evt.which : event.keyCode
+                if (charCode == 8) { return true; }
+                if (charCode < 48 || charCode > 57)
+                    return false;
+            }
+            function isNumber(evt, element) {
+                var charCode = (evt.which) ? evt.which : event.keyCode
+                if (charCode == 8) { return true; }
+                if (
+                     (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+                    (charCode < 48 || charCode > 57))
+                    return false;
+            }
+            function isNumberComma(evt, element) {
+                var charCode = (evt.which) ? evt.which : event.keyCode
+                if (charCode == 8) { return true; }
+                if (
+                    (charCode != 44) && // “-” CHECK Comma, AND ONLY ONE.
+                    (charCode < 47 || charCode > 57))
+                    return false;
+            }
+
+            var origin = document.location.origin;
+            $(document).ready(function () {
+
+                $("#returnurl").val(origin + "/NOC/getGISData?r=23&t=56");
+
+            });
+        </script>
+
+    }
+</div>
+
+<form id="form11" name="form11" method="post" action="@System.Configuration.ConfigurationManager.AppSettings["GISPATH"].ToString()">
+    <input type="hidden" id="portalid" name="portalid" value="rajcomp123" />
+    <input type="hidden" id="ssoId" name="ssoId" value="@Session["ssoId"].ToString()" />
+    <input type="hidden" id="requestFor" name="requestFor" value="" />
+    <input type="hidden" id="returnurl" name="returnurl" value="" />
+</form>
+
+<form id="jform" action="/NOC/CancelSWCS" method="post">
+    <input type="hidden" id="Usrdetails" name="Usrdetails" value="" />
+</form>
+
+

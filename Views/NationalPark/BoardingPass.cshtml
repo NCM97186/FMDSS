@@ -1,0 +1,448 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString());
+}
+@model FMDSS.Models.BookOnlineTicket.Ticket
+
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script>var RootUrl = '@Url.Content("~/")';</script>
+<style>
+    .hide {
+        display: none;
+    }
+
+    #myModal .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModal .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModal .modal-footer {
+        background-color: #f9f9f9;
+    }
+
+    #myModal .btn-success {
+        width: 100%;
+        padding: 10px;
+    }
+
+    ul.a {
+        list-style-type: circle;
+    }
+
+    #myModalRefund .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModalRefund .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModalRefund .modal-footer {
+        background-color: #f9f9f9;
+    }
+
+    #myModalRefund .btn-success {
+        width: 100%;
+        padding: 10px;
+    }
+
+    ul.a {
+        list-style-type: circle;
+    }
+
+    .capt {
+        background-color: #f8f8f8;
+        border-color: #e7e7e7;
+        border: 1px solid #e7e7e7;
+        width: 202px;
+        float: left;
+    }
+
+        .capt p {
+            margin: 10px;
+        }
+
+    #refresh {
+        width: 28px;
+        height: 26px;
+        padding: 0px;
+    }
+
+    #txtInput {
+        width: 150px;
+    }
+
+    #page-wrapper-inn .table > thead > tr > th {
+        width: auto;
+    }
+</style>
+<script>
+    function Success(data) {
+        if (data.status != undefined && data.status == false) {
+            if (data.error == "")
+                data.error = "We are facing some technical issue, please contact FMDSS if you are facing this issue on regular basis.";
+            if (data.error.indexOf("captcha") > -1) {
+                $("#txtInput").addClass("error");
+                $("#captchaError").html(data.error);
+            }
+            else {
+                $("#captchaError").html('');
+                $("#txtInput").removeClass("error");
+                alert(data.error);
+                $("html, body").animate({ scrollTop: 0 }, "slow");
+            }
+        }
+        else {
+            $("#page-wrapper-inn").html(data);
+            $("html, body").animate({ scrollTop: 0 }, "slow");
+        }
+
+    }
+</script>
+
+<div id="page-wrapper-inn">
+    <div id="frmInvalid" class="row" style="display:none">
+        <div class="col-lg-12 pad">
+            <h1 class="page-header">INVALID TICKET BOOKING PAGE</h1>
+            <div class="panel-heading">
+                <span style="color:red;">
+                    <i class="bg-light-blue">Sorry, this is a invalid booking URL.</i>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="frmBooking">
+        <div class="col-lg-12 pad">
+            <h1 class="page-header">Online Ticket Booking</h1>
+            <div style="color: #337ab7; float: right; margin-right: 30px; display: none; " id="getting-started"></div>
+            <span style="color: #337ab7; float: right; margin-right: 3px; " id="PlaceAndTime"></span>
+            <div class="panel-heading">
+                <span style="color:red;">
+                    <i class="bg-light-blue" style="color:ButtonText">Your page Session will be Expired in 10 minutes.</i>
+                </span>
+            </div>
+        </div>
+        @*<div class="panel-heading">
+                <marquee id="test" style="behavior="scroll" direction="left" scrolldelay="100" scrollamount="10" onmouseover="this.stop();" onmouseout="this.start();"> *Guest may book online tickets for Keoladeo National Park, Bharatpur even for current date.</marquee>
+            </div>*@
+
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span style="color:red;">* Mandatory field(s) to fill.</span>
+                    <span style="float:right" title="Help doc for onlinebooking">
+                        <i class="bg-light-blue" style="color:ButtonText">
+                            <a href="~/Help/User_Manual_Online%20_Ticket_Booking.pdf" target="_blank">Help doc for onlinebooking</a>
+                        </i>
+                    </span>
+                </div>
+                <div class="panel-body" id="formBody">
+                    @using (Ajax.BeginForm("Index", "NationalPark", new AjaxOptions { HttpMethod = "Post", OnSuccess = "Success" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="col-lg-4">
+                            <div class="form-group un-bold">
+                                @Html.Hidden("btype", (string)(Convert.ToString(ViewBag.Btype)))
+                                <label>Select Place: <span class="mandatory">*</span></label>
+                                <select id="PlaceId" name="PlaceId" class="form-control ddlPlace"></select>
+                                <span id="errorPlace" style="color: Red; display: none" class="alert-danger1">* Please Select Place.</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 zone divZone" style="display:none;">
+                            <div class="form-group un-bold">
+                                <label>Select Zone: <span class="mandatory">*</span></label>
+                                <select id="ZoneId" name="ZoneId" class="form-control ddlZone">
+                                    <option value="">--Select Zone--</option>
+                                </select>
+                                <span id="errorZone" style="color: Red; display: none" class="alert-danger1">* Please Select Zone.</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-2  divDate" style="display:none;">
+                            <div class="form-group un-bold">
+                                <label>Date of Visit:<span class="mandatory">*</span></label>
+                                <input type="text" class="form-control datefield ddlDate" id="VisitingDate" name="VisitingDate" title="Enter the date" onkeydown="return false" />
+                                <span id="errorDate" style="color: Red; display: none" class="alert-danger1">* Please Select Date.</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-2  divShift" style="display:none;">
+                            <div class="form-group un-bold">
+                                <label>Choose Shift: <span class="mandatory">*</span></label>
+                                <select id="ShiftId" name="ShiftId" class="form-control ddlShift">
+                                    <option value="">--Select Shift--</option>
+                                </select>
+                                <span id="errorShift" style="color: Red; display: none" class="alert-danger1">* Please Select Shift.</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 un-bold  divVehicle" style="display:none;">
+                            <div class="form-group">
+                                <label>Select Vehicle:</label>
+                                <select id="VehicleId" name="VehicleId" class="form-control ddlVehicle"><option value="">--Select Vehicle--</option></select>
+                                <span id="errorVehicle" style="color: Red; display: none" class="alert-danger1">* Please Select Vehicle.</span>
+                                <input type="hidden" id="hdn_vehiclefee" />
+                            </div>
+                        </div>
+                        <div class="col-lg-2 un-bold  divVisitors" style="display:none;">
+                            <div class="form-group">
+                                <label>Select No of Visitors:</label>
+                                <select id="Visitors" name="Visitors" class="form-control ddlVisitors"><option value="">--Select Visitors--</option></select>
+                                <span id="errorVehicle" style="color: Red; display: none" class="alert-danger1">* Please Select Visitors.</span>
+                            </div>
+                        </div> 
+                        <div class="col-lg-12 divTicket"></div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script type="text/javascript">
+    var places = [];
+    var zoneAvailable = 0;
+    var shiftAvailable = 0;
+    var vehicleAvailable = 0;
+    var route = '@ViewContext.RouteData.Values["id"]';
+    $(document).ready(function () {
+        var Url_GetData = RootUrl + 'NationalPark/getData';
+        var Url_TicketData = RootUrl + 'NationalPark/getTickets';
+        $('#VisitingDate').datepicker({ dateFormat: 'dd/mm/yy' });
+        $('#VisitingDate').datepicker('setDate', new Date());
+        getDate();
+        fillDropdown(Url_GetData, getSelectData('place'), 'Place');
+
+        $('.ddlPlace').on('change', function () {
+
+            var place = $.grep(places, function (i) {
+                return i.Id == $('.ddlPlace').val();
+            });
+            hideAll();
+            zoneAvailable = place[0].Zone;
+            shiftAvailable = place[0].Shift;
+            vehicleAvailable = place[0].Vehicle;
+            var option = '';
+            $('.divDate').show();
+            if (zoneAvailable > 0) {
+                $('.divZone').show();
+                option = 'Zone';
+            }
+            if (shiftAvailable > 0) {
+                $('.divShift').show();
+                option = (option == '' ? 'Shift' : option);
+            }
+            if (vehicleAvailable > 0) {
+                $('.divVehicle').show();
+                option = (option == '' ? 'Vehicle' : option);
+            }
+            else {
+                $('.divVisitors').show();
+                var $visitor = $(".ddlVisitors");
+                $visitor.empty();
+                $visitor.append("<option value='0'>--Select Visitors--</option>");
+                for (var i = 1; i <= place[0].MaxSeats; i++) {
+                    $visitor.append("<option value='" + i + "'>" + i + "</option>");
+                };
+
+            } 
+            if (option != '')
+                fillDropdown(Url_GetData, getSelectData(option), option);
+        });
+
+        $('.ddlZone').on('change', function () { 
+            $('#VisitingDate').datepicker('setDate', new Date());
+            clearData('Zone');
+            debugger;
+            if (shiftAvailable)
+                fillDropdown(Url_GetData, getSelectData('shift'), 'Shift');  //Commented by shaan 09-03-2021
+               
+        });
+
+
+        $('.ddlDate').on('change', function () {
+            clearData('Date');
+        });
+
+        $('.ddlShift').on('change', function () {
+            clearData('Shift');
+            if (vehicleAvailable)
+                fillDropdown(Url_GetData, getSelectData('vehicle'), 'Vehicle');
+        });
+
+        $('.ddlVehicle, .ddlVisitors').on('change', function () {
+            if ($(this).val() == "0" || $(this).val() == "") {
+                $(".divTicket").hide();
+                $(".divTicket").html('');
+            }
+            else {
+                clearData('Vehicle');
+                fillTicket(RootUrl + 'NationalPark/GetBoardingPassDetails', getSelectData('vehicle'), 'divTicket');
+            }
+        });
+
+        function hideAll(id) {
+            var ar = ['divPlace', 'divZone', 'divDate', 'divShift', 'divVehicle', 'divTicket', 'divVisitors'];
+            for (var i = 0; i < 7; i++) {
+                $('.' + ar[i]).hide();
+                $('.' + ar[i]).find("select").html('<option value="">--Select--</option>');
+            } 
+        }
+
+        function clearData(id) {
+            //var ar = ['divPlace', 'divZone', 'divDate', 'divShift', 'divVehicle', 'divTicket'];
+            //var idx = parseInt(ar.indexOf('div' + id)) + parseInt(parseInt($('.ddl' + id).val()) > 0 ? 1 : 0);
+            //$('.' + ar[idx++]).show();
+            //for (var i = idx; i < 6; i++) {
+            //    $('.' + ar[i]).deho();
+            //}
+        }
+
+        //Generic method for fill dropdown
+        function fillDropdown(url, data, id) {
+            $.ajax({
+                url: url,
+                type: 'POST',
+                dataType: 'json',
+                data: data,
+                success: function (data) {
+                    if (id.toLowerCase() == 'place') {
+                        places = data;
+                        $(".ddl" + id).empty();
+                        var items = '';
+                        if (data.length > 1)
+                            items = "<option value='0'>--Select " + id + "--</option>";
+
+                        $.each(data, function (index, optiondata) {
+                            items += "<option value='" + optiondata.Id + "'>" + optiondata.Name + "</option>";
+                        });
+
+                        $(".ddl" + id).append(items);
+                        if (data.length == 1) {
+                            $(".ddl" + id).trigger("change");
+                        }
+                        else if (data.length == 0) {
+                            $("#frmBooking").remove();
+                            $("#frmInvalid").show();
+                        }
+                    }
+                    else {
+                        $(".ddl" + id).empty();
+                        $(".ddl" + id).append("<option value='0'>--Select " + id + "--</option>");
+                        $.each(data, function (index, optiondata) {
+                            $(".ddl" + id).append("<option value='" + optiondata.Id + "'>" + optiondata.Name + "</option>");
+                        });
+
+                    }
+                }
+            });
+        }
+
+        //Generic method to get parameter
+        function getSelectData(option) {
+            var PlaceId = $(".ddlPlace option:selected").val();
+            var ZoneId = $(".ddlZone option:selected").val();
+            var ShiftId = $(".ddlShift option:selected").val();
+            var VehicleId = $(".ddlVehicle option:selected").val();
+            var Visitors = $(".ddlVisitors option:selected").val();
+            var selDate = $("#VisitingDate").val();
+            return {
+                option: option, placeid: PlaceId, zoneid: ZoneId, shiftid: ShiftId,
+                vehicleid: VehicleId, visitors: Visitors, route: route, seldate: selDate
+            };
+        }
+
+        //Get Ticket Data
+        function fillTicket(url, data, id) {
+            $('#hdntotalRows').val('');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                dataType: 'html',
+                data: data,
+                success: function (data) {
+                    $("." + id).show();
+                    $("." + id).html(data); 
+                },
+                error: function (jqXHR, exception) {
+                    var msg = '';
+                    if (jqXHR.status === 0) {
+                        msg = 'Not connect.\n Verify Network.';
+                    } else if (jqXHR.status == 404) {
+                        msg = 'Requested page not found. [404]';
+                    } else if (jqXHR.status == 500) {
+                        msg = 'Internal Server Error [500].';
+                    } else if (exception === 'parsererror') {
+                        msg = 'Requested JSON parse failed.';
+                    } else if (exception === 'timeout') {
+                        msg = 'Time out error.';
+                    } else if (exception === 'abort') {
+                        msg = 'Ajax request aborted.';
+                    } else {
+                        msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                    }
+                },
+            });
+        }
+
+        //Get server Date fro Datepicker
+        function getDate() {
+            var btype = $('#btype').val();
+            $.ajax({
+                url: RootUrl + 'NationalPark/getDate',
+                type: 'POST',
+                dataType: 'json',
+                success: function (data) {
+                    //Get the End date
+                    var endDate = new Date(data);
+                    if (btype == "1") {
+                        endDate.setDate(endDate.getDate() + 90);
+                    }
+                    //disable the previous date and after 90 days date
+                    $('#VisitingDate').datepicker('option', {
+                        minDate: new Date(data),
+                        maxDate: endDate
+                    });
+                }
+            });
+        }
+
+        //Generic Method for Ajax call
+        function ajxcall(url, data, callbk, dataType, mType) {
+            mType = mType || "POST";
+            dataType = dataType || "json";
+            $.ajax({
+                url: url,
+                type: mType,
+                dataType: dataType,
+                data: data,
+                success: callbk,
+                error: function (jqXHR, exception) {
+                    var msg = '';
+                    if (jqXHR.status === 0) {
+                        msg = 'Not connect.\n Verify Network.';
+                    } else if (jqXHR.status == 404) {
+                        msg = 'Requested page not found. [404]';
+                    } else if (jqXHR.status == 500) {
+                        msg = 'Internal Server Error [500].';
+                    } else if (exception === 'parsererror') {
+                        msg = 'Requested JSON parse failed.';
+                    } else if (exception === 'timeout') {
+                        msg = 'Time out error.';
+                    } else if (exception === 'abort') {
+                        msg = 'Ajax request aborted.';
+                    } else {
+                        msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                    }
+                    return msg;
+                },
+            });
+        }
+    });
+</script>

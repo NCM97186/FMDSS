@@ -1,0 +1,214 @@
+﻿@{
+    ViewBag.Title = "Claim Request Report";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString());
+}
+@model FMDSS.Entity.FRAViewModel.ClaimRequestParamVM
+
+<script>var RootUrl = '@Url.Content("~/")';</script>
+<style>
+    .hide {
+        display: none;
+    }
+
+    #myModal .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModal .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModal .modal-footer {
+        background-color: #f9f9f9;
+    }
+
+    #myModal .btn-success {
+        width: 100%;
+        padding: 10px;
+    }
+
+    ul.a {
+        list-style-type: circle;
+    }
+
+    #myModalRefund .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModalRefund .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModalRefund .modal-footer {
+        background-color: #f9f9f9;
+    }
+
+    #myModalRefund .btn-success {
+        width: 100%;
+        padding: 10px;
+    }
+
+    ul.a {
+        list-style-type: circle;
+    }
+
+    .capt {
+        background-color: #f8f8f8;
+        border-color: #e7e7e7;
+        border: 1px solid #e7e7e7;
+        width: 202px;
+        float: left;
+    }
+
+        .capt p {
+            margin: 10px;
+        }
+
+    #refresh {
+        width: 28px;
+        height: 26px;
+        padding: 0px;
+    }
+
+    #txtInput {
+        width: 150px;
+    }
+
+    #page-wrapper-inn .table > thead > tr > th {
+        width: auto;
+    }
+</style>
+
+<div id="page-wrapper-inn">
+    <div class="row">
+        <div class="col-lg-9 pad">
+            <h1 class="page-header"><span>Report : Claim Request</span></h1>
+        </div>
+        @using (Ajax.BeginForm("ClaimRequestReport", "MISFRA", new AjaxOptions { HttpMethod = "Post", InsertionMode = InsertionMode.Replace, UpdateTargetId = "divReportDetails" }))
+        {
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="col-lg-3">
+                            <div class="form-group un-bold">
+                                <label>Claim Type:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(model => model.ClaimTypeID, FMDSS.Entity.FRAViewModel.FRACommonList.ClaimType, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        @if (ViewBag.DistList != null)
+                        {
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label>District:</label>
+
+                                    @Html.DropDownListFor(m => m.DistrictID, new SelectList((List<FMDSS.Entity.FRAViewModel.DropDownListVM>)ViewBag.DistList, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddlDistID", onchange = "BindBlockNew(this,'ddlBlockID')" })
+
+
+                                </div>
+                            </div>
+                        }
+                        <div class="col-lg-3" id="divBlock">
+                            <div class="form-group">
+                                <label>Block:</label>
+                                @Html.DropDownListFor(m => m.BlockID, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddlBlockID", onchange = "BindGPNew(this,'ddlGPID')" })
+                            </div>
+                        </div>
+                        <div class="col-lg-3" id="divBlock">
+                            <div class="form-group">
+                                <label>Gram Panchayat:</label>
+                                @Html.DropDownListFor(m => m.GPID, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddlGPID" })
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group un-bold">
+                                <label>From Date:<span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(model => model.FromDate, new { @class = "form-control common ", id = "txtFromDate", @readonly = true })
+                                <span id="errFromDate" style="display: none" class="alert-danger1">From Date is Required.</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group un-bold">
+                                <label>To Date:<span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(model => model.ToDate, new { @class = "form-control common ", id = "txtToDate", @readonly = true })
+                                <span id="errToDate" style="display: none" class="alert-danger1"></span>
+                            </div>
+                        </div>
+                        <div id="btn" class="col-lg-12">
+                            <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit1">
+                                <i class="fa fa-check"></i> Submit
+                            </button>
+                            <button type="button" class="btn btn-warning" id="btn_reset">
+                                <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12" id="divReportDetails"></div>
+            </div>
+        }
+    </div>
+    <div class="modal fade in" data-backdrop="static" id="modalWorkFlowDetails" tabindex="1" role="dialog" aria-hidden="false"></div>
+    <div class="modal fade in" data-backdrop="static" id="modalAEvidence" tabindex="3" role="dialog" aria-hidden="false"></div>
+</div>
+@Html.Hidden("hdnRootURL", Url.Content("~/"))
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script> 
+<script src="~/Scripts/Controller/Common.js"></script>
+<script>
+
+    var rootURl = '@Url.Content("~/")';
+
+    function GetWorkFlowDetails(id) {
+        $.ajax({
+            type: 'GET',
+            url: rootURl + "ClaimRequest/GetWorkFlowDetails?userType=4&ClaimRequestDetailsID=" + id,
+            dataType: 'html',
+            success: function (data) {
+                $('#modalWorkFlowDetails').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+    };
+</script>
+<script>
+
+    $(document).ready(function () {
+        $('#txtFromDate,#txtToDate').datepicker({
+            dateFormat: GetDatePickerFormat(),
+            yearRange: GetYearRange(),
+            changeMonth: true,
+            changeYear: true,
+        });
+        $('#txtFromDate,#txtToDate').datepicker('setDate', new Date()); 
+
+        $("#txtToDate").change(function () {
+            var str1 = $("#txtFromDate").val();
+            var str2 = $("#txtToDate").val();
+
+            var L = 3, d1 = $("#txtFromDate").val().split('/'), d2 = $("#txtToDate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $('#txtFromDate,#txtToDate').datepicker('setDate', new Date());
+                alert('Date should be greater than From Date');
+            }
+        });
+    })
+
+    $("#btn_reset").click(function () {
+        $('#ClaimTypeID').val('');
+        $('#txtFromDate,#txtToDate').datepicker('setDate', new Date());
+    });
+
+</script>
+

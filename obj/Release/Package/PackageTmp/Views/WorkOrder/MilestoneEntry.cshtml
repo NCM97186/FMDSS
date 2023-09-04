@@ -1,0 +1,547 @@
+﻿@model FMDSS.Models.ForestDevelopment.WorkOrderMilestone
+
+@{
+    ViewBag.Title = "Create";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+<style type="text/css">
+    .field-validation-error {
+        color: #ff0000;
+    }
+
+    .field-validation-valid {
+        display: none;
+    }
+
+    .input-validation-error {
+        border: 1px solid #ff0000;
+        background-color: #ffeeee;
+    }
+
+    .validation-summary-errors {
+        font-weight: bold;
+        color: #ff0000;
+    }
+
+    .validation-summary-valid {
+        display: none;
+    }
+</style>
+<input type="hidden" id="hdWorkorderId" name="hdWorkorderId" value="@Session["workorderid"]" />
+
+<div id="page-wrapper-inn">
+
+    <div class="col-lg-12 pad">
+        <div class="col-lg-10 pad">
+            <h1 class="page-header">Milestone Entry for @ViewData["WorkOrderName"]</h1>
+            @if (@TempData["ViewMessage"] != null)
+            {
+                <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["ViewMessage"]</div>
+            }
+        </div>
+        @*<div class="col-lg-2 pull-right">
+                <button type="button" class="btn btn-success btn_pp pull-right" name="btn_addpopip" value="" title="Work Order List" onclick="location.href='@Url.Action("Progressindex", "WorkOrder")'">
+                    <i class=" fa fa-th-list ">
+                    </i> Milestone List
+                </button>
+            </div>*@
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!--<div class="panel-heading">Processing Fees</div>-->
+                <!-- /.panel-heading -->
+                @using (Html.BeginForm("MilestoneEntry", "WorkOrder", FormMethod.Post, new { enctype = "multipart/form-data", data_behavior = "confirm" }))
+                {
+                    <div class="panel-body">
+                        @*<div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="Proposed">
+                                        Forest Division Name:<span class="mandatory">*</span>
+                                    </label>
+                                    @Html.DropDownList("Div_Code", (IEnumerable<SelectListItem>)ViewBag.ddlDivision1, "--Select--", new { @class = "form-control common", id = "division" })
+
+                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.Div_Code)</div>
+
+                                </div>
+                            </div>                                
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Work Order: <span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(x => x.WorkOrderID, (IEnumerable<SelectListItem>)ViewBag.WorkOrderList1, new { @class = "form-control common", title = "Select Work order", id = "ddlWorkOrder" })
+                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.WorkOrderID)</div>
+
+                                </div>
+                            </div>*@
+                        @Html.HiddenFor(x => x.WorkOrderID, new { id = "lblWorkOrder" })
+
+                        <div class="col-lg-6 multi">
+                            <div class="form-group">
+                                <label>Milestone Title:</label>
+                                @Html.TextBox("MilestoneName", null, new { @class = "form-control Alphanumeric", title = "Enter Milestone title eg: Milestone for first payment", @placeholder = "Enter Milestone title", @maxlength = 100, @id = "Milestone" })
+                                <div id="errMicroPlanName" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 multi">
+                            <div class="form-group">
+                                <label>Milestone Payment %age: </label>
+                                @Html.TextBox("MilestonePaymentPercentage", '0', new { @class = "form-control Numeric", title = "Enter Percentage in 0-100", @placeholder = "Enter Milestone Percentage", @maxlength = 3, @id = "Percentage" })
+                                <div id="errMicroPlanName" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-2 pull-right multi">
+                            <button type="button" class="btn btn-success btn_pp pull-right" name="btn_addMilestone" onclick="AddMilestone();" value="" title="Add">
+                                <i class=" fa btn-success ">
+                                </i>Save
+                            </button>
+                        </div>
+                        <div class="col-lg-12">
+                            <table id="temp" class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        @*<th>Id</th>*@
+                                        <th>Milestone Title</th>
+                                        <th>Payment %age</th>
+                                        @*<th>Activity completion %age</th>*@
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="milestoneTable"></tbody>
+                            </table>
+                        </div>
+                        <br />
+                        <div class="col-lg-12">
+                            <div class="divider"></div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Milestone: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("Milestone", (IEnumerable<SelectListItem>)ViewBag.ddlActivity1, new { @class = "form-control common", title = "Select Activity", id = "ddlMilestone" })
+                                <div id="errMicroPlanName" class="alert-danger1"></div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Activity: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("Activity", (IEnumerable<SelectListItem>)ViewBag.ddlActivity1, new { @class = "form-control common", title = "Select Activity", id = "ddlActivity" })
+                                <div id="errMicroPlanName" class="alert-danger1"></div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6" >
+                            <div class="form-group">
+                                <label>Sub Activity: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("SubActivity", (IEnumerable<SelectListItem>)ViewBag.ddlsubActivity1, new { @class = "form-control common", title = "Select Sub Activity", id = "ddlSubActivity" })
+                                <div id="errMicroPlanName" class="alert-danger1"></div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6 multi">
+                            <div class="form-group">
+                                <label>Activity completion %age: </label>
+                                @Html.TextBox("ActivitycompletionPercentage", '0', new { @class = "form-control Numeric", title = "Enter Percentage in 0-100", @placeholder = "Enter Activity completion Percentage", @maxlength = 3, @id = "PercentageActivitycompletion" })
+                                <div id="errMicroPlanName" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 pull-right multi">
+                            <button type="button" class="btn btn-success btn_pp pull-right" name="btn_addMilestone" onclick="AddActivitytoMilestone();" value="" title="Add">
+                                <i class=" fa btn-success ">
+                                </i>Save
+                            </button>
+                        </div>
+                        <div class="col-lg-12">
+                            <table id="temp" class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        @*<th>Id</th>*@
+                                        <th>Milestone</th>
+                                        <th>Activity</th>
+                                        <th>Sub Activity</th>
+                                        <th>Complate %age</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="milestoneActTable"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="col-lg-12"></div>
+
+                        <!-- Btn Groping -->
+                        <div class="btn-padd">
+                            <div class="col-lg-12" id="btn">
+                                <button id="btn_submit1" value="Submit" name="Command" class="btn btn-success" type="submit">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+                                <button class="btn btn-warning" type="reset">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+                                <button class="btn btn-danger" value="Cancel" onclick="location.href='@Url.Action("index", "WorkOrder")'" type="button">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+
+                            </div>
+                        </div>
+                        <!-- /.Btn Groping -->
+
+                    </div>
+                <!-- /.panel-body -->
+                       <!-- /.panel -->
+
+
+                }
+                <!-- /.col-lg-12 -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/js/validation.js" type="text/javascript"></script>
+
+<script src="@Url.Content("~/Scripts/jquery-1.8.2.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.js")" type="text/javascript"></script> 
+
+<script type="text/javascript">
+    if ('@ViewData["Message"]' != '') {
+        alert('@ViewData["Message"]');
+    }
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        $(".Alphanumeric").on("keypress", function (event) { return IsAlphanumeric(event); });
+        $(".Numeric").on("keypress", function (event) { return isNumber(event, this); });
+
+
+        $(".datefield").datepicker({ minDate: new Date(1999, 10 - 1, 25), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+
+        $('#division').change(function (e) {
+            $('#ddlWorkOrder').empty();
+            $("#ddlModel").empty();
+            $("#ddlActivity").empty();
+            $("#ddlSubActivity").empty();
+            var ddldiv = $("#division option:selected").val();
+           // alert(ddldiv);
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'WorkOrder/SelectWorkOrderByDivisionCode', // we are calling json method
+                dataType: 'json',
+                data: { Division: ddldiv },
+                success: function (range) {
+                    $("#ddlWorkOrder").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlWorkOrder").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+        });
+
+
+
+    $('#ddlWorkOrder').change(function (e) {
+        var ddlWorkOrder = $("#ddlWorkOrder option:selected").val();
+       // alert(ddlworkorder);
+        $("#ddlActivity").empty();
+        $("#ddlSubActivity").empty();
+        //$("#ddlSurvey").empty();
+        //$("#ddlActivity").empty();
+        //$("#ddlSubActivity").empty();
+        //$('#blockname').val(ddldist);
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'WorkOrder/SelectActivityByWorkOrderID', // we are calling json method
+            dataType: 'json',
+            data: { WorkOrderID: ddlWorkOrder},
+            success: function (range) {
+                $("#ddlActivity").append('<option value=0>  --Select--</option>');
+                $.each(range, function (i, items) {
+                    $("#ddlActivity").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+
+        });
+        $("#milestoneTable").empty();
+        $("ddlMilestone").empty();
+        var RowInfo = {
+            WorkOrderID: $("#ddlWorkOrder option:selected").val()
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(RowInfo),
+            url: '@Url.Content("~/")' + 'WorkOrder/GetWorkOrderMilestone',
+           // data: { WorkOrderID: ddlWorkOrder },
+            success: function (data) {
+                $("#ddlMilestone").append('<option value=0>--Select--</option>');
+                $.each(data, function (i, items) {
+                    var id = "'" + items.rowID + "'";
+                    $("#ddlMilestone").append('<option value="' + items.rowID + '">    ' + items.MilestoneName + '</option>');
+                    var bardata = "<tr class='" + items.rowID + "'><td style='border:1px'>" + items.MilestoneName + "</td><td class='totalper' style='border:1px'>" + items.MilestonePaymentPercentage + "</td><td style='border:1px'><button type=button class=get-delete onclick=DeleteMilestone(" + id + ")>Delete</button>" + "</td></tr>";
+                    $("#milestoneTable").append(bardata);
+                })
+            },
+
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+    });
+
+        // var ddlActivity = $("#ddlActivity option:selected").val();
+        $('#ddlActivity').change(function (e) {          
+            var ddlWorkOrder = $("#hdWorkorderId").val();
+            var ddlActivity = $("#ddlActivity option:selected").val();
+            $("#ddlSubActivity").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'WorkOrder/SelectSubActivityByActivityID', // we are calling json method
+                dataType: 'json',
+                data: { ActivityID: ddlActivity, WorkOrder: ddlWorkOrder },
+                success: function (range) {
+                      $("#ddlSubActivity").append('<option value=0>--Select--</option>');
+                        $.each(range, function (i, items) {
+                            $("#ddlSubActivity").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                        });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+        });
+        DeleteMilestoneActivity(0);
+        DeleteMilestone(0);
+       // alert(ViewBag.WorkOrderID);
+
+
+    });
+    function reload() {
+        var r = confirm("Do you want to leave page!");
+        if (r) {
+            window.location = RootUrl + "ForesterAction/ForesterAction";
+        }
+        else {
+            //do nothing
+        }
+    }
+
+    function AddActivitytoMilestone() {
+       var per = parseFloat($('#PercentageActivitycompletion').val());
+       if ($('#ddlMilestone option:selected').text() == '--Select--' || $('#ddlMilestone option:selected').text() == '') {
+            alert('Please Select Milestone First.');
+            return;
+       }
+       if (per > 100) {
+           alert('Percentage will be between 1- 100 only');
+           return;
+       }
+       if ($('#ddlActivity option:selected').text() == '--Select--' || $('#ddlActivity option:selected').text() == '') {
+            alert('Please Select activity.');
+            return;
+        }
+        if ($('#ddlSubActivity option:selected').text() == '--Select--' || $('#ddlSubActivity option:selected').text() == '') {
+            alert('Please Select SubActivity.');
+            return;
+        }
+        $("#milestoneActTable").empty();
+        //  $('#division').attr("readOnly", "true");
+        var WOMA = {
+            rowID: '',
+            WorkorderID: $("#ddlWorkOrder option:selected").val(),
+            MilestoneID: $('#ddlMilestone  option:selected').val(),
+            MilestoneName: $('#ddlMilestone option:selected').text(),
+            ActivityID: $('#ddlActivity  option:selected').val(),
+            ActivityName: $('#ddlActivity option:selected').text(),
+            SubActivityID: $('#ddlSubActivity  option:selected').val(),
+            SubActivityName: $('#ddlSubActivity option:selected').text(),
+            PercentageActivitycompletion: $('#PercentageActivitycompletion').val()
+        };
+
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(WOMA),
+            url: '@Url.Content("~/")' + 'WorkOrder/AddMilestoneActivity',
+            success: function (data) {
+                $.each(data, function (i, items) {
+                    var id = "'" + items.rowID + "'";
+                    var bardata = "<tr class='" + items.rowID + "'><td style='border:1px'>" + items.MilestoneName + "</td><td style='border:1px'>" + items.ActivityName + "</td><td style='border:1px'>" + items.SubActivityName + "</td><td style='border:1px'>" + items.PercentageActivitycompletion + "</td><td style='border:1px'><button type=button class=get-delete onclick=DeleteMilestoneActivity(" + id + ")>Delete</button>" + "</td></tr>";
+                   // var bardata = "<tr class='" + items.rowID + "'><td style='border:1px'>" + items.MilestoneName + "</td><td style='border:1px'>" + items.ActivityName + "</td><td style='border:1px'>" + items.PercentageActivitycompletion + "</td><td style='border:1px'><button type=button class=get-delete onclick=DeleteMilestoneActivity(" + id + ")>Delete</button>" + "</td></tr>";
+                    $("#milestoneActTable").append(bardata);
+                })
+            },
+
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+        $('#ddlActivity').val(0);
+        $('#ddlSubActivity').val(0);
+        $('#PercentageActivitycompletion').val();
+        //  $("#ddlVillName").val('0');
+      //  $("#Milestone").val('');
+      //  $("#Percentage").val('');
+        // }
+    }
+    function DeleteMilestoneActivity(ID) {
+        //  alert(ID);
+
+        $("#milestoneActTable").empty();
+        var RowInfo = {
+            Id: ID
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(RowInfo),
+            url: '@Url.Content("~/")' + 'WorkOrder/deleteMilestoneActivity',
+            success: function (data) {
+                $.each(data, function (i, items) {
+                    var id = "'" + items.rowID + "'";
+                    var bardata = "<tr class='" + items.rowID + "'><td style='border:1px'>" + items.MilestoneName + "</td><td style='border:1px'>" + items.ActivityName + "</td><td style='border:1px'>" + items.SubActivityName + "</td><td style='border:1px'>" + items.PercentageActivitycompletion + "</td><td style='border:1px'><button type=button class=get-delete onclick=DeleteMilestoneActivity(" + id + ")>Delete</button>" + "</td></tr>";
+                   // var bardata = "<tr class='" + items.rowID + "'><td style='border:1px'>" + items.MilestoneName + "</td><td style='border:1px'>" + items.ActivityName + "</td><td style='border:1px'>" + items.PercentageActivitycompletion + "</td><td style='border:1px'><button type=button class=get-delete onclick=DeleteMilestoneActivity(" + id + ")>Delete</button>" + "</td></tr>";
+                    $("#milestoneActTable").append(bardata);
+                })
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+    }
+    function AddMilestone() {
+        var add = true;
+        if ($('#Milestone').val() == null || $('#Milestone').val() == '' || $('#Milestone').val() == '0') {
+            alert('Please Enter Milestone title.');
+            $('#Milestone').focus();
+            return;
+        }
+        if ($('#Percentage').val() == null || $('#Percentage').val() == '' || $('#Percentage').val() == '0') {
+            alert('Please Enter Percentage.');
+            $('#Percentage').focus();
+            return;
+        }
+        var sum = parseFloat($("#Percentage").val());
+       // alert(sum);
+        $('.totalper').each(function () {
+         //   alert($(this).text());
+            sum += parseFloat($(this).text());
+        });
+       //  alert(sum);
+        if (sum > 100) {
+            alert('Combined percentage can not be more than 100');
+            $("#Percentage").focus();
+            return;
+        }
+        $('.MileName').each(function () {
+            if($('#Milestone').val()==$(this).text())
+            {               
+                add = false;
+            }
+        });
+        if (add == false) {
+            alert('This milestone name already exists');
+            $('#Milestone').focus();
+        }
+        else {
+            $("#milestoneTable").empty();
+            //  $('#division').attr("readOnly", "true");
+            var WOMP = {
+                rowID: '',
+                WorkorderID: $("#ddlWorkOrder option:selected").val(),
+                MilestoneName: $('#Milestone').val(),
+                MilestonePaymentPercentage: $('#Percentage').val(),
+                ActivitycompletionPercentage: '0'// $('#PercentageActivitycompletion').val()
+            };
+            $("#ddlMilestone").empty();
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(WOMP),
+                url: '@Url.Content("~/")' + 'WorkOrder/AddWorkOrderMilestone',
+                success: function (data) {
+                    $("#ddlMilestone").append('<option value=0>--Select--</option>');
+                    $.each(data, function (i, items) {
+                        var id = "'" + items.rowID + "'";
+                        $("#ddlMilestone").append('<option value="' + items.rowID + '">    ' + items.MilestoneName + '</option>');
+                        var bardata = "<tr class='" + items.rowID + "'><td style='border:1px' class='MileName'>" + items.MilestoneName + "</td><td class='totalper' style='border:1px'>" + items.MilestonePaymentPercentage + "</td><td style='border:1px'><button type=button class=get-delete onclick=DeleteMilestone(" + id + ")>Delete</button>" + "</td></tr>";
+                        $("#milestoneTable").append(bardata);
+                    })
+                },
+
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+            //  $("#ddlVillName").val('0');
+            $("#Milestone").val('');
+            $("#Percentage").val('0');
+            $("#PercentageActivitycompletion").val('0');
+        }
+        // }
+    }
+    function DeleteMilestone(ID) {
+        //  alert(ID);
+
+        $("#milestoneTable").empty();
+        $("#ddlMilestone").empty();
+        var RowInfo = {
+            Id: ID//,
+           // WorkorderID: $("#ddlWorkOrder option:selected").val()
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(RowInfo),
+            url: '@Url.Content("~/")' + 'WorkOrder/deleteWorkOrderMilestone',
+            success: function (data) {
+                $("#ddlMilestone").append('<option value=0>--Select--</option>');
+                $.each(data, function (i, items) {
+                    var id = "'" + items.rowID + "'";
+                    $("#ddlMilestone").append('<option value="' + items.rowID + '">    ' + items.MilestoneName + '</option>');
+                    var bardata = "<tr class='" + items.rowID + "'><td style='border:1px' class='MileName'>" + items.MilestoneName + "</td><td class='totalper' style='border:1px'>" + items.MilestonePaymentPercentage + "</td><td style='border:1px'><button type=button class=get-delete onclick=DeleteMilestone(" + id + ")>Delete</button>" + "</td></tr>";
+                    $("#milestoneTable").append(bardata);
+                })
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+        $("#ddlActivity").empty();
+        $("#ddlSubActivity").empty();
+        //$("#ddlSurvey").empty();
+        //$("#ddlActivity").empty();
+        //$("#ddlSubActivity").empty();
+        //$('#blockname').val(ddldist);
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'WorkOrder/SelectActivityByWorkOrderID', // we are calling json method
+            dataType: 'json',
+            data: { WorkOrderID: 0},
+            success: function (range) {
+                $("#ddlActivity").append('<option value=0>  --Select--</option>');
+                $.each(range, function (i, items) {
+                    $("#ddlActivity").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+
+        });
+    }
+   
+</script>

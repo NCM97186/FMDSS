@@ -1,0 +1,200 @@
+﻿@model FMDSS.Entity.FRAViewModel.ClaimRequestOTVM
+@{
+    ViewBag.Title = "ForestResourceClaim";
+}
+
+<!-- Form design -->
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Forest Rights Act (FRA): Claim Form</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+
+            <div class="panel panel-default"> 
+                <!--From Start-->
+                @using (Html.BeginForm("ClaimRequestDetails", "ClaimRequestOT", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data", id = "frmClaimRequest" }))
+                {
+                    <div class="panel-body">
+                        <div class="col-md-12">
+                            @Html.Partial("_ErrorMsg")
+                            <div class="panel panel-default">
+                                <div class="panel-heading" style="font-size:14px;font-weight:700;">
+                                    Request Type
+                                    <div class="help"><a href="~/PDFFolder/FRARulesBook.pdf" target="_blank">FRA Rules Book</a></div>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label>Claim Type:<span class="mandatory">*</span></label>
+                                            @if (Model.ClaimRequestDetails != null && Model.ClaimRequestDetails.ClaimTypeID > 0)
+                                            {
+                                                @Html.DropDownListFor(m => m.ClaimRequestDetails.ClaimTypeID, FMDSS.Entity.FRAViewModel.FRACommonList.ClaimType, new { id = "ddlClaimTypeId", @class = "form-control", onchange = "LoadClaimRequest(this)" })
+                                            }
+                                            else
+                                            {
+                                                @Html.DropDownListFor(m => m.ClaimRequestDetails.ClaimTypeID, FMDSS.Entity.FRAViewModel.FRACommonList.ClaimType, new { id = "ddlClaimTypeId", @class = "form-control", onchange = "LoadClaimRequest(this)" })
+                                            }
+                                            <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(m => m.ClaimRequestDetails.ClaimTypeID)</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label>On Behalf Of:<span class="mandatory">*</span></label>
+                                            @Html.TextBoxFor(m => m.ClaimRequestDetails.SSOID, new { @class = "form-control", placeholder = "SSO ID", onchange="return ValidateSSO(this)" })
+                                            <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(m => m.ClaimRequestDetails.SSOID)</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label>Claim Date:<span class="mandatory">*</span></label>
+                                            @Html.TextBoxFor(m => m.ClaimRequestDetails.EnteredOn, new { @class = "form-control Calender", placeholder = "Claim Request Date", @readonly = "readonly" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="divClaimRequestDetails">
+                            @if (Model.ClaimRequestDetails != null)
+                            {
+                                if (Model.ClaimRequestDetails.ClaimTypeID == Convert.ToInt32(FMDSS.FRAClaimType.Community))
+                                {
+                                    @Html.Partial("_ClaimCommunityForestResource", Model)
+                                }
+                                else if (Model.ClaimRequestDetails.ClaimTypeID == Convert.ToInt32(FMDSS.FRAClaimType.Individual))
+                                {
+                                    @Html.Partial("_ForestLand", Model)
+                                }
+                            }
+                        </div>
+                        <!--===========================Action Buttons=====================================-->
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <button type="submit" name="actionName" class="btn btn-info" value="Submit" onclick="return ValidateForm()">
+                                    <i class="fa fa-check"></i> Save
+                                </button>
+                                <button type="button" name="actionName" class="btn btn-success hide" value="Submit">
+                                    <i class="fa fa-check"></i> Save as Draft
+                                </button>
+
+                                <button type="reset" name="actionName" class="btn btn-warning" onclick="ResetForm()">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+
+
+                                <button type="button" name="actionName" value="Cancel" class="btn btn-danger" onclick="location.href='@Url.Action("ApprovalGramSabha", "ClaimRequest")'">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+
+                            </div>
+                        </div>
+                    </div>
+                    @Html.Hidden("hdnCurrentBhamashahActionValue", "");
+                    if (Model.ClaimRequestDetails != null)
+                    {
+                        @Html.HiddenFor(x => x.ClaimRequestDetails.ClaimRequestDetailsID, new { Value = Model.ClaimRequestDetails.ClaimRequestDetailsID })
+                    }
+                }
+            </div>
+            <!-- /.panel-body -->
+            <!-- /.panel -->
+
+        </div>
+
+        <!--Bhamasha Model-->
+        <div class="modal fade in" id="myModalDashboard" tabindex="-1" role="dialog" aria-hidden="false">
+            <div class="modal-dialog mdw">
+                <div class="modal-content" style="height:500px;">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel">
+                            View Member(s) Detail
+                        </h4>
+                    </div>
+                    <div id="divmember">
+                        <table class="table table-striped table-bordered table-hover">
+                            <tbody id="tblMemberDetails"></tbody>
+                        </table>
+                    </div>
+                    <!-- /.modal-body -->
+                    <div class="modal-footer" id="fot-f">
+                        <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                            <i class="fa fa-times fa-fw"></i> Close
+                        </button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!--End Bhamasha Model-->
+        <!-- /.col-lg-12 -->
+
+        <div class="tmp hide">
+            @Html.Partial("_ClaimRequestTemplate")
+        </div>
+    </div>
+</div>
+<!-- /.Row --> 
+<script src="~/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js" type="text/javascript"></script>
+<script src="~/Scripts/Controller/ClaimRequest/ClaimRequestDetailsOT.js"></script>
+<script src="~/Scripts/Controller/Common.js"></script>
+<script>
+    var rootURl = '@Url.Content("~/")';
+    $(document).ready(function () {
+        $('.Calender').datepicker({
+            dateFormat: GetDatePickerFormat(),
+            yearRange: GetYearRange(),
+            changeMonth: true,
+            changeYear: true,
+        });
+        $('.Calender').datepicker('setDate', new Date());
+    })
+    function ValidateForm() {
+        var arrDTypeName = [];
+        $('#tblAdditionalEvidence').find('td[name="dTypeName"]').each(function () {
+            if ($.inArray($(this).html(), arrDTypeName) == -1)
+                arrDTypeName.push($(this).text());
+        });
+
+        if ($('#ddlClaimTypeId>option:selected').val() == '@Convert.ToUInt32(FMDSS.FRAClaimType.Individual)') {
+            if (arrDTypeName.length < 2) {
+                alert("Please upload any of two additional evidence.");
+                return false;
+            }
+            else if ($('#dtClaimantDetails').find('tr:not(.rowSkip)').length == 0) {
+                alert("Please add atleast one clamant details.");
+                return false;
+            }
+            else if ($('input[name="ClaimRequestDetails.Individual_STribe"][value="True"]:checked').length > 0)
+            {
+                if ($('#tblScheduledTribeFiles').find('tr:not(.rowSkip)').length == 0) {
+                    alert("Please upload scheduled tribe evidence.");
+                    return false;
+                }
+            }
+            else if ($('input[name="ClaimRequestDetails.Individual_OTFDweller"][value="True"]:checked').length > 0) {
+                if ($('#tblForestDwellerFiles').find('tr:not(.rowSkip)').length == 0) {
+                    alert("Please upload forest dweller evidence.");
+                    return false;
+                }
+            } 
+        }
+        else if ($('#ddlClaimTypeId>option:selected').val() == '@Convert.ToUInt32(FMDSS.FRAClaimType.Community)') {
+            if (arrDTypeName.length < 2) {
+                alert("Please upload any of two additional evidence.");
+                return false;
+            }
+        }
+    }
+</script>
+<style>
+    .help {
+        float: right;
+        margin-right: 18px;
+        font-style: italic;
+    }
+</style>

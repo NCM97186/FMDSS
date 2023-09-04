@@ -1,0 +1,453 @@
+﻿@model FMDSS.Models.ForesterDevelopment.ActivityModel
+
+@{
+    ViewBag.Title = "fdmActivity";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //  "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+<style>
+    .red {
+        color: red;
+    }
+</style>
+<!-- Form design -->
+<div id="page-wrapper-inn">
+    @Html.Partial("_PartialBudgetLink")
+    <div class="panel-heading"> <span>@Html.Raw(TempData["Message"]) </span> </div>
+    <div class="col-lg-12 pad">
+        <div class="col-lg-10">
+            <h1 class="page-header">Defining Activity (@Session["User"].ToString())</h1>
+        </div>
+        <div class="col-lg-2">
+            <button type="button" class="btn btn-success confirm-toggle" name="Command" value="0" id="AddMaster">
+                <i class="fa fa-check"></i> Show Master
+            </button>
+        </div>
+
+    </div>
+
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!--<div class="panel-heading">Processing Fees</div>-->
+                <!-- /.panel-heading -->
+
+                <div class="panel-body">
+                    <!--Add New Btn-->
+                    <div class="col-lg-3 rgt pull-right">
+                        <button type="button" class="btn btn-success pull-right btn_pp" data-toggle="modal" id="btnAddActivity" data-target="#myActivity" title="Add Activity">
+                            <i class="fa fa-plus"></i> Create Activity
+                        </button>
+                    </div>
+
+                    <!--./Add New Btn-->
+                    <!--Table-->
+                    <div class="dataTable_wrapper">
+                        <table class="table table-striped table-bordered table-hover table-responsive gridtable">
+                            <thead>
+                                <tr>
+                                    <th>S. No</th>
+                                    <th>Activity Full Name</th>
+                                    <th>Activity Short Name</th>
+                                    <th>Management Paragraph Number</th>
+                                    @*<th>Activity Category</th>*@
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                @foreach (var item in Model.List)
+                                {
+
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(model => item.Index)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.Activity_FullName)
+                                        </td>
+                                        <td class="name">
+                                            @Html.DisplayFor(model => item.Activity_Name)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.ActivityDescription)
+                                        </td>
+                                        @*<td class="name">
+                                                @Html.DisplayFor(model => item.ActivityCategory)
+                                            </td>*@
+                                        <td>
+                                            <button type="button" class="btn btn-warning btn-circle" onclick="ViewActivity('@item.ID','@item.Activity_FullName','@item.Activity_Name','@item.ActivityDescription','@item.ActivityGroup','@item.ActivityCategory','@item.ReferenceNo','@item.ReferenceDoc','@item.CampaCategory')" id="btnedit_@item.ID" title="Edit" value="@item.ID" data-toggle="modal" data-target="#myActivity">
+                                                <i class="fa fa-edit"></i>
+                                            </button>
+
+
+
+
+                                        </td>
+
+                                    </tr>
+                                }
+
+
+                            </tbody>
+
+
+                        </table>
+
+
+
+                        <!-- /.panel-body -->
+
+                    </div>
+                    <!-- /.panel -->
+
+                </div>
+                <div class="modal fade" id="myActivity" role="dialog">
+                    <div class="modal-dialog modal-lg">
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">
+                                    &times;
+                                </button>
+                                <h4 class="modal-title" id="activityLabel">Create Activity</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div role="form">
+                                    @using (Html.BeginForm("AddActivity", "fdmActivity", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data" }))
+                                    {
+                                        <div class="panel-body">
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Activity Full Name  [Item for Campa Scheme]: <span class="mandatory">*</span></label>
+                                                    @Html.TextBoxFor(x => x.Activity_FullName, new { @class = "form-control", @placeholder = "Enter Activity Name", @maxlength = 250, @id = "Activity_FullName" })
+                                                    @Html.ValidationMessageFor(s => s.Activity_FullName, null, new { @class = "red" })
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    @Html.HiddenFor(s => s.ID)
+                                                    <label>Activity Short Name: <span class="mandatory">*</span></label>
+                                                    @Html.TextBoxFor(x => x.Activity_Name, new { @class = "form-control", @placeholder = "Enter Activity Name", @maxlength = 150, @id = "Activity_Name" })
+                                                    @Html.ValidationMessageFor(s => s.Activity_Name, null, new { @class = "red" })
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Management Paragraph Number: <span class="mandatory">*</span></label>
+                                                    @Html.TextBoxFor(x => x.ActivityDescription, new { @class = "form-control input-width", @placeholder = "Enter Activity Description", @maxlength = 200, @id = "Activity_Desc" })
+                                                    @Html.ValidationMessageFor(s => s.ActivityDescription, null, new { @class = "red" })
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6" style="display:none">
+                                                <div class="form-group">
+                                                    @*<label>Activity Group: <span class="mandatory">*</span></label>
+                                                        @Html.DropDownListFor(s => s.ActivityGroup, (IEnumerable<SelectListItem>)ViewBag.Category, "--Select--", new { @class = "form-control", id = "ActivityGroup" })
+                                                        @Html.ValidationMessageFor(s => s.ActivityGroup, null, new { @class = "red" })*@
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6" style="display:none">
+                                                <div class="form-group">
+                                                    <label>Activity Category: <span class="mandatory">*</span></label>
+                                                    @Html.DropDownListFor(s => s.ActivityCategory, (IEnumerable<SelectListItem>)ViewBag.Activity_Type, new { @class = "form-control", id = "ActivityCategory" })
+                                                    @Html.ValidationMessageFor(s => s.ActivityCategory, null, new { @class = "red" })
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6" style="display:none">
+                                                <div class="form-group">
+                                                    <label>Reference No.: <span class="mandatory"></span></label>
+                                                    @Html.TextBoxFor(x => x.ReferenceNo, new { @class = "form-control", @placeholder = "Enter Reference Document No.", @maxlength = 50, @id = "ReferenceNo" })
+
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Campa Category: <span class="mandatory">*</span></label>
+                                                    @Html.DropDownListFor(s => s.CampaCategory, (IEnumerable<SelectListItem>)ViewBag.CampaCategory, new { @class = "form-control", id = "CampaCategory" })
+                                                    @Html.ValidationMessageFor(s => s.CampaCategory, null, new { @class = "red" })
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6" id="RefFileCommonMode">
+                                                <div class="form-group">
+                                                    <label for="Document">
+                                                        Ref Document:<span class="mandatory"></span>
+                                                    </label>
+                                                    @Html.HiddenFor(s => s.ReferenceDoc)
+                                                    <input type="file" class="form-control common" id="Activity_DocumentPath1" style="width:49%" title="Upload the Document" name="Activity_DocumentPath" />
+                                                    <a style="display:none" href="" id="refDocoument" target="_blank"><img src="../images/jpeg.png" width="30"></a>
+                                                    <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                                                    <div id="errordivdocument1" style="display: none; position: static; right: 0px;" class="alert-danger1"></div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Btn Groping -->
+                                            <div class="btn-padd">
+                                                <div id="btn" class="col-lg-12">
+                                                    <button type="submit" class="btn btn-success" name="Command" value="" id="btn_SaveActivity">
+                                                        <i class="fa fa-check"></i> Submit
+                                                    </button>
+                                                    <button type="button" name="Command" id="btn_Cancel" value="Cancel" data-dismiss="modal" class="btn btn-danger">
+                                                        <i class="fa fa-times fa-fw"></i> Cancel
+                                                    </button>
+
+                                                </div>
+                                            </div>
+                                            <!-- /.Btn Groping -->
+
+                                        </div>
+                                    }
+                                </div>
+                                <!-- /.panel -->
+
+                            </div>
+                            <!-- /.col-lg-12 -->
+                        </div>
+                    </div>
+                    <!-- /.Row -->
+                </div>
+
+                <!--Popup Model-->
+                <!--./Popup Model-->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    @*if ('@Session["SMessage"]' != '') { showMessage("Success", "Record Save Successfully."); Session["SMessage"] = ''; }
+    else if ('@Session["UMessage"]' != '') { showMessage("Success", "Record Update Successfully."); Session["UMessage"] = ''; }
+    else if ('@Session["EMessage"]' != '') { showMessage("error", "Error occur while saving/updating records."); Session["EMessage"] = ''; }*@
+
+    $(document).ready(function () {
+
+        $("#tblSubActivityList").hide();
+        $('.gridtable').DataTable({
+            responsive: true
+        });
+        var RootUrl = '@Url.Content("~/")';
+
+        $(".datefield").datepicker({ minDate: new Date(1999, 10 - 1, 25), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+
+        $("#txt_Dfrom").change(function () {
+            $("#txt_Dto").val('');
+        });
+
+        $("#btnViewFile ,#btnViewFile1").click(function () {
+
+            var path = RootUrl + $("#hdRefDocument").val();
+
+            var pathurl = path.replace('~/', '');
+            window.open(pathurl, '_blank');
+
+        });
+
+        $(document).on('change', '#Activity_DocumentPath', function (e) {
+
+            var iSize = ($("#Activity_DocumentPath")[0].files[0].size / 1048576);
+
+            if (iSize > 2) {
+                $("#Activity_DocumentPath").val('');
+                $('#errordivdocument').show();
+                $('#errordivdocument').html("Ref. Document file size should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Activity_DocumentPath').focus();
+                return false;
+
+            }
+            else { $('#errordivdocument').hide(); }
+
+
+            var file = $("#Activity_DocumentPath").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $("#Activity_DocumentPath").val('');
+                    $('#errordivdocument').show();
+                    $('#errordivdocument').html("Please upload only jpeg or jpg or pdf or png or gif file format Ref Document Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Activity_DocumentPath').focus();
+                    return false;
+                } else {
+                    $('#errordivdocument').hide();
+                }
+            }
+
+            else { $('#errordivdocument').hide(); }
+
+
+
+
+        });
+
+        $(document).on('change', '#Activity_DocumentPath1', function (e) {
+
+            var iSize = ($("#Activity_DocumentPath1")[0].files[0].size / 1048576);
+
+            if (iSize > 2) {
+                $("#Activity_DocumentPath1").val('');
+                $('#errordivdocument1').show();
+                $('#errordivdocument1').html("Ref. Document file size should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Activity_DocumentPath1').focus();
+                return false;
+
+            }
+            else { $('#errordivdocument1').hide(); }
+
+
+            var file = $("#Activity_DocumentPath1").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $("#Activity_DocumentPath1").val('');
+                    $('#errordivdocument1').show();
+                    $('#errordivdocument1').html("Please upload only jpeg or jpg or pdf or png or gif file format Ref Document Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Activity_DocumentPath1').focus();
+                    return false;
+                } else {
+                    $('#errordivdocument1').hide();
+                }
+            }
+
+            else { $('#errordivdocument1').hide(); }
+
+
+
+
+        });
+
+
+        $('#Activity_RefNo,#Activity_Name').keypress(function (e) {
+            var kc = e.which;
+
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95 || kc == 37 || kc == 38) || (kc >= 47 && kc <= 57) || (kc >= 44 && kc < 46) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+        $('#Activity_Name').keypress(function (e) {
+            var kc = e.which;
+
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 8 || kc == 13 || kc == 95 || kc == 37 || kc == 38) || (kc != 48 && kc >= 47 && kc <= 57) || (kc >= 44 && kc < 46) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+        $('#btnAddActivity,#btn_Cancel').click(function () {
+            $("#activityLabel").text("Create Activity");
+
+            $("#Activity_Name").val('');
+            $("#Activity_Desc").val('');
+            $("#Sub_Activity_Unit").val($("#Sub_Activity_Unit option:first").val());
+            $("#Activity_Year").val($("#Activity_Year option:first").val());
+            $("#BSR_Type").val('0');
+            $("#Activity_BSR_Per_Unit").val('');
+            $("#Activity_TotalCost").val('0');
+            $("#Activity_BSR_Labour_Cost").val('0');
+            $("#Activity_BSR_Material_Cost").val('0');
+
+
+            $("#noIsSubActivity").removeAttr()
+            $("#noIsSubActivity").attr("checked", true);
+
+            $("#txt_Dfrom").val('');
+            $("#txt_Dto").val('');
+            $("#dataTable").show();
+            $("#dataTable1").html('');
+            $("#dataTable1").hide('');
+            $("#hdRefDocument").val('');
+            $("#Activity_Type").val('0');
+            $("#RefFileEditMode").hide();
+            $("#RefFileCommonMode").show();
+            $("#btn_SaveActivity").val('');
+            $("#Activity_RefNo").val('');
+
+        })
+
+        function preventBackspace(e) {
+
+            var evt = e || window.event;
+            if (evt) {
+                var keyCode = evt.charCode || evt.keyCode;
+                if (keyCode === 8) {
+                    if (evt.preventDefault) {
+                        evt.preventDefault();
+                    } else {
+                        evt.returnValue = false;
+                    }
+                }
+            }
+        }
+        function isNumber(evt, element) {
+
+            var charCode = (evt.which) ? evt.which : event.keyCode
+
+            if (
+                (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+                (charCode < 48 || charCode > 57))
+                return false;
+
+            //return true;
+        }
+
+    });
+
+    function ViewActivity(id, Activity_FullName, activityname, desc, group, category, refNo, refDoc, CampaCategory) {
+        $("#ID").val(id);
+        $("#Activity_FullName").val(Activity_FullName);
+        $("#Activity_Name").val(activityname);
+        $("#Activity_Desc").val(desc);
+        $("#ActivityGroup").val(group);
+        $("#ActivityCategory option:Selected").text(category);
+        $("#CampaCategory option:Selected").text(CampaCategory);
+        $("#ReferenceNo").val(refNo);
+        $("#ReferenceDoc").val(refDoc);
+        if (refDoc != '') {
+            $("#refDocoument").attr("style", "display:block");
+            $("#refDocoument").attr("href", refDoc);
+
+        }
+    }
+
+</script>
+
+
+
+<script type="text/javascript">
+    $.noConflict(true);
+</script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+@*<script src="~/js/bootstrap.min.js"></script>*@
+@*<script src="~/js/Common.js"></script>*@
+@*<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />*@

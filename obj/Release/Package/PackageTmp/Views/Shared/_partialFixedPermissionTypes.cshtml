@@ -1,0 +1,219 @@
+﻿
+@model FMDSS.Models.Master.FixedPermissionTypes
+<link href="~/css/timepicki.css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+<script>
+    var $j = jQuery.noConflict();
+    $j('.timepicker').timepicki({ timeFormat: 'h:mm p' });
+
+</script>
+
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+   
+    $(document).ready(function () {
+        $('#Tax,#Amount,#Discount,#EmitraServiceId').keypress(function (event) {
+            return isNumber(event, this)
+        });
+    });
+    // THE SCRIPT THAT CHECKS IF THE KEY PRESSED IS A NUMERIC OR DECIMAL VALUE.
+    function isNumber(evt, element) {
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+
+        if (
+            (charCode != 45 || $(element).val().indexOf('-') != -1) &&      // “-” CHECK MINUS, AND ONLY ONE.
+            (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+            (charCode < 48 || charCode > 57))
+            return false;
+
+        return true;
+    }
+
+
+
+    $(document).ready(function () {
+
+      
+        $('#btn_submit1').click(function (e) {
+
+          
+            if ($('#Name').val().trim() == "") {
+                $('#errName').css("display", "block");
+                $('#errName').focus();
+                return false;
+            }
+            else {
+                $('#errName').css("display", "none");
+            }
+
+           
+            if ($('#Description').val().trim() == "") {
+                $('#errDescription').css("display", "block");
+                $('#errDescription').focus();
+                return false;
+            }
+            else {
+                $('#errDescription').css("display", "none");
+            }
+
+
+            if ($('#Discount').val().trim() == '') {
+                $("#errDiscount").css("display", "block");
+                $('#errDiscount').focus();
+                return false;
+            }
+            else {
+                $("#errDiscount").css("display", "none");
+            }
+
+            if ($('#Amount').val().trim() == '') {
+                $("#errAmount").css("display", "block");
+                $('#errAmount').focus();
+                return false;
+            }
+            else {
+                $("#errAmount").css("display", "none");
+            }
+
+           
+
+            if ($('#Tax').val().trim() == "") {
+                $("#errTax").css("display", "block");
+                $('#errTax').focus();
+                return false;
+            }
+            else {
+                $("#errTax").css("display", "none");
+            }
+
+            if ($('#EmitraCharges').val().trim() == "") {
+                $("#errEmitraCharges").css("display", "block");
+                $('#errEmitraCharges').focus();
+                return false;
+            }
+            else {
+                $("#errEmitraCharges").css("display", "none");
+            }
+
+            if ($('option:selected', $('#Status')).index() == 0) {
+                $("#errStatus").css("display", "block");
+                $('#errStatus').focus();
+                return false;
+            }
+            else {
+                $("#errStatus").css("display", "none");
+            }
+           
+
+        });
+
+    });
+
+
+</script>
+
+@using (Html.BeginForm("ADDUpdateFixedPermissionTypes", "Master", FormMethod.Post))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @*<label id="lbl_dpt">Add/Edit Place</label>*@
+                @ViewBag.OpType
+            </h4>
+        </div>
+
+        <div class="modal-body">
+            @Html.HiddenFor(model => model.P_ID)
+            
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Name: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Name, new { @class = "form-control common", @maxlength = "100" })
+                    <div id="errName" style="display:none" class="alert-danger1">Name is Required.</div>
+                </div>
+            </div>           
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Description <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Description, new { @class = "form-control common", @maxlength = "100" })
+                    <div id="errDescription" style="display:none" class="alert-danger1">Description is Required.</div>
+                </div>
+            </div>
+
+           
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Amount <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Amount, new { @class = "form-control common", @maxlength = "100" })
+                    <div id="errAmount" style="display:none" class="alert-danger1">Amount is Required.</div>
+                </div>
+            </div>
+
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Tax Rate: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Tax, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errTax" style="display:none" class="alert-danger1">Tax Rate is Required.</div>
+                </div>
+            </div>
+
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Emitra Service Id: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.EmitraServiceId, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errEmitraServiceId" style="display:none" class="alert-danger1">Emitra id is Required.</div>
+                </div>
+            </div>
+
+
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Discount: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Discount, new { @class = "form-control common", @maxlength = "200" })
+                    <div id="errDiscount" style="display:none" class="alert-danger1">Discount is Required.</div>
+                </div>
+            </div>
+         
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Status : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.Status, (IEnumerable<SelectListItem>)ViewBag.Statustype, "--Select--", new { @class = "form-control common", id = "Status" })
+                    <div id="errStatus" style="display:none" class="alert-danger1">Status  is Required.</div>
+
+                </div>
+            </div>
+            <!-- /.Btn Groping -->
+
+
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success" value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+}

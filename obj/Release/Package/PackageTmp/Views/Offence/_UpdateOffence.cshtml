@@ -1,0 +1,49 @@
+﻿@model FMDSS.Entity.Protection.ViewModel.ApproverRemarks
+@using (Ajax.BeginForm("UpdateOffence", "Offence", new AjaxOptions { HttpMethod = "POST", Confirm = FMDSS.Globals.Constant.ConfirmMsg, OnSuccess = "BackToList('ShowOffenceDetails')" }))
+{
+    if (Model.StatusID != 17)
+    {
+        <div class="col-lg-12" id="font13" style="margin-top:20px;">
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Action: <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(x => x.StatusID, new List<SelectListItem>
+                            {
+                                new SelectListItem { Text = "--Select--", Value = ""},
+                                new SelectListItem { Text = "Pending", Value = "1"},
+                                new SelectListItem { Text = "Case In Court", Value = "16"},
+                                new SelectListItem { Text = "Closed", Value = "17"}
+                            }, new { @class = "form-control", onchange = "BindActionReason(this)", id = "ddlAction", value = Model.StatusID })
+                    <div class="alert-danger1">@Html.ValidationMessageFor(x => x.StatusID)</div>
+                </div>
+            </div>
+
+            <div id="divRemaks" class="col-lg-6">
+                <div class="form-group hideclass">
+                    <label>Remarks: <span style="color: red">*</span></label>
+                    @Html.TextAreaFor(x => x.ApproverComment, new { @class = "form-control", @maxlength = 500, @id = "txtApproverComment", @Required = "Required", placeholder = "Please Enter Remark." })
+                    <div class="alert-danger1">@Html.ValidationMessageFor(x => x.ApproverComment)</div>
+                </div>
+            </div>
+        </div>
+    }
+            <!-- /.modal-body -->
+    <div class="modal-footer" id="fot-f">
+        <div id="btn" class="col-lg-12">
+            @if (Model.StatusID != 17)
+            {
+                <button id="btnApprove" type="submit" class="btn btn-success forward hideclass" name="Command" value="UpdateOffence">
+                    <i class="fa fa-check"></i> Submit
+                </button>
+            }
+
+            <button id="btnCancel" name="button" class="btn btn-danger" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                <i class="fa fa-times fa-fw"></i> Close
+            </button>
+
+        </div>
+    </div>
+    @Html.HiddenFor(X => X.RequestID, new { value = Model.RequestID })
+}
+<script src="~/Scripts/Controller/Common.js"></script>

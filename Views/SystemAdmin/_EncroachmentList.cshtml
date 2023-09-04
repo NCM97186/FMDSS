@@ -1,0 +1,73 @@
+﻿@model IEnumerable<FMDSS.Models.Admin.EnchorsmentReport>
+
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <table class="table table-striped table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th width="10%">SNo</th>
+                                    <th width="10%">Enchorsment_Code</th>
+                                    <th width="10%">DOE</th> 
+                                    <th width="10%">Area</th>
+                                    <th width="10%">Encroacher Name</th>
+                                    <th width="10%">Encroacher Address</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.SNo</td>
+                                        <td><a href="javascript:void(0);" onclick="ShowDashboardData('Enchorsment', '@item.Enchorsment_Code', 'EnchorsmentDetailsByID', this)">@item.Enchorsment_Code</a></td>
+                                        <td>@item.DOE</td>
+                                        <td>@item.Area</td>
+                                        <td>@item.Encroacher_Name</td>
+                                        <td>@item.Encroacher_Address</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+            <!-- /.modal-body -->
+        </div>
+    </div>
+</div> 
+@Html.Hidden("hdnRootURL", Url.Content("~/"))
+<div class="modal fade in" data-backdrop="static" id="myModalDashboard" tabindex="2" role="dialog" aria-hidden="false"></div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#tbl_@ViewBag.ParentID').DataTable({
+            responsive: true,
+            "bSort": true
+        });
+    });
+
+    function ShowDashboardData(moduleName, parentID, type, cntrlID) {
+         // string moduleName, string parentID, string type, string status, string fromDate, string toDate, int OffenceId
+        //, status: '', fromDate: '', toDate: '', OffenceId:0
+        $.ajax({
+            type: 'GET',
+            data: { moduleName: moduleName, parentID: parentID, type: type, status: '', fromDate: '', toDate: '', OffenceId:0},
+            url: RootUrl + 'SystemAdmin/GetDashboardDetails',
+            dataType: 'html',
+            success: function (data) {
+                $("#myModalDashboard").html(data);
+                $('#myModalDashboard').show();
+            },
+            error: function (ex) {
+                console.log(ex.error);
+            }
+        });
+    }
+</script>
+  

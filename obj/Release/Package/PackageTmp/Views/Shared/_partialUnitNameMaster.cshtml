@@ -1,0 +1,124 @@
+﻿@model FMDSS.Models.Master.UnitNameMaster
+<link href="~/css/timepicki.css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+<script>
+    var $j = jQuery.noConflict();
+    $j('.timepicker').timepicki();
+
+</script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+
+
+
+    $(document).ready(function () {
+
+        $('#btn_submit1').click(function (e) {
+
+           
+
+
+            if ($('#ShortName').val().trim() == "") {
+                $('#errShortName').css("display", "block");
+                $('#errShortName').focus();
+                return false;
+            }
+            else {
+                $('#errShortName').css("display", "none");
+            }
+
+            if ($('#UnitName').val().trim() == "") {
+                $('#errUnitName').css("display", "block");
+                $('#errUnitName').focus();
+                return false;
+            }
+            else {
+                $('#errUnitName').css("display", "none");
+            }
+            if ($('option:selected', $('#IsActive')).index() == 0) {
+                 $("#errIsActive").css("display", "block");
+                 $('#errIsActive').focus();
+                return false;
+            }
+            else {
+                 $("#errIsActive").css("display", "none");
+            }
+
+
+
+        });
+
+    });
+
+</script>
+
+@using (Html.BeginForm("ADDUpdateUnitNameMaster", "Master", FormMethod.Post))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @*<label id="lbl_dpt">Add/Edit Place</label>*@
+                @ViewBag.OpType
+            </h4>
+        </div>
+
+        <div class="modal-body">
+            @Html.HiddenFor(model => model.UnitId)
+           
+             <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Unit Name: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.UnitName, new { @class = "form-control common", @maxlength = "50" })
+                    <div id="errUnitName" style="display:none" class="alert-danger1">Unit Name is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Short Name: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.ShortName, new { @class = "form-control common", @maxlength = "50" })
+                    <div id="errShortName" style="display:none" class="alert-danger1">Short Name is Required.</div>
+                </div>
+            </div>
+            
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Active / Deactive : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.isActive, (IEnumerable<SelectListItem>)ViewBag.ISactivelst, "--Select--", new { @class = "form-control common", id = "isActive" })
+                    <div id="errIsActive" style="display:none" class="alert-danger1">Active / Deactive  is Required.</div>
+
+                </div>
+            </div> 
+
+            <div class="col-lg-12"></div>
+
+
+            <!-- /.Btn Groping -->
+
+
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success"  value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+                
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+}

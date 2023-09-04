@@ -1,0 +1,630 @@
+﻿@model FMDSS.Models.MIS.MISCommonModel
+@{
+    ViewBag.Title = "TicketCancellationDetails";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_SuperAdmin.cshtml";
+}
+
+
+<script type="text/javascript">
+    var RootURl = '@Url.Content("~/")';
+    $(document).ready(function (e) {
+
+
+
+    });
+</script>
+<style>
+    #tbl {
+        overflow-x: auto;
+        overflow-y: auto;
+        padding: 15px;
+        width: 100%;
+    }
+</style>
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+       
+   
+
+        // date validation ========================================================================
+        var currentYear = (new Date).getFullYear();
+        var Range = '2008:' + (currentYear + 1)
+
+        $("#FromDate,#ToDate,#txt_DateOfRefund").datepicker({ maxDate: new Date(), yearRange: Range, dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        var currentDate = new Date();
+        //$("#txt_fromdate").datepicker("setDate", currentDate);
+        //$("#txt_todate").datepicker("setDate", currentDate);
+
+        $("#FromDate").change(function () {
+            $("#ToDate").val('');
+        });
+
+        $(document).on('keypress', '#FromDate,#ToDate', function (event) {
+
+            event.preventDefault();
+            return false;
+
+        });
+
+        $('#FromDate,#ToDate').keydown(function (event)
+        { return cancelBackspace(event) });
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+        $("#ToDate").change(function () {
+            var str1 = $("#FromDate").val();
+            var str2 = $("#ToDate").val();
+
+            var L = 3, d1 = $("#FromDate").val().split('/'), d2 = $("#ToDate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#ToDate").val('');
+                alert('Date Must be GreaterThen From Date');
+            }
+        });
+
+        // date validation ========================================================================
+
+
+
+
+
+        $('#Place').change(function (e) {
+            $('#PLACE_NAME').val($("#Place option:selected").text());
+        });
+
+        $('#SHIFT_TYPE').change(function (e) {
+
+            $('#SHIFTName').val($("#SHIFT_TYPE option:selected").text());
+
+        });
+
+
+        $('#btn_submit1').click(function (e) {
+
+
+
+
+            if ($('#FromDate').val() == '') {
+                $("#errFromDate").css("display", "block");
+                $('#errFromDate').focus();
+                return false;
+            }
+            else {
+                $("#errFromDate").css("display", "none");
+            }
+
+            if ($('#ToDate').val() == '') {
+                $("#errToDate").css("display", "block");
+                $('#errToDate').focus();
+                return false;
+            }
+            else {
+                $("#errToDate").css("display", "none");
+            }
+
+
+
+            if ($('option:selected', $('#Place')).index() == 0) {
+                $("#errPlace").css("display", "block");
+                $('#errPlace').focus();
+                return false;
+            }
+            else {
+                $("#errPlace").css("display", "none");
+            }
+
+
+            if ($('option:selected', $('#SHIFT_TYPE')).index() == 0) {
+                $("#errSHIFT_TYPE").css("display", "block");
+                $('#errSHIFT_TYPE').focus();
+                return false;
+            }
+            else {
+                $("#errDuration").css("display", "none");
+            }
+
+
+            if ($('option:selected', $('#BOOKING_TYPE')).index() == 0) {
+                $("#errBOOKING_TYPE").css("display", "block");
+                $('#errBOOKING_TYPE').focus();
+                return false;
+            }
+            else {
+                $("#errBOOKING_TYPE").css("display", "none");
+
+            }
+
+
+        });
+
+    });
+
+    function TicketRefundNow(RID) {
+        alert(RID);
+        $("#hdn_reqId").val(RID);
+        $("#myModal_RefundNow").modal("show");
+    }
+    function cancel() {
+        $("#myModal_RefundNow").modal("hide");
+        $("#errorddl_RefundStatus").hide();
+        $("#errorddl_ModeOfPayment").hide();
+        $("#errortxt_DateOfRefund").hide();
+        $("#errortxt_ReferenceId").hide();
+        $("#hdn_reqId").val("");
+        $("#ddl_RefundStatus option:selected").text("Select Refund Status");
+        $("#ddl_ModeOfPayment option:selected").text("Select Payment Mode");
+        $("#txt_ReferenceId").val(""); 
+        $("#txt_DateOfRefund").val("");
+        $("#txt_Remark").val("");
+        
+    }
+
+    function SubmitToRefundNow() {
+        debugger;
+        var RequestId = $("#hdn_reqId").val();
+        var RefundStatus = $("#ddl_RefundStatus").val();
+        var ModeOfPayment = $("#ddl_ModeOfPayment option:selected").text();
+        var ReferenceId = $("#txt_ReferenceId").val();
+        var dateOfRefund = $("#txt_DateOfRefund").val();
+        var Remark = $("#txt_Remark").val();
+
+        if ($("#ddl_RefundStatus option:selected").index() == 0) {
+            $("#errorddl_RefundStatus").show();
+            return false;
+        } else { $("#errorddl_RefundStatus").hide();}
+        if ($("#ddl_ModeOfPayment option:selected").index() == 0) {
+            $("#errorddl_ModeOfPayment").show();
+            return false;
+        } else { $("#errorddl_ModeOfPayment").hide();}
+        if ($("#txt_ReferenceId").val() == '') {
+            $("#errortxt_ReferenceId").show();
+            return false;
+        } else { $("#errortxt_ReferenceId").hide(); }
+        if ($("#txt_DateOfRefund").val() == '') {
+            $("#errortxt_DateOfRefund").show();
+            return false;
+        } else { $("#errortxt_DateOfRefund").hide(); }
+
+        var r = confirm("Are you sure you want to submit ?");
+        if (r == true) {
+            var values = {
+                RequestId: RequestId,
+                RefundStatus: parseInt(RefundStatus),
+                PaymentMode: ModeOfPayment,
+                PaymentReferenceId: ReferenceId,
+                DateOfRefund: dateOfRefund,
+                Remark: Remark
+               
+            };
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootURl + "MIS/SubmiteToRefund",
+                data: JSON.stringify(values),
+                success: function (result) {
+                    if (result == 1) {
+                        alert("you have refunded successfully!");
+                        $("#myModal_RefundNow").modal('hide');
+                        window.location.href = '/MIS/TicketRefundDetails'
+                    }
+                    
+                },
+                error: function (error) {
+                    console.log(error)
+                    alert("Some Error Occured!!!!!")
+                }
+            });
+        }
+    }
+
+
+    
+
+
+</script>
+
+<div class="modal fade" id="myModal_RefundNow" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4><i class="fa-fw"></i>Refund Details</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Refund Status:</label>
+                            @Html.DropDownList("ddl_RefundStatus",new SelectList(new List<SelectListItem> {
+                                                                                                    new SelectListItem { Text = "In-Progress", Value = "0"},
+                                                                                                    new SelectListItem { Text = "Refunded", Value = "1"}
+                                                                                                }, "Value", "Text"),
+                                                                                            "Select Refund Status",
+                                                                                             new { @class = "form-control", id = "ddl_RefundStatus" })
+                            <span id="errorddl_RefundStatus" style="color: Red; display: none" class="alert-danger1">* Please Select Refund Status.</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Mode Of Payment:</label>
+                            @Html.DropDownList("ddl_ModeOfPayment", new SelectList(new List<SelectListItem> {
+                                                                                                    new SelectListItem { Text = "Cash", Value = "Cash"},
+                                                                                                    new SelectListItem { Text = "DD", Value = "DD"},
+                                                                                                      new SelectListItem { Text = "Cheque", Value = "Cheque"},
+                                                                                                        new SelectListItem { Text = "Online", Value = "Online"}
+                                                                                                }, "Value", "Text"),
+                                                                                            "Select Payment Mode",
+                                                                                             new { @class = "form-control", id = "ddl_ModeOfPayment" })
+                            <span id="errorddl_ModeOfPayment" style="color: Red; display: none" class="alert-danger1">* Please Select Mode Of payment.</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Payment Reference Id:</label>
+                            @Html.TextBox("txt_ReferenceId", null, new { @class = "form-control", id = "txt_ReferenceId" })
+                            <span id="errortxt_ReferenceId" style="color: Red; display: none" class="alert-danger1">* Enter Payment Reference Id.</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Date of Refund:<span class="mandatory">*</span></label>
+                            @Html.TextBox("txt_DateOfRefund", null, new { @class = "form-control", @id = "txt_DateOfRefund" })
+                            <span id="errortxt_DateOfRefund" style="color: Red; display: none" class="alert-danger1">* Enter Date Of Refund.</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Remark:</label>
+                            @Html.TextArea("txt_Remark", null, new { @class = "form-control", id = "txt_Remark" })
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <br /><br />
+                            <input type="hidden" id="hdn_reqId" />
+                            <input type="button" id="btn_confirm" value="Submit To Refund" onclick="SubmitToRefundNow()" class="btn btn-success" />
+                            <input type="button" value="Cancel" onclick="cancel();" class="btn btn-success" />
+                        </div>
+                    </div>
+                </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+
+<div class="row">
+    <div class="col-lg-9 pad">
+        <h1 class="page-header"><span>Report : Ticket Covid Refund Details</span></h1>
+    </div>
+    <div class="modal fade" id="myModal_TicketCancel" role="dialog">
+        <div class="modal-dialog">
+            <input type="hidden" id="TicketID" />
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4><i class="fa-fw"></i>Ticket Covid Refund Information</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="col-lg-12">
+                        <div class="col-lg-6">
+                            <label>Place Name:</label>
+                            @Html.TextBox("PlaceName", "", new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                        <div class="col-lg-6">
+                            <label>Request ID:</label>
+                            @Html.TextBox("RequestID", "", new { @class = "form-control", @readonly = "readonly" })
+                            <span id="RequestID" style="display: none" class="alert-danger1">RequestID is Required.</span>
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-12">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Date Of Booking:</label>
+                                @Html.TextBox("DateOfBooking", "", new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Total Members:</label>
+                                @Html.TextBox("TotalMembers", "", new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-lg-12">
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Emitra Transaction ID:</label>
+                                @Html.TextBox("EmitraTransactionID", "", new { @class = "form-control", @readonly = "readonly" })
+                                <span id="RequestID" style="display: none" class="alert-danger1">EmitraTransactionID is Required.</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>AmountTobePaid:</label>
+                                @Html.TextBox("AmountTobePaid", "", new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label>Remarks Status:</label>
+                                @Html.DropDownList("RemarksStatus", (List<SelectListItem>)ViewBag.RemarksList, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="form-group">
+                                <label>Remarks:</label>
+                                @Html.TextBox("RemarksMsg", "", new { @class = "form-control" })
+                                @Html.Hidden("TicketID")
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                </div>
+                <div class="modal-footer" style="clear:both">
+                    <div id="btn" class="col-lg-12">
+                        <button type="button" class="btn btn-success" value="Save" id="btn_submit11">
+                            Confirm
+                        </button>
+                        <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                            Exit
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    @using (Html.BeginForm("TicketRefundDetails", "MIS", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+
+
+                    @*<div class="col-lg-12">
+                            <div class="form-group">
+                                <label>Date Type:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(model => model.DATETYPE, (IEnumerable<SelectListItem>)ViewBag.ddlDATEtYPE1, new { @class = "form-control common", id = "DATETYPE" })
+                            </div>
+                        </div>*@
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>From Date:<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.FromDate, new { @class = "form-control common ", id = "FromDate" })
+                            <span id="errFromDate" style="display: none" class="alert-danger1">From Date is Required.</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>To Date:<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.ToDate, new { @class = "form-control common ", id = "ToDate" })
+                            <span id="errToDate" style="display: none" class="alert-danger1">To Date is Required.</span>
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Place:<span class="mandatory">*</span></label>
+
+                            @Html.DropDownListFor(model => model.Place, (IEnumerable<SelectListItem>)ViewBag.ddlPlace1, "--Select--", new { @class = "form-control common", id = "Place" })
+                            <div id="errPlace" style="display:none" class="alert-danger1">Place is Required.</div>
+
+                        </div>
+                    </div>
+
+                    @*<div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Shift Type:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(model => model.SHIFT_TYPE, (IEnumerable<SelectListItem>)ViewBag.ddlShiftType1, "--Select--", new { @class = "form-control common", id = "SHIFT_TYPE" })
+                                <div id="errSHIFT_TYPE" style="display:none" class="alert-danger1">Shift Type is Required.</div>
+
+                            </div>
+                        </div>*@
+
+
+                    <div id="btn" class="col-lg-12">
+
+                        <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit1">
+                            <i class="fa fa-check"></i> Submit
+                        </button>
+                        <button type="button" class="btn btn-warning" id="btn_reset">
+                            <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                        </button>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-4 pull-right" id="place">
+                <a class="btn btn-success" title="Export to Excel" target="_blank" href='TicketRefundExport'><i class="fa fa-download"></i> Export to Excel</a>
+            </div>
+            <br /><br /><br />
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="dataTable_wrapper">
+                        <div id="tbl" class="table-responsive">
+                            <table id="tblCancellation" class="table table-striped table-bordered table-hover table-responsive gridtable">
+
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Booking Id</th>
+                                        <th>Date of Booking</th>
+                                        <th>Date of Visit</th>
+                                        <th>Mobile  </th>
+                                        <th>EmailId </th>
+                                        <th>Place </th>
+                                        <th>Actual No Of Ticket Requested</th>
+                                        <th>Total No Of Camera</th>
+                                        <th>Vehicle Name </th>
+                                        <th>Amount To be Paid </th>
+                                        <th>Transaction Status </th>
+                                        <th>Emitra Transaction ID</th>
+                                        <th>Cancellation Status</th>
+                                        <th>Cancellation Remarks</th>
+                                        <th>Refund Status</th>
+                                        <th>Payment Mode</th>
+                                        <th>Payment Reference Id</th>
+                                        <th>Date Of Refund</th>
+                                        <th>Remark</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in ViewData["ListTicketRefund"] as IEnumerable<FMDSS.Models.MIS.MISTicketTransactionDetails>)
+                                    {
+                                    <tr>
+                                        <td>@Html.DisplayFor(model => item.Index)</td>
+                                        <td>@Html.DisplayFor(model => item.BookingID)</td>
+                                        <td>@Html.DisplayFor(model => item.DateOfBooking)</td>
+                                        <td>@Html.DisplayFor(model => item.DateOfVisit)</td>
+                                        <td>@Html.DisplayFor(model => item.Mobile)</td>
+                                        <td>@Html.DisplayFor(model => item.EmailId)</td>
+                                        <td>@Html.DisplayFor(model => item.PlaceName)</td>
+                                        <td>@Html.DisplayFor(model => item.TotalMembers)</td>
+                                        <td>@Html.DisplayFor(model => item.TotalNoOfCamera)</td>
+                                        <td>@Html.DisplayFor(model => item.VehicleName)</td>
+                                        <td>@Html.DisplayFor(model => item.AmountTobePaid)</td>
+                                        <td>@Html.DisplayFor(model => item.TransactionStatus)</td>
+                                        <td>@Html.DisplayFor(model => item.EmitraTransactionID)</td>
+                                        <td>@Html.DisplayFor(model => item.Manual_Status)</td>
+                                        <td>@Html.DisplayFor(model => item.Manual_Remarks)</td>
+                                        <td>@Html.DisplayFor(model => item.Refund_Status)</td>
+                                        <td>@Html.DisplayFor(model => item.Payment_Mode)</td>
+                                        <td>@Html.DisplayFor(model => item.Payment_Reference_Id)</td>
+                                        <td>@Html.DisplayFor(model => item.Date_Of_Refund)</td>
+                                        <td>@Html.DisplayFor(model => item.Remark)</td>
+                                        <td>
+                                            @if (item.Refund_Status == "In-Progress")
+                                            {
+                                                <a onclick="TicketRefundNow('@Encryption.encrypt(Convert.ToString(System.Text.RegularExpressions.Regex.Match(item.BookingID, @"\d+").Value))');" style="cursor:pointer;">
+                                                    Refund Now
+                                                    <input id="hdn_TicketID" type="hidden" value="'@Encryption.encrypt(Convert.ToString(item.TicketID))'" />
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <label>Completed</label>
+                                            }
+                                        </td>
+                                    </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+
+
+        </div>
+    }
+</div>
+
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script src="~/Scripts/jquery.blockUI.js"></script>
+<script>
+
+    $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
+</script>
+
+
+<script type="text/javascript">
+    $.noConflict(true);
+</script>
+<script>
+    var RootUrl = '@Url.Content("~/")';
+    function TicketCancelReview(TicketID, RequestID, DateOfBooking, PlaceName, TotalMembers, AmountTobePaid, EmitraTransactionID) {
+
+        if (TicketID != null && TicketID != '' && TicketID != '0') {
+            $("#TicketID").val(TicketID);
+            $("#RequestID").val(RequestID);
+            $("#DateOfBooking").val(DateOfBooking);
+            $("#PlaceName").val(PlaceName);
+            $("#TotalMembers").val(TotalMembers);
+            $("#AmountTobePaid").val(AmountTobePaid);
+            $("#EmitraTransactionID").val(EmitraTransactionID);
+            $("#myModal_TicketCancel").modal('show');
+        }
+        else {
+            alert("Request Id not exists");
+        }
+    };
+
+    $("#btn_submit11").click(function () {
+        var TicketID = $("#TicketID").val();
+        var RemarkStatus = $("#RemarksStatus").val();
+        var Remark = $("#RemarksMsg").val();
+        if (TicketID != null && TicketID != '' && TicketID != '0') {
+            var r = confirm("Are you confirm?");
+            if (r == true) {
+                var values = {
+                    TicketID: TicketID,
+                    RemarkStatus: RemarkStatus,
+                    Remark: Remark,
+                    IsPartialOrFullCanelation:1
+                };
+                $.ajax({
+                    type: 'POST',
+                    url: RootURl + "MIS/TicketRefundUserDetailsDataResend",
+                    data: values,
+                    success: function (result) {
+                        alert(result.Message);
+                        $("#myModal_TicketCancel").modal('hide');
+                    },
+                    error: function (error) {
+                        console.log(error)
+                        alert("Some Error Occured!!!!!")
+                    }
+                });
+            }
+        }
+        else {
+            alert("Request Id not exists");
+        }
+    });
+</script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+@*<script src="~/js/bootstrap.min.js"></script>*@
+@*<script src="~/js/Common.js"></script>*@
+@*<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />*@
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#tblCancellation').DataTable();
+    });
+</script>

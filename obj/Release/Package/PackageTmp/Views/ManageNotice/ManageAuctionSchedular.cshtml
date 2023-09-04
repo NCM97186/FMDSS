@@ -1,0 +1,747 @@
+﻿@{
+    ViewBag.Title = "ManageAuctionSchedular";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+
+@{
+    ViewBag.Title = "ManageNotice";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+
+@model IEnumerable<FMDSS.Models.ForestProduction.NoticeManagement>
+<style>
+    #page-wrapper-inn .table > thead > tr > th:last-child {
+        width: 170px !important;
+    }
+</style>
+<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<link href="~/css/timepicki.css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+<script type="text/javascript">
+    var  $j = jQuery.noConflict();
+    var RootUrl = '@Url.Content("~/")';
+
+      $j(document).ready(function () {
+         //$j("#regionCode").prop("enabled", true);
+         //$j("#circleCode").prop("enabled", true);
+         //$j("#divisionCode").prop("enabled", true);
+         //$j("#rangeCode").prop("enabled", true);
+         //$j("#depotId").prop("enabled", true);
+         //$j("#producetype").prop("enabled", true);
+         //$j("#forestProductID").prop("enabled", true);
+         //$j("#txt_qty").prop("enabled", true);
+      
+         $j(".datefield").datepicker({
+             minDate: new Date(),
+             dateFormat: 'dd/mm/yy',
+             changeYear: true,
+             onClose: function (dateText, inst) { $j("[id $=auto]").focus(); }
+         });
+         $j('.timepicker').timepicki();
+
+         var dt='';
+
+         $j('#durationfrom').change(function (e) {
+ 
+             dt+=$j("#durationfrom").val()+",";
+             
+             $j("#lbl_Auctiondt").text("Multiple Date:" + dt);
+             $j("#hdn_mltDt").val(dt);
+          
+
+         });
+
+
+         $j('#regionCode').change(function (e) {
+
+             $j("#hd_regionCode").val( $j("#regionCode").val());
+            
+             $j("#divisionCode").empty();
+             $j("#circleCode").empty();
+             $j("#divisionCode").empty();
+             $j("#rangeCode").empty();
+             $j("#depotId").empty();
+             $j.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/CircleData', // we are calling json method
+                dataType: 'json',
+                data: { regionCode:  $j("#regionCode").val() },
+                success: function (region) {
+                     $j.each(region, function (i, items) {
+                         $j("#circleCode").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+         $j('#circleCode').change(function (e) {
+             $j("#hd_circleCode").val( $j("#circleCode").val());
+            var circleName =  $j("#circleCode option:selected").text();
+             $j("#divisionCode").empty();
+             $j("#rangeCode").empty();
+             $j("#depotId").empty();
+             $j.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/DivisionData', // we are calling json method
+                dataType: 'json',
+                data: { regionCode:  $j("#regionCode").val(), circleCode:  $j("#circleCode").val() },
+                success: function (circle) {
+                     $j.each(circle, function (i, items) {
+                         $j("#divisionCode").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+
+         $j('#divisionCode').change(function (e) {
+             $j("#hd_divisionCode").val( $j("#divisionCode").val());
+            var DivisionName =  $j("#divisionCode option:selected").text();
+             $j("#rangeCode").empty();
+             $j("#depotId").empty();
+             $j.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/RangeData', // we are calling json method
+                dataType: 'json',
+                data: { regionCode:  $j("#regionCode").val(), circleCode:  $j("#circleCode").val(), divisionCode:  $j("#divisionCode").val() },
+                success: function (divCode) {
+                     $j.each(divCode, function (i, items) {
+                         $j("#rangeCode").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+         $j('#rangeCode').change(function (e) {
+             $j("#hd_rangeCode").val( $j("#rangeCode").val());
+            //var rangeName =  $j("#rangeCode option:selected").text();
+             $j("#depotId").empty();
+
+             $j.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/getDepotData', // we are calling json method
+                dataType: 'json',
+                data: { regionCode:  $j("#regionCode").val(), circleCode:  $j("#circleCode").val(), divisionCode:  $j("#divisionCode").val(), rangeCode:  $j("#rangeCode").val() },
+                success: function (range) {
+                     $j.each(range, function (i, items) {
+                         $j("#depotId").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+         $j('#depotId').change(function (e) {
+             $j("#hd_depotId").val( $j("#depotId").val());
+            //var depotName =  $j("#depotId option:selected").text();
+             $j("#producetype").empty();
+
+
+             $j.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/getForesProducescd', // we are calling json method
+                dataType: 'json',
+                data: { depotId:  $j("#depotId").val() },
+                success: function (produce) {
+                     $j.each(produce, function (i, items) {
+                         $j("#producetype").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+         $j('#producetype').change(function (e) {
+             $j("#hd_producetype").val( $j("#producetype").val());
+           // var ProductType =  $j("#producetype option:selected").text();
+             $j("#forestProductID").empty();
+
+
+             $j.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/getForesProduct', // we are calling json method
+                dataType: 'json',
+                data: { depotId:  $j("#depotId").val(), producetype:  $j("#producetype").val() },
+                success: function (produce) {
+                     $j.each(produce, function (i, items) {
+                         $j("#forestProductID").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+         $j('#forestProductID').change(function (e) {
+             $j("#hd_forestProductID").val( $j("#forestProductID").val());
+            //var Product =  $j("#forestProductID option:selected").text();
+             $j("#produceUnit").val('');
+             $j("#produceUnit").text('');
+             $j.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/getForesProduceqty', // we are calling json method
+                dataType: 'json',
+                data: { depotId:  $j("#depotId").val(), producetype:  $j("#producetype").val(), product:  $j("#forestProductID").val() },
+                success: function (stockqty) {
+
+                     $j("#produceUnit").val(stockqty.ProduceUnit);
+                     $j("#hdn_avQty").val(stockqty.Qty);
+                     $j("#hdn_productRate").val(stockqty.ProductRate);
+                     //$j("#lbl_availableQty").text("Available Quantity:" + stockqty.Qty);
+                     $j("#unitspan").text("(In " + stockqty.ProduceUnit + ")");
+                     //$j("#lbl_baserate").html("Auction Reserved Rate per " + '</b>' + stockqty.ProduceUnit + '</b>:' + stockqty.ProductRate);
+
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+         $j('#addNewnotice').click(function (e) {
+             $j("#lbl_header").html('Create Notice');
+             $j("#btn_Save").html('Submit');
+             $j("#btn_Save").val('Submit');
+
+        });
+
+         $j('#txt_amount').keypress(function (event) {
+
+            return isNumber(event, this)
+
+        });
+
+
+         $j('#txt_qty, #txt_amount').keypress(function (e) {
+            var kc = e.which;
+            //alert(kc);
+            if (kc >= 46 && kc <= 57) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+
+        })
+
+         $j("#txt_qty").change(function () {
+            
+            var ntQty =  $j("#txt_qty").val();
+             $j("#hd_Qty").val(ntQty);
+            var availdepotQty =  $j("#hdn_avQty").val();
+            var prorate =  $j("#hdn_productRate").val();
+            var amt = (parseInt(ntQty) * parseFloat(prorate));
+             $j("#txt_amount").val(amt);
+            //alert("ntQty" + ntQty);
+            //alert("prorate" + prorate);
+            //alert("amt" + amt);
+            //var tamt =  $j("#txt_amount").val();
+
+            //alert("tamt" + tamt);
+
+            if (!ntQty) { ntQty = 0; }
+            if (!availdepotQty) { availdepotQty = 0; }
+
+            //if (parseInt(ntQty) > parseInt(availdepotQty)) {
+            //    alert('You can Enter maximum value of “Quantity”  equal or less  than the quantity available at the selected depot ');
+            //     $j("#txt_qty").val('');
+            //     $j("#txt_amount").val('');
+            //    return false;
+            //}
+
+        });
+
+         $j('#addNewnotice').click(function (e) {
+             dt = '';
+            var toAmt =   $j("#tottxt_Amount").val();
+            var toQty =   $j("#totQty").val();
+            var SchedularInfo = {
+             
+                ID:  $j("#Hdn_ID").val(),
+                RegionName:  $j("#regionCode option:selected").text(),
+                RegionCode:  $j("#regionCode").val(),
+                CircleName:  $j("#circleCode option:selected").text(),
+                CircleCode:  $j("#circleCode").val(),
+                DivisionName:  $j("#divisionCode option:selected").text(),
+                DivisionCode:  $j("#divisionCode").val(),
+                Rangename:  $j("#rangeCode option:selected").text(),
+                RangeCode:  $j("#rangeCode").val(),
+                DepotName:  $j("#depotId option:selected").text(),
+                DepotId:  $j("#depotId").val(),
+                ForestProduce:  $j("#producetype option:selected").text(),
+                ForestProduceID:  $j("#producetype").val(),
+                ForestProduct:  $j("#forestProductID option:selected").text(),
+                ForestProductID:  $j("#forestProductID").val(),
+                Qty:  $j("#txt_qty").val(),
+                BiddOpeningDate: $j("#hdn_mltDt").val(),
+                BidClosingDate:  $j("#durationto").val(),
+                ReservedPrice:  $j("#txt_amount").val()
+            }
+
+             $j.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(SchedularInfo),
+                url: RootUrl + 'ManageNotice/BindGridData',
+                success: function (data) {
+                   
+                    var bardata = "<tr class='rowid'><td>" + data.ID + "</td><td>" + data.RegionName + "</td><td>" + data.CircleName + "</td><td>" + data.DivisionName + "</td>" +
+                "<td>" + data.Rangename + "</td><td>" + data.DepotName + "</td><td>" + data.ForestProduce + "</td><td>" + data.ForestProduct + "</td><td>" + data.Qty + "</td><td>" + data.BiddOpeningDate + "</td><td>" + data.BidClosingDate + "</td></tr>";
+                     $j("#schedularTable").append(bardata);
+                     //$j("#tottxt_Amount").val(parseFloat(toAmt) + parseFloat(data.ReservedPrice))
+                    // $j("#totQty").val(parseFloat(toQty) + parseFloat(data.Qty))
+                     $j("#Hdn_ID").val(parseInt(data.ID) + 1);
+                     //$j("#regionCode").prop("disabled", true);
+                     //$j("#circleCode").prop("disabled", true);
+                     //$j("#divisionCode").prop("disabled", true);
+                     //$j("#rangeCode").prop("disabled", true);
+                     //$j("#depotId").prop("disabled", true);
+                     //$j("#producetype").prop("disabled", true);
+                     //$j("#forestProductID").prop("disabled", true);
+                     //$j("#txt_qty").prop("disabled", true);
+                     $j("#lbl_Auctiondt").text('');
+                     $j("#hdn_mltDt").val("");
+                     $j("#durationfrom").val("");
+                   
+                },
+
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+        });
+         $j('#btn_Save').click(function (e) {
+
+            if ( $j('#regionCode').val() == '') {
+                 $j('#regionerrordiv').show();
+                 $j('#regionerrordiv').html("Please Select Region Name" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                 $j("#regionCode").focus();
+                return false;
+            }
+            else {  $j('#regionerrordiv').hide(); }
+
+            if ( $j('#circleCode').val() == '0') {
+                 $j('#circleerrordiv').show();
+                 $j('#circleerrordiv').html("Please Select Circle Name" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                 $j("#circleCode").focus();
+                return false;
+            }
+            else {  $j('#circleerrordiv').hide(); }
+
+            if ( $j('#divisionCode').val() == '0') {
+                 $j('#divisionerrordiv').show();
+                 $j('#divisionerrordiv').html("Please Select Division Name" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                 $j("#divisionCode").focus();
+                return false;
+            }
+            else {  $j('#divisionerrordiv').hide(); }
+
+            if ( $j('#rangeCode').val() == '0') {
+                 $j('#rangeerrordiv').show();
+                 $j('#rangeerrordiv').html("Please Select Range Name." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                 $j("#rangeCode").focus();
+                return false;
+            }
+            else {  $j('#rangeerrordiv').hide(); }
+            if ( $j('#depotId').val() == '0') {
+                 $j('#depoterrordiv').show();
+                 $j('#depoterrordiv').html("Please Select Depot Name." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                 $j("#rangeerrordiv").focus();
+                return false;
+            }
+            else {  $j('#depoterrordiv').hide(); }
+
+            if ( $j('#producetype').val() == '0') {
+                 $j('#produceerrordiv').show();
+                 $j('#produceerrordiv').html("Please Select Product Type." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                 $j("#producetype").focus();
+                return false;
+            }
+            else {  $j('#produceerrordiv').hide(); }
+
+            if ( $j('#forestProductID').val() == '0') {
+                 $j('#producterrordiv').show();
+                 $j('#producterrordiv').html("Please Select  Product." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                 $j("#forestProductID").focus();
+                return false;
+            }
+            else {  $j('#producterrordiv').hide(); }
+
+            if ( $j('#txt_qty').val() == '' ||  $j('#txt_qty').val() == '0') {
+                 $j('#textqtyerrordiv').show();
+                 $j('#textqtyerrordiv').html("Please Enter Quantity." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                 $j("#txt_qty").focus();
+                return false;
+            }
+            else {  $j('#textqtyerrordiv').hide(); }
+
+            if ( $j('#durationto').val() == '') {
+                 $j('#errordiv7').show();
+                 $j('#errordiv7').html("Please Enter To Date." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                 $j("#durationto").focus();
+                return false;
+            }
+            else {  $j('#errordiv7').hide(); }
+
+            if ( $j('#txt_amount').val() == '') {
+                 $j('#amounterrordiv').show();
+                 $j('#amounterrordiv').html("Please Enter Amount." + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                 $j("#txt_amount").focus();
+                return false;
+            }
+            else {  $j('#amounterrordiv').hide(); }
+
+
+
+        });
+
+        function isNumber(evt, element) {
+
+            var charCode = (evt.which) ? evt.which : event.keyCode
+
+            if (
+                 (charCode != 46 ||  $j(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+                (charCode < 48 || charCode > 57))
+                return false;
+
+            //return true;
+        }
+    });
+</script>
+<script type="text/javascript">
+
+    function ClearField() {
+
+         $j("#regionCode").val('');
+         $j("#circleCode").empty();
+         $j("#divisionCode").empty();
+         $j("#rangeCode").empty();
+         $j("#depotId").empty();
+         $j("#producetype").val('');
+         $j("#produceUnit").val('');
+         $j("#txt_qty").val('');
+         $j("#lbl_availableQty").text('');
+         $j("#durationfrom").val('');
+         $j("#durationto").val('');
+         $j("#txt_amount").val('');
+        var currentDate = new Date();
+         $j("#durationfrom").datepicker("setDate", currentDate);
+
+    }
+
+</script>
+
+
+
+@using (Html.BeginForm("SubmitAuctionschedularForm", "ManageNotice", FormMethod.Post))
+{
+    <input type="hidden" id="Hdn_ID" name="ID" value="1">
+    <div id="page-wrapper-inn">
+        <div class="col-lg-12 pad">
+            <h1 class="page-header"><span>Auction Notice Scheduler</span></h1>
+            @if (@TempData["AUSCH_Status"] != null)
+            {
+                <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["AUSCH_Status"]</div>
+            }
+        </div>
+        <!-- /.col-lg-12 -->
+        <!-- Row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+
+                    <div class="panel-body">
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Period of Scheduler: <span class="mandatory"></span></label>
+                                <select name="SchedulerPeriod" id="SchedulerPeriod" class="form-control">
+                                    <option value="0">---Select---</option>
+                                    <option value="Quarterly">Quarterly</option>
+                                    <option value="Half yearly">Half Yearly</option>
+                                    <option value="Yearly">Yearly</option>
+
+                                </select>
+                                
+                               
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Region Name: <span class="mandatory"></span></label>
+                                @Html.DropDownList("RegionCode", (IEnumerable<SelectListItem>)ViewBag.RegionCode, "--Select--", new { @class = "form-control", id = "regionCode" })
+                                <input type="hidden" id="hd_regionCode" name="Hd_RegionCode" />
+                                <div id="regionerrordiv" style="display:none" class="alert-danger1"></div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Circle Name: <span class="mandatory"></span></label>
+                                @Html.DropDownList("CircleCode", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "circleCode" })
+                                <input type="hidden" id="hd_circleCode" name="Hd_CircleCode"  />
+                                <div id="circleerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Division Name: <span class="mandatory"></span></label>
+                                @Html.DropDownList("DivisionCode", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "divisionCode" })
+                                <input type="hidden" id="hd_divisionCode" name="Hd_DivisionCode" />
+                                <div id="divisionerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Range Name: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("RangeCode", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "rangeCode" })
+                                <input type="hidden" id="hd_rangeCode" name="Hd_RangeCode" />
+                                <div id="rangeerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Place/Depot of Auction: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("DepotId", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "depotId" })
+                                <input type="hidden" id="hd_depotId" name="Hd_DepotId" />
+                                <div id="depoterrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Product Type: <span class="mandatory">*</span></label>
+
+                                @Html.DropDownList("ForestProduceID", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "producetype" })
+                                <input type="hidden" id="hd_producetype" name="Hd_ForestProduceID" />
+
+
+                                <div id="produceerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Product: <span class="mandatory">*</span></label>
+
+                                @Html.DropDownList("ForestProductID", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "forestProductID" })
+
+                                <input type="hidden" id="hd_forestProductID" name="Hd_ForestProductID"  />
+
+                                <div id="producterrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6" style="display:none;">
+                            <div class="form-group">
+                                <label>Unit: <span class="mandatory">*</span></label>
+                                <input class="form-control" id="produceUnit" name="ProduceUnit" readonly="readonly">
+
+
+                                <div id="produceerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Estimated Quantity<span id="unitspan"></span>:<span class="mandatory">*</span></label>
+                                <input class="form-control" id="txt_qty" name="Qty">
+                                <input type="hidden" id="hd_Qty" name="Hd_Qty" />
+                                <input type="hidden" id="hdn_avQty" />
+
+                                <label id="lbl_availableQty" for="email" class="pull-left"></label>
+                                <label id="lbl_baserate" for="email" class="pull-right"></label>
+                                <div id="textqtyerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6" style="display:none;">
+                            <div class="form-group">
+                                <label>Rate(Per Product Unit): <span class="mandatory">*</span></label>
+                                <input class="form-control" id="hdn_productRate" readonly="readonly">
+
+
+                                <div id="produceerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+
+                                <label>Auction Date: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control datefield" id="durationfrom" name="BiddOpeningDate" />
+                                <label id="lbl_Auctiondt" for="email" class="pull-right"></label>
+                                <input type="hidden" id="hdn_mltDt" />
+                                <div id="errordiv6" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                       
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Time of Auction:</label>
+                                <div id="datepicker" class="input-group date" data-date-format="mm-dd-yyyy">
+                                    <input class="form-control timepicker" type="text" id="durationto" name="BidClosingDate">
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                       
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Reserved Price(INR): <span class="mandatory">*</span></label>
+                                <input class="form-control" id="txt_amount" name="ReservedPrice" readonly="readonly">
+
+                                <div id="amounterrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                      
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group" id="btn-cont1">
+                                <label> &nbsp;</label>
+                                <button type="button" class="btn btn-success" id="addNewnotice"> Add</button>
+                                @*<button type="button" id="btnView" class="btn btn-success" data-toggle="modal" data-target="#MemberModal">View</button>*@
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <table id="temp" class="table table-bordered" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th width="15%">S.No</th>
+                                            <th width="15%">Region</th>
+                                            <th width="15%">Circle</th>
+                                            <th width="15%">Division</th>
+                                            <th width="15%">Range</th>
+                                            <th width="15%">Depot</th>
+                                            <th width="15%">ProductType</th>
+                                            <th width="15%">Product</th>
+                                            <th width="15%">Qty</th>
+                                            <th width="15%">Auction Date</th>
+                                            <th width="15%">Auction Time</th>
+
+     
+                                        </tr>
+                                    </thead>
+                                    <tbody id="schedularTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                      
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>EMD Amount(INR): <span class="mandatory">*</span></label>
+                                <input class="form-control" id="tottxt_Amount" name="EmdAmount" />
+                                <div id="errordiv8" style="display:none" class="alert-danger1"></div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Description: <span class="mandatory">*</span></label>
+                                <input class="form-control" id="totQty" name="Description">
+
+                                <div id="amounterrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12"></div>
+
+
+
+
+                        <!-- Btn Groping -->
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_Save">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+                                <button type="reset" class="btn btn-warning">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+                                <button type="button" value="Cancel" class="btn btn-danger" onclick="reload(); return false;">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+
+                            </div>
+                        </div>
+                        <!-- /.Btn Groping -->
+
+                    </div>
+                    <!-- /.panel-body -->
+
+                </div>
+                <!-- /.panel -->
+
+            </div>
+            <!-- /.col-lg-12 -->
+
+            <div class="modal fade in" id="myViewNoticeModal2" tabindex="-1" role="dialog" aria-hidden="false">
+                <div class="modal-dialog mdw">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                            <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> </label></h4>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- From URL Get -->
+                            <input type="hidden" id="pHdn_No" name="PHdn_No" />
+                            <div id="divPublish"></div>
+
+                            <!-- /. From URL Get -->
+                        </div>
+                        <!-- /.modal-body -->
+                        <div class="modal-footer" id="fot-f">
+                            <div id="btn" class="col-lg-12">
+
+                                <button name="button" class="btn btn-danger" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                                    <i class="fa fa-times fa-fw"></i> Close
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- /.modal-content -->
+                </div>
+                <!-- /.modal-dialog -->
+            </div>
+        </div>
+    </div>
+
+}

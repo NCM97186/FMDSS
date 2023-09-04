@@ -1,0 +1,94 @@
+﻿@model List<FMDSS.Models.CitizenService.ProductionServices.Auction>
+
+
+<script src="~/js/jquery.min.js"></script>
+<style>
+
+
+    .SiteId .FeePerVehicle, .SiteName, .VillageName, .ReservedPrice, .BiddingPrice {
+        width: 100% !important;
+    }
+    .SiteId, .SiteName, .VillageName, .ReservedPrice {
+        border: none;
+        background: none;
+        font-weight: bold;
+        width: 10px;
+    }
+</style>
+
+
+<script type="text/javascript">
+    var RootURl = '@Url.Content("~/")';
+
+    $(function () {
+
+       
+        $(".BiddingPrice").bind('focus', function (e) {
+            var id = $(this).attr('id');           
+            var idc = id.substr(12, 1);            
+            $('#BiddingPrice' + idc).bind("change", function () {
+                if (parseInt($('#BiddingPrice' + idc).val(), 10) != 0 && $('#BiddingPrice' + idc).val() != '') {
+                    var BiddingPrice = $('#BiddingPrice' + idc).val();
+                    var totalfee = $('#BiddingAmount').val();                  
+                    if (!totalfee) { totalfee = 0; }
+                    var finalAmount = parseInt(BiddingPrice) + parseInt(totalfee);                  
+                    $('#BiddingAmount').val(finalAmount);
+                    e.preventDefault();
+                }                                
+            });
+
+        });
+
+
+
+    });
+
+    function isNumberKey(evt) {
+        var id = $(evt.target).attr("id");
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57)) {
+
+            evt.preventDefault();
+            return false;
+        }
+        else
+            return true;
+    }
+
+</script>
+
+<div id="tblNotice" class="table-responsive">
+    <h4>Notice Details</h4>
+    <table class="table table-striped table-bordered table-hover">
+        <thead>
+           <tr>               
+                <th style="width:4%">SiteId</th>
+                <th style="width:15%">Site Name</th>
+                <th style="width:20%">Village Name</th>
+                <th style="width:10%">Reserve Price</th>    
+                <th style="width:10%">Bidding Price</th>     
+            </tr>
+        </thead>
+        <tbody>
+          
+
+            @if (Model != null)
+            {
+                var i = 0;
+                foreach (var item in Model as IEnumerable<FMDSS.Models.CitizenService.ProductionServices.Auction>)
+                {
+                    var abc = "trVrow" + i;
+                    <tr class="@abc">
+                        <td style="width:5%!important;">@Html.TextBoxFor(X => X[i].SiteId, new { id = "SiteId" + i, @class = "SiteId", @readonly = "readonly", @Value = i + 1 })</td>
+                        <td>@Html.TextBoxFor(X => X[i].SiteName, new { id = "SiteName" + i, @class = "SiteName", @Value = item.SiteName, @readonly = "readonly" })</td>
+                        <td>@Html.TextBoxFor(X => X[i].VillageName, new { id = "VillageName" + i, @class = "VillageName", @Value = item.VillageName, @readonly = "readonly" })</td>
+                        <td>@Html.TextBoxFor(X => X[i].ReservedPrice, new { id = "ReservedPrice" + i, @class = "ReservedPrice", onkeypress = "return isNumberKey(event);" })</td>
+                        <td>@Html.TextBoxFor(X => X[i].BiddingPrice, new { id = "BiddingPrice" + i, @class = "BiddingPrice", maxlength = "10", onkeypress = "return isNumberKey(event);" })</td>
+                    </tr>
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+</div>

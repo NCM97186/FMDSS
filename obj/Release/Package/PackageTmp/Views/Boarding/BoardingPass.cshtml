@@ -1,0 +1,721 @@
+﻿@model FMDSS.Models.OnlineBooking.CS_BoardingDetails
+@{
+    ViewBag.Title = "BoardingPass";
+   
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+
+
+}
+
+
+<style>
+    #ad-btn .btn {
+        margin: 24px 0;
+        width: auto;
+    }
+
+    .ddl {
+        font-size: 10px;
+        margin: 0px;
+        padding: 0px;
+    }
+
+    .upper {
+        text-transform: uppercase;
+    }
+
+    .IssueBoards {
+        margin: 2px 0;
+        width: 30px;
+        font-size: 10px;
+    }
+</style>
+
+<style>
+    .ui-autocomplete {
+        position: absolute !important;
+        cursor: default !important;
+        left: 315px !important;
+        top: 376px !important;
+    }
+
+    .ui-autocomplete-loading {
+        background-color: white !important;
+    }
+
+    .ui-autocomplete li {
+        list-style-type: none !important;
+        margin-left: 0 !important;
+        padding: 5px !important;
+        background: #fff;
+    }
+
+    .ui-autocomplete ul {
+        margin: 0 !important;
+        padding: 0 !important;
+        background-color: White !important;
+    }
+</style>
+
+
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+
+<script>
+
+
+
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        autoRequestIdsuggest();
+        $('.upper').keypress(function (e) {
+            var kc = e.which;
+            if (e.shiftKey) {
+                if (kc == 64 || kc == 33 || kc == 35 || kc == 36 || kc == 37 || kc == 94 || kc == 38 || kc == 42 || kc == 40 || kc == 41) {
+                    e.preventDefault();
+                }
+            }
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95) || (kc >= 47 && kc <= 57) || (kc >= 44 && kc < 46) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+
+
+        //  ZoneID ========================================================================
+        $('#PlaceId').change(function (e) {
+
+
+            $("#ZoneID").empty();
+            $("#Vehicle").empty();
+            $("#ZoneID").append('<option value="--Select--">--Select--</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'BoardingMaster/ZoneByPlace', // we are calling json method
+                dataType: 'json',
+                data: { PlaceId: $("#PlaceId").val() },
+                success: function (circle) {
+                    $.each(circle, function (i, items) {
+                        $("#ZoneID").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+
+        });
+        // get Vehicle ========================================================================
+        $('#ZoneID').change(function (e) {
+
+
+
+            $("#Vehicle").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'BoardingMaster/GetVehicleByZoneAndPlace', // we are calling json method
+                dataType: 'json',
+                data: { PlaceId: $("#PlaceId").val(), ZoneID: $("#ZoneID").val() },
+                success: function (circle) {
+                    $.each(circle, function (i, items) {
+                        $("#Vehicle").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+
+    });
+</script>
+
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).on('click', '.IssueBoard', function (e) {
+
+        var ids = $(this).parents('tr').find('input[name=PrintBoarding]').val();
+
+        $.ajax({
+
+            type: 'POST',
+            url: RootUrl + 'BoardingMaster/IssueBoardingPass',
+            data: { id: ids },
+            success: function (data) {
+                $("#dvContainer").html(data);
+
+                var contents = $("#dvContainer").html();
+
+                var frame1 = $('<iframe />');
+                frame1[0].name = "frame1";
+
+                $("body").append(frame1);
+                var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+                frameDoc.document.open();
+                //Create a new HTML document.
+                frameDoc.document.write('<html><head><title>FMDSS || Boarding pass </title>');
+                //Append the external CSS file.
+                frameDoc.document.write('<link href="../css/bootstrap.min.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="../css/mobile.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="../css/main.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="../css/dashboard/dashboard.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="../css/dashboard/font-awesome.min.css" rel="stylesheet" />');
+                frameDoc.document.write("<style>.print-bg-tkt {box-shadow: none;background: #f8f8f8;border-color: #e7e7e7;padding: 5px;}</style>");
+                frameDoc.document.write('</head><body>');
+                //Append the DIV contents.
+                frameDoc.document.write(contents);
+                frameDoc.document.write('</body></html>');
+                frameDoc.document.close();
+                setTimeout(function () {
+                    window.frames["frame1"].focus();
+                    window.frames["frame1"].print();
+                    frame1.remove();
+                }, 500);
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+
+    });
+
+    $(document).on('click', '.PrintApps', function (e) {
+
+        var ids = $(this).parents('tr').find('input[name=PrintBoarding]').val();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'BoardingMaster/PrintBoardingPass',
+            data: { id: ids },
+            success: function (data) {
+                $("#dvContainer").html(data);
+
+                var contents = $("#dvContainer").html();
+
+                var frame1 = $('<iframe />');
+                frame1[0].name = "frame1";
+
+                $("body").append(frame1);
+                var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+                frameDoc.document.open();
+                //Create a new HTML document.
+                frameDoc.document.write('<html><head><title>FMDSS || Boarding pass </title>');
+                //Append the external CSS file.
+                frameDoc.document.write('<link href="../css/bootstrap.min.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="../css/mobile.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="../css/main.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="../css/dashboard/dashboard.css" rel="stylesheet" />');
+                frameDoc.document.write('<link href="../css/dashboard/font-awesome.min.css" rel="stylesheet" />');
+                frameDoc.document.write("<style>.print-bg-tkt {box-shadow: none;background: #f8f8f8;border-color: #e7e7e7;padding: 5px;}</style>");
+                frameDoc.document.write('</head><body>');
+                //Append the DIV contents.
+                frameDoc.document.write(contents);
+                frameDoc.document.write('</body></html>');
+                frameDoc.document.close();
+                setTimeout(function () {
+                    window.frames["frame1"].focus();
+                    window.frames["frame1"].print();
+                    frame1.remove();
+                }, 500);
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+
+    });
+
+
+
+
+
+</script>
+
+<script type="text/javascript">
+
+    var RootUrl = '@Url.Content("~/")';
+
+    function autoRequestIdsuggest() {
+
+        $(".autoRequestIdsuggest").autocomplete({
+            source: function (request, response) {
+                if (document.getElementById('RequestID').value.length >= 3) {
+                    $.ajax({
+                        type: "POST",
+                        url: RootUrl + 'BoardingMaster/GetAutoCompleteCity',
+                        data: {
+                            Place: $.trim($("#PlaceId").val()),
+                            ZoneID: $.trim($("#ZoneID").val()),
+                            DateOfArrival: $.trim($("#DateofVisit").val()),
+                            VehicleID: $.trim($("#Vehicle").val()),
+                            ShiftTime: $.trim($("#Shift").val()),
+                            RequestId: $.trim($("#RequestID").val())
+                        },
+
+                        success: function (data) {
+
+                            source: data.d;
+
+                            response($.map(data, function (item) {
+                                return { label: item.BookingId, value: item.BookingId };
+                            }))
+
+                        },
+                        error: function (result) {
+                        }
+                    });
+                }
+                else {
+                    response('');
+                }
+            }
+        });
+    }
+
+
+    $(document).on('click', '.reqid', function (e) {
+
+        var id = $(this).parents('tr').find('input[name=ZoneUpdate]').val();
+        var Zone = $(this).parents('tr').find('option:selected').val();
+
+        var tblinfo = {
+            ZoneID: $.trim(Zone),
+            RecordID: $.trim(id)
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'BoardingMaster/UpdateBoardingZoneS',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(tblinfo),
+            success: function (json) {
+                if (json.isRedirect) {
+                    window.location.href = json.redirectUrl;
+                }
+            }
+
+        });
+    });
+
+</script>
+
+<script type="text/javascript">
+
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).on('click', '.UpdateForIssuePass', function (e) {
+
+        //var r = confirm('Are you sure you want to generate the boarding pass ?');
+        //if (r == false) {
+        //    return false;
+        //}
+
+        var GuidName = $(this).parents('tr').find('input[id=GuidName]').val();
+
+        var VehicleNumber = $(this).parents('tr').find('input[id=VehicleNumber]').val();
+        var IDname = $(this).parents('tr').find('input[name=PrintBoarding]').val();
+
+        if (GuidName == "" || VehicleNumber == "") {
+            alert("Guid Name and Vehicle Number must be fill before Print ")
+            return false;
+        }
+
+
+        var Indexs = $(this).parents('tr').find('input[name=Index]').val();
+
+
+
+        var tblinfo = {
+            ID: $.trim(IDname),
+            GuidName: $.trim(GuidName),
+            VehicleNumber: $.trim(VehicleNumber),
+            Place: $.trim($("#PlaceId").val()),
+            ZoneID: $.trim($("#ZoneID").val()),
+            DateOfArrival: $.trim($("#DateofVisit").val()),
+            VehicleID: $.trim($("#Vehicle").val()),
+            ShiftTime: $.trim($("#Shift").val())
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'BoardingMaster/ValidationForGuidNameAndVehicleNumberUpdate',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(tblinfo),
+            success: function (json) {
+
+                if (json.STATUS == "FALSE") {
+                   
+                    alert("Guid Name And Vehicle Number assigning limit exceeded please assign new Guid Name And Vehicle Number. \n Remaining seats for Vehicle ( " + VehicleNumber + " ) is : " + json.Remaining);
+                    return false;
+                }
+                else {
+                    $.ajax({
+                        type: 'POST',
+                        url: RootUrl + 'BoardingMaster/GuidNameAndVehicleNumberUpdate',
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify(tblinfo),
+                        success: function (json) {
+                            if (json.isRedirect) {
+
+
+
+                                $("#NotArrivedindex_" + Indexs).hide();
+
+                                $("#index_" + Indexs).removeClass('UpdateForIssuePass').addClass('UpdateForPrintPass');
+                                $("#index_" + Indexs).html("Print");
+
+
+                                //$(this).parents('tr').find('input[id=VehicleNumber]').prop('readonly',true);;
+                                //$(this).parents('tr').find('input[name=PrintBoarding]').prop('readonly', true);
+
+                                window.open("PrintBoardingPass/" + IDname);
+                            }
+
+                        }
+                    });
+
+                }
+
+            }
+        });
+
+
+    });
+
+    $(document).on('click', '.UpdateForPrintPass', function (e) {
+
+        var GuidName = $(this).parents('tr').find('input[id=GuidName]').val();
+
+        var VehicleNumber = $(this).parents('tr').find('input[id=VehicleNumber]').val();
+        var IDname = $(this).parents('tr').find('input[name=PrintBoarding]').val();
+
+        if (GuidName == "" || VehicleNumber == "") {
+            alert("Guid Name and Vehicle Number must be fill before Print ")
+            return false;
+        }
+        window.open("PrintBoardingPass/" + IDname);
+    });
+
+
+    $(document).on('click', '.UpdateForNotArrivedOLD', function (e) {
+
+        var r = confirm('Are you confirm that visiter will not arrive ?');
+        if (r == false) {
+            return false;
+        }
+        var IDname = $(this).parents('tr').find('input[name=PrintBoarding]').val();
+
+        var tblinfo = {
+            ID: $.trim(IDname)
+        }
+        var row = $(this).parents('tr');
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'BoardingMaster/UpdateForNotArrived',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(tblinfo),
+            success: function (json) {
+
+                if (json.STATUS == "TRUE") {
+
+
+                    row.hide();
+                    alert('inventory update at current booking window');
+
+                    // $("#RowHideIndex_" + Indexs).hide();
+                }
+
+            }
+
+        });
+
+    });
+
+    $(document).on('click', '.UpdateForNotArrived', function (e) {
+
+
+        var IDname = $(this).parents('tr').find('input[name=PrintBoarding]').val();
+
+        $.ajax({
+            type: 'GET',
+            url: "../BoardingMaster/GetNotArrivedTicketDetails?Ticket=" + IDname,
+            dataType: 'html',
+            success: function (data) {
+                $('#modelNotArrived').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+
+    });
+
+
+
+
+    $(document).on('click', '.ViewTicket', function (e) {
+
+
+        var IDname = $(this).parents('tr').find('input[name=PrintBoarding]').val();
+
+        $.ajax({
+            type: 'GET',
+            url: "../BoardingMaster/GetViewTicketDetails?Ticket=" + IDname,
+            dataType: 'html',
+            success: function (data) {
+                $('#modelNotArrived').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+
+    });
+
+
+
+</script>
+
+<div style="display:none" id="dvContainer"></div>
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Boarding Pass Detail </h1>@*: @DateTime.Now.ToString("dd-MMM-yyyy")*@
+    </div>
+    <div class="row" ng-controller="BoardingPassController">
+        <div class="col-lg-12">
+
+            @using (Html.BeginForm("BoardingPass", "BoardingMaster", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+
+                                @if (Convert.ToBoolean(ViewBag.MultiPlaceStatus) == true && Convert.ToString(ViewBag.KioskBoardingDirect)!="true")
+                                {
+                                    <label>Place: <span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(Model => Model.PlaceId, (IEnumerable<SelectListItem>)ViewBag.LstddlPlace, "--Select--", new { @class = "form-control common", id = "PlaceId" })
+                                    <div id="errDIST_CODE" style="display:none" class="alert-danger1">Place is Required.</div>
+
+                                }
+                                else if (Convert.ToBoolean(ViewBag.MultiPlaceStatus) == false)
+                                {
+                                    @Html.HiddenFor(model => model.PlaceId)
+                                    @Html.HiddenFor(model => model.PlaceName)
+                                    <h1 class="page-header">@Html.DisplayFor(model => model.PlaceName)</h1>
+
+                                }
+                                else if (Convert.ToString(ViewBag.KioskBoardingDirect) == "true")
+                                {
+                                    @Html.HiddenFor(model => model.PlaceId)
+                                    @Html.HiddenFor(model => model.PlaceName)
+                                    <h1 class="page-header">@Html.DisplayFor(model => model.PlaceName)</h1>
+
+                                }
+
+                            </div>
+                        </div>
+                        <div id="divdate">
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <div class="form-group">
+
+                                        <label>Date of Visit: <span class="mandatory">*</span></label>
+                                        @Html.TextBoxFor(Model => Model.DateofVisit, new { @class = "form-control common upper", @maxlength = "18", id = "DateofVisit", @readonly = "True" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <div class="form-group">
+                                        <label>Zone: <span class="mandatory">*</span></label>
+                                        @Html.DropDownListFor(Model => Model.ZoneID, (IEnumerable<SelectListItem>)ViewBag.LstddlZone, "--Select--", new { @class = "form-control common", id = "ZoneID" })
+                                        <div id="errDIST_CODE" style="display:none" class="alert-danger1">Zone Name is Required.</div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <div class="form-group">
+                                        <label>Vehicle Type: <span class="mandatory">*</span></label>
+                                        @Html.DropDownListFor(Model => Model.Vehicle, (IEnumerable<SelectListItem>)ViewBag.LstddlVehicle, "--Select--", new { @class = "form-control common", id = "Vehicle" })
+                                        <div id="errDIST_CODE" style="display:none" class="alert-danger1">Vehicle Type is Required.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <div class="form-group">
+                                        <label>Shift Type: <span class="mandatory">*</span></label>
+                                        @Html.HiddenFor(model => model.Shift)
+
+
+                                        @Html.TextBoxFor(Model => Model.DisplayShiftName, new { @class = "form-control common", @maxlength = "18", id = "DisplayShiftName", @readonly = "True" })
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <div class="form-group">
+                                        <label>Request ID: </label>
+                                        @Html.TextBoxFor(Model => Model.RequestID, new { @class = "form-control common upper autoRequestIdsuggest", @maxlength = "18", id = "RequestID" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+
+                            </div>
+                            <div class="col-lg-3" id="ad-btn">
+                                <button title="View" class="btn btn-success" type="submit" id="btnView">
+                                    <i class="fa fa-eye"></i> View
+                                </button>
+                            </div>
+
+                            
+
+
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="dataTable_wrapper">
+
+
+                        <div id="tbl" class="table-responsive">
+
+
+                            @*<b>   @ViewBag.GuideSummary </b>*@
+                            <table class="table  table-bordered  table-responsive gridtable" id="dataTables-example">
+
+                                <thead>
+                                    <tr>
+                                        <th style="width:1%">#</th>
+                                        <th style="width:10%">Booking Id</th>
+
+                                        <th>Date of Visit</th>
+                                        <th>Mode Of Booking</th>
+                                        <th>Shift </th>
+                                        <th>Vehicle </th>
+                                        <th>Zone </th>
+                                      
+                                        <th>Guide Name </th>
+                                        <th>Vehicle Number </th>
+
+                                        <th colspan="2" style="width:20%;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in ViewData["ListBoarding"] as IEnumerable<FMDSS.Models.OnlineBooking.CS_BoardingDetails>)
+                                    {
+                                        <tr style="background-color:none; background-color: @Html.DisplayFor(model => item.Colors); ">
+                                            <td>@Html.DisplayFor(model => item.Index) </td>
+                                            <td>
+                                                <a class="IssueBoards ViewTicket" style="font-size:12px;" title="View Ticket Detail(s)" href="javascript:void(0)" data-toggle="modal" data-target="#myModal">@item.DisplayBookingId</a>
+
+                                            </td>
+
+                                            <td>@Html.DisplayFor(model => item.DateofVisit)</td>
+                                            <td>@Html.DisplayFor(model => item.ModeOfBooking)</td>
+                                            <td>@Html.DisplayFor(model => item.Shift)</td>
+                                            <td>@Html.DisplayFor(model => item.Vehicle)</td>
+                                            <td>@Html.DisplayFor(model => item.ZoneAtTheTimeOfBooking)</td>
+                                           
+
+
+                                            <td>
+                                                @if (item.BoardingIssueStatus == 0)
+                                                {
+                                                    @Html.TextBoxFor(model => item.GuidName, new { @class = "upper", @maxlength = "100", @id = "GuidName", @name = "GuidName" })
+                                                }
+                                                else if (item.BoardingIssueStatus == 1)
+                                                {
+                                                    @Html.TextBoxFor(model => item.GuidName, new { @class = "upper", @maxlength = "100", @id = "GuidName", @readonly = "readonly", @name = "GuidName" })
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (item.BoardingIssueStatus == 0)
+                                                {
+                                                    @Html.TextBoxFor(model => item.VehicleNumber, new { @class = "upper", @maxlength = "15", @id = "VehicleNumber", @name = "VehicleNumber" })
+                                                }
+                                                else if (item.BoardingIssueStatus == 1)
+                                                {
+                                                    @Html.TextBoxFor(model => item.VehicleNumber, new { @class = "upper", @maxlength = "15", @id = "VehicleNumber", @readonly = "readonly", @name = "VehicleNumber" })
+
+                                                }
+
+
+
+                                            </td>
+                                            <td class="Print" colspan="2">
+
+                                                @Html.Hidden("PrintBoarding", Encryption.encrypt(item.DisplayBookingId))
+
+                                                @Html.Hidden("Index", item.Index)
+
+                                                @if (item.BoardingIssueStatus == 0)
+                                                {
+                                                    <button type="button" class="IssueBoards btn btn-success UpdateForIssuePass" id="index_@item.Index" name="index_@item.Index">To Verify And Print</button>
+
+
+
+                                                    if (item.IsDepartmentalKioskUser == 0)
+                                                    {
+                                                        <button type="button" class="IssueBoards btn btn-success UpdateForNotArrived" data-toggle="modal" data-target="#myModal" id="NotArrivedindex_@item.Index" name="NotArrivedindex_@item.Index">No Show</button>
+                                                        //
+
+                                                    }
+
+                                                }
+                                                @if (item.BoardingIssueStatus == 1)
+                                                {
+                                                    <button type="button" class="IssueBoards btn btn-success UpdateForPrintPass">
+                                                        <i class="glyphicon "> Print</i>
+                                                    </button>
+                                                }
+
+                                            </td>
+                                        </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+
+        </div>
+
+    </div>
+
+
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog modal-lg" id="modelNotArrived">
+            <!-- Modal content-->
+
+
+        </div>
+    </div>
+
+
+</div>

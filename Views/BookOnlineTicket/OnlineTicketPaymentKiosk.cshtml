@@ -1,0 +1,201 @@
+﻿@using CaptchaMvc.HtmlHelpers
+@{
+    ViewBag.Title = "TicketPayment";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (Convert.ToString(HttpContext.Current.Session["IsDepartmentalKioskUser"]) == "False")
+{
+    <meta http-equiv="refresh" content="20;url=http://fmdss.forest.rajasthan.gov.in/SessionExpire/Index">
+}
+<style type="text/css">
+    table.imagetable {
+        font-family: verdana,arial,sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #999999;
+        border-collapse: collapse;
+    }
+
+        table.imagetable th {
+            background: #b5cfd2 url('cell-blue.jpg');
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #999999;
+        }
+
+        table.imagetable td {
+            background: #ccc;
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #999999;
+        }
+</style>
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript" language="javascript">
+
+    $(document).ready(function () {
+
+        function disableBack() { window.history.forward() }
+
+        window.onload = disableBack();
+        window.onpageshow = function (evt) {
+            if (evt.persisted) disableBack()
+        }
+
+    });
+
+    $(document).on("keydown", function (e) {
+        if (e.which === 8 && !$(e.target).is("input, textarea")) {
+            e.preventDefault();
+        }
+    });
+
+
+    function CallhideAccomoFees() {
+        alert('hello');
+        $('.temp').hide();
+    }
+
+</script>
+
+<div id="page-wrapper-inn">
+
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">
+            <!--<i class="fa fa-rupee"></i>--> Payment
+            <!-- <small class="pull-right pdate">Date: 17/12/2015</small> -->
+        </h1>
+    </div>
+    <!-- /.col-lg-12 -->
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <section class="payment">
+
+                        <!-- Table row -->
+                        <div class="row">
+                            <div class="col-xs-12 table-responsive">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            @*<th>Transaction_Id</th>*@
+                                            <th>Member Fee</th>
+                                            <th>Camera Fees</th>
+                                            <th>Safari Fees</th>
+
+                                            <th>Vehicle Rent Fees</th>
+                                            <th>GST on Vehicle Rent Fees</th>
+
+                                            <th>Guide Fees</th>
+                                            <th>GST on Guide Fees</th>
+
+
+                                            <th>Total Amount</th>
+                                            <th>Enter By</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in ViewData.Model)
+                                    {
+
+                                        <tbody>
+
+                                            <tr style="color:Black">
+                                                @*<td>@item["Transaction_Id"] </td>*@
+                                                <td>@item["MemberFee"]</td>
+                                                <td>@item["CameraFees"]</td>
+                                                <td>@item["SafariFees"]</td>
+                                                <td>@item["BoardingVehicleRentFee"]</td>
+                                                <td>@item["BoardingVehicleRentFeeGST"]</td>
+                                                <td>@item["BoardingGuideFee"]</td>
+                                                <td>@item["BoardingGuideRentFeeGST"]</td>
+                                                @*<td>@item["TicketAmount"]</td>
+                                                    <td>@item["EMitraCharges"]</td>
+                                                    <td>@item["Tax"]</td>*@
+                                                <td>@item["TotalAmount"]</td>
+                                                <td>@Session["User"].ToString()</td>
+                                                <td><span class="danger-text"> @item["Status"]</span></td>
+                                            </tr>
+                                        </tbody>
+                                    }
+
+
+
+                                </table>
+                            </div><!-- /.col -->
+                        </div><!-- /.row -->
+                        <!-- this row will not appear when printing -->
+                        <div class="row no-print">
+                            <div class="col-xs-12">
+                                <label>Total Amount </label>: @Html.Raw(HttpContext.Current.Session["totalprice"])
+                                <br />
+                                <span style="color:red;">Payment aggregator and bank charges will be extra as per their policy.</span>
+                                <br />
+                                <label>The Payment does not guarantee E-ticket. Confirmed Ticket would be available only as per seat availabilty</label>
+                                @if (Convert.ToString(HttpContext.Current.Session["IsDepartmentalKioskUser"].ToString()) == "True")
+                                {
+                                    using (Html.BeginForm("DeptKioskUserPayVIPSeats", "BookOnlineTicket", FormMethod.Post, new { id = "pay" }))
+                                    {
+                                        if (HttpContext.Current.Session["totalprice"].ToString() == "0")
+                                        {
+                                            <div style="text-align:center" class="form-horizontal" role="form">
+                                                <button id="btnPay" type="submit" name="Command" value="pay" disabled="disabled" class="btn btn-primary pull-right"><i class="fa fa-check"></i> Pay Now</button>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div style="text-align:center" class="form-horizontal" role="form">
+                                                <button id="btnPay" type="submit" name="Command" value="pay" class="btn btn-primary pull-right"><i class="fa fa-check"></i> Pay Now</button>
+                                            </div>
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    using (Html.BeginForm("Pay", "BookOnlineTicket", FormMethod.Post, new { id = "pay" }))
+                                    {
+
+                                        <div class="col-lg-12 un-bold" style="clear:both;display:none">
+                                            <div class="capt">
+                                                <p>   @Html.MathCaptcha()  <span style="color:red">@TempData["ErrorMessage"]</span> <br /></p>
+                                            </div>
+                                        </div>
+
+
+
+                                        if (HttpContext.Current.Session["totalprice"].ToString() == "0")
+                                        {
+                                            <div style="text-align:center" class="form-horizontal" role="form">
+                                                <button id="btnPay" type="submit" name="Command" value="pay" disabled="disabled" class="btn btn-primary pull-right"><i class="fa fa-check"></i> Pay Now</button>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div style="text-align:center" class="form-horizontal" role="form">
+                                                <button id="btnPay" type="submit" name="Command" value="pay" class="btn btn-primary pull-right"><i class="fa fa-check"></i> Pay Now</button>
+                                            </div>
+                                        }
+
+                                    }
+                                }
+
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>
+<!-- /#page-wrapper -->

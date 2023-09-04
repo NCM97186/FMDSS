@@ -1,0 +1,221 @@
+﻿@model FMDSS.Models.Rescue.NGOModel
+
+@{
+    ViewBag.Title = "EditNGO";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm("EditNGO", "Rescue", FormMethod.Post, new { enctype = "multipart/form-data", id = "main" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    <div id="mainDiv" class="col-lg-9">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Edit NGO
+            </div>
+            <div class="panel-body">
+
+                <div class="col-lg-4 hide">
+                    <div class="form-group">
+                        <label>WaterHoleVendorDetailsID:</label>
+                        @Html.TextBoxFor(model => model.WaterHoleVendorDetailsID, new { @readonly = true, @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.WaterHoleVendorDetailsID)
+                    </div>
+                </div>
+
+                <div class="col-lg-4 hide">
+                    <div class="form-group">
+                        <label>Reg. Number:</label>
+                        @Html.TextBoxFor(model => model.RegNumber, new { @readonly = true, @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.RegNumber)
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>NGO Name:</label>
+                        @Html.TextBoxFor(model => model.NameofVendor, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.NameofVendor)
+                    </div>
+                </div>
+
+                @*<div class="col-lg-4">
+                        <div class="form-group">
+                            <label>District:</label>
+                            @Html.TextBoxFor(model => model.District, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.District)
+                        </div>
+                    </div>*@
+
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>PinCode:</label>
+                        @Html.TextBoxFor(model => model.PinCode, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.PinCode)
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Representative Name:</label>
+                        @Html.TextBoxFor(model => model.RepresentativeName, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.RepresentativeName)
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Mobile Number:</label>
+                        @Html.TextBoxFor(model => model.MobileNumber, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.MobileNumber)
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>SSO Id:</label>
+                        @Html.TextBoxFor(model => model.VendorSSOId, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.VendorSSOId)
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Registration Purpose:</label>
+                        @Html.TextBoxFor(model => model.PurposeforRegistration, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.PurposeforRegistration)
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Circle Name:</label>
+                        @Html.DropDownListFor(d => d.Circle_Code, (IEnumerable<SelectListItem>)ViewBag.CCODE, "--Select--", new { @class = "form-control", id = "ddl_circleCode", onchange = "Circle_Onchange(this);" })
+                        @Html.ValidationMessageFor(model => model.Circle_Code)
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Division Name:</label>
+                        @Html.DropDownListFor(model => model.Division_Code, (IEnumerable<SelectListItem>)ViewBag.DivisionCode, "--Select--", new { @class = "form-control", id = "ddl_divisionCode", onchange = "Division_Onchange(this);" })
+                        @Html.ValidationMessageFor(model => model.Division_Code)
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Range Name:</label>
+                        @Html.DropDownListFor(d => d.Range_Code, (IEnumerable<SelectListItem>)ViewBag.RangeCode, "--Select--", new { id = "ddlRange", @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Range_Code)
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Village Name:</label>
+                        @Html.DropDownListFor(d => d.Village_Code, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "ddlVillageCode", @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Village_Code)
+                    </div>
+                </div>
+
+
+
+                <div class="col-lg-4">
+                    <div class="form-group" style="padding-top:29px;">
+                        <label>IsActive:</label>
+                        @Html.CheckBoxFor(model => model.isActive)
+                    </div>
+                </div>
+
+                <div class="col-lg-9 un-bold">
+                    <label></label>
+                    <div class="input-group">
+                        <div class="form-group">
+                            <input type="submit" class="btn btn-success" value="Submit" name="buttonType" />
+                            @Html.ActionLink("Back to List", "NGOIndex", null, null, new { @class = "btn btn-success" })
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+}
+
+<script>
+            var RootUrl = '@Url.Content("~/")';
+            function Circle_Onchange(cntrl) {
+                $("#ddl_divisionCode").empty();
+                $.ajax({
+                    type: 'POST',
+                    url:  'DivisionData', // we are calling json method
+                    dataType: 'json',
+                    data: { circleCode: cntrl.value },
+                    success: function (response) {
+                        $.each(response, function (i, items) {
+                            $("#ddl_divisionCode").append('<option value="' + items.Value + '">' +
+                                items.Text + '</option>');
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve data.' + ex);
+                    }
+                });
+            }
+
+
+            function Division_Onchange(cntrl) {
+                $("#ddlRange").empty();
+                $.ajax({
+                    type: 'POST',
+                    url:  'RangeData', // we are calling json method
+                    dataType: 'json',
+                    data: { divisionCode: cntrl.value },
+                    success: function (response) {
+                        $.each(response, function (i, items) {
+                            $("#ddlRange").append('<option value="' + items.Value + '">' +
+                                items.Text + '</option>');
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve data.' + ex);
+                    }
+                });
+            }
+
+            $("#ddlRange").bind("change", function () {
+                //$('#ddlVillages').empty();
+                //$("#ddlVillages").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+
+                //$('#NurseryInchargeSSOID').empty();
+                //$("#NurseryInchargeSSOID").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+
+                //var values = {
+                //    RangeCode: $("#ddlRange option:selected").val()
+                //};
+
+                //$.ajax({
+                //    type: 'POST',
+                //    contentType: 'application/json; charset=utf-8',
+                //    url: RootUrl + 'ManageNursery/GetSSOIDbyRange',
+                //    data: JSON.stringify(values),
+                //    success: function (data) {
+                //        $.each(data, function (i, items) {
+                //            $("#NurseryInchargeSSOID").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                //        });
+                //    },
+                //    traditional: true,
+                //    error: function (data) { console.log(data) }
+                });
+</script>
+
+@*<div>
+        @Html.ActionLink("Back to List", "Index")
+    </div>
+
+    @section Scripts {
+        @Scripts.Render("~/bundles/jqueryval")
+    }*@

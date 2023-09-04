@@ -1,0 +1,75 @@
+﻿@model FMDSS.Entity.FRAViewModel.ApproverRemarksCommonVM
+ 
+<div class="modal-dialog tbl-scroll">
+    <div class="modal-content"> 
+        @using (Ajax.BeginForm("UpdateAppealDetails", "ClaimRequest", new AjaxOptions { HttpMethod ="POST", Confirm = FMDSS.Globals.Constant.ConfirmMsg, OnSuccess = "RedirectToOtherPage" }))
+        {
+           <div class="col-lg-12" id="font13" style="margin-top:20px;">   
+               <div class="col-lg-12 panel panel-heading"><label>Appeal Request Approval</label></div> 
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Action: <span class="mandatory">*</span></label>
+                        @Html.DropDownListFor(x => x.StatusID, new List<SelectListItem>
+                            {
+                                new SelectListItem { Text = "--Select--", Value = ""},
+                                new SelectListItem { Text = "Consider", Value = Convert.ToInt32(FMDSS.ActionTypeForFRA.Considered).ToString()}, 
+                                new SelectListItem { Text = "Reject", Value = Convert.ToInt32(FMDSS.ActionTypeForFRA.Reject).ToString()}
+                            }, new { @class = "form-control", onchange = "BindActionReason(this)", id = "ddlAction" }) 
+                        <div id="err1" class="alert-danger1">@Html.ValidationMessageFor(x => x.StatusID)</div>
+                    </div>
+                </div>
+                <div  id="divRemaks" class="col-lg-6">
+                    <div class="form-group hideclass">
+                        <label>Remarks: <span style="color: red">*</span></label>
+
+                        @Html.TextBoxFor(x => x.ApproverComment, new { @class = "form-control", @maxlength = 500, @id = "txtApproverComment", @Required = "Required", placeholder = "Please Enter Remark." })
+
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.ApproverComment)</div>
+
+                    </div>
+                </div> 
+            </div>
+            <!-- /.modal-body -->
+            <div class="modal-footer" id="fot-f">
+                <div id="btn" class="col-lg-12">
+                    <button id="btnForward" type="submit" class="btn btn-success forward hideclass" name="Command" value="@FMDSS.FRAUserType.SDLC">
+                        <i class="fa fa-check"></i> Submit
+                    </button>
+
+                    <button id="btnCancel" name="button" class="btn btn-danger" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                        <i class="fa fa-times fa-fw"></i> Close
+                    </button>
+
+                </div>
+            </div> 
+            @Html.Hidden("userType", (int)ViewBag.UserType)
+            @Html.HiddenFor(x=>x.ParentID, Model.ParentID)
+        }
+    </div>
+
+    <!-- /.modal-content -->
+</div>
+ 
+<style>
+
+    #divPrint {
+        max-height:350px !important;
+    }
+    #modalWorkFlowDetails .modal-dialog {
+        width: 1092px !important;
+        min-height: 600px;
+    }
+</style>
+<script src="~/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js" type="text/javascript"></script> 
+<script src="~/Scripts/Controller/Common.js"></script>
+<script> 
+    function RedirectToOtherPage(response) {
+        if (!response.IsError) {
+            BackToList(response.redirectURL);
+        }
+        else {
+            alert(response.ReturnMsg);
+        }
+    }
+</script> 

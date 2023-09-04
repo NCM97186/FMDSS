@@ -1,0 +1,658 @@
+﻿@using FMDSS.Models.ForesterDevelopment.BudgetAllocation.ViewModel
+@model FMDSS.Models.ForesterDevelopment.BudgetAllocation.ViewModel.MonthlyProgressReportModel
+@{
+    ViewBag.Title = "BudgetMonthlyProgressReport";
+    Layout = "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<script src="~/js/jquery.min.js"></script>
+
+<style>
+    #tbl {
+        display: block;
+        overflow: scroll;
+    }
+
+    th.dt-center, td.dt-center {
+        text-align: center;
+    }
+</style>
+<style>
+    #tbl {
+        display: block;
+        overflow: scroll;
+    }
+
+    .Bold {
+        font-size: 20px;
+    }
+
+    tfoot {
+        color: green;
+    }
+
+    .navbar-top-links li {
+        display: inline-block !important;
+    }
+
+    .navbar-brand {
+        padding: 4px 15px !important;
+        line-height: 20px !important;
+    }
+
+    .navbar {
+        margin-bottom: 0px !important;
+    }
+
+    .navbar-nav {
+        float: right !important;
+        margin: 0;
+    }
+
+        .navbar-nav > li > a {
+            line-height: 16px !important;
+            padding-top: 10px !important;
+            padding-bottom: 10px !important;
+        }
+
+    .redBold {
+        color: red;
+        font-size: large;
+    }
+</style>
+
+<div id="page-wrapper-inn">
+    @if (TempData["Message"] != null)
+    {
+    <script type="text/javascript" language="javascript">
+        alert('@TempData["Message"]');
+    </script>
+    }
+    @Html.Partial("_PartialBudgetLink")
+
+    <div class="col-lg-12 pad">
+        <div class="col-lg-10">
+            <h1 class="page-header">Wildlife Budget Monitoring Report (@Session["User"].ToString())</h1>
+        </div>
+        @*<div class="col-lg-2">
+            <button type="button" class="btn btn-success confirm-toggle" name="Command" value="0" id="AddMaster">
+                <i class="fa fa-check"></i> Show Master
+            </button>
+        </div>*@
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+
+                <div class="panel-body">
+
+                    <div class="col-xs-12">
+                        @using (Html.BeginForm("BudgetSummaryReports", "BudgetMnthProgReport", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data", id = "IdFor" }))
+                        {
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label>Financial Year: <span class="mandatory"></span></label>
+                                @Html.DropDownListFor(x => x.FinancialYear, (IEnumerable<SelectListItem>)ViewBag.Financial, "--ALL--", new { @class = "form-control", @id = "FinancialYearId" })
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label>Scheme: <span class="mandatory"></span></label>
+                                @Html.DropDownListFor(x => x.Scheme_Name, (IEnumerable<SelectListItem>)ViewBag.SchemeList, "--ALL--", new { @class = "form-control", @id = "SchemeID" })
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label>Budget Head: <span class="mandatory"></span></label>
+                                @Html.DropDownListFor(x => x.BudgetHead, (IEnumerable<SelectListItem>)ViewBag.BudgetHead, "--ALL--", new { @class = "form-control", @id = "BudgetHeadList" })
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label>Budget Sub-Head: <span class="mandatory"></span></label>
+                                @Html.DropDownListFor(x => x.SubBudgetHead, (IEnumerable<SelectListItem>)ViewBag.SubBudgetHeadList, "--ALL--", new { @class = "form-control", @id = "SubBudgetHeadList", name = "SubBudgetHeadId" })
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label>Activity: <span class="mandatory"></span></label>
+                                @Html.DropDownListFor(x => x.Activity_Name, (IEnumerable<SelectListItem>)ViewBag.Activity, "--ALL--", new { @class = "form-control", @id = "ActivityList" })
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label>Sub-Activity: <span class="mandatory"></span></label>
+                                @Html.DropDownListFor(x => x.SubActivity_Name, (IEnumerable<SelectListItem>)ViewBag.SubActivityList, "--ALL--", new { @class = "form-control", @id = "SubActivityList" })
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label>Circle: <span class="mandatory"></span></label>
+                                @Html.DropDownListFor(x => x.Circle_Code, (IEnumerable<SelectListItem>)ViewBag.Circle, null, new { @class = "form-control", @id = "Circle_Code" })
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label>Division: <span class="mandatory"></span></label>
+                                @Html.DropDownList("Division_Codes", (IEnumerable<SelectListItem>
+                                    )ViewBag.DivisionLists, "--ALL--", new { @name = "Division_Codes", @class = "form-control", @id = "Division_Code", @multiple = "multiple" })
+                                    @Html.HiddenFor(s => s.Division_Code, new { @id = "Division_CodeMulti" })
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label>Sanctuary: <span class="mandatory"></span></label>
+                                @Html.DropDownListFor(model => model.SantuaryCode, (IEnumerable<SelectListItem>)ViewBag.SantauryList, "--ALL--", new { @class = "form-control", @id = "Sanctuary" })
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label>Recurring/NonRecurring: <span class="mandatory"></span></label>
+                                @Html.DropDownListFor(model => model.IsRecurringName, new List<SelectListItem>
+                                    {
+                                    new SelectListItem{ Text="Recurring", Value="0"},
+                                    new SelectListItem{ Text="NonRecurring", Value="1"},
+                                    new SelectListItem{ Text="None", Value="2"}
+                                    }, "--Select--", new { @class = "form-control", @id = "Sanctuary" })
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label>Is Core Or Buffer: <span class="mandatory">*</span></label>
+
+                                @Html.DropDownListFor(model => model.IsCoreOrBuffer, new List<SelectListItem> {
+                                                   new SelectListItem{Text="BOTH",Value="BOTH"},new SelectListItem{Text="CORE",Value="CORE"},new SelectListItem{Text="BUFFER",Value="BUFFER"}}, new { @class = "form-control", @id = "IsCoreOrBuffer" })
+                            </div>
+                        </div>
+                        <br /> <br />
+
+
+                        <div class="col-lg-2">
+                            <div class="form-group">
+                                @Html.Hidden("Circle_Names", new { @id = "Circle_Names" })
+                                @Html.Hidden("Division_Names", new { @id = "Division_Names" })
+                                @Html.Hidden("SantuaryNames", new { @id = "SantuaryNames" })
+                                <label><span class="mandatory"></span></label>
+                                <button type="submit" class="btn btn-success confirm-toggle" name="Save" id="Submit">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+                            </div>
+                        </div>
+                        @*<div class="col-lg-2">
+                            <div class="form-group">
+                                <label><span class="mandatory"></span></label>
+                                <button type="reset" class="btn btn-danger" name="Cancel">
+                                    <i class="fa fa-arrow-circle-right"></i> Cancel
+                                </button>
+                            </div>
+                        </div>*@
+                        <div class="col-lg-2">
+                            <div class="form-group">
+                                <label><span class="mandatory"></span></label>
+                                <button type="button" class="btn btn-info" onclick="tablesToExcel(['tbl'], ['tbl'], 'BudgetSummaryReport', 'Excel')">Export to Excel</button>
+                            </div>
+                        </div>
+                        <br />
+
+
+                        }
+
+                        <div class="col-lg-12">
+                            <br />
+
+                            <br />
+                            <div id="DivExport" class="dataTable_wrapper table-responsive scroll-x scroll-y simplebar horizontal">
+                                <table id="tbl" class="table table-striped table-bordered table-hover gridtable">
+                                    @Html.Raw(TempData["BudgetSummaryReport"])
+
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<script>
+    var RootURl = '@Url.Content("~/")';
+</script>
+@*
+<script src="http://code.jquery.com/jquery-1.12.4.min.js"></script>*@
+@*<link href="http://cdn.rawgit.com/davidstutz/bootstrap-multiselect/master/dist/css/bootstrap-multiselect.css"
+      rel="stylesheet" type="text/css" />
+<script src="http://cdn.rawgit.com/davidstutz/bootstrap-multiselect/master/dist/js/bootstrap-multiselect.js"></script>
+<link href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.3/css/bootstrap.min.css"
+      rel="stylesheet" type="text/css" />
+<script src="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.3/js/bootstrap.min.js"></script>*@
+<script>
+
+    //$('select[multiple]').multiselect({
+    //    columns: 2,
+    //    placeholder: 'Select options'
+    //});
+    $("#Submit").click(function () {
+        $("#SelectColumnName").val('');
+        $("#SelectColumnName").val($("#mySkills").val());
+    });
+    //$(function () {
+    //    $(".multiselect-selected-text").click(function () {
+
+    //        $(".btn-group").addClass("open");
+    //    })
+    //});
+</script>
+
+
+<script type="text/javascript">
+    $("#Submit").click(function () {
+        var FY = $("#FinancialYearId option:Selected").val();
+        var Scheme = $("#SchemeID option:Selected").val();
+        var Circle = $("#Circle_Code option:Selected").val();
+        var Division = $("#Division_Code option:Selected").val();
+        var SantuaryName = $("#Sanctuary option:Selected").val();
+        if (FY != "" && FY != "0") {
+            $("#FinancialYears").val($("#FinancialYearId option:Selected").text().trim());
+        }
+        else {
+            $("#FinancialYears").val('N/A');
+        }
+
+        if (Scheme != "" && Scheme != "0") {
+            $("#Scheme_Names").val($("#SchemeID option:Selected").text().trim());
+        }
+        else {
+            $("#Scheme_Names").val('N/A');
+        }
+
+        if (Circle != "" && Circle != "0") {
+            $("#Circle_Names").val($("#Circle_Code option:Selected").text().trim());
+        }
+        else {
+            $("#Circle_Names").val('N/A');
+        }
+
+        //if (Division != "" && Division != "0") {
+        //    $("#Division_Names").val($("#Division_Code option:Selected").text().trim());
+        //}
+        //else {
+        //    $("#Division_Names").val('N/A');
+        //}
+        var Division = $("#Division_Code").val();
+        $("#Division_CodeMulti").val(Division);
+
+        var DivisionNames = [];
+        $.each($("#Division_Code option:selected"), function () {
+            DivisionNames.push($(this).text());
+        });
+        $("#Division_Names").val(DivisionNames.join(", "));
+
+        if (SantuaryName != "" && SantuaryName != "0") {
+            $("#SantuaryNames").val($("#Sanctuary option:Selected").text().trim());
+        }
+        else {
+            $("#SantuaryNames").val('N/A');
+        }
+
+    });
+    $("#BudgetHeadList").bind("change", function (e) {
+        GetSubBudgetHead();
+
+    });
+
+    function GetSubBudgetHead() {
+        var budgetHead = $("#BudgetHeadList option:Selected").val();
+        if (budgetHead != '') {
+
+            $("#SubBudgetHeadList").empty();
+            $("#SubBudgetHeadList").append('<option value="">--ALL--</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootURl + 'BudgetMnthProgReport/GetBudgetSubHeadAccordingAllocation',
+                dataType: 'json',
+                data: { budgetHead: budgetHead },
+                success: function (data) {
+                    $.each(data, function (i, items) {
+
+                        $("#SubBudgetHeadList").append('<option value="' + items.Value + '">' +
+                            items.Text + '</option>');
+                    });
+
+                    $("#SubBudgetHeadList option").each(function () {
+                        if ($(this).text().trim().toLowerCase() == 'none') {
+                            $(this).attr("selected", "selected");
+                        }
+                    });
+                },
+            });
+
+        }
+    }
+
+    function GetSubActivity() {
+
+        var ActivityID = $('#ActivityList option:Selected').val();
+
+        $("#SubActivityList").empty();
+        if (ActivityID != '') {
+            $("#SubActivityList").append('<option value="">--ALL--</option>');
+
+            $.ajax({
+                type: 'POST',
+                url: RootURl + 'BudgetMnthProgReport/GetSubActivityAccordingAllocation',
+                dataType: 'json',
+                data: { ActivityID: ActivityID },
+                success: function (data) {
+                    $.each(data, function (i, items) {
+
+                        $("#SubActivityList").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+
+                    });
+                    $("#SubActivityList option").each(function () {
+                        if ($(this).text().trim().toLowerCase() == 'none') {
+                            $(this).attr("selected", "selected");
+                        }
+                    });
+                },
+
+            });
+        }
+    }
+    $(document).ready(function () {
+        //GetSubActivity();
+        //GetSubBudgetHead();
+    });
+
+    $("#ActivityList").bind("change", function (e) {
+
+        GetSubActivity();
+
+    });
+
+    $('#Circle_Code').change(function (e) {
+        var Circle_Code = $('#Circle_Code option:Selected').val();
+        $("#Division_Code").empty();
+        var option = $("<option />");
+        option.attr("value", '').text('--ALL--');
+        $('#Division_Code').append(option);
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("GetDivision","BudgetExpenditure")',
+            dataType: 'json',
+            data: { circleCode: Circle_Code },
+            success: function (circle) {
+                $.each(circle, function (i, items) {
+                    $("#Division_Code").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+
+        });
+
+    });
+
+
+    $('#Division_Code').change(function (e) {
+        $("#Sanctuary").empty();
+        $("#Sanctuary").append('<option value="">--ALL--</option>');
+        if ($("#Division_Code").val() != "" && $("#Division_Code").val() != "0") {
+            var DIV_CODE = $("#Division_Code").val();
+            $.ajax({
+                type: 'GET',
+                url: RootURl + 'BudgetAllocationCircle/GetSanctuaryList?Div_Code=' + DIV_CODE,
+                dataType: 'json',
+                //data: { Div_Code: DIV_CODE },
+                success: function (result) {
+                    $.each(result, function (i, items) {
+                        $("#Sanctuary").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+
+                    });
+                },
+
+            });
+        }
+        else {
+            $("#Sanctuary").append('<option value="0">--Select--</option>');
+
+        }
+
+    });
+
+    function isObjectEmpty(obj) {
+        if (obj !== null) {
+            return '<p style="color: red;">' + parseFloat(obj).toFixed(2) + '</p>';
+        }
+        else {
+            return parseFloat(0).toFixed(2);
+        }
+    }
+
+    function isObjectEmptyForYear(obj) {
+        if (obj !== null) {
+            return obj;
+        }
+        else {
+            return '<p style="color: red;">No Expenditure</p>';
+        }
+    }
+
+    $(function () {
+        $('.gridtable').DataTable({
+            responsive: true,
+            "lengthMenu": [500, 1000, 1500, 2000, 5000],
+            "bSort": false,
+            dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+    "<'row'<'col-sm-12'tr>>" +
+    "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            "columnDefs": [
+       { "className": "dt-center", "targets": "_all" }
+            ]
+        })
+
+    });
+</script>
+<script type="text/javascript">
+    $.noConflict(true);
+    var tablesToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+        , tmplWorkbookXML = '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'
+          + '<DocumentProperties xmlns="urn:schemas-microsoft-com:office:office"><Author>Axel Richter</Author><Created>{created}</Created></DocumentProperties>'
+          + '<Styles>'
+          + '<Style ss:ID="Currency"><NumberFormat ss:Format="Currency"></NumberFormat></Style>'
+          + '<Style ss:ID="Date"><NumberFormat ss:Format="Medium Date"></NumberFormat></Style>'
+          + '<Style ss:ID="columnheaders"><Font ss:Size="10" ss:Bold="1"/></Style>'
+          + '</Styles>'
+          + '{worksheets}</Workbook>'
+        , tmplWorksheetXML = '<Worksheet ss:Name="{nameWS}"><Table>{rows}</Table></Worksheet>'
+        , tmplCellXML = '<Cell{attributeStyleID}{attributeFormula}><Data ss:Type="{nameType}">{data}</Data></Cell>'
+        , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+        , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (tables, wsnames, wbname, appname) {
+            var ctx = "";
+            var workbookXML = "";
+            var worksheetsXML = "";
+            var rowsXML = "";
+
+            //Export Excel Developed By Rajveer
+
+            var FY = 'N/A';
+            var Scheme_Names = 'N/A';
+            var Circle_Names = 'N/A';
+            var Division_Codes = 'N/A';
+            var SantuaryName = 'N/A';
+
+            if ($("#FinancialYearId option:Selected").val().trim() != "" && $("#FinancialYearId option:Selected").val().trim() != "0") {
+                FY = $("#FinancialYearId option:Selected").text().trim();
+            }
+            if ($("#Circle_Code option:selected").val() != "" && $("#Circle_Code option:selected").val() != "0") {
+                Circle_Names = $("#Circle_Code option:Selected").text().trim();
+            }
+            if ($("#Division_Code option:Selected").val() != "" && $("#Division_Code option:Selected").val() != "0") {
+                Division_Codes = $("#Division_Code option:Selected").text().trim();
+            }
+            if ($("#Sanctuary option:Selected").val() != "" && $("#Sanctuary option:Selected").val() != "0") {
+                SantuaryName = $("#Sanctuary option:Selected").text().trim();
+            }
+            if ($("#SchemeID option:Selected").val() != "" && $("#SchemeID option:Selected").val() != "0") {
+                Scheme_Names = $("#SchemeID option:Selected").text().trim();
+            }
+
+            //End
+            //var getFilterFromDate = document.getElementById('FromDate').value;
+            //var getFilterToDate = document.getElementById('ToDate').value;
+            wbname = wbname + '.xls';
+            for (var i = 0; i < tables.length; i++) {
+                if (!tables[i].nodeType) tables[i] = document.getElementById(tables[i]);
+
+                //Customized Excel Report By Rajveer
+                rowsXML += '<Row><Cell ss:StyleID="columnheaders"><Data ss:Type="String">Scheme:</Data></Cell><Cell><Data ss:Type="String">' + Scheme_Names + '</Data></Cell><Cell ss:StyleID="columnheaders"><Data ss:Type="String">Budget Year:</Data></Cell><Cell><Data ss:Type="String">' + FY + '</Data></Cell></Row>';
+                rowsXML += '<Row></Row>'
+                rowsXML += '<Row><Cell ss:StyleID="columnheaders"><Data ss:Type="String">Circle/Division/Sanctuary:-</Data></Cell><Cell><Data ss:Type="String">' + Circle_Names + ' /' + Division_Codes + ' /' + SantuaryName + '</Data></Cell></Row>';
+                rowsXML += '<Row></Row>'
+                //End Customized Excel Report By Rajveer
+                for (var j = 0; j < tables[i].rows.length; j++) {
+                    rowsXML += '<Row>'
+                    for (var k = 0; k < tables[i].rows[j].cells.length; k++) {
+                        var dataType = tables[i].rows[j].cells[k].getAttribute("data-type");
+                        var dataStyle = tables[i].rows[j].cells[k].getAttribute("data-style");
+                        var dataValue = tables[i].rows[j].cells[k].getAttribute("data-value");
+                        dataValue = (dataValue) ? dataValue : tables[i].rows[j].cells[k].innerHTML.trim();
+                        if (dataValue.indexOf("input") > 0) {
+                            dataValue = dataValue.substring(0, dataValue.indexOf("input") - 1)
+                        }
+
+                        if (dataValue.indexOf('button') == -1 || dataValue.indexOf('a') == -1 || dataValue.indexOf('checkbox')) {
+                            var dataFormula = tables[i].rows[j].cells[k].getAttribute("data-formula");
+                            dataFormula = (dataFormula) ? dataFormula : (appname == 'Calc' && dataType == 'DateTime') ? dataValue : null;
+                            ctx = {
+                                attributeStyleID: (dataStyle == 'Currency' || dataStyle == 'Date') ? ' ss:StyleID="' + dataStyle + '"' : ''
+                                   , nameType: (dataType == 'Number' || dataType == 'DateTime' || dataType == 'Boolean' || dataType == 'Error') ? dataType : 'String'
+                                   , data: (dataFormula) ? '' : dataValue
+                                   , attributeFormula: (dataFormula) ? ' ss:Formula="' + dataFormula + '"' : ''
+                            };
+                            rowsXML += format(tmplCellXML.trim(), ctx);
+                        }
+                    }
+                    rowsXML += '</Row>'
+                }
+                ctx = { rows: rowsXML, nameWS: wsnames[i] || 'Sheet' + i };
+                worksheetsXML += format(tmplWorksheetXML, ctx);
+                rowsXML = "";
+            }
+
+            ctx = { created: (new Date()).getTime(), worksheets: worksheetsXML };
+            workbookXML = format(tmplWorkbookXML, ctx);
+
+
+            var link = document.createElement("A");
+            link.href = uri + base64(workbookXML);
+            link.download = wbname || 'BudgetSummaryReport.xls';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    })();
+</script>
+<script type="text/javascript">
+
+
+
+    function FooterTable() {
+        var TotalAmount = 0.0;
+        var AllocatedAmount = 0.0;
+        var ExpAmount = 0.0;
+        var duringthemonthAmount = 0.0;
+        var RAmount = 0.0;
+        var RemainingAmount = 0.0;
+        var ExpenditureTilldate = 0.0;
+        var ExpenditureLastmonth = 0.0;
+
+        if ($("#tbl tbody tr .counttotal").length > 0) {
+            $("#tbl tbody tr .counttotal").each(function (i, v) {
+
+            });
+            $(".counttotalamount").each(function () {
+                TotalAmount = parseFloat(TotalAmount) + parseFloat($(this).text());
+            });
+
+            $(".countallocatedamount").each(function () {
+                AllocatedAmount = parseFloat(AllocatedAmount) + parseFloat($(this).text());
+            });
+
+            $(".countexpenditureduringthemonth").each(function () {
+                duringthemonthAmount = parseFloat(duringthemonthAmount) + parseFloat($(this).text());
+            });
+
+            $(".countremaningamount").each(function () {
+                RAmount = parseFloat(RAmount) + parseFloat($(this).text());
+            });
+
+            $(".countexpendituretilldate").each(function () {
+                ExpenditureTilldate = parseFloat(ExpenditureTilldate) + parseFloat($(this).text());
+            });
+
+            $(".countexpenditurelastmonth").each(function () {
+                ExpenditureLastmonth = parseFloat(ExpenditureLastmonth) + parseFloat($(this).text());
+            });
+        }
+
+
+        $("#totalamount").text(TotalAmount.toFixed(2));
+        $("#allocatedamount").text(AllocatedAmount.toFixed(2));
+        $("#expenditureduringthemonth").text(duringthemonthAmount.toFixed(2));
+        $("#remaningamount").text(RAmount.toFixed(2));
+        $("#expendituretilldate").text(ExpenditureTilldate.toFixed(2));
+        $("#expenditurelastmonth").text(ExpenditureLastmonth.toFixed(2));
+    }
+
+
+    $(document).ready(function () {
+
+        FooterTable();
+
+    });
+</script>
+
+
+<script type="text/javascript">
+    function fnShowHide(iCol) {
+        /* Get the DataTables object again - this is not a recreation, just a get of the object */
+        var oTable = $('#tbl').dataTable();
+
+        var bVis = oTable.fnSettings().aoColumns[iCol].bVisible;
+        oTable.fnSetColumnVis(iCol, bVis ? false : true);
+    }
+
+    function SelectMultipleSelectOption() {
+        var values = $("#Division_CodeMulti").val();
+        if (values != '') {
+            $.each(values.split(","), function (i, e) {
+                $("#Division_Code option[value='" + e + "']").prop("selected", true);
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        SelectMultipleSelectOption();
+    });
+</script>

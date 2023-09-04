@@ -1,0 +1,342 @@
+﻿@model FMDSS.Models.ElephantMovement
+@{
+    ViewBag.Title = "AmritaDeviAwardReviewApprover";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<script type="text/javascript">
+    function SetADAppReviewApprover(id) {
+
+        $.ajax({
+            type: 'GET',
+            url: "../AmritaDeviAward/GetADRevApprvDetails?ID=" + id,
+            dataType: 'html',
+            success: function (data) {
+                $('#modelDetails').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+
+    };
+
+
+    function SetADAppAssigner(id) {
+
+        $.ajax({
+            type: 'GET',
+            url: "../AmritaDeviAward/GetADAssignerDetails?ID=" + id,
+            dataType: 'html',
+            success: function (data) {
+                $('#modelDetailsAssigner').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+
+    };
+
+    function SetADmyaction(id) {      
+        $.ajax({
+            type: 'GET',
+            url: "../AmritaDeviAward/GetMyActionApprvDetails?ID=" + id + "&ActionNames=ADReviewApproverlistView",
+            dataType: 'html',
+            success: function (data) {
+                $('#modelDetailsViews').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+
+    };
+
+    //$(document).ready(function () {
+    //    $("#printReport").click(function () {
+    //        alert("test");
+          
+    //    });
+    //});
+</script>
+
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog modal-lg" id="modelDetails">
+    </div>
+</div>
+
+
+<div class="modal fade" id="myModalAssigner" role="dialog">
+    <div class="modal-dialog modal-lg" id="modelDetailsAssigner">
+    </div>
+</div>
+
+
+<div class="modal fade" id="modelDetailsView" role="dialog">
+    <div class="modal-dialog modal-lg" id="modelDetailsViews">
+    </div>
+</div>
+
+<div class="col-lg-9 pad">
+    <h1 class="page-header">Amrita Devi Award Review Approver</h1>
+
+</div>
+
+<div class="row">
+
+    <div class="col-md-9">
+        <span style="color:forestgreen">@TempData["msg"]</span> 
+        <div class="panel with-nav-tabs panel-default">
+            <div class="panel-heading">
+                <ul class="nav nav-tabs" id="myTab">
+                    <li class="active"><a href="#tab1default" data-toggle="tab"><i class="fa fa-star fa-fw"></i> My Actions</a></li>
+                    <li class=""><a href="#tab2default" data-toggle="tab"><i class="fa fa-user fa-fw"></i>Pending Requests</a></li>
+                    @*<li class=""><a href="#tab3default " data-toggle="tab"><i class="fa fa-comment fa-fw"></i>To Be Assigned</a></li>*@
+                  
+                </ul>
+            </div>
+           
+            <div class="panel-body">
+                <div class="tab-content">
+                   
+                    <div class="tab-pane fade in active" id="tab1default">
+                        @using (Html.BeginForm("ExportToExcel", "AmritaDeviAward", FormMethod.Post))
+                        {
+                            @Html.Hidden("hdn_myaction", "myaction")
+                            <input type="submit" value="Print Report" id="printReport" class="btn btn-success"  />
+                            <div class="panel-body">
+
+                                <div class="table-responsive request-id tbl-scroll">
+
+                                    <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    #
+                                                </th>
+                                                <th>
+                                                    Request ID
+                                                </th>
+                                                <th>
+                                                    Name
+                                                </th>
+                                                <th>
+                                                    Award Category
+                                                </th>
+                                                <th>
+                                                    Land Place
+                                                </th>
+                                                <th>
+                                                    Status
+                                                </th>
+                                                <th>
+                                                    Action
+                                                </th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            @foreach (var item in ViewData["MyActions"] as IEnumerable<FMDSS.Models.AmritaDeviAwardModel>)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.Index)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.RequestID)
+                                                    </td>
+
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.FirstName1)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.AwardCategory)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.LandPlace)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.StatusName)
+                                                    </td>
+                                                    <td colspan="2">
+                                                        <a title='Update Status' id="lnk_UpdateStatus" data-toggle="modal" data-target="#modelDetailsView" href='javascript:void(0)' onclick=SetADmyaction('@item.RequestID')> @Html.DisplayFor(modelItem => item.StatusName)</a>
+                                                    </td>
+                                                </tr>
+                                            }
+
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+                                <!-- /.table-responsive -->
+                            </div>
+                        }
+                    </div>
+                  
+
+                    <div class="tab-pane fade in" id="tab2default">
+                        @using (Html.BeginForm("ExportToExcel", "AmritaDeviAward", FormMethod.Post))
+                        {
+                            @Html.Hidden("hdn_pending", "pending")
+                            <input type="submit" value="Print Report" id="printReport1" class="btn btn-success"  />
+                            <div class="panel-body">
+                                <div class="table-responsive tbl-scroll">
+
+                                    <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    #
+                                                </th>
+                                                <th>
+                                                    Request ID
+                                                </th>
+                                                <th>
+                                                    Name
+                                                </th>
+                                                <th>
+                                                    Award Category
+                                                </th>
+                                                <th>
+                                                    Land Place
+                                                </th>
+                                                <th>
+                                                    Status
+                                                </th>
+
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in ViewData["PendingRequests"] as IEnumerable <FMDSS.Models.AmritaDeviAwardModel>)
+                                            { 
+                                                <tr>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.Index)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.RequestID)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.FirstName1)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.AwardCategory)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.LandPlace)
+                                                    </td>
+                                                    <td colspan="2">
+                                                        <a title='Update Status' id="lnk_UpdateStatus" data-toggle="modal" data-target="#myModal" href='javascript:void(0)' onclick=SetADAppReviewApprover('@item.RequestID')> @Html.DisplayFor(modelItem => item.StatusName)</a>
+                                                    </td>
+
+                                                </tr>
+                                            }
+
+
+                                    </tbody>
+
+                                </table>
+
+
+                            </div>
+                            <!-- /.table-responsive -->
+                        </div>
+                    }
+                    </div>
+
+
+                    <div class="tab-pane fade in" id="tab3default">
+                        @using (Html.BeginForm("ExportToExcel", "AmritaDeviAward", FormMethod.Post))
+                        {
+                            @Html.Hidden("hdn_tobeassign", "tobeassign")
+                            <input type="submit" value="Print Report" id="printReport2" class="btn btn-success" />
+                            <div class="panel-body">
+                                <div class="table-responsive tbl-scroll">
+
+                                    <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    #
+                                                </th>
+                                                <th>
+                                                    Request ID
+                                                </th>
+                                                <th>
+                                                    Name
+                                                </th>
+                                                <th>
+                                                    Award Category
+                                                </th>
+                                                <th>
+                                                    Land Place
+                                                </th>
+                                                <th>
+                                                    Status
+                                                </th>
+
+                                                <th>
+                                                    Action
+                                                </th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            @foreach (var item in ViewData["ToBeAssigned"] as IEnumerable
+                                            <FMDSS.Models.AmritaDeviAwardModel>)
+                                            { 
+                                                <tr>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.Index)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.RequestID)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.FirstName1)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.AwardCategory)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.LandPlace)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.StatusName)
+                                                    </td>
+                                                    <td colspan="2">
+                                                        <a title='Update Assigner' id="lnk_UpdateAssigner" data-toggle="modal" data-target="#myModalAssigner" href='javascript:void(0)' onclick=SetADAppAssigner('@item.RequestID')>Assign</a>
+                                                    </td>
+                                                </tr>
+                                            }
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+                            <!-- /.table-responsive -->
+                        </div>
+                    }
+                    </div>
+                <!-- /.Tab3 -->
+                </div>
+        </div>
+           
+    </div>
+</div>
+<!-- /.Tab1 -->
+
+
+
+
+</div>
+
+

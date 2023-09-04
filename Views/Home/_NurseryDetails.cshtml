@@ -1,0 +1,101 @@
+﻿@model FMDSS.Models.Home.ProductListVM
+@*@{
+        Layout = null;
+    }*@
+
+<form id="form11" name="form11" method="post" target='_blank'>
+        <input type="hidden" id="ssoid" name="ssoid" value="" />
+        <input type="hidden" id="ofcid" name="ofcid" value="DOITC" />
+        <input type="hidden" id="requestFor" name="requestFor" value="" />
+        <input type="hidden" id="coordinates" name="coordinates" value="" />
+        <input type="hidden" id="nurserydetails" name="nurserydetails" value="" />
+        <input type="hidden" id="portalid" name="portalid" value="" />
+        <input type="hidden" id="returnurl" name="returnurl" value="" />
+
+    </form>
+<div class="col-lg-12">
+    <h4 >Nursery Information:</h4>
+</div>
+@Html.Hidden("hdnCaptchaFlage",Model.ErrorMessageFlag)
+<table class="table table-striped table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Nursery Name</th>
+            <th>Nursery Address</th>
+            <th>Nursery Incharge</th>
+            <th>Mobile No</th>
+            <th>Nursery Image</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.nurseryInformationList != null)
+        {
+            var id = 0;
+            foreach (var item in Model.nurseryInformationList)
+            {
+                id++;
+                var landmark = string.Empty;
+                if(item.NURSERY_LANDMARK!=null)
+                {
+                    landmark = item.NURSERY_LANDMARK;
+                }
+                <tr>
+                    <td>@item.NurseryName</td>
+                    <td>@item.NurseryAddress<br /><br />@landmark</td>
+                    <td>@item.NurseryIncharge</td>
+                    <td>@item.Mobile</td>
+                    <td>
+                        @if (item.NurseryImageUrl != null)
+                                    {
+                        <a href="@item.NurseryImageUrl.Replace(" ","")" target="_blank">
+                           <img src='@item.NurseryImageUrl.Replace(" ","")' style="height:100px;width:100px;border:2px solid dotted #000000" />
+                        </a>
+                        }
+                        else
+                        {
+
+                            <img src="~/Content/Images/SiteImage/no-image-available-png-3.png" style="height:100px;width:100px;border:2px solid dotted #000000" />
+                        }
+                    </td>
+                    <td>
+                        <a href="@Url.Action("NurseryPlantdetails","Home",new {DIST_CODE=Model.DIST_CODE,NURSERY_CODE=item.NURSERY_CODE,Id=Model.Id })" target="_blank" style="color:#000000" title="View Plant Availability">
+                            <i class="fa fa-eye"></i>
+                        </a>
+                        @if (item.LATITUDE != "0.0000000000" && item.LONGITUDE != "0.0000000000")
+                {
+                    @*@Html.Hidden("hdnLat", item.LATITUDE)*@
+                            <input type="hidden" value="@item.LATITUDE" id="hdnLat_@id" />
+                          <input type="hidden" value="@item.LONGITUDE" id="hdnLong_@id"/>
+                        <input type="hidden" value="@Model.DIST_CODE" id="hdnDIST_CODE" />
+                        <input type="hidden" value="@item.NurseryName" id="hdnNurseryName_@id" />
+                        <input type="hidden" value="@item.NURSERY_CODE" id="hdnNURSERY_CODE_@id" />
+                        <input type="hidden" value="@item.NurseryAddress" id="hdnNurseryAddress_@id" />
+                        <input type="hidden" value="@item.NurseryImageUrl" id="hdnNurseryImageUrl_@id" />
+                            @*@Html.Hidden("hdnLong_@id", item.LONGITUDE)*@
+                            @*@Html.Hidden("hdnDIST_CODE", Model.DIST_CODE)
+                            @Html.Hidden("hdnNurseryName", item.NurseryName)
+                            @Html.Hidden("hdnNURSERY_CODE", item.NURSERY_CODE)
+                            @Html.Hidden("hdnNurseryAddress", item.NurseryAddress)
+                            @Html.Hidden("hdnNurseryImageUrl", item.NurseryImageUrl)*@
+
+                            <span> | </span>
+                            <a href="#" title="View GIS"  onclick="POSTGIS(@id);">
+                                <i class="fa fa-map-marker" style="color:#000000"></i>
+                            </a>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6">
+
+                    </td>
+                </tr>
+             }
+            }
+        </tbody>
+</table>
+
+
+
+

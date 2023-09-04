@@ -1,0 +1,1168 @@
+﻿@model FMDSS.Models.ForestDevelopment.SchemeModel
+@{
+    ViewBag.Title = "AddScheme";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString());
+}
+<style>
+    .red {
+        color: red;
+    }
+
+    .hide {
+        display: none;
+    }
+</style>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+<div id="page-wrapper-inn">
+    @Html.Partial("_PartialBudgetLink")
+    <div class="panel-heading">
+        @if (TempData["Message"] != null)
+        {
+            @*<div id='divSuccess' class='alert alert-success'><i class='fa fa-thumbs-o-up fa-fw'></i> @Html.Raw(TempData["Message"])</div>*@
+            @Html.Raw(TempData["Message"])
+        }
+    </div>
+    <div class="col-lg-12 pad">
+        <div class="col-lg-10">
+            <h1 class="page-header">Add Scheme (@Session["User"].ToString())</h1>
+        </div>
+        <div class="col-lg-2">
+            <button type="button" class="btn btn-success confirm-toggle" name="Command" value="0" id="AddMaster">
+                <i class="fa fa-check"></i> Show Master
+            </button>
+        </div>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <!--Search-->
+                    <!--./Search-->
+                    <!--Add New Btn-->
+                    <div class="col-lg-3 pull-right">
+                        <button id="btnAddScheme" type="button" style="width: auto; margin: 0 0 10px" class="btn btn-info AddNewScheme pull-right" name="" value="" title="Add New Scheme" data-toggle="modal" data-target="#NewSchemeForm">
+                            <i class="fa fa-plus"></i> Add New Scheme
+                        </button>
+                    </div>
+                    <!--./Add New Btn-->
+                    <!--Table-->
+
+                    <div class="table-responsive request-id">
+                        <table class="table table-striped table-bordered table-hover gridtable">
+
+                            <thead>
+                                <tr>
+                                    <th style="width:6%;">S. No</th>
+                                    <th>Scheme Name</th>
+
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.List)
+                                {
+                                    <tr class="reqid">
+                                        <td>@Html.DisplayFor(model => item.ID)</td>
+                                        <td class="name">
+                                            @Html.DisplayFor(model => item.SchemeName)
+                                        </td>
+                                        <td class="name">
+                                            @Html.DisplayFor(model => item.StartDate)
+                                        </td>
+                                        <td class="name">
+                                            @Html.DisplayFor(model => item.EndDate)
+                                        </td>
+                                        <td>
+                                            @*@if (item.StatusDesc == "Edit")
+                                                {
+                                                    <button id="btnEdit" type="button" class="btn btn-warning btn-circle edit" title="Edit" data-toggle="modal" data-target="#NewSchemeForm" onclick="EditScheme('@Html.DisplayFor(model => item.ID)')"><i class="fa fa-edit"></i></button>
+                                                }
+                                                else
+                                                {
+                                                    <button id="btnEdit" type="button" disabled="disabled" class="btn btn-warning btn-circle edit" title="Edit" data-toggle="modal" data-target="#NewSchemeForm" onclick="EditScheme('@Html.DisplayFor(model => item.ID)')"><i class="fa fa-edit"></i></button>
+                                                }*@
+                                            <button type="button" class="btn btn-warning btn-circle" title="View" data-toggle="modal" data-target="#NewSchemeForm" onclick="ViewScheme('@item.ID','@item.SchemeName','@item.StartDate','@item.EndDate')">
+                                                <i class="fa fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-warning btn-circle" title="Map" onclick="ViewSchemeMappingbtn('@item.ID','@item.SchemeName')">
+                                                <i class="fa fa-warning"></i>
+                                            </button>
+                                        </td>
+
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+                <!-- /.panel-body -->
+                @using (Html.BeginForm("AddScheme", "fdmScheme", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {
+                    <div class="modal fade" id="NewSchemeForm" role="dialog">
+                        <div class="modal-dialog modal-lg">
+                            <!-- Modal content-->
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button id="btnAddSchem" type="button" class="close" data-dismiss="modal">
+                                        &times;
+                                    </button>
+                                    <h4 class="modal-title">
+                                        Add Scheme
+                                    </h4>
+                                </div>
+                                <div class="modal-body auto-scrol">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="panel panel-default">
+
+                                                <div class="panel-body">
+                                                    @Html.HiddenFor(model => model.ID)
+
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Name of Scheme:<span class="mandatory">*</span> <span id="SScheme" style="display:none;" class="mandatory">*Scheme Required</span></label>
+                                                            @Html.TextBoxFor(s => s.SchemeName, new { @class = "form-control", @maxlength = "100" })
+                                                            @Html.ValidationMessageFor(s => s.SchemeName, null, new { @class = "red" })
+                                                        </div>
+                                                    </div>
+                                                    @*<div class="col-lg-6" id="DistrictLabel">
+                                                            <div class="form-group">
+                                                                <label>District:(multiple selection using ctrl+select)<span class="mandatory"></span><span id="SDistrict" style="display:none;" class="mandatory">* Select District</span></label>
+                                                                @Html.DropDownListFor(s => s.DistrictName, (IEnumerable<SelectListItem>)ViewBag.district, new { @class = "form-control", id = "Dropdistrict", name = "Dropdistrict", multiple = "multiple" })
+                                                                @Html.HiddenFor(s => s.DistrictCode)
+                                                            </div>
+                                                        </div>*@
+
+                                                    <div class="col-lg-6" style="display:none;">
+                                                        <div class="form-group">
+                                                            <label>From Date:<span class="mandatory">*</span><span id="SStartdate" style="display:none;" class="mandatory">*From date Required</span></label>
+
+                                                            @Html.TextBoxFor(s => s.StartDate, new { @class = "form-control", @maxlength = "100" })
+                                                            @Html.ValidationMessageFor(s => s.StartDate, null, new { @class = "red" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6" style="display:none;">
+                                                        <div class="form-group">
+                                                            <label>To Date:<span class="mandatory">*</span><span id="SEnddate" style="display:none;" class="mandatory">*To date Required</span></label>
+
+                                                            @Html.TextBoxFor(s => s.EndDate, new { @class = "form-control", @maxlength = "100" })
+                                                            @Html.ValidationMessageFor(s => s.EndDate, null, new { @class = "red" })
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Btn Groping -->
+                                                    <div class="btn-padd">
+                                                        <div id="btn" class="col-lg-12">
+                                                            <button type="submit" class="btn btn-success" name="Command" value="submit" id="btn_submit1">
+                                                                <i class="fa fa-check"></i> Submit
+                                                            </button>
+                                                            <button type="reset" class="btn btn-warning" id="btnReset">
+                                                                <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                                            </button>
+
+                                                        </div>
+                                                    </div>
+                                                    <!-- /.Btn Groping -->
+
+                                                </div>
+                                                <!-- /.panel-body -->
+
+                                            </div>
+                                            <!-- /.panel -->
+
+                                        </div>
+                                        <!-- /.col-lg-12 -->
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                }
+
+                @using (Html.BeginForm("CreateSchemeMapping", "fdmScheme", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {
+                    <div class="modal fade" id="mapSchemeForm" role="dialog">
+                        <div class="modal-dialog modal-lg">
+                            <!-- Modal content-->
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button id="btnAddSchem" type="button" class="close" data-dismiss="modal">
+                                        &times;
+                                    </button>
+                                    <h4 class="modal-title">
+                                        Map Schemes
+                                    </h4>
+                                </div>
+                                <div class="modal-body auto-scrol">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="panel panel-default">
+
+                                                <div class="panel-body">
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Name of Scheme:<span class="mandatory"></span></label>
+                                                            @Html.Hidden("SchemeID")
+                                                            @Html.Hidden("MappingID")
+                                                            @Html.TextBoxFor(s => s.SchemeName, new { @class = "form-control SchemeName", @maxlength = "100", @readonly = "readonly", id = "SchemeName" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Select Any option <span class="mandatory"></span></label><br />
+
+                                                            @Html.RadioButtonFor(s => s.ISCircleDivision, "Circle", new { @class = "ISCircleDivision cir", @checked = "checked" }) Circle
+                                                            @Html.RadioButtonFor(s => s.ISCircleDivision, "Division", new { @class = "ISCircleDivision div" }) Division
+                                                            @Html.RadioButtonFor(s => s.ISCircleDivision, "HQ", new { @class = "ISCircleDivision HQ" }) HQ
+                                                            @Html.RadioButtonFor(s => s.ISCircleDivision, "Sanctuary", new { @class = "ISCircleDivision san" }) Sanctuary
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-12"></div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Office: <span class="mandatory">*</span></label>
+                                                            @Html.DropDownListFor(x => x.CIRCLE_CODE, (IEnumerable<SelectListItem>)ViewBag.Circle, "--Select--", new { @class = "form-control", @id = "CIRCLE_CODE" })
+
+                                                            @Html.DropDownListFor(model => model.CIRCLE_CODE, new List<SelectListItem> {
+                                                             new SelectListItem{Text="HQ",Value="HQ"}}, new { @class = "form-control hide", @id = "CircleHQ" })
+                                                            @*<div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.BudgetHeadID)</div>*@
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-6" id="divisions" style="display:none">
+                                                        <div class="form-group">
+                                                            <label>Division: <span class="mandatory">*</span></label>
+                                                            @Html.DropDownListFor(x => x.Division, (IEnumerable<SelectListItem>)ViewBag.DivisionList, "--Select--", new { @class = "form-control ", @id = "Division" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6 hide" id="SanctuaryVal">
+                                                        <div class="form-group">
+                                                            <label>Sanctuary: <span class="mandatory">*</span></label>
+                                                            @Html.DropDownListFor(x => x.SanctuaryCode, (IEnumerable<SelectListItem>)ViewBag.SanctuaryList, "--Select--", new { @class = "form-control ", @id = "Sanctuary" })
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Budget Head<span class="mandatory"></span></label>
+                                                            @Html.DropDownListFor(s => s.BudgetHead, (IEnumerable<SelectListItem>)ViewBag.BudgetHeadList, "--Select--", new { @class = "form-control", id = "BudgetHeadID" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Sub Budget Head<span class="mandatory"></span></label>
+                                                            @Html.DropDownListFor(s => s.SubBudgetHead, (IEnumerable<SelectListItem>)ViewBag.SubBudgetHeadList, "--Select--", new { @class = "form-control", id = "SubBudgetHeadID" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Activity Name<span class="mandatory"></span></label>
+                                                            @Html.DropDownListFor(s => s.Activity, (IEnumerable<SelectListItem>)ViewBag.ActivityList, "--Select--", new { @class = "form-control", id = "ActivityID" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Sub Activity Name<span class="mandatory"></span></label>
+                                                            @Html.DropDownListFor(s => s.SubActivity, (IEnumerable<SelectListItem>)ViewBag.SubActivityList, "--Select--", new { @class = "form-control", id = "SubActivityID" })
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="btn-padd Insert">
+                                                        <div id="btn" class="col-lg-6">
+                                                            <button type="button" class="btn btn-success" name="Command" value="submit" id="btn_Add">
+                                                                <i class="fa fa-check"></i> ADD
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="btn-padd Edit hide">
+                                                        <div id="btn" class="col-lg-6">
+                                                            <button type="button" class="btn btn-success" name="Command" onclick="EDITSchemeMapping();" value="submit" id="btn_Add">
+                                                                <i class="fa fa-check"></i> EDIT
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="table-responsive request-id">
+                                                        <table class="table table-striped table-bordered table-hover">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>HQ/Circle Office Name</th>
+                                                                    <th>Division Name</th>
+                                                                    <th>Sanctuary Name</th>
+                                                                    <th>Budget Head</th>
+                                                                    <th>Sub Budget Head</th>
+                                                                    <th>Activity Name</th>
+                                                                    <th>Sub Activity Name</th>
+                                                                    @*<th>ISCircleDivision</th>*@
+
+
+                                                                    <th>Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="logTbl">
+                                                                @{int i = 0;}
+                                                                @foreach (var item in Model.MappingList)
+                                                                {
+                                                                    <tr class="reqid">
+                                                                        <td class="name">
+                                                                            @Html.DisplayFor(model => item.CIRCLEName)
+                                                                        </td>
+                                                                        <td class="name">
+                                                                            @Html.DisplayFor(model => item.DivisionName)
+                                                                        </td>
+                                                                        <td class="name">
+                                                                            @Html.DisplayFor(model => item.SanctuaryName)
+                                                                        </td>
+                                                                        <td class="name">
+                                                                            @Html.Hidden("scheID", item.ID, new { @class = "schemesID" })
+                                                                            @Html.DisplayFor(model => item.BudgetHeadName)
+                                                                        </td>
+                                                                        <td class="name">
+                                                                            @Html.DisplayFor(model => item.SubBudgetHeadName)
+                                                                        </td>
+                                                                        <td class="name">
+                                                                            @Html.DisplayFor(model => item.ActivityName)
+                                                                        </td>
+                                                                        <td class="name">
+                                                                            @Html.DisplayFor(model => item.SubActivityName)
+                                                                        </td>
+                                                                        @*<td class="name">
+                                                                                @Html.DisplayFor(model => item.ISCircleDivision)
+                                                                            </td>*@
+
+                                                                        <td></td>
+
+                                                                    </tr>
+                                                                }
+                                                            </tbody>
+                                                        </table>
+
+                                                    </div>
+
+                                                </div>
+                                                <!-- Btn Groping -->
+                                                @Html.Hidden("ApprovedIds", null, new { @class = "SchemeIds" })
+                                                <div class="btn-padd Insert">
+                                                    <div id="btn" class="col-lg-12">
+                                                        <button type="submit" class="btn btn-success" name="Command" value="submit" id="btn_submit11">
+                                                            <i class="fa fa-check"></i> Submit
+                                                        </button>
+                                                        <button type="reset" class="btn btn-warning" id="btnReset">
+                                                            <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                                        </button>
+                                                        <button type="button" class="btn btn-danger" data-dismiss="modal">
+                                                            <i class="fa fa-times fa-fw"></i> Cancel
+                                                        </button>
+
+                                                    </div>
+                                                </div>
+                                                <!-- /.Btn Groping -->
+
+                                            </div>
+                                            <!-- /.panel-body -->
+
+                                        </div>
+                                        <!-- /.panel -->
+
+                                    </div>
+                                    <!-- /.col-lg-12 -->
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                }
+
+
+
+
+
+
+
+            </div>
+            <!-- /.panel -->
+
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+
+</div>
+<script src="~/Scripts/jquery-1.8.2.min.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+<script type="text/javascript">
+    var RootURl = '@Url.Content("~/")';
+</script>
+<script type="text/javascript">
+    $(function () {
+
+        $(document).ready(function () {
+            $(".Edit").addClass('hide');
+            $(".Insert").removeClass('hide');
+        });
+
+        $('.gridtable').DataTable({
+            responsive: true,
+            "bSort": true
+        });
+
+    });
+    $(function () {
+        $(".datefield").datepicker({ minDate: new Date(1999, 10 - 1, 25), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+    });
+
+    $("#Dropdistrict").blur(function () {
+
+        $("#DistrictCode").val($("#Dropdistrict").val());
+    });
+
+    function ViewScheme(id, schemaname, startdate, enddate) {
+        $("#ID").val(id);
+        $("#SchemeName").val(schemaname);
+        $("#StartDate").val(startdate);
+        $("#EndDate").val(enddate);
+    }
+
+    function ViewSchemeMappingbtn(id, schemaname) {
+        $("#SchemeID").val(id);
+        $(".SchemeName").val(schemaname);
+        GetMappingScheme(id);
+
+    }
+
+    $(function () {
+        var BudgetHeadID;
+        $('#BudgetHeadID').change(function (e) {
+            BudgetHeadID = $('#BudgetHeadID').val();
+            GetSubBudgetHead(BudgetHeadID, 'GET', 0);
+
+        });
+        $('#ActivityID').change(function (e) {
+            var ActivityID = $('#ActivityID').val();
+            GetSubActivity(ActivityID, 'GET', 0);
+        });
+
+        $('#btn_Add').click(function (e) {
+            var SchemeID = $('#SchemeID').val();
+            var SchemeName = $('.SchemeName').val();
+            AddSchemeMapping(SchemeID, SchemeName);
+        });
+
+        $('#btn_submit11').click(function (e) {
+
+            //var SchemeID = $("#SchemeID").val();;
+            //var BudgetHeadID= $("#BudgetHeadID option:selected").val();
+            //var SubBudgetHeadID= $("#SubBudgetHeadID option:selected").val();
+            //var ActivityID= $("#ActivityID option:selected").val();
+            //var SubActivityID = $("#SubActivityID option:selected").val();
+
+            //if (SchemeID == null || SchemeID == '' || SchemeID == 'undefined' || SchemeID == '0')
+            //{
+            //    alert("Please Fill Scheme");
+            //    return false;
+            //}
+            //else if (BudgetHeadID == null || BudgetHeadID == '' || BudgetHeadID == 'undefined' || BudgetHeadID == '0') {
+            //    alert("Please select Budget Head");
+            //    return false;
+            //}
+            //else if (SubBudgetHeadID == null || SubBudgetHeadID == '' || SubBudgetHeadID == 'undefined') {
+            //    alert("Please select Sub Budget Head");
+            //    return false;
+            //}
+            //else if (ActivityID == null || ActivityID == '' || ActivityID == 'undefined' || ActivityID == '0') {
+            //    alert("Please select Activity");
+            //    return false;
+            //}
+            //else if (SubActivityID == null || SubActivityID == '' || SubActivityID == 'undefined' || SubActivityID == '0') {
+            //    alert("Please select Sub Activity");
+            //    return false;
+            //}
+
+            if ($("#logTbl tr").length > 0) {
+                var data = "";
+                $.each($("#logTbl tr"), function (i, item) {
+                    data += "," + $(this).find('td').find('input').val()
+
+                });
+                $(".SchemeIds").val(data);
+            }
+            else {
+                alert("Add Atleast one record");
+                return false;
+            }
+        });
+
+    });
+
+    function GetMappingScheme(SchemeID) {
+        if (SchemeID != null && SchemeID != "" && SchemeID != "0") {
+            $("#logTbl").empty();
+            $.ajax({
+                type: 'GET',
+                url: RootURl + 'FdmScheme/GETMapScheme?SchemeID=' + SchemeID,
+                success: function (result) {
+                    console.log(result);
+                    $.each(result, function (i, data) {
+                        if (data.MappingId != null && data.MappingId > 0) {
+                            var tbl = "";
+                            tbl = tbl + "<tr>"
+                            tbl = tbl + "<td><input type='hidden' class='EditMappedID EditMappedID" + data.MappingId + "' value='" + data.MappingId + "'/><input type='hidden' class='EditCircle_Code" + data.MappingId + "' value='" + data.CIRCLE_CODE + "'/><input type='hidden' class='EditDivision" + data.MappingId + "' value='" + data.Division + "'/><input type='hidden' class='EditSanctuaryCode" + data.MappingId + "' value='" + data.SanctuaryCode + "'/><input type='hidden' class='EditISCircleDivision" + data.MappingId + "' value='" + data.ISCircleDivision + "'/><input type='hidden' class='EditBudgetHeadID" + data.MappingId + "' value='" + data.BudgetHead + "'/><input type='hidden' class='EditSubBudgetHeadID" + data.MappingId + "' value='" + data.SubBudgetHead + "'/><input type='hidden' class='EditActivityID" + data.MappingId + "' value='" + data.Activity + "'/><input type='hidden' class='EditSubActivityID" + data.MappingId + "' value='" + data.SubActivity + "'/>" + data.CIRCLEName + "</td><td>" + data.DivisionName + "</td><td>" + data.SanctuaryName + "</td><td>" + data.BudgetHeadName + "</td><td>" + data.SubBudgetHeadName + "</td><td>" + data.ActivityName + "</td><td>" + data.SubActivityName + "</td><td><button type='button' class='btn btn-warning btn-circle' title='EDIT' onclick='EDITScheme(" + data.MappingId + ")'><i class='fa fa-edit'></i></button><button type=button class='btn btn-danger btn-circle btndelete' style=cursor:pointer ><i class='fa fa-times'></i></button></td>";
+                            tbl = tbl + "</tr>"
+                            $("#logTbl").append(tbl);
+                        }
+
+                        else {
+                            alert("Some Error Occured!!!!!");
+                        }
+                    });
+                    $("#mapSchemeForm").modal('show');
+                },
+
+            });
+        }
+        else {
+            alert("Please select scheme");
+        }
+    }
+    function GetSubBudgetHead(BudgetHeadID, Action, SubBudgetHead) {
+        $("#SubBudgetHeadID").empty();
+        var option = $("<option />");
+        option.attr("value", '').text('--Select--');
+        $('#SubBudgetHeadID').append(option);
+        $.ajax({
+            type: 'POST',
+            url: RootURl + 'BudgetAllocationCircle/GetBudgetSubHead',
+            dataType: 'json',
+            data: { budgetHead: BudgetHeadID },
+            success: function (data) {
+                $.each(data, function (i, items) {
+
+                    $("#SubBudgetHeadID").append('<option value="' + items.Value + '">' +
+                     items.Text + '</option>');
+
+                });
+                $("#SubBudgetHeadID option").each(function () {
+                    if ($(this).text().trim().toLowerCase() == 'none') {
+                        $(this).attr("selected", "selected");
+                    }
+                });
+
+                if (Action == 'EDIT') {
+                    $('#SubBudgetHeadID').val(SubBudgetHead);
+
+                }
+
+            },
+
+        });
+    }
+
+    function GetSubActivity(ActivityId, Action, SubActivity) {
+        if (ActivityId != '') {
+            $("#SubActivityID").empty();
+            var option = $("<option />");
+            option.attr("value", '0').text('--Select--');
+            $('#SubActivityID').append(option);
+            $.ajax({
+                type: 'POST',
+                url: RootURl + "BudgetAllocationCircle/GetMasterActivity",
+                dataType: 'json',
+                data: { Action: 'SubActivity', ID: ActivityId },
+                success: function (data) {
+                    $.each(data, function (i, items) {
+
+                        $("#SubActivityID").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+
+                    });
+                    $("#SubActivityID option").each(function () {
+                        if ($(this).text().trim().toLowerCase() == 'none') {
+                            $(this).attr("selected", "selected");
+                        }
+                    });
+
+                    if (Action == 'EDIT') {
+                        $('#SubActivityID').val(SubActivity);
+
+                    }
+                },
+
+            });
+        }
+
+    }
+
+    $(document).on('click', '.btndelete', function () {
+
+        if (confirm("Are you sure you want to delete this?")) {
+
+            var $item = $(this).closest("tr").find('td');
+            var i = 0;
+            var ID;
+            var ISCircleDivision;
+            $.each($item, function (key, value) {
+                if (i == 0) {
+                    ID = $(value).find('.EditMappedID').val();
+                }
+                if (i == 1) {
+                    $(this).closest('tr').remove();
+                }
+                i++;
+            });
+
+            $.ajax({
+                type: 'POST',
+                url: RootURl + 'FdmScheme/DeleteSchemeMapping',
+                dataType: 'json',
+                data: { MappingID: ID },
+                success: function (data) {
+                    // (-2 Means Deleted)
+                    if (data == '-2') {
+                        alert('Data deleted from table');
+                    }
+                    else {
+                        alert('Data not deleted from table please check!!!!');
+                    }
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+        }
+        else {
+
+            return false;
+        }
+
+
+    });
+    function AddSchemeMapping(SchemeID, SchemeName) {
+
+        var SchemeID = $("#SchemeID").val();;
+        var BudgetHeadID = $("#BudgetHeadID option:selected").val();
+        var SubBudgetHeadID = $("#SubBudgetHeadID option:selected").val();
+        var ActivityID = $("#ActivityID option:selected").val();
+        var SubActivityID = $("#SubActivityID option:selected").val();
+        var CIRCLEName = 'NA';
+        var DivisionName = 'NA';
+        var SanctuaryName = 'NA';
+        if (SchemeID == null || SchemeID == '' || SchemeID == 'undefined' || SchemeID == '0') {
+            alert("Please Fill Scheme");
+            return false;
+        }
+
+        else if ($(".ISCircleDivision:checked").attr('class') == "ISCircleDivision cir") {
+            if ($('#CIRCLE_CODE').val() == '' || $('#CIRCLE_CODE').val() == 'undefined') {
+                $('#CIRCLE_CODE').focus();
+                return false;
+            }
+        }
+        else if ($(".ISCircleDivision:checked").attr('class') == "ISCircleDivision div") {
+            if ($('#Division').val() == '' || $('#Division').val() == '0' || $('#Division').val() == 'undefined') {
+                $('#Division').focus();
+                return false;
+            }
+        }
+        else if ($(".ISCircleDivision:checked").attr('class') == "ISCircleDivision HQ") {
+            if ($('#CircleHQ').val() == '' || $('#CircleHQ').val() == 'undefined') {
+                $('#CircleHQ').focus();
+                return false;
+            }
+        }
+        else if ($(".ISCircleDivision:checked").attr('class') == "ISCircleDivision san") {
+            if ($('#Division').val() == '' || $('#Division').val() == '0' || $('#Division').val() == 'undefined') {
+                $('#Division').focus();
+                return false;
+            }
+            if ($('#Sanctuary').val() == '' || $('#Sanctuary').val() == '0' || $('#Sanctuary').val() == 'undefined') {
+                $('#Sanctuary').focus();
+                return false;
+            }
+        }
+
+        var Division = '0';
+        var Circles = '';
+
+        if ($("#divisions").attr("style") == 'display:block' && $(".ISCircleDivision:checked").attr('class') == "ISCircleDivision div") {
+            if ($('#Division').val() != '' && $('#Division').val() != '0' && $('#Division').val() != 'undefined') {
+                Division = $('#Division').val();
+                Circles = $("#CIRCLE_CODE").val();
+                CIRCLEName = $("#CIRCLE_CODE option:selected").text();
+                DivisionName = $("#Division option:selected").text();
+            }
+            else {
+                $('#Division').focus();
+                return false;
+            }
+        }
+        var Sanctuary = '0';
+        if ($("#divisions").attr("style") == 'display:block' && $(".ISCircleDivision:checked").attr('class') == "ISCircleDivision san") {
+            if ($('#Division').val() != '' && $('#Division').val() != '0' && $('#Division').val() != 'undefined') {
+                Division = $('#Division').val();
+                Circles = $("#CIRCLE_CODE").val();
+                CIRCLEName = $("#CIRCLE_CODE option:selected").text();
+                DivisionName = $("#Division option:selected").text();
+                SanctuaryName = $("#Sanctuary option:selected").text();
+            }
+            else {
+                $('#Division').focus();
+                return false;
+            }
+            if ($('#Sanctuary').val() != '' && $('#Sanctuary').val() != '0' && $('#Sanctuary').val() != 'undefined') {
+                Sanctuary = $("#Sanctuary").val();
+                SanctuaryName = $("#Sanctuary option:selected").text();
+            }
+            else {
+                $('#Sanctuary').focus();
+                return false;
+            }
+        }
+
+
+        else if (BudgetHeadID == null || BudgetHeadID == '' || BudgetHeadID == 'undefined' || BudgetHeadID == '0') {
+            alert("Please select Budget Head");
+            return false;
+        }
+        else if (SubBudgetHeadID == null || SubBudgetHeadID == '' || SubBudgetHeadID == 'undefined') {
+            alert("Please select Sub Budget Head");
+            return false;
+        }
+        else if (ActivityID == null || ActivityID == '' || ActivityID == 'undefined' || ActivityID == '0') {
+            alert("Please select Activity");
+            return false;
+        }
+        else if (SubActivityID == null || SubActivityID == '' || SubActivityID == 'undefined' || SubActivityID == '0') {
+            alert("Please select Sub Activity");
+            return false;
+        }
+
+        if ($(".ISCircleDivision:checked").attr('class') == "ISCircleDivision cir" && $("#CIRCLE_CODE option:selected").val() != "") {
+            Circles = $("#CIRCLE_CODE").val();
+            CIRCLEName = $("#CIRCLE_CODE option:selected").text();
+        }
+        if ($(".ISCircleDivision:checked").attr('class') == "ISCircleDivision HQ" && $("#CircleHQ option:selected").val() != "") {
+            Circles = $("#CircleHQ").val();
+            CIRCLEName = $("#CircleHQ option:selected").text();
+        }
+
+        var values = {
+            ID: SchemeID,
+            SchemeName: SchemeName,
+
+            ISCircleDivision: $('.ISCircleDivision:checked').val(),
+            CIRCLE_CODE: Circles,
+            Division: Division,
+            SanctuaryCode: Sanctuary,
+
+            BudgetHead: $("#BudgetHeadID option:selected").val(),
+            SubBudgetHead: $("#SubBudgetHeadID option:selected").val(),
+            Activity: $("#ActivityID option:selected").val(),
+            SubActivity: $("#SubActivityID option:selected").val(),
+            BudgetHeadName: $("#BudgetHeadID option:selected").text(),
+            SubBudgetHeadName: $("#SubBudgetHeadID option:selected").text(),
+            ActivityName: $("#ActivityID option:selected").text(),
+            SubActivityName: $("#SubActivityID option:selected").text(),
+
+            CIRCLEName: CIRCLEName,
+            DivisionName: DivisionName,
+            SanctuaryName: SanctuaryName,
+        };
+
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("MapScheme", "FdmScheme")',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(values),
+            success: function (data) {
+                console.log(data);
+                if (data.MappingId != null && data.MappingId > 0) {
+                    var tbl = "";
+                    tbl = tbl + "<tr>"
+                    tbl = tbl + "<td><input type='hidden' class='schemesID' value='" + data.MappingId + "'/>" + data.CIRCLEName + "</td><td>" + data.DivisionName + "</td><td>" + data.SanctuaryName + "</td><td>" + data.BudgetHeadName + "</td><td>" + data.SubBudgetHeadName + "</td><td>" + data.ActivityName + "</td><td>" + data.SubActivityName + "</td><td><button type=button class='btn btn-danger btn-circle btndelete' style=cursor:pointer ><i class='fa fa-times'></i></button></td>";
+                    tbl = tbl + "</tr>"
+                    $("#logTbl").append(tbl);
+                }
+                else if (data.MappingId != null && data.MappingId == -1) {
+                    alert("Duplicate Record !!!!!");
+                }
+                else {
+                    alert("Some Error Occured!!!!!");
+                }
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+    }
+
+
+
+
+    var RootUrl = '@Url.Content("~/")';
+    function EDITSchemeMapping() {
+        var EditMappedID = $("#MappingID").val();
+        var SchemeID = $("#SchemeID").val();
+        var BudgetHeadID = $("#BudgetHeadID option:selected").val();
+        var SubBudgetHeadID = $("#SubBudgetHeadID option:selected").val();
+        var ActivityID = $("#ActivityID option:selected").val();
+        var SubActivityID = $("#SubActivityID option:selected").val();
+
+
+
+
+        if (SchemeID == null || SchemeID == '' || SchemeID == 'undefined' || SchemeID == '0') {
+            alert("Please Fill Scheme");
+            return false;
+        }
+        else if (EditMappedID == null || EditMappedID == '' || EditMappedID == 'undefined' || EditMappedID == '0') {
+            alert("Some Error Occured please try again leter");
+            return false;
+        }
+        else if (BudgetHeadID == null || BudgetHeadID == '' || BudgetHeadID == 'undefined' || BudgetHeadID == '0') {
+            alert("Please select Budget Head");
+            return false;
+        }
+        else if (SubBudgetHeadID == null || SubBudgetHeadID == '' || SubBudgetHeadID == 'undefined') {
+            alert("Please select Sub Budget Head");
+            return false;
+        }
+        else if (ActivityID == null || ActivityID == '' || ActivityID == 'undefined' || ActivityID == '0') {
+            alert("Please select Activity");
+            return false;
+        }
+        else if (SubActivityID == null || SubActivityID == '' || SubActivityID == 'undefined' || SubActivityID == '0') {
+            alert("Please select Sub Activity");
+            return false;
+        }
+
+        else if ($(".ISCircleDivision:checked").attr('class') == "ISCircleDivision cir") {
+            if ($('#CIRCLE_CODE').val() == '' || $('#CIRCLE_CODE').val() == 'undefined') {
+                $('#CIRCLE_CODE').focus();
+                return false;
+            }
+        }
+        else if ($(".ISCircleDivision:checked").attr('class') == "ISCircleDivision div") {
+            if ($('#Division').val() == '' || $('#Division').val() == '0' || $('#Division').val() == 'undefined') {
+                $('#Division').focus();
+                return false;
+            }
+        }
+        else if ($(".ISCircleDivision:checked").attr('class') == "ISCircleDivision HQ") {
+            if ($('#CircleHQ').val() == '' || $('#CircleHQ').val() == 'undefined') {
+                $('#CircleHQ').focus();
+                return false;
+            }
+        }
+        else if ($(".ISCircleDivision:checked").attr('class') == "ISCircleDivision san") {
+            if ($('#Division').val() == '' || $('#Division').val() == '0' || $('#Division').val() == 'undefined') {
+                $('#Division').focus();
+                return false;
+            }
+            if ($('#Sanctuary').val() == '' || $('#Sanctuary').val() == '0' || $('#Sanctuary').val() == 'undefined') {
+                $('#Sanctuary').focus();
+                return false;
+            }
+        }
+
+        var ISCircleOrDivision = 'Circle';
+        var Division = '0';
+        if ($("#divisions").attr("style") == 'display:block' && $(".ISCircleDivision:checked").attr('class') == "ISCircleDivision div") {
+            if ($('#Division').val() != '' && $('#Division').val() != '0' && $('#Division').val() != 'undefined') {
+                Division = $('#Division').val();
+                Circles = $("#CIRCLE_CODE").val();
+                ISCircleOrDivision = 'Division';
+            }
+            else {
+                $('#Division').focus();
+                return false;
+            }
+        }
+        var Sanctuary = '0';
+        if ($("#divisions").attr("style") == 'display:block' && $(".ISCircleDivision:checked").attr('class') == "ISCircleDivision san") {
+            if ($('#Division').val() != '' && $('#Division').val() != '0' && $('#Division').val() != 'undefined') {
+                Division = $('#Division').val();
+                Circles = $("#CIRCLE_CODE").val();
+                ISCircleOrDivision = 'Division';
+            }
+            else {
+                $('#Division').focus();
+                return false;
+            }
+            if ($('#Sanctuary').val() != '' && $('#Sanctuary').val() != '0' && $('#Sanctuary').val() != 'undefined') {
+                Sanctuary = $("#Sanctuary").val();
+                ISCircleOrDivision = 'Sanctuary';
+            }
+            else {
+                $('#Sanctuary').focus();
+                return false;
+            }
+        }
+        if ($(".ISCircleDivision:checked").attr('class') == "ISCircleDivision cir" && $("#CIRCLE_CODE option:selected").val() != "") {
+            Circles = $("#CIRCLE_CODE").val();
+            ISCircleOrDivision = 'Circle';
+        }
+        if ($(".ISCircleDivision:checked").attr('class') == "ISCircleDivision HQ" && $("#CircleHQ option:selected").val() != "") {
+            Circles = $("#CircleHQ").val();
+            ISCircleOrDivision = 'HQ';
+        }
+
+        var values = {
+            ID: SchemeID,
+            MappingId: EditMappedID,
+            BudgetHead: BudgetHeadID,
+            SubBudgetHead: SubBudgetHeadID,
+            Activity: ActivityID,
+            SubActivity: SubActivityID,
+            ISCircleDivision: ISCircleOrDivision,
+            CIRCLE_CODE: Circles,
+            Division: Division,
+            SanctuaryCode: Sanctuary,
+            BudgetHeadName: $("#BudgetHeadID option:selected").text(),
+            SubBudgetHeadName: $("#SubBudgetHeadID option:selected").text(),
+            ActivityName: $("#ActivityID option:selected").text(),
+            SubActivityName: $("#SubActivityID option:selected").text(),
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("EDITMapping", "FdmScheme")',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(values),
+            success: function (data) {
+                console.log(data);
+                if (data == -3) {
+                    window.location.href = '@Url.Action("AddScheme", "FdmScheme")';
+                }
+                else if (data == -1) {
+                    alert("Duplicate Record");
+                }
+                else {
+                    alert("Please Refresh the page");
+                }
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+    }
+
+    function EDITScheme(MappingID) {
+
+
+
+        $("#MappingID").val($(".EditMappedID" + MappingID).val());
+        $("#BudgetHeadID").val($(".EditBudgetHeadID" + MappingID).val());
+        GetSubBudgetHead($(".EditBudgetHeadID" + MappingID).val(), 'EDIT', $(".EditSubBudgetHeadID" + MappingID).val());
+        $("#ActivityID").val($(".EditActivityID" + MappingID).val());
+        GetSubActivity($(".EditActivityID" + MappingID).val(), 'EDIT', $(".EditSubActivityID" + MappingID).val());
+
+        $(".ISCircleDivision").val($(".EditISCircleDivision" + MappingID).val());
+        $("#CIRCLE_CODE").val($(".EditCircle_Code" + MappingID).val());
+
+        var Circle_Code = $(".EditCircle_Code" + MappingID).val();
+
+        if ($(".EditISCircleDivision" + MappingID).val() == "HQ") {
+            $(".HQ").prop('checked', 'checked');
+            $("#divisions").attr("style", "display:none");
+            $("#CIRCLE_CODE").addClass('hide');
+            $("#CircleHQ").removeClass('hide');
+            $("#SanctuaryVal").addClass('hide');
+
+
+
+        }
+        else if ($(".EditISCircleDivision" + MappingID).val() == "Circle") {
+            $(".cir").prop('checked', 'checked');
+            $("#divisions").attr("style", "display:none");
+            $("#CIRCLE_CODE").removeClass('hide');
+            $("#CircleHQ").addClass('hide');
+            $("#SanctuaryVal").addClass('hide');
+
+
+
+        }
+        else if ($(".EditISCircleDivision" + MappingID).val() == "Division") {
+            $(".div").prop('checked', 'checked');
+            $("#divisions").attr("style", "display:block");
+            $("#CircleHQ").addClass('hide');
+            $("#CIRCLE_CODE").removeClass('hide');
+            $("#SanctuaryVal").addClass('hide');
+            // var Circle_Code = $(".EditCIRCLE_CODE").val();
+            if ($(".ISCircleDivision:checked").attr('class') == "ISCircleDivision div" && Circle_Code != 'null' && Circle_Code != '0' && Circle_Code != 'undefined') {
+                GetDivision(Circle_Code, $(".EditDivision" + MappingID).val());
+            }
+            else {
+                $("#Division").append('<option value="0">--Select--</option>');
+            }
+
+        }
+        else if ($(".EditISCircleDivision" + MappingID).val() == "Sanctuary") {
+            $(".san").prop('checked', 'checked');
+            $("#divisions").attr("style", "display:block");
+            $("#SanctuaryVal").removeClass('hide');
+            $("#CIRCLE_CODE").removeClass('hide');
+            $("#CircleHQ").addClass('hide');
+
+
+            if ($(".ISCircleDivision:checked").attr('class') == "ISCircleDivision div" || $(".ISCircleDivision:checked").attr('class') == "ISCircleDivision san" && Circle_Code != 'null' && Circle_Code != '0' && Circle_Code != 'undefined') {
+                GetDivision(Circle_Code, $(".EditDivision" + MappingID).val());
+            }
+
+            var DIV_CODE = $(".EditDivision" + MappingID).val();
+            if ($(".ISCircleDivision:checked").attr('class') == "ISCircleDivision san" && DIV_CODE != "" && DIV_CODE != "0") {
+                GetSantatury(DIV_CODE, $(".EditSanctuaryCode" + MappingID).val());
+            }
+
+            //$("#Division").val($(".EditDivision").val());
+            //$("#Sanctuary").val($(".EditSanctuaryCode").val());
+
+        }
+        else {
+            $("#divisions").attr("style", "display:none");
+            $("#CircleHQ").addClass('hide');
+            $("#CIRCLE_CODE").removeClass('hide');
+            $("#SanctuaryVal").addClass('hide');
+        }
+
+
+
+
+
+
+
+        $(".Edit").removeClass('hide');
+        $(".Insert").addClass('hide');
+
+
+    }
+
+    $(".ISCircleDivision").change(function () {
+        $("#CIRCLE_CODE").val('');
+        $("#Division").empty('');
+        if ($(this).attr('class') == "ISCircleDivision san") {
+            $("#divisions").attr("style", "display:block");
+            $("#SanctuaryVal").removeClass('hide');
+            $("#CIRCLE_CODE").removeClass('hide');
+            $("#CircleHQ").addClass('hide');
+
+        }
+
+        else if ($(this).attr('class') == "ISCircleDivision HQ") {
+
+            $("#divisions").attr("style", "display:none");
+            $("#CIRCLE_CODE").addClass('hide');
+            $("#CircleHQ").removeClass('hide');
+            $("#SanctuaryVal").addClass('hide');
+
+        }
+        else if ($(this).attr('class') == "ISCircleDivision div") {
+            $("#divisions").attr("style", "display:block");
+            $("#CircleHQ").addClass('hide');
+            $("#CIRCLE_CODE").removeClass('hide');
+            $("#SanctuaryVal").addClass('hide');
+        }
+        else {
+            $("#divisions").attr("style", "display:none");
+            $("#CircleHQ").addClass('hide');
+            $("#CIRCLE_CODE").removeClass('hide');
+            $("#SanctuaryVal").addClass('hide');
+        }
+
+    });
+
+
+    $('#CIRCLE_CODE').change(function (e) {
+        var Circle_Code = $("#CIRCLE_CODE").val();
+        if ($(".ISCircleDivision:checked").attr('class') == "ISCircleDivision div" || $(".ISCircleDivision:checked").attr('class') == "ISCircleDivision san" && Circle_Code != 'null' && Circle_Code != '0' && Circle_Code != 'undefined') {
+            GetDivision(Circle_Code, '0');
+        }
+        else {
+            $("#Division").append('<option value="0">--Select--</option>');
+        }
+    });
+
+    function GetDivision(Circle_Code, DivCode) {
+        $("#Division").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'MISCitizen/DivisionData', // we are calling json method
+            dataType: 'json',
+            data: { circleCode: Circle_Code },
+            success: function (circle) {
+                $.each(circle, function (i, items) {
+                    $("#Division").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                });
+                if (DivCode != null && DivCode != '' && DivCode != '0') {
+                    $("#Division").val(DivCode);
+                }
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+
+        });
+    }
+
+    $('#Division').change(function (e) {
+        var DIV_CODE = $("#Division").val();
+        if ($(".ISCircleDivision:checked").attr('class') == "ISCircleDivision san" && DIV_CODE != "" && DIV_CODE != "0") {
+            GetSantatury(DIV_CODE, '0');
+        }
+        else {
+            $("#Sanctuary").append('<option value="0">--Select--</option>');
+
+        }
+    });
+
+    function GetSantatury(DIV_CODE, SanCode) {
+        $("#Sanctuary").empty();
+        $("#Sanctuary").append('<option value="0">--Select--</option>');
+        $.ajax({
+            type: 'GET',
+            url: RootURl + 'BudgetAllocationCircle/GetSanctuaryList',
+            dataType: 'json',
+            data: { Div_Code: DIV_CODE },
+            success: function (result) {
+                $.each(result, function (i, items) {
+                    $("#Sanctuary").append('<option value="' + items.Value + '">' +
+                     items.Text + '</option>');
+
+                });
+
+                if (SanCode != null && SanCode != '' && SanCode != '0') {
+                    $("#Sanctuary").val(SanCode);
+                }
+            },
+
+        });
+    }
+
+
+
+
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+
+    });
+</script>

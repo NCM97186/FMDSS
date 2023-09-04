@@ -1,0 +1,539 @@
+﻿@{
+    ViewBag.Title = "JFMC";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+</script>
+<script type="text/javascript">
+
+    $(function (e) {
+
+        $('#DropMom').change(function (e) {
+            if ($('#DropMom option:selected').val() == "Yes") {
+                $('#UploadMom').show();
+            }
+            else {
+                $('#UploadMom').hide();
+            }
+        });
+
+
+        $('#Dropdist').change(function (e) {
+     
+            $("#Dropblock").empty();
+            $("#DropVillage").empty();
+            $("#DropGramPanchayat").empty();
+            
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'JFMCRegistration/getBlock', // we are calling json method
+                dataType: 'json',
+                data: { dist_code: $("#Dropdist").val() },
+                success: function (states) {
+                    $.each(states, function (i, block) {
+                        $("#Dropblock").append('<option value="' + block.Value + '">' +
+                         block.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        });
+
+        $('#Dropblock').change(function (e) {
+            $("#DropVillage").empty();
+            $("#DropGramPanchayat").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'JFMCRegistration/getGPs', // we are calling json method
+                dataType: 'json',
+                data: { dist_code: $("#Dropdist").val(), block: $("#Dropblock").val() },
+                success: function (states) {
+                    $.each(states, function (i, Gps) {
+                        $("#DropGramPanchayat").append('<option value="' + Gps.Value + '">' +
+                         Gps.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        });
+
+        $('#DropGramPanchayat').change(function (e) {
+            $("#DropVillage").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'JFMCRegistration/getVillage', // we are calling json method
+                dataType: 'json',
+                data: { District_code: $("#Dropdist").val(), Block_code: $("#Dropblock").val(), GP_Code: $("#DropGramPanchayat").val() },
+                success: function (states) {
+                    $.each(states, function (i, village) {
+                        $("#DropVillage").append('<option value="' + village.Value + '">' +
+                         village.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        });
+
+        $('#btn_submit').click(function (e) {
+
+            if ($('#DropMom option:selected').val() == 'Yes' && $('#fileMom').val().length == 0) {
+                alert('Upload valid file');
+                $('#fileMom').focus();
+                e.preventDefault();
+            }
+
+        });
+            
+
+        $('#txtRegistrationId,#txtCommittee,#txtBankName,#txtBranchName,#txtBranchid,#txtAccountType,#txtareRemarks').keypress(function (e) {
+            var kc = e.which;
+
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95) || (kc >= 44 && kc <= 57) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+          
+           $('#txtlattitude,#txtlongitude,#txtAreapalntation,#txtManagedPlantation,#txtAccountNo,#txtMemberShip,#txtIncomeDeposit,#txtIncomeSale').keypress(function (e) {
+               var kc = e.which;
+               if ((kc >= 48 && kc <= 57) || (kc == 0 || kc == 8 || kc == 13 || kc == 95 || kc == 46)) {
+
+               }
+               else {
+                   e.preventDefault();
+               }
+           });
+
+           $('#txtOtherSource,#txtTotalIncome,#txtGrassQuantity,#txtGrassAmount,#txtProduceQuantity,#txtProduceAmount,#txtOthetQuantity,#txtOtherAmount,#txtThreeyear,#txtCurrentYear,#txtNgo,#txtTotalhelpgrp').keypress(function (e) {
+               var kc = e.which;
+               if ((kc >= 48 && kc <= 57) || (kc == 0 || kc == 8 || kc == 13 || kc == 95 || kc == 46)) {
+
+               }
+               else {
+                   e.preventDefault();
+               }
+           });
+    });
+
+</script>
+<style>
+    #jfmc {
+        overflow-y: auto;
+        height: 500px !important;
+    }
+
+</style>
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header"><span>  Joint Forest Management Committee (JFMC) Registration</span></h1>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                @if (ViewData["JFMC"] != null)
+                {
+                    <script type="text/javascript" language="javascript">
+                      alert('@ViewData["JFMC"]');
+                    </script>
+                }
+                @using (Html.BeginForm("Submit", "JFMCRegistration", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {
+                <div id="jfmc" class="panel-body">      
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>District:<span class="mandatory">*</span></label>
+                            @Html.DropDownList("Dropdist", (IEnumerable<SelectListItem>)ViewBag.DistrictName, "--Select--", new { id = "Dropdist", name = "Dropdist", @class = "form-control", required = "required" })
+                        </div>
+                    </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>Block:<span class="mandatory">*</span></label>
+                @Html.DropDownList("Dropblock", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "Dropblock", name = "Dropblock", @class = "form-control", required = "required" })
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Name of Gram-Panchayat:<span class="mandatory">*</span>
+                </label>
+                @* @Html.DropDownList("DropGramPanchayat", (IEnumerable<SelectListItem>)ViewBag.GramPanchayat, "--Select--", new { id = "DropGramPanchayat", name = "DropGramPanchayat", @class = "form-control", required = "required" })*@
+                @Html.DropDownList("DropGramPanchayat", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "DropGramPanchayat", name = "DropGramPanchayat", @class = "form-control", required = "required" })
+
+
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label> Village:</label>
+                @Html.DropDownList("DropVillage", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "DropVillage", name = "DropVillage", @class = "form-control", required = "required" })
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Minutes of Meeting:<span class="mandatory">*</span>
+                </label>
+                <select class="form-control" id="DropMom" name="DropMom" required>
+                    <option value="">--Select--</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </div>
+        </div>
+        <div id="UploadMom" style="display:none" class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Minutes of Meeting
+                </label>
+                <input type="file" class="form-control" id="fileMom" name="fileMom" />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Name of Committee:<span class="mandatory">*</span>
+                </label>
+                <input type="text" class="form-control" id="txtCommittee" name="txtCommittee" maxlength="200" required />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Registration Id:<span class="mandatory">*</span>
+                </label>
+                <input type="text" class="form-control" id="txtRegistrationId" name="txtRegistrationId" maxlength="50" />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Name of Secretary:<span class="mandatory">*</span>
+                </label>
+                <input type="text" class="form-control" id="txtSecretaryName" name="txtSecretaryName" maxlength="100" />
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Lattitude:<span class="mandatory">*</span>
+                </label>
+                <input type="text" class="form-control" id="txtlattitude" name="txtlattitude" maxlength="50" required />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Longitude:<span class="mandatory">*</span>
+                </label>
+                <input type="text" class="form-control" id="txtlongitude" name="txtlongitude" maxlength="50" required />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Area Of Plantation(hectare):<span class="mandatory">*</span>
+                </label>
+                <input type="text" class="form-control" id="txtAreapalntation" name="txtAreapalntation" maxlength="50" required />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Total Area Managed(hectare):<span class="mandatory">*</span>
+                </label>
+                <input type="text" class="form-control" id="txtManagedPlantation" name="txtManagedPlantation" maxlength="50" required />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Bank Account Operated/Not:<span class="mandatory">*</span>
+                </label>
+                <select class="form-control" id="DropBankAccount" name="DropBankAccount">
+                    <option value="">--Select--</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Name of the Bank:
+                </label>
+                <input type="text" class="form-control" id="txtBankName" maxlength="200" name="txtBankName" />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Name of Branch:
+                </label>
+                <input type="text" class="form-control" id="txtBranchName" name="txtBranchName" maxlength="200" />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Branch Id:
+                </label>
+                <input type="text" class="form-control" id="txtBranchid" name="txtBranchid" maxlength="50" />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Account Number:
+                </label>
+                <input type="text" class="form-control" id="txtAccountNo" name="txtAccountNo" maxlength="20" />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Account Type:
+                </label>
+                <input type="text" class="form-control" id="txtAccountType" name="txtAccountType" maxlength="50" />
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <h2>Income of Committee:<span class="mandatory">*</span></h2>
+            <hr />
+        </div>
+
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Membership Fees:
+                </label>
+                <input type="text" class="form-control" id="txtMemberShip" name="txtMemberShip" maxlength="50" required />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Income Deposited From Forest Office(In Lacs):<span class="mandatory">*</span>
+                </label>
+                <input type="text" class="form-control" id="txtIncomeDeposit" name="txtIncomeDeposit" maxlength="50" required />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Income From Sale of Forest Produces(In Lacs):<span class="mandatory">*</span>
+                </label>
+                <input type="text" class="form-control" id="txtIncomeSale" name="txtIncomeSale" maxlength="50" required />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Other Sources(In Lacs):
+                </label>
+                <input type="text" class="form-control" id="txtOtherSource" name="txtOtherSource" maxlength="50" required />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Total Income:<span class="mandatory">*</span>
+                </label>
+                <input type="text" class="form-control" id="txtTotalIncome" name="txtTotalIncome" maxlength="50" required />
+            </div>
+        </div>
+
+        <div class="col-lg-12">
+            <h2>Benefits from Plant</h2>
+            <h4>Grass</h4>
+            <hr />
+        </div>
+
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Quantity(In Qntl):
+                </label>
+                <input type="text" class="form-control" id="txtGrassQuantity" name="txtGrassQuantity" maxlength="50" required />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Amount:
+                </label>
+                <input type="text" class="form-control" id="txtGrassAmount" name="txtGrassAmount" maxlength="50" required />
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <h4>Minor Forest Produce</h4>
+            <hr />
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Quantity(In Qntl):
+                </label>
+                <input type="text" class="form-control" id="txtProduceQuantity" name="txtProduceQuantity" maxlength="50" required />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Amount:
+                </label>
+                <input type="text" class="form-control" id="txtProduceAmount" name="txtProduceAmount" maxlength="50" required />
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <h4>Other Forest Produce</h4>
+            <hr />
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Quantity(In Qntl):
+                </label>
+                <input type="text" class="form-control" id="txtOthetQuantity" name="txtOthetQuantity" maxlength="50" required />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Amount:
+                </label>
+                <input type="text" class="form-control" id="txtOtherAmount" name="txtOtherAmount" maxlength="50" required />
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <h2>Number of Beneficiaries</h2>
+            <hr />
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Upto Last 3 Years:
+                </label>
+                <input type="text" class="form-control" id="txtThreeyear" name="txtThreeyear" maxlength="50" required />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Current Year:
+                </label>
+                <input type="text" class="form-control" id="txtCurrentYear" name="txtCurrentYear" maxlength="50" required />
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <h2>Efficient Grades</h2>
+            <hr />
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Grades:<span class="mandatory">*</span>
+                </label>
+                <select class="form-control" id="DropGrades" name="DropGrades" required>
+                    <option value="">--Select--</option>
+                    <option value="A(60% or above achievement)">A(60% or above achievement)</option>
+                    <option value="B(35% to 60% achievement)">B(35% to 60% achievement)</option>
+                    <option value="C(35% or less achievement)">C(35% or less achievement)</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Number of NGO working in this field:<span class="mandatory">*</span>
+                </label>
+                <input type="text" class="form-control" id="txtNgo" name="txtNgo" maxlength="50" required />
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <h2>Self Help Group(Sakhdarpan)</h2>
+            <hr />
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label> Men:<span class="mandatory">*</span></label>
+                <select class="form-control" id="DropMen" name="DropMen" required>
+                    <option value="">--Select--</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>Women:<span class="mandatory">*</span></label>
+                <select class="form-control" id="DropWomen" name="DropWomen" required>
+                    <option value="">--Select--</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>Others:</label>
+                <select class="form-control" id="DropOthers" name="DropOthers" required>
+                    <option value="">--Select--</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label>
+                    Total:
+                </label>
+                <input type="text" class="form-control" id="txtTotalhelpgrp" name="txtTotalhelpgrp" maxlength="50" required />
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="form-group">
+                <label for="txtareRemarks">
+                    Overall Remarks:
+                </label>
+                <textarea class="form-control" id="txtareRemarks" name="txtareRemarks" maxlength="500" required></textarea>
+            </div>
+        </div>      
+    </div>
+         <div class="btn-padd">
+            <div id="btn" class="col-lg-12">
+                <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit">
+                    <i class="fa fa-check"></i> Save
+                </button>
+                <button type="submit" class="btn btn-warning">
+                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                </button>
+                <button type="submit" name="Command" value="Cancel" class="btn btn-danger">
+                    <i class="fa fa-times fa-fw"></i> Cancel
+                </button>
+            </div>
+        </div>
+}
+            </div>
+        </div>
+    </div>
+</div>

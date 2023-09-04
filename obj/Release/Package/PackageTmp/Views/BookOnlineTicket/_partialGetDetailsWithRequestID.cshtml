@@ -1,0 +1,209 @@
+﻿@model IEnumerable<FMDSS.Models.BookOnlineTicket.SaveOnlineBookingApproveReject>
+@{int remainingSeats = ViewBag.RemainingSeats;}
+@using (Html.BeginForm("GetDetailsWithRequestID", "BookOnlineTicket", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data", id = "frmWorkFlow" }))
+{
+    <div class="modal-content">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="modal-header">
+                    <h1 class="page-header">Half / Full Day Visit Permit (@Model.FirstOrDefault().RequestID)</h1>
+                </div>
+                <div class="dataTable_wrapper">
+
+                    <div id="tbl1" class="table-responsive">
+                        <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example1">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Total Vehicle</th>
+                                    <th>Approved Ticket</th>
+                                    <th>Remaining Vehicle</th>
+                                </tr>
+                                <tr>
+                                    <th>@Model.FirstOrDefault().DateOfArrival</th>
+                                    <th>@ViewBag.totalVehicle</th>
+                                    <th>@ViewBag.ApprovedSeats</th>
+                                    <th><input type="hidden" value="@remainingSeats" id="remainingSeats" /> @remainingSeats</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+
+                    <div id="tbl" class="table-responsive">
+                        <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                            <thead>
+                                <tr style="background-color: lightgray;">
+                                    <th style="width:5%;">Sr No.</th>
+                                    <th style="width:10%;">Enter Date</th>
+                                    <th style="width:15%;">Date of Viist</th>
+                                    <th style="width:10%;">Protected Area</th>
+                                    <th style="width:10%;">Zone</th>
+                                    <th style="width:10%;">Shift</th>
+                                    <th style="width:10%;">Name</th>
+                                    <th style="width:10%;">Nationality</th>
+                                    <th style="width:10%;">Gender</th>
+                                    <th style="width:10%;">ID Type</th>
+                                    <th style="width:10%;">ID Number</th>
+                                    @*<th style="width:10%;">Total Amount Paid</th>*@
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(model => item.SNO)
+                                        @Html.HiddenFor(model => item.RequestID)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.CreatedDate)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.DateOfArrival)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.PlaceName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.ZoneName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.ShiftTimeName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.Name)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.Nationality)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.Gender)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.IDType)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.IDNo)
+                                    </td>
+                                    @*<td>
+                                            @Html.DisplayFor(model => item.AmountWithServiceCharges)
+                                        </td>*@
+                                </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="7" style="text-align:end"><span>Total Amount </span> </td>
+                                    <td colspan="3">
+                                        <b> @Model.FirstOrDefault().AmountWithServiceCharges (INR)</b>
+                                        @Html.HiddenFor(s => Model.FirstOrDefault().DateOfArrival)
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+
+            @if (ViewBag.FileUploader != null)
+            {
+                <div class="col-lg-12">
+                    <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                        <thead>
+                            <tr style="background-color: lightgray;">
+                                <th style="width:10%;">File Name</th>
+                                <th style="width:10%;">Download</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (KeyValuePair<string, string> item in ViewBag.FileUploader)
+                            {
+                            <tr>
+                                <td>@item.Key</td>
+                                <td><a href="@item.Value" target="_blank"><img src="../images/jpeg.png" width="30"></a></td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            @*@if (ViewBag.LogModel != null && (ViewBag.showHideReviewApproveBtn != null && ViewBag.showHideReviewApproveBtn > 0 && remainingSeats > 0))
+                {*@
+            <div class="col-lg-12">
+                <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                    <thead>
+                        <tr style="background-color: lightgray;">
+                            <th style="width:10%;">Remarks</th>
+                            <th style="width:10%;">Authority Name</th>
+                            <th style="width:10%;">Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var itm in (List<FMDSS.Models.BookOnlineTicket.OnlineBookingApproveRejectLogModel>)ViewBag.LogModel)
+                        {
+                            <tr>
+                                <td>@itm.AdminRemarks</td>
+                                <td>@itm.USerName</td>
+                                <td>@itm.StatusName</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @*}*@
+
+
+            <div class="col-lg-12">
+                <div class="form-group un-bold">
+                    <label>Citizen Remarks: <span class="mandatory"></span></label>
+                    @Html.TextAreaFor(s => Model.FirstOrDefault().CitizenRemarks, new { @class = "form-control", placeholder = "Remarks", @readonly = "readonly" })
+                </div>
+            </div>
+            @if (ViewBag.showHideReviewApproveBtn != null && ViewBag.showHideReviewApproveBtn > 0 && remainingSeats > 0)
+            {
+                <div class="col-lg-12">
+                    <div class="form-group un-bold">
+                        <label>Admin Remarks: <span class="mandatory"></span></label>
+                        @Html.TextAreaFor(s => Model.FirstOrDefault().AdminRemarks, new { @class = "form-control", placeholder = "Remarks" })
+                    </div>
+                </div>
+            }
+            <div class="clearfix"> </div>
+            <br />
+            <div class="modal-footer" id="fot-f">
+                <div id="btn" class="col-lg-12">
+                    @if (ViewBag.showHideReviewApproveBtn != null && ViewBag.showHideReviewApproveBtn > 0 && remainingSeats > 0)
+                    {
+                        if (Model.FirstOrDefault().Status == 1)
+                        {
+                            <button id="btnSubmit" class="btn btn-success forward hideclass" name="Command" value="Forwarded">
+                                <i class="fa fa-check"></i> Forward
+                            </button>
+                        }
+                        else if (Model.FirstOrDefault().Status == 10)
+                        {
+                            <button id="btnSubmit" class="btn btn-success forward hideclass" name="Command" value="Approve">
+                                <i class="fa fa-check"></i> Approve
+                            </button>
+                        }
+                        <button id="btnSubmit" class="btn btn-primary forward hideclass" name="Command" value="Reject">
+                            <i class="fa fa-check"></i> Reject
+                        </button>
+                    }
+
+                    <button id="btnCancel" name="button" class="btn btn-danger" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                        <i class="fa fa-times fa-fw"></i> Close
+                    </button>
+                </div>
+                <div>
+                    @Html.ValidationSummary(true)
+                </div>
+            </div>
+        </div>
+    </div>
+}

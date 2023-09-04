@@ -1,0 +1,171 @@
+﻿@model List<FMDSS.Models.BookOnlineZoo.BookOnZoo>
+    @*@{
+        List<FMDSS.Models.BookOnlineZoo.BookOnZoo> ddlList = new List<FMDSS.Models.BookOnlineZoo.BookOnZoo>();
+        foreach (var item in Model as IEnumerable<FMDSS.Models.BookOnlineZoo.BookOnZoo>)
+        {
+            ddlList.Add(new FMDSS.Models.BookOnlineZoo.BookOnZoo
+            {
+                TypeOfVehicle = item.TypeOfVehicle
+            });
+
+        }
+    }*@
+
+    <div class="col-lg-12">
+        @*<label>Vehicle Details:</label>*@
+        <div class="table-responsive col-lg-12">
+            <table class="table table-striped table-bordered table-hover" id="tbl_vehicleInfo">
+                <thead>
+                    <tr>
+                        @*<th style="width:4%">SL No</th>*@
+                        <th style="width:20%">Vehicle</th>
+                        <th style="width:15%">Number of Vehicles</th>
+                        <th style="width:15%">Vehicle Number</th>
+                        <th style="width:15%">Fee Per Vehicle (INR)</th>
+                        <th style="width:15%">Total Fee (INR)</th>
+                        <th style="width:15%">Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div class="col-lg-2">
+                <button id="addvehicleInfo" type="button" class="btn btn-primary" onclick="addRow(this.id,'vehicleInfo','tbl_vehicleInfo')">
+                    <i class="fa fa-plus"></i> New Row
+                </button><br/><br/>
+            </div>
+        </div>
+    </div>
+
+    <script>
+       
+            function isNumberKey(evt) {
+            var id = $(evt.target).attr("id");
+
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57)) {
+
+                evt.preventDefault();
+                return false;
+            }
+            else
+                    return true;
+                TFees(id);
+            }
+    
+        function addRow(ctrl, Type, TargetType) {
+            debugger;
+            var PlaceId = $("#PlaceOfVisit option:selected").val();
+            var values = {
+                PlaceId: PlaceId
+            };
+            var IsFillRow = 1;
+            
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+
+
+
+                url: RootURl + 'BookOnlineZoo/getVehicleDropDownData',
+                success: function (data) {
+                    var htmlRow = ''; //getVehicleDropDownData
+                    debugger;
+                    if (Type == "vehicleInfo") {
+                        var rowNo = $("#" + TargetType + " tbody tr").length;
+                        if (rowNo > 0) {
+                            var no = parseInt(rowNo) - 1;
+                            $('#btnRemove_' + no).hide();
+                            $("#tbl_vehicleInfo tbody tr").each(function (index, value) {
+                               
+                                if($("#TypeOfVehicle_" + index).val() == '0')
+                                {
+                                    IsFillRow = 0
+                                }
+                                if ($("#NoOfVehicle_" + index).val() == '') {
+                                    IsFillRow = 0
+                                }
+                                if ($("#VehicleNumber_" + index).val() == '') {
+                                    IsFillRow = 0
+                                }
+                                if ($("#FeePerVehicle_" + index).val() == '') {
+                                    IsFillRow = 0
+                                }
+                                if ($("#TotalVehicleFee_" + index).val() == '') {
+                                    IsFillRow = 0
+                                }
+                            });
+                        }
+                
+                        htmlRow += '<tr>';
+                        if (data != null) {
+                            htmlRow += '<td><select id="TypeOfVehicle_' + rowNo + '" name="VehicleInformation[' + rowNo +'].TypeOfVehicle" class="from-control ddVehicle" onchange=" VehicleChange(this.id)" >';
+                            htmlRow += '<option value="0">Select Vehicle</option>';
+                            for (var i = 0; i < data.length; i++) {
+                                htmlRow += '<option value="' + data[i].TypeOfVehicle + '">' + data[i].TypeOfVehicle + '</option>';
+                            }
+                            htmlRow += '</select></td>';
+                        }
+                        //htmlRow += '<td><input type="text" name=Model[' + rowNo + '].TypeOfVehicle class="from-control" /></td>';
+                        htmlRow += '<td><input type="text" id="NoOfVehicle_' + rowNo + '" name=VehicleInformation[' + rowNo + '].NoOfVehicle class="from-control" , maxlength = "2", onkeypress = "return isNumberKey(event);" /></td>';
+                        htmlRow += '<td><input type="text" id="VehicleNumber_' + rowNo +'" name=VehicleInformation[' + rowNo + '].VehicleNumber class="from-control" /></td>';
+                        htmlRow += '<td><input type="text" id="FeePerVehicle_' + rowNo +'" name=VehicleInformation[' + rowNo + '].FeePerVehicle class="from-control" , readonly = "readonly"/></td>';
+                        htmlRow += '<td><input type="text" id="TotalVehicleFee_' + rowNo +'" name=VehicleInformation[' + rowNo + '].TotalVehicleFee class="from-control" , readonly = "readonly"/></td>';
+                        htmlRow += '<td>';
+                        htmlRow += '<a href="#" id="btnRemove_' + rowNo +'" onclick="removeRow(this);">';
+                        htmlRow += '<i class="fa fa-remove"  title="Delete Row"></i>';
+                        htmlRow += '</a>';
+                        htmlRow += '</td>';
+                        htmlRow += '</tr>';
+                        if (IsFillRow == 1) {
+                            $("#" + TargetType).append(htmlRow);
+                        }
+                       
+                        
+                    }
+                }
+            });
+            $(document).on('keyup', "[id^='NoOfVehicle_']", function () {
+                var id = $(this).attr('id');
+                TFees(id)
+            });
+        }
+
+        function removeRow(ctrl) {
+            $(ctrl).closest('tr').remove();
+        }
+
+        function VehicleChange(id) {
+            var elementIndex = id.split('_');
+           
+            var placeId = $("#PlaceOfVisit option:selected").val();
+            var vehicle = $('#TypeOfVehicle_' + elementIndex[1]).val();
+            var values = {
+                PlaceId: placeId,
+                Vehicle: vehicle
+            };
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootURl + 'BookOnlineZoo/getVehicleCharge',
+                success: function (data) {
+                   
+                    $('[name="VehicleInformation[' + elementIndex[1] + '].FeePerVehicle"]').val(data);
+                    TFees(id);
+                }
+            });
+      
+        }
+        function TFees(id) {
+            var r = 0;
+            var elementIndex = id.split('_');
+            var m = $('#NoOfVehicle_' + elementIndex[1]).val() != '' ? $('#NoOfVehicle_' + elementIndex[1]).val():0;
+            var f = $('#FeePerVehicle_' + elementIndex[1]).val() != '' ? $('#FeePerVehicle_' + elementIndex[1]).val():0;
+            if (m != '' && f!='') {
+                r = parseFloat(m) * parseFloat(f);
+            }
+            
+            $('[name="VehicleInformation[' + elementIndex[1] + '].TotalVehicleFee"]').val(r);
+        }
+    </script>

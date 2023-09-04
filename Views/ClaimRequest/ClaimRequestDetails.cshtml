@@ -1,0 +1,294 @@
+﻿@model FMDSS.Entity.FRAViewModel.ClaimRequestVM
+@{
+    ViewBag.Title = "ForestResourceClaim";
+}
+
+<!-- Form design -->
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Forest Rights Act (FRA): Claim Form</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+
+            <div class="panel panel-default">
+
+                <!--From Start-->
+                @using (Html.BeginForm("ClaimRequestDetails", "ClaimRequest", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data", id = "frmClaimRequest" }))
+                {
+                    <div class="panel-body">
+                        <div class="col-md-12">
+                            @Html.Partial("_ErrorMsg")
+                            <div class="panel panel-default">
+                                <div class="panel-heading" style="font-size:14px;font-weight:700;">
+                                    Request Type
+                                    <div class="help"><a href="~/PDFFolder/FRARulesBook.pdf" target="_blank">FRA Rules Book</a></div>
+                                </div> 
+                                <div class="panel-body">
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label>Claim Type:<span class="mandatory">*</span></label>
+                                            @if (Model.ClaimRequestDetails != null && Model.ClaimRequestDetails.ClaimTypeID > 0)
+                                            {
+                                                @Html.DropDownListFor(m => m.ClaimRequestDetails.ClaimTypeID, FMDSS.Entity.FRAViewModel.FRACommonList.ClaimType, new { id = "ddlClaimTypeId", @class = "form-control", onchange = "LoadClaimRequest(this)" })
+                                            }
+                                            else
+                                            {
+                                                @Html.DropDownListFor(m => m.ClaimRequestDetails.ClaimTypeID, FMDSS.Entity.FRAViewModel.FRACommonList.ClaimType, new { id = "ddlClaimTypeId", @class = "form-control", onchange = "LoadClaimRequest(this)" })
+                                            }
+                                            <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(m => m.ClaimRequestDetails.ClaimTypeID)</div>
+                                        </div>
+                                    </div>  
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Application Type:</label>
+                                            <div>
+                                                <label class="radio-inline">
+                                                    @Html.RadioButtonFor(m => m.ClaimRequestDetails.ApplicationType, 0, new { onchange = "ApplicationType_OnChange(this)", @checked="checked" }) New
+                                                </label>
+                                                <label class="radio-inline">
+                                                    @Html.RadioButtonFor(m => m.ClaimRequestDetails.ApplicationType, 1, new { onchange = "ApplicationType_OnChange(this)" }) Previosly Rejected
+                                                </label> 
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div id="divPrevioslyRejected" class="@string.Format("{0}",Model.ClaimRequestDetails.ApplicationType == 1?"":"hide")">
+                                        <div class="col-lg-3">
+                                            <div class="form-group">
+                                                <label>Ref Number(If any):<span class="mandatory">*</span></label>
+                                                @Html.TextBoxFor(m => m.ClaimRequestDetails.RejectedRefNumber, new {id= "txtRejectedRefNumber", @class = "form-control", placeholder = "Ref Number of Offline application" })
+                                                @Html.HiddenFor(m => m.ClaimRequestDetails.AppealRequestID,new {id= "hdnAppealRequestID" })
+                                                <div class="alert-danger1">@Html.ValidationMessageFor(m => m.ClaimRequestDetails.RejectedRefNumber)</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="form-group">
+                                                <label>Date of Claim:<span class="mandatory">*</span></label>
+                                                @Html.TextBoxFor(m => m.ClaimRequestDetails.RejectedRequestDate, new { @class = "form-control Calender", placeholder = "Date of Claim", @readonly = "readonly" })
+                                                <div class="alert-danger1">@Html.ValidationMessageFor(m => m.ClaimRequestDetails.RejectedRequestDate)</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="form-group">
+                                                <label>Date of Rejection:<span class="mandatory">*</span></label>
+                                                @Html.TextBoxFor(m => m.ClaimRequestDetails.RejectedDate, new { @class = "form-control Calender", placeholder = "Date of Rejection", @readonly = "readonly" })
+                                                <div class="alert-danger1">@Html.ValidationMessageFor(m => m.ClaimRequestDetails.RejectedDate)</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="form-group">
+                                                <label>Reason of Rejection:<span class="mandatory">*</span></label>
+                                                @Html.TextBoxFor(m => m.ClaimRequestDetails.RejectedReason, new { @class = "form-control", placeholder = "Reason of Rejection" })
+                                                <div class="alert-danger1">@Html.ValidationMessageFor(m => m.ClaimRequestDetails.RejectedReason)</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @if (Convert.ToString(Session["DesignationId"]) == "19")
+                                    {
+                                    <div id="divOnBehalfOf">
+                                        <div class="col-lg-3">
+                                            <div class="form-group">
+                                                <label>Request For: <span class="mandatory">*</span></label>
+                                                @Html.DropDownList("RequestFor", new List<SelectListItem>
+                                                {
+                                                    new SelectListItem { Text = "Self", Value = ""},
+                                                    new SelectListItem { Text = "On Behalf of Other", Value = "1"}
+                                                }, new { @class = "form-control", id = "ddlRequestFor", onchange= "ddlRequestFor_OnChange(this)" })
+                                            </div>
+                                        </div>
+
+                                        <div id="divOnBehalfOfOption" class="hide">
+                                            <div class="col-lg-3">
+                                                <div class="form-group">
+                                                    <label>On Behalf Of:<span class="mandatory">*</span></label>
+                                                    @Html.TextBoxFor(m => m.ClaimRequestDetails.SSOID, new { @class = "form-control", placeholder = "Enter SSO ID", onchange = "return ValidateSSO(this)", id = "txtSSOID" })
+                                                    <div id="errSSOID" class="alert-danger1"></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-3">
+                                                <div class="form-group">
+                                                    <label>Claim Date:<span class="mandatory">*</span></label>
+                                                    @Html.TextBoxFor(m => m.ClaimRequestDetails.EnteredOn, new { @class = "form-control Calender", placeholder = "Claim Request Date", @readonly="readonly" })
+                                                    <div id="errClaimDate" class="alert-danger1"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div id="divClaimRequestDetails">
+                            @if (Model.ClaimRequestDetails != null)
+                            {
+                                if (Model.ClaimRequestDetails.ClaimTypeID == Convert.ToInt32(FMDSS.FRAClaimType.Community))
+                                {
+                                    @Html.Partial("_ClaimCommunityForestResource", Model)
+                                }
+                                else if (Model.ClaimRequestDetails.ClaimTypeID == Convert.ToInt32(FMDSS.FRAClaimType.Individual))
+                                {
+                                    @Html.Partial("_ForestLand", Model)
+                                }
+                            }
+                        </div>
+                        <!--===========================Action Buttons=====================================-->
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <button type="submit" name="actionName" class="btn btn-info" value="Submit" onclick="return ValidateForm()">
+                                    <i class="fa fa-check"></i> Submit to Gram Sabha
+                                </button>
+                                <button type="button" name="actionName" class="btn btn-success hide" value="Submit">
+                                    <i class="fa fa-check"></i> Save as Draft
+                                </button>
+
+                                <button type="reset" name="actionName" class="btn btn-warning" onclick="ResetForm()">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+
+
+                                <button type="button" name="actionName" value="Cancel" class="btn btn-danger" onclick="BackToList('@string.Format("{0}",Convert.ToInt32(Session["CURRENT_ROLE"])==8?"Index": "ApprovalGramSabha")')">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+
+                            </div>
+                        </div>
+                    </div>
+                    @Html.Hidden("hdnCurrentBhamashahActionValue", "");
+                    if (Model.ClaimRequestDetails != null)
+                    {
+                        @Html.HiddenFor(x => x.ClaimRequestDetails.ClaimRequestDetailsID, new { Value = Model.ClaimRequestDetails.ClaimRequestDetailsID })
+                    }
+                }
+            </div>
+            <!-- /.panel-body -->
+            <!-- /.panel -->
+
+        </div>
+
+        <!--Bhamasha Model-->
+        <div class="modal fade in" id="myModalDashboard" tabindex="-1" role="dialog" aria-hidden="false">
+            <div class="modal-dialog mdw">
+                <div class="modal-content" style="height:500px;">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel">
+                            View Member(s) Detail
+                        </h4>
+                    </div>
+                    <div id="divmember">
+                        <table class="table table-striped table-bordered table-hover">
+                            <tbody id="tblMemberDetails"></tbody>
+                        </table>
+                    </div>
+                    <!-- /.modal-body -->
+                    <div class="modal-footer" id="fot-f">
+                        <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                            <i class="fa fa-times fa-fw"></i> Close
+                        </button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!--End Bhamasha Model-->
+        <!-- /.col-lg-12 -->
+
+        <div class="tmp hide">
+            @Html.Partial("_ClaimRequestTemplate")
+        </div>
+    </div>
+</div>
+<!-- /.Row -->
+<script src="~/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js" type="text/javascript"></script>
+<script src="~/Scripts/Controller/ClaimRequest/ClaimRequestDetails.js"></script>
+<script src="~/Scripts/Controller/Common.js"></script>
+<script>
+    var rootURl = '@Url.Content("~/")';
+    $(document).ready(function () {
+        $('.Calender').datepicker({
+            dateFormat: GetDatePickerFormat(),
+            yearRange: GetYearRange(),
+            changeMonth: true,
+            changeYear: true,
+        });
+        $('.Calender').datepicker('setDate', new Date());
+
+        if ($('#hdnAppealRequestID').val().length > 0) {
+            $('input[name="ClaimRequestDetails.ApplicationType"]:not(:checked)').prop('disabled', 'disabled');
+            $('#txtRejectedRefNumber').attr('readonly', 'readonly');
+        }
+    });
+
+    function ApplicationType_OnChange(cntrl) {
+        if (cntrl.value == "0") {
+            $('#divPrevioslyRejected').addClass("hide");
+            $('#divPrevioslyRejected').find('input[type="text"]').removeClass("required");
+        }
+        else
+        {
+            $('#divPrevioslyRejected').removeClass("hide");
+            $('#divPrevioslyRejected').find('input[type="text"]').addClass("required");
+        }
+    }
+
+    function ValidateForm() {
+        var arrDTypeName = [];
+        $('#tblAdditionalEvidence').find('td[name="dTypeName"]').each(function () {
+            if ($.inArray($(this).html(), arrDTypeName) == -1)
+                arrDTypeName.push($(this).text());
+        });
+
+        if ($('#divOnBehalfOf').length > 0 && $('#ddlRequestFor').val() == "1") {
+            if ($.isEmptyObject($.trim($('#txtSSOID').val()))) {
+                $('#errSSOID').html('On Behalf Of field is required.')
+                $('#txtSSOID').focus();
+                return false;
+            }
+            else {
+                $('#errSSOID').html('');
+            }
+        }
+
+        if ($('#ddlClaimTypeId>option:selected').val() == '@Convert.ToUInt32(FMDSS.FRAClaimType.Individual)') {
+            if (arrDTypeName.length < 2) {
+                alert("Please upload any of two additional evidence.");
+                return false;
+            }
+            else if ($('#dtClaimantDetails').find('tr:not(.rowSkip)').length == 0) {
+                alert("Please add atleast one clamant details.");
+                return false;
+            }
+            else if ($('input[name="ClaimRequestDetails.Individual_STribe"][value="True"]:checked').length > 0) {
+                if ($('#tblScheduledTribeFiles').find('tr:not(.rowSkip)').length == 0) {
+                    alert("Please upload scheduled tribe evidence.");
+                    return false;
+                }
+            }
+            else if ($('input[name="ClaimRequestDetails.Individual_OTFDweller"][value="True"]:checked').length > 0) {
+                if ($('#tblForestDwellerFiles').find('tr:not(.rowSkip)').length == 0) {
+                    alert("Please upload forest dweller evidence.");
+                    return false;
+                }
+            }
+        }
+        else if ($('#ddlClaimTypeId>option:selected').val() == '@Convert.ToUInt32(FMDSS.FRAClaimType.Community)') {
+            if (arrDTypeName.length < 2) {
+                alert("Please upload any of two additional evidence.");
+                $('#errFUAdditionalEvidence').html('Please upload any of two additional evidence.')
+                return false;
+            }
+        }
+    }
+</script>
+<style>
+    .help {
+        float: right;
+        margin-right: 18px;
+        font-style: italic;
+    }
+</style>

@@ -1,0 +1,1737 @@
+﻿@model FMDSS.Models.OnlineBooking.CS_BoardingDetails
+@{
+    ViewBag.Title = "Boarding Pass";
+    Layout = "~/Views/Shared/_LayoutBookingRoaster.cshtml";
+}
+@section PageCss{
+    <link href="~/css/bootstrap/jquery-ui.css" rel="stylesheet" />
+    <link href="~/Select2DropdownJSCSS/css/select2.min.css" rel="stylesheet" />
+
+    <style>
+        #ad-btn .btn {
+            margin: 24px 0;
+            width: auto;
+        }
+
+        .ddl {
+            font-size: 10px;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .upper {
+            text-transform: uppercase;
+        }
+
+        .IssueBoards {
+            margin: 2px 0;
+            width: 30px;
+            font-size: 10px;
+        }
+       
+    </style>
+
+    <style>
+        .ui-autocomplete {
+            position: absolute !important;
+            cursor: default !important;
+            /*left: 315px !important;
+        top: 376px !important;*/
+        }
+
+        .ui-autocomplete-loading {
+            background-color: white !important;
+        }
+
+        .ui-autocomplete li {
+            list-style-type: none !important;
+            margin-left: 0 !important;
+            padding: 5px !important;
+            background: #fff;
+        }
+
+        .ui-autocomplete ul {
+            margin: 0 !important;
+            padding: 0 !important;
+            background-color: White !important;
+        }
+
+    </style>
+}
+
+
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header"><span>Generate Boarding Pass</span></h1>
+
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+
+    <div class="row">
+        <div class="col-lg-12" style="padding-bottom:15px;">
+            <div class="col-lg-12">
+                <div class="form-group">
+                    <label>Select Place : <span class="mandatory"></span></label>
+                    @Html.DropDownListFor(Model => Model.PlaceId, (IEnumerable<SelectListItem>)ViewBag.LstddlPlace, "--Select--", new { @class = "form-control myselect", id = "PlaceId" })
+                    @*<select class="form-control myselect" id="ddlPlace">
+                            <option value="0">--Select Place--</option>
+                        </select>*@
+                    <span style="color:orangered;" id="spnErrPlace"></span>
+                </div>
+
+            </div>
+        </div>
+        <div class="col-lg-12" style="padding-bottom:15px;">
+            <div class="col-lg-3">
+                <label>Date of Visit: <span class="mandatory">*</span></label>
+                @Html.TextBoxFor(Model => Model.DateofVisit, new { @class = "form-control common upper", @maxlength = "18", id = "DateofVisit", @readonly = "True" })
+                @*<label>Visit Date : <span class="mandatory"></span></label>
+                    <input type="text" class="form-control" id="txtBookingDate" name="BookingDate" title="Enter the date of visit" placeholder="Select Date" autocomplete="off" readonly="readonly" />
+                    <span style="color:orangered;" id="spnErrDate"></span>*@
+            </div>
+            <div class="col-lg-3">
+                <div class="form-group">
+                    <label>Select Shift : <span class="mandatory"></span></label>
+                    @Html.DropDownListFor(c => c.Shift, new SelectList(
+                                 new List<Object>{
+                                  new { value = "1" , text = "Morning"  },
+                                  new { value = "2" , text = "Evening" },
+                                 new { value = "3" , text = "Full Day"},
+                                  new { value = "4" , text = "Half Day"}
+                                }, "value", "text"), "--Select--", new { @class = "form-control myselect", id = "Shift" })
+                </div>
+
+                <span style="color:orangered;" id="spnErrShift"></span>
+            </div>
+            <div class="col-lg-3">
+                <div class="form-group">
+                    <label>Zone: <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.ZoneID, (IEnumerable<SelectListItem>)ViewBag.LstddlZone, "--Select--", new { @class = "form-control myselect", id = "ZoneID" })
+                </div>
+
+            </div>
+            <div class="col-lg-3">
+                <div class="form-group">
+                    <label>Vehicle Type: <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.Vehicle, (IEnumerable<SelectListItem>)ViewBag.LstddlVehicle, "--Select--", new { @class = "form-control myselect", id = "Vehicle" })
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12" style="padding-bottom:15px;">
+
+            <div class="col-lg-4">
+                <div class="form-group">
+                    <label>Request ID: </label>
+                    @Html.TextBoxFor(Model => Model.RequestID, new { @class = "form-control common upper autoRequestIdsuggest", @maxlength = "18", id = "RequestID" })
+                </div>
+            </div>
+            <div class="col-lg-1" id="ad-btn">
+
+                <button title="View" class="btn btn-success" type="button" id="btnView" onclick="GetBookingList();">
+                    <i class="fa fa-eye"></i> Display
+                </button>
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+
+
+                <div class="panel-body">
+                    <div class="col-lg-12" id="div_CitizenVisitDetails">
+                        <div class="table-responsive">
+                            <table class="table tabtext table-striped  table-bordered table-hover" , id="tbl_CitizenVisitDetails" style="width:100%;">
+                                <thead>
+                                    <tr>
+                                        <th style="display:none">RequestId</th>
+                                        <th style="width:10px;">S No.</th>
+                                        <th style="width:20px;">Booking Id</th>
+                                        <th style="width:15px;">Date Of Visit</th>
+                                        <th style="width:15px;">Mode Of Booking</th>
+                                        <th style="width:10px;">Shift</th>
+                                        <th style="width:10px;">Vehicle</th>
+                                        <th style="width:10px;">Zone </th>
+                                        <th style="width:15px;">Member Count</th>
+                                        <th style="width:15px;">Choice Type</th>
+                                        @*<th style="width:15px;">Extra Amount (INR)</th>*@
+                                        <th style="width:15px;">Select Vehicle</th>
+                                        <th style="width:45px;">Select Guide</th>
+                                        <th style="width:30px;">Actions</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+
+
+
+                    <!-- Btn Groping -->
+                    @*<div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit1">
+                                    <i class="fa fa-check"></i> Save
+                                </button>
+                                <button type="reset" class="btn btn-warning">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+                                <button type="submit" name="Command" value="Cancel" class="btn btn-danger">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+                            </div>
+                        </div>*@
+                    <!-- /.Btn Groping -->
+
+                </div>
+                <!-- /.panel-body -->
+
+            </div>
+            <!-- /.panel -->
+
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    <div class="modal fade" id="myModal" aria-hidden="true" role="dialog">
+        <div class="modal-dialog modal-lg" id="modelNotArrived">
+            <!-- Modal content-->
+
+
+        </div>
+    </div>
+    
+</div>
+<div class="row">
+    <div id="myGuideVehicleReplament" data-backdrop="false" class="modal hide fade" style="background: #fff;position: absolute;height: 350px !important;width: 520px !important;display: block;top: 35%;left: 37%;" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="myModalLabel">Replacement of Guide/Vehicle</h3>
+        </div>
+        <div id="divSpanId" style="display:none">
+            <span id="spnChoiceType"></span>
+            <span id="spnSavedGuideId"></span>
+            <span id="spnSavedVehicleId"></span>
+            <input type="text" class="form-control" value="" id="requestid" name="RequestId" />
+        </div>
+        <div class="modal-body">
+            <div class="col-lg-12">
+                <div class="form-group col-lg-12">
+                    <label>Request Id: </label>
+                    <input type="text" class="form-control" value="" id="displayRequestId" readonly="readonly" />
+
+                </div>
+            </div>
+            <div class="col-lg-6" id="divGuideReplacement">
+                <div class="form-group col-lg-12">
+                    <label>Replaced Guide: </label>
+                    <select id="ReplacementOfGuide" class="form-control myselect" style="width:200px!important;">
+                        <option value="first">Select Guide</option>
+                    </select>
+                    <span id="errReplaceGuide" style="color:orangered"></span>
+                </div>
+            </div>
+            <div class="col-lg-6" id="divVehicleReplacement">
+                <div class="form-group col-lg-12">
+                    <label>Replaced Vehicle: </label>
+                    <select id="ReplacementOfVehicle" class="form-control myselect" style="width:200px!important;">
+                        <option value="first">Select Vehicle</option>
+                    </select>
+                    <span id="errReplaceVehicle" style="color:orangered"></span>                    
+                </div>
+            </div>
+           
+        </div>
+        <div class="modal-footer" style="display:flex;">
+            <button class="btn btn-primary SaveVehicleGuideReplacement"  id="btnSaveReplacement">Save</button>
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+        </div>
+    </div>
+    <div class="modal hide fade" id="myConfirmationDialog" data-backdrop="false" aria-hidden="true" role="dialog" style="border:2px solid #cbcbcb; background: #fff;position: absolute;height: 155px !important;width: 350px !important;display: block;top: 46%;left: 41%;" >
+        <div class="modal-dialog modal-lg" style="margin:0px !important;">
+            <div class="modal-header" style="max-width:38%; padding:7px !important;">
+                @*<button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="width:340px !important;">×</button>*@
+                <h5 id="myModalLabel" class="text-center"><b>Replacement Confirmation</b></h5>
+            </div>
+        </div>
+        <div class="modal-body" style="padding:4px !important;">
+            <span style="padding-left: 10px;">Are you sure to save replacement ?</span>
+        </div>
+            <div class="modal-footer" style="display:flex;">
+                <button class="btn btn-success SaveVehicleGuideReplacement" id="btnYes">Yes</button>
+                <button class="btn btn-primary" id="btnNo" aria-hidden="true">No</button>
+            </div>
+        </div>
+    </div>
+@section PageScript{
+
+    <script src="~/Select2DropdownJSCSS/js/select2.min.js"></script>
+    <script type="text/javascript">
+    $(".myselect").select2();
+    var RootUrl = '@Url.Content("~/")';
+    //function DisableDates(date) {
+    //    var string = jQuery.datepicker.formatDate('dd/mm/yy', date);
+    //    return [dates.indexOf(string) == -1];
+    //}
+
+    $(document).ready(function () {
+        $('#PlaceId').change(function (e) {
+
+
+            var id = $(this).val();
+            if (id == 65 || id == 1) {
+                //$("#Shift option[value='1']").remove();
+                //$("#Shift option[value='2']").remove();
+                $("#Shift").empty();
+                $("#Shift").append('<option value="1">Morning (Half Day)</option>');
+                $("#Shift").append('<option value="2">Evening (Half Day)</option>');
+                $("#Shift").append('<option value="3">Full Day</option>');
+
+            }
+            else if (id != 65 || id != 1) {
+                //$("#Shift option[value='3']").remove();
+                //$("#Shift option[value='4']").remove();
+                $("#Shift").empty();
+                $("#Shift").append('<option value="1">Morning</option>');
+                $("#Shift").append('<option value="2">Evening</option>');
+            }
+
+            else {
+                $("#Shift").empty();
+                $("#Shift").append('<option value="">--Select--</option>');
+                $("#Shift").append('<option value="1">Morning</option>');
+                $("#Shift").append('<option value="2">Evening</option>');
+                $("#Shift").append('<option value="3">Full Day</option>');
+                $("#Shift").append('<option value="4">Half Day</option>');
+            }
+            $("#Shift").val('');
+            //$("#ZoneID").empty();
+            //$("#Vehicle").empty();
+            //$("#ZoneID").append('<option value="--Select--">--Select--</option>');
+            //$.ajax({
+            //    type: 'POST',
+            //    url: RootUrl + 'BoardingMaster/ZoneByPlace', // we are calling json method
+            //    dataType: 'json',
+            //    data: { PlaceId: $("#PlaceId").val() },
+            //    success: function (circle) {
+            //        $.each(circle, function (i, items) {
+            //            $("#ZoneID").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+            //        });
+            //    },
+            //    error: function (ex) {
+            //        alert('Failed to retrieve states.' + ex);
+            //    }
+
+            //});
+
+        });
+        // get Vehicle ========================================================================
+        $('#ZoneID').change(function (e) {
+
+
+
+            $("#Vehicle").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'BoardingMaster/GetVehicleByZoneAndPlaceForVIPSeats', // we are calling json method
+                dataType: 'json',
+                data: { PlaceId: $("#PlaceId").val(), ZoneID: $("#ZoneID").val(), ShiftType: $("#Shift").val() },
+                success: function (circle) {
+                    $("#Vehicle").append('<option selected="selected" value="0">--Select Vehicle Type--</option>');
+                    $.each(circle, function (i, items) {
+                        $("#Vehicle").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#Shift').change(function (e) {
+
+            $("#ZoneID").empty();
+            $("#Vehicle").empty();
+
+            var shiftId = $(this).val();
+
+            $("#ZoneID").append('<option value="--Select--">--Select--</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'BoardingMaster/ZoneByPlaceForVIPSeat', // we are calling json method
+                dataType: 'json',
+                data: { PlaceId: $("#PlaceId").val(), shiftType: shiftId },
+                success: function (circle) {
+                    $.each(circle, function (i, items) {
+                        if (PlaceId = 65 && items.Text == "ALL Zone") {
+                            $("#ZoneID").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                        }
+                        else if (shiftId == 1 || shiftId == 2) {
+                            $("#ZoneID").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                            //$("#ZoneID option[value='38']").remove();
+                            jQuery("#ZoneID option:contains('ALL Zone')").remove();
+                        }
+                        //$("#ZoneID").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+        });
+        });
+        var GuideOptionGlobalList ;
+        var VehicleOptionGlobalList;        
+        var GuideOptionList = [];
+        var VehicleOptionList = [];
+        var GuideOptions = [];
+        var VehicleOptions = [];
+        var VehicleBackId = 0;
+        var GuideBackId = 0;
+        function GetBookingList() {
+            GuideOptionGlobalList = '';
+            VehicleOptionGlobalList = ''           
+            var placeId = $('#PlaceId').val();
+            var visitDate = $('#DateofVisit').val();
+            var shiftId = $('#Shift').val();
+            var zoneId = $('#ZoneID').val();
+            var vehicleId = $('#Vehicle').val();
+            var requestId = $('#RequestID').val();
+
+            GuideOptionList = [];
+            VehicleOptionList = [];
+            GuideOptions = [];
+            VehicleOptions = [];
+            VehicleBackId = 0;
+            GuideBackId = 0;
+
+            $('#tbl_CitizenVisitDetails').dataTable().fnDestroy();
+            $.ajax({
+                type: 'GET',
+                url: RootUrl + 'BookingRoster/GetCitizenBookingVisitDetail', // we are calling json method
+                //dataType: 'html',
+                dataType: 'json',
+                data: { 'DateofVisit': visitDate, 'PlaceID': placeId, 'SHIFT_TYPE': shiftId, 'BOOKING_TYPE':'', 'Zone': zoneId, 'VehicleTypeID': vehicleId, 'RequestID': requestId },
+                //success: function (visitDetal) {
+                success: function (data) {
+                    //alert('test');
+                    debugger;
+                    var j = 0;
+                    $("#tbl_CitizenVisitDetails tbody").empty();
+                    var tblDetail = ''
+
+                    if (data.visitDetal.length > 0) {
+                        //alert(data.visitDetal.length);
+                        GuideOptionList.length = data.visitDetal.length;
+                        VehicleOptionList.length = data.visitDetal.length;
+                        $.each(data.visitDetal, function (i, itm) {
+                            var strActionOption = '';
+                            var choiceType = (itm.ChoiceGuideAmt > 0 && itm.ChoiceVehicleAmt > 0 ? 3 : (itm.ChoiceGuideAmt > 0 ? 1 : (itm.ChoiceVehicleAmt > 0 ? 2 : 0)));
+                            if ((choiceType == 0 && parseInt(itm.GuideId) > 0 && parseInt(itm.VehicleId) > 0) || (parseInt(itm.GuideId) > 0 && parseInt(itm.VehicleId) > 0 && ((choiceType == 3 && itm.ChoiceGuideReplaceId > 0 && itm.ChoiceVehicleReplaceId > 0) || (choiceType == 2 && itm.ChoiceVehicleReplaceId > 0) || (choiceType == 1 && itm.ChoiceGuideReplaceId > 0) ))){
+                                strActionOption = '<a href="#" data-id="' + choiceType + '|' + itm.GuideId + '|' + itm.VehicleId + '|' + itm.RequestId2 + '|' + itm.DisplayBookingId+'" style="font-size:12px!important;" id="printRequest_' + j + '"  class="dropdown-item IssueBoards  UpdateForPrintPass" title="Verify Detail">' +
+                                '<i class="fa fa-print"></i>' +
+                                ' Print Pass' +
+                                '</a>';
+                            }
+                            if (choiceType == 0 && parseInt(itm.GuideId) == 0 && parseInt(itm.VehicleId) == 0 && itm.ChoiceGuideReplaceId == 0 && itm.ChoiceVehicleReplaceId == 0) {
+                                strActionOption = '<a href="#" data-id="' + choiceType + '|0| "  style="font-size:12px!important;"  class="dropdown-item  UpdateForIssuePass" title="Verify Detail" id="VerifyDetail_' + j + '">' +
+                                    '<i class="fa fa-file-pdf-o"></i>' +
+                                    ' To Verify And Print' +
+                                    '</a>';
+                            }
+                            if (choiceType == 1 && parseInt(itm.GuideId) > 0 && parseInt(itm.VehicleId) == 0 && itm.ChoiceGuideReplaceId > 0 && itm.ChoiceVehicleReplaceId == 0) {
+                                strActionOption = '<a href="#" data-id="' + choiceType + '|' + itm.GuideId + '|' + itm.GuidName +'" style="font-size:12px!important;" class="dropdown-item  UpdateForIssuePass" title="Verify Detail" id="VerifyDetail_' + j + '">' +
+                                    '<i class="fa fa-file-pdf-o"></i>' +
+                                    ' To Verify And Print' +
+                                    '</a>';
+                            } 
+                            if (choiceType == 2 && parseInt(itm.GuideId) == 0 && parseInt(itm.VehicleId) > 0 && itm.ChoiceGuideReplaceId == 0 && itm.ChoiceVehicleReplaceId > 0) {
+                                strActionOption = '<a href="#" data-id="' + choiceType + '|' + itm.VehicleId + '|' + itm.VehicleNumber +'" style="font-size:12px!important;" class="dropdown-item  UpdateForIssuePass" title="Verify Detail" id="VerifyDetail_' + j + '">' +
+                                    '<i class="fa fa-file-pdf-o"></i>' +
+                                    ' To Verify And Print' +
+                                    '</a>';
+                            }
+                            if (choiceType == 1 && itm.ChoiceGuideReplaceId == 0 && parseInt(itm.GuideId) > 0) {
+                                strActionOption = '<a href="#" data-id="' + choiceType + '|' + itm.GuideId + '|' + itm.VehicleId + '|' + itm.RequestId2 + '|' + itm.DisplayBookingId +'" style="font-size:12px!important;" id="AddVehicleGuideReplacement_' + j + '"  class="dropdown-item AddVehicleGuideReplacement" title="Add Guide Replacement">' +
+                                    '<i class="fa fa-plug"></i>' +
+                                    ' Add Guide Replacement' +
+                                    '</a>';
+                            }
+                            if (choiceType == 2 && itm.ChoiceVehicleReplaceId == 0 && parseInt(itm.VehicleId) > 0) {
+                                strActionOption = '<a href="#" data-id="' + choiceType + '|' + itm.GuideId + '|' + itm.VehicleId + '|' + itm.RequestId2 + '|' + itm.DisplayBookingId +'" style="font-size:12px!important;" id="AddVehicleGuideReplacement_' + j + '"  class="dropdown-item AddVehicleGuideReplacement" title="Add Vehicle Replacement">' +
+                                    '<i class="fa fa-plug"></i>' +
+                                    ' Add Vehicle Replacement' +
+                                    '</a>';
+                            }
+                            if (choiceType == 3 && itm.ChoiceGuideReplaceId == 0 && itm.ChoiceVehicleReplaceId == 0 && parseInt(itm.GuideId) > 0 && parseInt(itm.VehicleId) > 0) {
+                                strActionOption = '<a href="#" data-id="' + choiceType + '|' + itm.GuideId + '|' + itm.VehicleId + '|' + itm.RequestId2 + '|' + itm.DisplayBookingId +'" style="font-size:12px!important;" id="AddVehicleGuideReplacement_' + j + '"  class="dropdown-item AddVehicleGuideReplacement" title="Add Vehicle/Guide Replacement">' +
+                                    '<i class="fa fa-plug"></i>' +
+                                    ' Add Vehicle/Guide Replacement' +
+                                    '</a>';
+                            }
+
+                            if (itm.GuideId > 0) {
+                                GuideOptions[j] = GuideOptions[j] + '<option value="0">--Select Guide-- </option>'
+                                if (j == 0) {
+                                    GuideOptionGlobalList = GuideOptionGlobalList + '<option value="0" selected="selected">--Select Guide-- </option>';                                   
+                                }
+                                    
+                            }
+                            else {
+                                GuideOptions[j] = GuideOptions[j] + '<option value="0" selected="selected">--Select Guide-- </option>';
+                                if (j == 0) {
+                                    GuideOptionGlobalList = GuideOptionGlobalList + '<option value="0" selected="selected">--Select Guide-- </option>';                                   
+                                }
+                                    
+                            }
+
+
+                            if (itm.VehicleId > 0) {
+                                VehicleOptions[j] = VehicleOptions[j] + '<option value="0">--Select Vehicle-- </option>';
+                                if (j == 0) {
+                                    VehicleOptionGlobalList = VehicleOptionGlobalList + '<option value="0">--Select Vehicle-- </option>';                                    
+                                }
+                                    
+                            }
+                            else {
+                                VehicleOptions[j] = VehicleOptions[j] + '<option value="0" selected="selected">--Select Vehicle-- </option>'
+                                if (j == 0) {
+                                    VehicleOptionGlobalList = VehicleOptionGlobalList + '<option value="0" selected="selected">--Select Vehicle-- </option>';                                    
+                                }
+                                    
+                            }
+                            
+                            //GuideOptionList[j] = itm.GuideList;
+                            GuideOptionList[j] = data.GuideList;
+                            if (j == 0) {
+                                //$.each(itm.GuideList, function (k, itm2) {
+                                $.each(data.GuideList, function (k, itm2) {
+                                    if (itm.GuideId == itm2.Value && itm.GuideId > 0)
+                                        GuideOptions[j] = GuideOptions[j] + '<option value=' + itm2.Value + ' selected="selected">' + itm2.Text + '</option>';
+                                    else
+                                        GuideOptions[j] = GuideOptions[j] + '<option value=' + itm2.Value + '>' + itm2.Text + '</option>';
+
+                                    if (j == 0) {
+                                        GuideOptionGlobalList = GuideOptionGlobalList + '<option value=' + itm2.Value + '>' + itm2.Text + '</option>';                                       
+                                    }
+                                        
+                                });
+                            } else {
+                                GuideOptions[j] = GuideOptionGlobalList;
+                            }
+                            
+                            //VehicleOptionList[j] = itm.VehicleList;
+                            VehicleOptionList[j] = data.VehicleList;
+                            if (j == 0) {
+                                //$.each(itm.VehicleList, function (x, itm3) {
+                                $.each(data.VehicleList, function (x, itm3) {
+                                    if (itm.VehicleId == itm3.Value && itm.VehicleId > 0)
+                                        VehicleOptions[j] = VehicleOptions[j] + '<option value=' + itm3.Value + ' selected="selected">' + itm3.Text + '</option>';
+                                    else
+                                        VehicleOptions[j] = VehicleOptions[j] + '<option value=' + itm3.Value + '>' + itm3.Text + '</option>';
+
+                                    if (j == 0) {
+                                        VehicleOptionGlobalList = VehicleOptionGlobalList + '<option value=' + itm3.Value + '>' + itm3.Text + '</option>';                                        
+                                    }
+                                        
+                                });
+                            } else {
+                                VehicleOptions[j] = VehicleOptionGlobalList;
+                            }
+
+                            //tblDetail = "<tr><td><input type='checkbox' name='record'></td><td>" + name + "</td><td>" + email + "</td></tr>";
+                            var memberCount = itm.DisplayBookingId.split('(')[1].split(')')[0];
+                            //var requestid = itm.DisplayBookingId.split('(')[0];
+                            var noShow = '';
+
+                            if (itm.IsDepartmentalKioskUser == 0 && itm.IsNoShowOpenOrNot == "S") {
+                                noShow = '<div style="padding-bottom:10px!important;">' +
+                                         //'<a href="#" style="font-size:12px!important;" id="nsRequest_' + j + '" class="dropdown-item IssueBoards UpdateForNotArrived" title="No Show Detail" id="NoShowDetail_' + j + '">' +
+                                         //        '<i class="fa fa-minus-square" ></i>' +
+                                         //        ' No Show Detail' +
+                                         //    '</a>' +
+                                         '</div>';
+                            }
+
+                            if (parseInt(itm.GuideId) > 0 && parseInt(itm.VehicleId) > 0) {
+                                tblDetail += '<tr class="myRowEvent" id="myRowId_' + j + '"><td>' + itm.RequestId2 + '</td>' +
+                                    '<td style="width:5px;">' + (parseInt(j) + parseInt(1)) + '</td>' +
+                                    '<td style="width:5px;"><a id="myRequest_' + j + '" class="IssueBoards ViewTicket" style="font-size:12px;" title="View Ticket Detail(s)" href="javascript:void(0)">' + itm.DisplayBookingId + '</a></td>' + // data-toggle="modal" data-target="#myModal"
+                                    '<td  style="width:15px;">' + itm.DateofVisit + '</td>' +
+                                    '<td  style="width:15px;">' + itm.ModeOfBooking + '</td>' +
+                                    '<td  style="width:10px;">' + itm.Shift + '</td>' +
+                                    '<td  style="width:15px;">' + itm.Vehicle + '</td>' +
+                                    '<td  style="width:10px;">' + itm.ZoneAtTheTimeOfBooking + '</td>' +
+                                    '<td  style="width: 15px;"><div id="memberCount_' + j + '">' + memberCount + '</div></td>' +
+                                    '<td  style="width: 15px;"><div id="choiceType_' + j + '">' + (itm.ChoiceGuideAmt > 0 && itm.ChoiceVehicleAmt > 0 ? 'Both(Vehicle & Guide)' : (itm.ChoiceGuideAmt > 0 ? 'Guide Choice' : (itm.ChoiceVehicleAmt > 0 ? 'Vehicle Coice' : 'NA'))) + '</div></td>' +
+                                    //'<td  style="width: 15px;"><div id="ExtraAmountRevised_' + j + '">' + itm.ExtraAmountRevised + '</div></td>' +
+                                    '<td  style="width:25px;">' +
+                                            itm.VehicleNumber +
+                                    '</td>' +
+                                    '<td>' +
+                                            itm.GuidName +
+                                    '</td>' +
+                                    '<td style="width:20px;">' +
+                                    '<div class="btn-group show">' +
+                                    '<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">' +
+                                    '<i class="fa fa-bars" title="Action"></i>' +
+                                    '</a>' +
+                                    '<div class="dropdown-menu" x-placement="top-start" style="position: absolute; will-change: transform; top: 30px !important;left: 5px !important; transform: translate3d(-5px, -18px, 0px) !important; padding-left:10px;!important;padding-top:5px;!important">' +
+                                    '<div style="padding:5px!important; ">' +
+                                        strActionOption +
+                                        //'<a href="#" style="font-size:12px!important;" id="printRequest_' + j + '"  class="dropdown-item IssueBoards  UpdateForPrintPass" title="Verify Detail" id="PrintUpdateDetail_' + j + '">' +
+                                        //'<i class="fa fa-print"></i>' +
+                                        //' Print Pass' +
+                                        //'</a>' +
+                                    '</div>' +
+                                    '</div>' +
+                                    '</div>' +
+                                    '</td>' +
+                                    '</tr>';
+                            } else {
+                                tblDetail += '<tr class="myRowEvent" id="myRowId_' + j + '"><td>' + itm.RequestId2 + '</td>' +
+                                    '<td style="width:5px;">' + (parseInt(j) + parseInt(1)) + '</td>' +
+                                    '<td style="width:5px;"><a id="myRequest_' + j + '" class="IssueBoards ViewTicket" style="font-size:12px;" title="View Ticket Detail(s)" href="javascript:void(0)" >' + itm.DisplayBookingId + '</a></td>' + // data-target="#myModal"
+                                    '<td  style="width:15px;">' + itm.DateofVisit + '</td>' +
+                                    '<td  style="width:15px;">' + itm.ModeOfBooking + '</td>' +
+                                    '<td  style="width:10px;">' + itm.Shift + '</td>' +
+                                    '<td  style="width:15px;">' + itm.Vehicle + '</td>' +
+                                    '<td  style="width:10px;">' + itm.ZoneAtTheTimeOfBooking + '</td>' +
+                                    '<td  style="width: 15px;"><div id="memberCount_' + j + '">' + memberCount + '</div></td>' + //
+                                    '<td  style="width: 15px;"><div id="choiceType_' + j + '">' + (itm.ChoiceGuideAmt > 0 && itm.ChoiceVehicleAmt > 0 ? 'Both(Vehicle & Guide)' : (itm.ChoiceGuideAmt > 0 ? 'Guide Choice' : (itm.ChoiceVehicleAmt > 0 ? 'Vehicle Coice':'NA'))) + '</div></td>' +
+                                   // '<td  style="width: 15px;"><div id="ExtraAmountRevised_' + j + '">' + itm.ExtraAmountRevised + '</div></td>' +
+                                    '<td  style="width:25px;">' +
+                                        (choiceType == 2 ? itm.VehicleNumber : '<select class="form-control myselect2" style = "width: 100%;" id="ddlVehicleNumber_' + j + '"> ' + VehicleOptions[j] + '</select >'  ) + 
+                                    '</td >' +
+                                    '<td  style="width:35px;">' +
+                                        (choiceType == 1 ? itm.GuidName :'<select class="form-control myselect2" style = "width: 100%;" id="ddlGuide_' + j + '">' + GuideOptions[j] + '</select >' )+
+                                    '</td>' +
+                                    '<td>' +
+                                      '<div class="btn-group show">' +
+                                        '<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">' +
+                                        '<i class="fa fa-bars" title="Action"></i>' +
+                                        '</a>' +
+                                        '<div class="dropdown-menu" x-placement="top-start" style="position: absolute; will-change: transform; top: 30px !important;left: 5px !important; transform: translate3d(-5px, -18px, 0px) !important; padding-left:10px;!important;padding-top:5px;!important  ">' +
+                                        '<div style="padding:5px!important; ">' +
+                                            strActionOption +
+                                            //'<a href="#" style="font-size:12px!important;" class="dropdown-item  UpdateForIssuePass" title="Verify Detail" id="VerifyDetail_' + j + '">' +
+                                            //'<i class="fa fa-file-pdf-o"></i>' +
+                                            //' To Verify And Print' +
+                                            //'</a>' +
+                                         '</div>' +
+                                         '<br />' +
+                                            noShow +
+                                      '</div>' +
+                                    '</td> ' +
+                                    '</tr>';
+                            }
+
+                            j++;
+                        });
+                    }
+
+                    $("#tbl_CitizenVisitDetails tbody").append(tblDetail);
+                    $('#tbl_CitizenVisitDetails').dataTable({
+                        "destroy": true,
+                        "paging": true,
+                        "ordering": false,
+                        "filter": true,
+                        "orderMulti": false,
+                        //"serverSide": true,
+                        "Processing": true,
+                        "columnDefs": [
+                            { "width": 0, "targets": 0 },
+                            { "width": 10, "targets": 1 },
+                            { "width": 20, "targets": 2 },
+                            { "width": 10, "targets": 3 },
+                            { "width": 10, "targets": 4 },
+                            { "width": 10, "targets": 5 },
+                            { "width": 10, "targets": 6 },
+                            { "width": 10, "targets": 7 },
+                            { "width": 15, "targets": 8 },
+                            { "width": 50, "targets": 9 },
+                            { "width": 70, "targets": 10 },
+                            { "width": 200, "targets": 11 },
+                            { "width": 70, "targets": 12 },
+                            {
+                                "targets": [0],//[1, 8],
+                                "visible": false,
+                                "searchable": true,
+                            },
+                        ],
+                        fixedColumns: true,
+
+                        drawCallback: function () {
+                            //$('.myselect2').select2().destroy();
+                            $(".myselect2-filter").select2("destroy");
+                            $('.myselect2').select2()
+                        }
+                    });
+
+
+                    //
+                    //$("#div_CitizenVisitDetails").html(data.visitDetal);
+                    $('#div_CitizenVisitDetails').show();
+                    $("#ReplacementOfGuide").empty();
+                    $("#ReplacementOfGuide").append(GuideOptionGlobalList);
+
+                    $("#ReplacementOfVehicle").empty();
+                    $("#ReplacementOfVehicle").append(VehicleOptionGlobalList);
+                    
+                    
+                    
+                    //$('#tbl_CitizenVisitDetails').DataTable({
+
+                    //})
+                    //$('.myselect2').select2()
+
+
+                    $(document).on("focus", ".select2", function () {
+                        //alert($(this).parent().parent().attr("id"));
+                        //var id = $(this).parent().parent().attr("id");
+                        //var ticketId = ($(this).parent().parent().find("td").eq(1).html());
+                        // alert(ticketId)
+                        //var indx = id.split('_')[1];
+                        //GetGuideList(ticketId, indx);
+
+                    });
+                    $('.myRowEvent').on("click", function () {
+                        //alert($(this).attr("id"));
+                        // alert('select2:open');
+                        //var id = $(this).attr('id');
+                        //var indx = id.split('_')[1];
+                        //var ticketId = ($(this).find("td").eq(1).html());
+                        ////alert(id + ' , ' + ticketId);
+
+                        //if (flg == false && (indexBack == 0 || indexBack != indx)) {
+                        //    flg = true;
+                        //    indexBack = indx;
+                        //    GetGuideList(ticketId, indx);
+                        //} else {
+                        //    flg = false;
+                        //}
+                    });
+                    $(document).on('change', "[id^='ddlGuide_']", function () {
+                        
+                        var id = $(this).attr('id');
+                        var indx = id.split('_')[1];
+                        var vehicleIdBack = $("#ddlVehicleNumber_" + indx).val() | 0;
+                        var guideId = $("#ddlGuide_" + indx).val() | 0;
+                        flgEvtGuide = false;
+                        if (flgEvtVehicle == false && guideId>0)
+                            var flg = GetVehicleSavedList(indx);
+                        //if ( guideId==0) {
+                        //    $("#ddlVehicleNumber_" + indx).empty();
+                        //    $("#ddlVehicleNumber_" + indx).append('<option value="0">--Select Guide-- </option>');
+                        //    $.each(VehicleOptionList[indx], function (x, items) {
+                        //        if (parseInt(vehicleIdBack) == parseInt(items.Value))
+                        //            $("#ddlVehicleNumber_" + indx).append('<option selected="selected" value="' + items.Value + '">' + items.Text + '</option>');
+                        //        else
+                        //            $("#ddlVehicleNumber_" + indx).append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                        //    });
+                        //}
+
+                        GetGuideListExceptSelectedValues(indx);
+
+                        //if (vehicleIdBack > 0 && guideId>0) {
+                        //    $('#ddlVehicleNumber_' + indx).val(vehicleIdBack);
+                        //}
+                        //GetVehicleSavedList(indx);
+                    });
+                    $(document).on('select2:open', "[id^='ddlGuide_']", function (e) {
+                        var id = $(this).attr('id');
+                        GuideBackId = $('#' + id).val();
+                    });
+                    $(document).on('select2:select', "[id^='ddlGuide_']", function () {
+                        //alert('select2:select');
+
+
+                    });
+                    //$eventSelect.on("select2:select", function (e) { log("select2:select", e); });
+
+                    $(document).on('select2:close', "[id^='ddlGuide_']", function () {
+                        //alert('select2:close');
+                    });
+                    $(document).on('select2:select', "[id^='ddlGuide_']", function () {
+                        // alert($(this).find(':selected').val());
+                    });
+                    $(document).on('select2:unselect', "[id^='ddlGuide_']", function () {
+                        // alert('select2:unselect');
+                    });
+
+                    //---------------------Vehicle--------------------------------------------
+                    $(document).on('change', "[id^='ddlVehicleNumber_']", function () {
+                        //alert('test');
+                       
+                        
+                        flgEvtVehicle == false
+                        var id = $(this).attr('id');
+
+                        var indx = id.split('_')[1];
+                        var guideIdBack = $('#ddlGuide_' + indx).val() | 0;
+                        var vehId = $("#ddlVehicleNumber_" + indx).val() | 0;
+
+                        if (flgEvtGuide == false && vehId>0)
+                            var flg = GetGuideSavedList(indx);
+                        //if ( vehId==0) {
+                        //    $("#ddlGuide_" + indx).empty();
+                        //    $("#ddlGuide_" + indx).append('<option value="0">--Select Guide-- </option>');
+                        //    $.each(GuideOptionList[indx], function (x, items) {
+                        //        if (parseInt(guideIdBack) == parseInt(items.Value))
+                        //            $("#ddlGuide_" + indx).append('<option selected="selected" value="' + items.Value + '">' + items.Text + '</option>');
+                        //        else
+                        //            $("#ddlGuide_" + indx).append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                        //    });
+                        //}
+                        GetVehicleListExceptSelectedValues(indx);
+
+                        //if (guideIdBack > 0 && vehId>0) {
+                        //    $('#ddlGuide_' + indx).val(guideIdBack);
+                        //}
+                    });
+                    $(document).on('select2:select', "[id^='ddlVehicleNumber_']", function () {
+                        //alert('select2:select');
+
+                    });
+                    //$eventSelect.on("select2:select", function (e) { log("select2:select", e); });
+                    $(document).on('select2:open', "[id^='ddlVehicleNumber_']", function (e) {
+                        // alert('select2:open');
+                        var id = $(this).attr('id');
+                        VehicleBackId = $('#' + id ).val();
+                    });
+                    $(document).on('select2:close', "[id^='ddlVehicleNumber_']", function () {
+
+                        //alert('select2:close');
+                    });
+                    $(document).on('select2:unselect', "[id^='ddlVehicleNumber_']", function () {
+
+                        // alert('select2:unselect');
+                    });
+
+
+                    //if ($('#ddlGuide_0').hasClass('myselect')) {
+                    //    $('#ddlGuide_0').removeClass();
+                    //    $('#ddlGuide_0').addClass('myselect');
+
+                    //}
+                    //if ($('#ddlVehicleNumber_0').hasClass('myselect')) {
+                    //    $('#ddlVehicleNumber_0').removeClass();
+                    //    $('#ddlVehicleNumber_0').addClass('myselect');
+
+                    //}
+
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve place list.' + ex);
+                }
+
+            });
+        }
+        var flgEvtGuide = false;
+        var flgEvtVehicle = false;
+        function GetVehicleSavedList(indx) {
+            //string VisitDate, int GuideId, int ShiftId
+            var vehicleFlg = false;
+            var guideId = $("#ddlGuide_" + indx).val() | 0;
+            var visitDate = $("#DateofVisit").val();
+            var shiftId = $("#Shift").val() | 0;
+            var vehicleTypeId = $("#Vehicle").val() | 0;
+            var placeId = $("#PlaceId").val() | 0;
+            var zoneID = $("#ZoneID").val() | 0;
+            var memberCount = $('#memberCount_' + indx).text();
+            if (shiftId <= 0 || vehicleTypeId <= 0 || placeId <= 0 || zoneID<=0) {
+                return false;
+            }
+            if (visitDate == undefined || visitDate == '' || visitDate == null) {
+                return false;
+            }
+
+            var dtTable = $('#tbl_CitizenVisitDetails').DataTable();           
+            var RequestId = dtTable.cells({ row: indx, column: 0 }).data()[0];
+
+            $.ajax({
+                type: 'GET',
+                url: RootUrl + 'BookingRoster/GetSavedVehicleList', // we are calling json method
+                //dataType: 'html',
+                dataType: 'json',
+                data: {
+                    'PlaceId': placeId,
+                    'VisitDate': visitDate, 'GuideId': guideId,
+                    'ShiftId': shiftId, 'VehicleTypeId': vehicleTypeId,
+                    'ZoneId': zoneID,
+                    'MemberCount': memberCount,
+                    'RequestId': RequestId
+                },
+                success: function (data) {
+                   
+                    if (data.MsgStatus == 1) {
+                        if (data.LstVehicle.length > 0) {
+                            $("#ddlVehicleNumber_" + indx).empty();
+                            $("#ddlVehicleNumber_" + indx).append('<option value="0" selected="selected">--Select Vehicle-- </option>');
+                            var vbackId = $("#ddlVehicleNumber_" + indx).val() | 0;
+                           
+                            $.each(data.LstVehicle, function (i, items) {
+                                if (parseInt(vbackId) == parseInt(items.Value)) {
+                                    $("#ddlVehicleNumber_" + indx).append('<option selected="selected" value="' + items.Value + '">' +
+                                        items.Text + '</option>');
+                                } else {
+                                    $("#ddlVehicleNumber_" + indx).append('<option  value="' + items.Value + '">' +
+                                        items.Text + '</option>');
+                                }
+                                vehicleFlg = true;
+                                flgEvtGuide = true;
+                            });
+
+                        }
+                        if (vehicleFlg == false) {
+                            var vbackId = $("#ddlVehicleNumber_" + indx).val() | 0;
+                            $("#ddlVehicleNumber_" + indx).empty();
+                            $("#ddlVehicleNumber_" + indx).append('<option value="0">--Select Guide-- </option>');
+                            $.each(VehicleOptionList[indx], function (x, items) {
+                                if (parseInt(vbackId) == parseInt(items.Value))
+                                    $("#ddlVehicleNumber_" + indx).append('<option selected="selected" value="' + items.Value + '">' + items.Text + '</option>');
+                                else
+                                    $("#ddlVehicleNumber_" + indx).append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                            });
+                        }
+                    } else {    
+                        $("#ddlVehicleNumber_" + indx).empty();
+                        $("#ddlVehicleNumber_" + indx).append('<option value="0" selected="selected">--Select Vehicle-- </option>');
+                        $("#ddlGuide_" + indx).select2("val", "0");                       
+                        alert(data.Msg);
+                    }   
+                    
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve guide list.' + ex);
+                }
+
+            });
+
+            return vehicleFlg;
+        }
+        function GetGuideSavedList(indx) {
+            var guideFlg = false;
+            //string VisitDate, int GuideId, int ShiftId
+            var vehicleId = $("#ddlVehicleNumber_" + indx).val()|0;
+            var visitDate = $("#DateofVisit").val();
+            var shiftId = $("#Shift").val() | 0;
+            var vehicleTypeId = $("#Vehicle").val() | 0;
+            var placeId = $("#PlaceId").val() | 0;
+            var zoneID = $("#ZoneID").val() | 0;
+            if (shiftId <= 0 || vehicleTypeId <= 0 || placeId <= 0 || zoneID<=0) {
+                return false;
+            }
+            if (visitDate == undefined || visitDate == '' || visitDate == null) {
+                return false;
+            }
+            var memberCount = $('#memberCount_' + indx).text();
+            var dtTable = $('#tbl_CitizenVisitDetails').DataTable();
+            var RequestId = dtTable.cells({ row: indx, column: 0 }).data()[0];
+
+            $.ajax({
+                type: 'GET',
+                url: RootUrl + 'BookingRoster/GetSavedGuideList', // we are calling json method
+                //dataType: 'html',
+                dataType: 'json',
+                data: {
+                    'PlaceId': placeId,
+                    'VisitDate': visitDate, 'VehicleId': vehicleId,
+                    'ShiftId': shiftId, 'VehicleTypeId': vehicleTypeId,
+                    'ZoneId': zoneID,
+                    'MemberCount': memberCount,
+                    'RequestId': RequestId
+                },
+                success: function (data) {
+                  
+                    if (data.MsgStatus == 1) {
+                        if (data.LstGuide.length > 0) {
+                            $("#ddlGuide_" + indx).empty();
+                            $("#ddlGuide_" + indx).append('<option selected="selected" value="0">--Select Guide-- </option>');
+                            var gBackId = $("#ddlGuide_" + indx).val() | 0;
+                            $.each(data.LstGuide, function (i, items) {
+                                if (parseInt(gBackId) == parseInt(items.Value)) {
+                                    $("#ddlGuide_" + indx).append('<option selected="selected" value="' + items.Value + '">' +
+                                        items.Text + '</option>');
+                                } else {
+                                    $("#ddlGuide_" + indx).append('<option  value="' + items.Value + '">' +
+                                        items.Text + '</option>');
+                                }
+                                guideFlg = true;
+                                flgEvtVehicle = true;
+                            });
+                        }
+                        if (guideFlg == false) {
+                            var gBackId = $("#ddlGuide_" + indx).val() | 0;
+                            $("#ddlGuide_" + indx).empty();
+                            $("#ddlGuide_" + indx).append('<option value="0">--Select Guide-- </option>');
+                            $.each(GuideOptionList[indx], function (x, items) {
+                                if (parseInt(gBackId) == parseInt(items.Value))
+                                    $("#ddlGuide_" + indx).append('<option selected="selected" value="' + items.Value + '">' + items.Text + '</option>');
+                                else
+                                    $("#ddlGuide_" + indx).append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                            });
+                        }
+                    } else {     
+                        $("#ddlGuide_" + indx).empty();
+                        $("#ddlGuide_" + indx).append('<option selected="selected" value="0">--Select Guide-- </option>');
+                        $("#ddlVehicleNumber_" + indx).select2("val", "0");                       
+                        alert(data.Msg);
+                    }                    
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve guide list.' + ex);
+                }
+
+            });
+
+            return guideFlg
+        }
+        function GetGuideListExceptSelectedValues(indx) {
+            ////var maxSeatCount = 0;
+            var memberCount = 0;
+            var flg = true;
+
+            //var vehicleType = $.trim($("#Vehicle").val())
+            ////if (vehicleType.toUpperCase() == '59')
+            ////    maxSeatCount = 6;
+            ////else
+            ////    maxSeatCount = 20;
+
+
+            var guid = $("#ddlGuide_" + indx).val();
+            var guideId = [];
+            var membersArr = [];
+            var selectedArrIndx = [];
+            var selectedArrVehicles = [];
+
+            guideId.length = GuideOptionList.length;
+            membersArr.length = GuideOptionList.length;
+            selectedArrVehicles.length = GuideOptionList.length;
+
+            selectedArrIndx.length = GuideOptionList.length;
+            for (var j = 0; j < GuideOptionList.length; j++) {
+                    guideId[j] = $("#ddlGuide_" + j).val();
+                    membersArr[j] = $("#memberCount_" + j).text();
+                    selectedArrVehicles = $("#ddlVehicleNumber_" + j).val();
+            }
+            if (jQuery.inArray(guid, guideId) != -1 && parseInt(guid) > 0) {
+
+                for (y = 0; y < membersArr.length; y++) {
+                    if (parseInt(guideId[y]) == parseInt(guid) && parseInt(guid) > 0) {
+                        memberCount = parseInt(memberCount) + parseInt(membersArr[y]);
+                        selectedArrIndx[y] = y;
+                    }
+                }
+                var savedMembers = GetMemberCount(indx, 0);
+                memberCount = parseInt(memberCount) + parseInt(savedMembers);
+                if (memberCount > maxSeatCount || memberCount == maxSeatCount) {
+                    flg = false;
+
+                    if (memberCount > maxSeatCount) {
+
+                        if (parseInt(GuideBackId) > 0 ) {
+                            $("#ddlGuide_" + indx).val(GuideBackId);
+                            $("#ddlGuide_" + indx).trigger('change.select2');
+                        }
+                        else
+                            $("#ddlGuide_" + indx).select2("val", "0");
+
+
+
+                            alert('Member Count Limit More Than Available Seats')
+                            return false;
+
+                    }
+
+                }
+            }
+            if (CheckDuplicateAllotmentVehicleGuide(indx) == false) {
+                $("#ddlGuide_" + indx).val(GuideBackId);
+                $("#ddlGuide_" + indx).trigger('change.select2');
+                return false;
+            }
+            for (var k = 0; k < GuideOptionList.length; k++) {
+                var isRemoved = true;
+                for (var i = 0; i < selectedArrIndx.length; i++) {
+                    var p = selectedArrIndx[i];
+                    if (parseInt(p) == parseInt(k)) {
+                        isRemoved = false;
+                    }
+                }
+                var backId = $("#ddlGuide_" + k).val() | 0;
+                if (flg == false) {
+                    //if (memberCount > maxSeatCount && k != indx) {
+                    //    $("#ddlGuide_" + k).empty();
+                    //    $("#ddlGuide_" + k).append('<option value="0">--Select Guide-- </option>');
+                    //    $.each(GuideOptionList[k], function (x, items) {
+                    //        //if (jQuery.inArray(guideId, items.Value) == -1) {
+                    //        if (guideId.indexOf(items.Value) == k || guideId.indexOf(items.Value) == -1) {
+                    //            if (backId == items.Value)
+                    //                $("#ddlGuide_" + k).append('<option selected="selected" value="' + items.Value + '">' + items.Text + '</option>');
+                    //            else
+                    //                $("#ddlGuide_" + k).append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    //        }
+                    //    });
+                    //} else
+                    if (indx != k) {
+                        //selectedArrIndx[y]
+
+                        if (isRemoved == true) {
+                            $("#ddlGuide_" + k).empty();
+                            $("#ddlGuide_" + k).append('<option value="0">--Select Guide-- </option>');
+                            $.each(GuideOptionList[k], function (x, items) {
+                                //if (jQuery.inArray(parseInt(items.Value), guideId) == -1) {
+
+                                if ((guideId[k] == items.Value && memberCount <= maxSeatCount) || guideId.indexOf(items.Value) == -1) {
+
+
+                                        if (backId == items.Value)
+                                            $("#ddlGuide_" + k).append('<option selected="selected" value="' + items.Value + '">' + items.Text + '</option>');
+                                        else
+                                            $("#ddlGuide_" + k).append('<option value="' + items.Value + '">' + items.Text + '</option>');
+
+                                }
+
+                            });
+                        }
+                    }
+
+                }
+            }
+            return true;
+        }
+        function GetVehicleListExceptSelectedValues(indx) {
+            //var maxSeatCount = 0;
+            var memberCount2 = 0;
+            var flg = true;
+            /// var currentMemberCount = $('#memberCount_' + indx).text();
+
+            //var vehicleType = $.trim($("#Vehicle").val())
+            //if (vehicleType.toUpperCase() == '59')
+            //    maxSeatCount = 6;
+            //else
+            //    maxSeatCount = 20;
+
+            var vehid = $("#ddlVehicleNumber_" + indx).val();
+            var vehicleId = [];
+            var membersArr2 = [];
+            var selectedArrIndx2 = [];
+            vehicleId.length = VehicleOptionList.length;
+            membersArr2.length = VehicleOptionList.length;
+            selectedArrIndx2.length = VehicleOptionList.length;
+            for (var jj = 0; jj < VehicleOptionList.length; jj++) {
+                vehicleId[jj] = $("#ddlVehicleNumber_" + jj).val();
+                membersArr2[jj] = $("#memberCount_" + jj).text();
+            }
+            if (vehicleId.indexOf(vehid) != -1 && parseInt(vehid) > 0) {
+                for (yy = 0; yy < membersArr2.length; yy++) {
+                    if (parseInt(vehicleId[yy]) == parseInt(vehid) && parseInt(vehid) > 0) {
+                        memberCount2 = parseInt(memberCount2) + parseInt(membersArr2[yy]);
+                        selectedArrIndx2[yy] = yy;
+                    }
+                }
+                var savedMembers = GetMemberCount(indx, 1);
+
+                memberCount2 = parseInt(memberCount2) + parseInt(savedMembers);
+
+                if (memberCount2 > maxSeatCount || memberCount2 == maxSeatCount) {
+
+                    flg = false;
+                    if (memberCount2 > maxSeatCount) {
+                        //$("#ddlVehicleNumber_" + indx).val(VehicleBackId);
+                        if (parseInt(VehicleBackId) > 0) {
+                           // var id = "'" + VehicleBackId + "'";
+                            $("#ddlVehicleNumber_" + indx).val(VehicleBackId);
+                            $("#ddlVehicleNumber_" + indx).trigger('change.select2');
+                            //
+                        }
+                        else
+                            $("#ddlVehicleNumber_" + indx).select2("val", "0");
+
+                        alert('Member Count Limit More Than Available Seats')
+                        return false;
+                    }
+
+                }
+            }
+
+            if (CheckDuplicateAllotmentVehicleGuide(indx) == false) {
+                $("#ddlVehicleNumber_" + indx).val(VehicleBackId);
+                $("#ddlVehicleNumber_" + indx).trigger('change.select2');
+                return false;
+            }
+            for (var kk = 0; kk < VehicleOptionList.length; kk++) {
+                var selectedVal = $("#ddlVehicleNumber_" + kk).val() | 0;
+                var isRemoved2 = true;
+                for (var i = 0; i < selectedArrIndx2.length; i++) {
+                    var p1 = selectedArrIndx2[i];
+                    if (parseInt(p1) == parseInt(kk)) {
+                        isRemoved2 = false;
+                    }
+                }
+                if (flg == false) {
+                    //if (memberCount2 > maxSeatCount && kk != indx) {
+
+
+                    //    $("#ddlVehicleNumber_" + kk).empty();
+                    //    $("#ddlVehicleNumber_" + kk).append('<option value="0">--Select Guide-- </option>');
+                    //    $.each(VehicleOptionList[kk], function (x, items) {
+
+                    //        if (vehicleId.indexOf(items.Value) == kk || vehicleId.indexOf(items.Value) == -1) {
+                    //            if (selectedVal == items.Value)
+                    //                $("#ddlVehicleNumber_" + kk).append('<option selected="selected" value="' + items.Value + '">' + items.Text + '</option>');
+                    //            else
+                    //                $("#ddlVehicleNumber_" + kk).append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    //        }
+                    //    });
+                    //    //if (kk = 4) {
+                    //    //    alert('kk1=4');
+                    //    //}
+                    //} else
+                    if (indx != kk) {
+                        //selectedArrIndx2[y]
+                        if (isRemoved2 == true) {
+                            if (kk != indx) {
+
+
+                                $("#ddlVehicleNumber_" + kk).empty();
+                                $("#ddlVehicleNumber_" + kk).append('<option value="0">--Select Vehicle-- </option>');
+                                $.each(VehicleOptionList[kk], function (x, items) {
+                                    if ((vehicleId[kk] == items.Value && memberCount2 <= maxSeatCount) || vehicleId.indexOf(items.Value) == -1) {
+                                        alert(selectedVal);
+                                        if (selectedVal == items.Value)
+                                            $("#ddlVehicleNumber_" + kk).append('<option selected="selected" value="' + items.Value + '">' + items.Text + '</option>');
+                                        else
+                                            $("#ddlVehicleNumber_" + kk).append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                                    }
+                                });
+                                //if (kk = 4) {
+                                //    alert('kk2=4');
+                                //}
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+        function CheckDuplicateAllotmentVehicleGuide(indx) {
+            var GuideAlreadyFlg = false;
+            var VehAlreadyFlg = false;
+            var dupFlg = false;
+            var arrSameGuideIndx = [];
+            var currentGuideId = $('#ddlGuide_' + indx).val() | 0;
+            var currentVehicleId = $('#ddlVehicleNumber_' + indx).val() | 0;
+            for (var k = 0; k < GuideOptionList.length; k++) {
+                var guideid = $('#ddlGuide_' + k).val() | 0;
+                var vehicleid = $('#ddlVehicleNumber_' + k).val() | 0;
+                if (parseInt(currentGuideId) > 0 && parseInt(guideid) > 0 && parseInt(guideid) == parseInt(currentGuideId)) { //&& parseInt(indx) != parseInt(k)
+                    if (parseInt(currentVehicleId) > 0 && parseInt(vehicleid) > 0 && parseInt(vehicleid) != parseInt(currentVehicleId)) {
+                        GuideAlreadyFlg = true;
+                    }
+                } else {
+                    if (parseInt(currentVehicleId) > 0 && parseInt(vehicleid) > 0 && parseInt(vehicleid) == parseInt(currentVehicleId)) {
+                        if (parseInt(currentGuideId) > 0 && parseInt(guideid) > 0 && parseInt(guideid) != parseInt(currentGuideId)) { //&& parseInt(indx) != parseInt(k)
+                            VehAlreadyFlg = true;
+                        }
+                    }
+                }
+            }
+            if (GuideAlreadyFlg == true) {
+                alert('Guide Can Have Only One Vehicle per shift');
+                return false;
+            }
+            if (VehAlreadyFlg == true) {
+                alert('Vehicle Can Have Only One Guide per shift');
+                return false;
+            }
+            return true;
+        }
+        function GetMemberCount(indx,isVehicleOrGuide) {
+            var GuidName = $('#ddlGuide_' + indx + ' option:selected').text();
+            var VehicleNumber = $('#ddlVehicleNumber_' + indx + ' option:selected').text();
+
+            var table = $('#tbl_CitizenVisitDetails').DataTable();
+            var totalMemeber = 0;
+            var length = table.page.info().recordsTotal;
+            var dtTable = $('#tbl_CitizenVisitDetails').DataTable()
+            for (var i = 0; i < length; i++) {
+                var membercount = $('#memberCount_'+i).text();
+                var vehicleNumber = dtTable.cells({ row: i, column: 9 }).data()[0];
+                var guideName = dtTable.cells({ row: i, column: 10 }).data()[0];
+                if (VehicleNumber == vehicleNumber && isVehicleOrGuide == 1 && vehicleNumber!='') {
+                    totalMemeber = parseInt(totalMemeber) + parseInt(membercount)
+                }
+                if (guideName == GuidName && isVehicleOrGuide == 0 && GuidName != '') {
+                    totalMemeber = parseInt(totalMemeber) + parseInt(membercount)
+                }
+                //var guideName = dtTable.cells({ row: i, column: 10 }).data()[0];
+            }
+            return totalMemeber;
+        }
+        var maxSeatCount = 0;
+        $(document).on('change', "[id='Vehicle']", function () {
+            //alert('a');
+            GetVehicleMaxSeats();
+        });
+        function GetVehicleMaxSeats() {
+            var shiftId = $("#Shift").val() | 0;
+            var vehicleTypeId = $("#Vehicle").val() | 0;
+            var placeId = $("#PlaceId").val() | 0;
+            var zoneID = $("#ZoneID").val() | 0;
+            if (shiftId <= 0 || vehicleTypeId <= 0 || placeId <= 0 || zoneID<=0) {
+                return false;
+            }
+            $.ajax({
+                type: 'GET',
+                url: RootUrl + 'BookingRoster/GetVehicleMaxSeats', // we are calling json method
+                //dataType: 'html',
+                dataType: 'json',
+                data: {
+                    'PlaceId': placeId,
+                    'ShiftId': shiftId, 'VehicleTypeId': vehicleTypeId,
+                    'ZoneId': zoneID
+                },
+                success: function (maxSeats) {
+                    maxSeatCount = 0;
+                    if (parseInt(maxSeats) > 0) {
+                        maxSeatCount = maxSeats;
+                        //alert(maxSeatCount);
+                    }
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve Max Vehicle Seats' + ex);
+                }
+
+            });
+        }
+        //function GetGuideList(ticketId,indx) {
+        //    var visitDate = $("#txtBookingDate").val();
+
+        //    $.ajax({
+        //        type: 'GET',
+        //        url: RootUrl + 'BookingRoster/GetGuideList', // we are calling json method
+        //        //dataType: 'html',
+        //        dataType: 'json',
+        //        data: { 'VisitDate': visitDate, 'TicketId': ticketId},
+        //        success: function (lstGuide) {
+        //            $("#ddlGuide_" + indx).empty();
+        //            $("#ddlGuide_" + indx).append('<option value="0">--Select Guide-- </option>');
+        //            $.each(lstGuide, function (i, items) {
+        //                $("#ddlGuide_" + indx).append('<option value="' + items.Value + '">' +
+        //                    items.Text + '</option>');
+        //            });
+        //        },
+        //        error: function (ex) {
+        //            alert('Failed to retrieve guide list.' + ex);
+        //        }
+
+        //    });
+        //}
+        //function GetVehicleList(ticketId,placeId,vehicleType, indx) {
+        //    var visitDate = $("#txtBookingDate").val();
+        //    $.ajax({
+        //        type: 'GET',
+        //        url: RootUrl + 'BookingRoster/GetVehicleList', // we are calling json method
+        //        //dataType: 'html',
+        //        dataType: 'json',
+        //        data: {
+        //            'VisitDate': visitDate, 'TicketId': ticketId, 'VehicelType': vehicleType, 'PlaceId': placeId },
+        //        success: function (lstVehicel) {
+        //            $("#ddlVehicleNumber_" + indx).empty();
+        //            $("#ddlVehicleNumber_" + indx).append('<option value="0">--Select Vehicle Number-- </option>');
+        //            $.each(lstVehicel, function (i, items) {
+        //                $("#ddlVehicleNumber_" + indx).append('<option value="' + items.Value + '">' +
+        //                    items.Text + '</option>');
+        //            });
+        //        },
+        //        error: function (ex) {
+        //            alert('Failed to retrieve vehicle list.' + ex);
+        //        }
+
+        //    });
+        //}
+        $(document).on('click', '.UpdateForIssuePass', function (e) {
+
+            //var r = confirm('Are you sure you want to generate the boarding pass ?');
+            //if (r == false) {
+            //    return false;
+            //}
+            var ctrlId = $(this).attr('id');
+            var indx = ctrlId.split('_')[1];
+
+
+
+            var GuideId = $('#ddlGuide_' + indx).val() | 0;
+            var VehicleId = $('#ddlVehicleNumber_' + indx).val() | 0;
+            //alert('guide_' + GuideId);
+            //alert('vehicle_' + VehicleId);
+            //var GuidName = $(this).parents('tr').find('input[id=GuidName]').val();
+            //var VehicleNumber = $(this).parents('tr').find('input[id=VehicleNumber]').val();
+          
+
+            var GuidName = $('#ddlGuide_' + indx +' option:selected').text();
+            var VehicleNumber = $('#ddlVehicleNumber_' + indx + ' option:selected').text();
+
+            var dataid = $(this).attr("data-id");
+            var spl = dataid.split('|');
+            var choiceType = parseInt(spl[0]);
+            if (choiceType == 1) {               
+                GuideId = parseInt(spl[1]);
+                GuidName = spl[2];
+                //alert(GuideId + ',' + GuidName);
+            }
+           
+
+            if (choiceType == 2) {
+                VehicleId = parseInt(spl[1]);
+                VehicleNumber = spl[2];
+                //alert(VehicleId + ',' + VehicleNumber);
+            }             
+            if (VehicleId == 0 || VehicleId == undefined || VehicleId == null) {
+                alert('Selet Vehicle Number');
+                $('#ddlVehicleNumber_' + indx).focus();
+                return false;
+            }
+            if (GuideId == 0 || GuideId == undefined || GuideId == null) {
+                alert('Selet Guide');
+                $('#ddlGuide_' + indx).focus();
+                return false;
+            }
+            var dtTable = $('#tbl_CitizenVisitDetails').DataTable();
+            //alert(dtTable.cells({ row: indx, column: 0 }).data()[0]);
+            //dtTable.columns([0, 1, 2]).visible(false);
+
+
+            var IDname = dtTable.cells({ row: indx, column: 0 }).data()[0];
+
+          
+
+            //var IDname = $(this).parents('tr').find('input[name=PrintBoarding]').val();
+
+            if (GuidName == "" || VehicleNumber == "") {
+                alert("Guid Name and Vehicle Number must be fill before Print ")
+                return false;
+            }
+
+
+            //var Indexs = $(this).parents('tr').find('input[name=Index]').val();
+
+
+
+            var tblinfo = {
+                ID: $.trim(IDname),
+                GuidName: $.trim(GuidName),
+                VehicleNumber: $.trim(VehicleNumber),
+                Place: $.trim($("#PlaceId").val()),
+                ZoneID: $.trim($("#ZoneID").val()),
+                DateOfArrival: $.trim($("#DateofVisit").val()),
+                VehicleID: $.trim($("#Vehicle").val()),
+                ShiftTime: $.trim($("#Shift").val()),
+                GuideId: parseInt(GuideId),
+                VehicleID2: parseInt(VehicleId),
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'BookingRoster/ValidationForGuidNameAndVehicleNumberUpdate',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(tblinfo),
+                success: function (json) {
+
+                    if (json.STATUS == "FALSE") {
+
+                        alert("Guid Name And Vehicle Number assigning limit exceeded please assign new Guid Name And Vehicle Number. \n Remaining seats for Vehicle ( " + VehicleNumber + " ) is : " + json.Remaining);
+                        return false;
+                    }
+                    else if (json.STATUS == 0) {
+                        //alert(json.STATUS + ' MUKESH ' + json.Remaining)
+                        var splMsg = [];
+                        splMsg = json.Remaining.split('|');
+                        if (splMsg.length > 1) {
+                            alert(splMsg[0] + " \n" + splMsg[1]);
+                        } else {
+                            alert(splMsg[0]);
+                        }
+                        return false;
+                    }
+                    else {
+                        $.ajax({
+                            type: 'POST',
+                            url: RootUrl + 'BookingRoster/GuidNameAndVehicleNumberUpdate',
+                            contentType: 'application/json; charset=utf-8',
+                            data: JSON.stringify(tblinfo),
+                            success: function (json) {
+                                if (json.isRedirect) {
+                                    alert('Boarding Pass Generated');
+                                    GetBookingList();
+
+
+                                    //$("#NotArrivedindex_" + Indexs).hide();
+
+                                    //$("#index_" + Indexs).removeClass('UpdateForIssuePass').addClass('UpdateForPrintPass');
+                                    //$("#index_" + Indexs).html("Print");
+
+
+                                    //$(this).parents('tr').find('input[id=VehicleNumber]').prop('readonly',true);;
+                                    //$(this).parents('tr').find('input[name=PrintBoarding]').prop('readonly', true);
+
+                                   // window.open("PrintBoardingPass/" + IDname);
+                                    window.open("../BoardingMaster/PrintBoardingPass/" + IDname);
+                                } else if (json.STATUS === "Blocked") {
+                                    alert(json.Msg);
+                                    return false;
+                                }
+
+                            }
+                        });
+
+                    }
+
+                }
+            });
+        });
+        $(function () {
+            $("#myModal").on("hidden.bs.modal", function (e) {
+                //alert('closed');
+                //console.log("Modal hidden");
+                $("#modelNotArrived").html("");
+                GetBookingList();
+                //$('#myModal').modal("toggle");
+            });
+        });
+        $(document).on('click', '.ViewTicket', function (e) {
+
+
+            //var IDname = $(this).parents('tr').find('input[name=PrintBoarding]').val();
+            var ahrefId = this.id;
+            var indx = ahrefId.split('_')[1];
+            var dtTable = $('#tbl_CitizenVisitDetails').DataTable()
+            var IDname = dtTable.cells({ row: indx, column: 0 }).data()[0];
+            //alert(IDname);
+            $.ajax({
+                type: 'GET',
+                url: "../BoardingMaster/GetViewTicketDetailsForVIPSeats?Ticket=" + IDname,
+                dataType: 'html',
+                success: function (data) {
+
+                    $('#myModal').modal({
+                        backdrop: 'static',
+                        keyboard: true,
+                        show: true
+                    });
+                    $("#modelNotArrived").html(data);
+                    $('#myModal').modal('show');
+
+                //    //$('.panel-default').scrollTop($('.panel-default').height())
+                },
+                error: function (ex) {
+                    alert(ex.error);
+                }
+            });
+
+        });
+        $(document).on('click', '.UpdateForNotArrived', function (e) {
+
+            //$currentTR = $(this).parents('tr');
+            currentValue = 0;
+            //var IDname = $(this).parents('tr').find('input[name=PrintBoarding]').val();
+            var ahrefId = this.id;
+            var indx = ahrefId.split('_')[1];
+            var dtTable = $('#tbl_CitizenVisitDetails').DataTable()
+            var IDname = dtTable.cells({ row: indx, column: 0 }).data()[0];
+
+            $.ajax({
+                type: 'GET',
+                url: "../BoardingMaster/GetNotArrivedTicketDetails?Ticket=" + IDname,
+                dataType: 'html',
+                success: function (data) {
+                    currentValue = $('#modelNotArrived').find('tbody>tr').length;
+                    $('#myModal').modal({
+                        backdrop: 'static',
+                        keyboard: true,
+                        show: true
+                    });
+                    $("#modelNotArrived").html(data);
+                    $('#myModal').modal('show');
+
+                },
+                error: function (ex) {
+                    alert(ex.error);
+                }
+            });
+
+        });
+        $(document).on('click', '.AddVehicleGuideReplacement', function (e) {
+            let dataId = $(this).attr("data-id");
+           //  alert("The data-id of clicked item is: " + dataId);
+
+            //$('#myGuideVehicleReplament').modal('toggle');
+            var spl = dataId.split('|');
+            
+            $('#spnChoiceType').text(spl[0]);
+            $('#spnSavedGuideId').text(spl[1]);
+            $('#spnSavedVehicleId').text(spl[2]);
+            $('#requestid').val(spl[3]);
+            $('#displayRequestId').val(spl[4]);
+
+            if (parseInt(spl[0]) == 3) {
+                $('#divGuideReplacement').show();
+                $('#divVehicleReplacement').show();
+                $("#myGuideVehicleReplament").height(360);
+            }
+            if (parseInt(spl[0]) == 2) {
+                $('#divGuideReplacement').hide();
+                $('#divVehicleReplacement').show();
+                $("#myGuideVehicleReplament").height(300);
+            }
+            if (parseInt(spl[0]) == 1) {
+                $('#divGuideReplacement').show();
+                $('#divVehicleReplacement').hide();
+                $("#myGuideVehicleReplament").height(300);
+            }   
+            $("#ReplacementOfGuide").select2("val", "0");
+            
+            $('#ReplacementOfVehicle').select2("val", "0");
+            
+            $("#myGuideVehicleReplament").modal({
+                backdrop: 'static',
+                keyboard: false,                 
+            });
+            $('#myGuideVehicleReplament').removeClass('hide');
+            $('#myGuideVehicleReplament').modal('show');
+
+            //$('#myGuideVehicleReplament').modal('hide');
+        });
+
+        $(document).on('click', '.UpdateForPrintPass', function (e) {
+
+            //var GuidName = $(this).parents('tr').find('input[id=GuidName]').val();
+            //var VehicleNumber = $(this).parents('tr').find('input[id=VehicleNumber]').val();
+            //var IDname = $(this).parents('tr').find('input[name=PrintBoarding]').val();
+
+
+            var ahrefId = this.id;
+            var indx = ahrefId.split('_')[1];
+            var dtTable = $('#tbl_CitizenVisitDetails').DataTable()
+            var IDname = dtTable.cells({ row: indx, column: 0 }).data()[0];
+
+            var GuidName = dtTable.cells({ row: indx, column: 10 }).data()[0];
+            var VehicleNumber = dtTable.cells({ row: indx, column: 9 }).data()[0];
+
+
+
+            if (GuidName == "" || VehicleNumber == "") {
+                alert("Guid Name and Vehicle Number must be fill before Print ")
+                return false;
+            }
+            window.open("../BoardingMaster/PrintBoardingPass/" + IDname);
+        });
+        $(document).on('change', "[id='ReplacementOfGuide']", function (e) {
+            $('#errReplaceGuide').text('');
+        });
+        $(document).on('change', "[id='ReplacementOfVehicle']", function (e) {
+            $('#errReplaceVehicle').text('');
+        });
+        $(document).on('click', '.SaveVehicleGuideReplacement', function (e) {
+            var choicetype = $('#spnChoiceType').text();
+            var isValid = true;
+            var replacedGuide = $('#ReplacementOfGuide').val() | 0;
+            var replacedVehicle = $('#ReplacementOfVehicle').val() | 0;
+            var savedGuideId= $('#spnSavedGuideId').text();
+            var savedVehicleId= $('#spnSavedVehicleId').text();
+            if (parseInt(choicetype) == 3) {              
+                if (replacedGuide == 0) {
+                    isValid = false;
+                    $('#errReplaceGuide').text('Select Guide');
+                }
+                if (replacedVehicle == 0) {
+                    isValid = false;
+                    $('#errReplaceVehicle').text('Select Vehicle');
+                }   
+                if (replacedGuide == savedGuideId) {
+                    isValid = false;
+                    $('#errReplaceGuide').text('Selected Guide and already saved guide must not be same');
+                }
+                if (replacedVehicle == savedVehicleId) {
+                    isValid = false;
+                    $('#errReplaceVehicle').text('Selected Vehicle and already saved vehicle must not be same');
+                }
+            }
+            if (parseInt(choicetype) == 2) {                               
+                if (replacedVehicle == 0) {
+                    isValid = false;
+                    $('#errReplaceVehicle').text('Select Vehicle');
+                }
+                if (replacedVehicle == savedVehicleId) {
+                    isValid = false;
+                    $('#errReplaceVehicle').text('Selected Vehicle and already saved vehicle must not be same');
+                }
+            }
+            if (parseInt(choicetype) == 1) {
+                if (replacedGuide == 0) {
+                    isValid = false;
+                    $('#errReplaceGuide').text('Select Guide');
+                }
+                if (replacedGuide == savedGuideId) {
+                    isValid = false;
+                    $('#errReplaceGuide').text('Selected Guide and already saved guide must not be same');
+                }
+            }
+            if (isValid == false)
+                return false;
+
+            $('#myGuideVehicleReplament').hide();
+            $("#myConfirmationDialog").modal({
+                backdrop: 'static',
+                keyboard: false,
+            });
+            $('#myConfirmationDialog').removeClass('hide');
+            $('#myConfirmationDialog').modal('show');
+           
+           
+        });   
+        $(document).on('click', "[id='btnNo']", function () {
+            $('#myGuideVehicleReplament').show();
+            $('#myConfirmationDialog').modal('toggle');            
+        });
+        $(document).on('click', "[id='btnNo']", function () {
+            $('#myGuideVehicleReplament').show();
+            $('#myConfirmationDialog').modal('toggle');
+        });
+        $(document).on('click', "[id='btnYes']", function () {
+            var replacedGuide = $('#ReplacementOfGuide').val() | 0;
+            var replacedVehicle = $('#ReplacementOfVehicle').val() | 0;
+            var requestId = $('#requestid').val();
+            var visitDate = $('#DateofVisit').val();
+            var shiftId = $('#Shift').val();
+           
+            
+            $.ajax({
+                type: 'POST',
+                url: "../BookingRoster/SaveReplacedVehicleGuide",
+                dataType: 'json',
+                data: { 'RequestId': requestId, 'VehicleId': replacedVehicle, 'GuideId': replacedGuide, 'ShiftId': shiftId, 'VisitDate': visitDate },
+                success: function (response) {
+                    
+                    $('#myConfirmationDialog').modal('toggle');
+                    $('#myGuideVehicleReplament').modal('toggle');  
+                    alert(response.Msg);
+                    GetBookingList();
+                   
+                   
+                },
+                error: function (xhr) {
+                    alert('something went wrong');
+                }
+            });          
+        });
+        
+    </script>
+}

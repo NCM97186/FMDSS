@@ -1,0 +1,167 @@
+﻿@{
+    ViewBag.Title = "OnlineZooPayment";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+    table.imagetable {
+        font-family: verdana,arial,sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #999999;
+        border-collapse: collapse;
+    }
+
+        table.imagetable th {
+            background: #b5cfd2 url('cell-blue.jpg');
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #999999;
+        }
+
+        table.imagetable td {
+            background: #ccc;
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #999999;
+        }
+</style>
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript" language="javascript">
+
+    $(document).ready(function () {
+
+        function disableBack() { window.history.forward() }
+
+        window.onload = disableBack();
+        window.onpageshow = function (evt) {
+            if (evt.persisted) disableBack()
+        }
+
+    });
+
+    $(document).on("keydown", function (e) {
+        if (e.which === 8 && !$(e.target).is("input, textarea")) {
+            e.preventDefault();
+        }
+    });
+
+    $(function (e) {
+        $(".btnsubmit").click(function () {
+            $(".btnsubmit").attr('disabled', 'disabled');
+            $(this).parents('form').submit();
+        });
+    });
+
+</script>
+
+<div id="page-wrapper-inn">
+
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">
+
+            <!--<i class="fa fa-rupee"></i>--> Payment
+            <!-- <small class="pull-right pdate">Date: 17/12/2015</small> -->
+
+        </h1>
+    </div>
+
+    <!-- /.col-lg-12 -->
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <section class="payment">
+                        <!-- Table row -->
+                        <div class="row">
+                            <div class="col-xs-12 table-responsive">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Transaction_Id</th>
+                                            <th>Member Entry Fee</th>
+                                            <th>Video Camera Fees</th>
+                                            <th>Vehicle Fees</th>
+                                            @*<th>Online booking Charges</th>*@
+                                            <th>Total Amount Payable</th>
+                                            <th>Enter By</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in ViewData.Model)
+                                        {
+                                            <tr style="color:Black">
+                                                <td>@item["RequestID"] </td>
+                                                <td>@item["MemberFee"]</td>
+                                                <td>@item["CameraFee"]</td>
+                                                <td>@item["VehicleFee"]</td>
+                                                @*<td>@item["EmitraCharges"]</td>*@
+                                                <td>@item["TotalFinalAmount"]</td>
+                                                <td>@Session["User"].ToString()</td>
+                                                <td><span class="danger-text"> @item["Status"]</span></td>
+                                            </tr>
+                                        }
+
+
+                                    </tbody>
+                                </table>
+                            </div><!-- /.col -->
+                        </div><!-- /.row -->
+                        <!-- this row will not appear when printing -->
+                        <div class="row no-print">
+                            <div class="col-xs-12">
+                                <label>Total Amount </label>: @Html.Raw(HttpContext.Current.Session["totalprice"])
+                                <br />
+                                @if (Convert.ToString(HttpContext.Current.Session["IsDepartmentalKioskUser"]) == "False")
+                                {
+                                    <span style="color:red"> Payment aggregator and bank charges will be extra as per their policy. </span>
+                                }
+                            </div>
+                            <div class="col-xs-12">
+
+                                @if (Convert.ToString(HttpContext.Current.Session["IsDepartmentalKioskUser"].ToString()) == "True")
+                                {
+                                    using (Html.BeginForm("DeptKioskUserPayZOO", "BookOnlineZoo", FormMethod.Post, new { id = "pay" }))
+                                    {
+
+                                        <div style="text-align:center" class="form-horizontal" role="form">
+                                            <button id="btnPay" type="submit" name="Command" value="pay" class="btn btn-primary pull-right btnsubmit"><i class="fa fa-check"></i> Pay Now</button>
+                                        </div>
+                                        <a class="btn btn-info  pull-left" href='@Url.Action("BookOnlineZoo", "BookOnlineZoo")'>
+                                            <i class="fa fa-arrow-circle-left"></i>  Back
+                                        </a>
+
+                                    }
+                                }
+                                else
+                                {
+
+
+                                    using (Html.BeginForm("Pay", "BookOnlineZoo", FormMethod.Post, new { id = "pay" }))
+                                    {
+                                        <div style="text-align:center" class="form-horizontal" role="form">
+                                            <button id="btnPay" type="submit" name="Command" value="pay" class="btn btn-primary pull-right btnsubmit"><i class="fa fa-check"></i> Pay Now</button>
+                                        </div>
+                                        <a class="btn btn-info  pull-left" href='@Url.Action("BookOnlineZoo", "BookOnlineZoo")'>
+                                            <i class="fa fa-arrow-circle-left"></i>  Back
+                                        </a>
+                                    }
+                                }
+                            </div>
+                        </div>
+
+                    </section>
+
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>

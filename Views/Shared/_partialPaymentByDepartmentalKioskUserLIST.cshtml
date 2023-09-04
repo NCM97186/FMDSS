@@ -1,0 +1,247 @@
+﻿@{
+    ViewBag.Title = "PaymentByDepartmentalKioskUserDetails";
+
+
+    if (HttpContext.Current.Session["User"] != null)
+    {
+        Layout = null;
+        if ((HttpContext.Current.Session["DesignationId"].ToString() != "10"))
+        {
+            if (Convert.ToString(HttpContext.Current.Session["IsDepartmentalKioskUser"].ToString()) == "True")
+            {
+                Layout = "~/Views/Shared/_Layout.cshtml";
+            }
+            else
+            {
+                Layout = "~/Views/Shared/Forestlayout.cshtml";
+            }
+        }
+        else
+        {
+            Layout = "~/Views/Shared/_Layout.cshtml";
+
+        }
+    }
+}
+
+@model FMDSS.Models.PaymentByDepartmentalKioskUserDetails
+
+
+
+<style>
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 5px;
+        text-align: left;
+    }
+
+    table#tblScart tr:nth-child(even) {
+        background-color: #eee;
+    }
+
+    table#tblScart tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    table th {
+        background-color: dimgrey;
+        color: white;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #eee;
+    }
+
+    table tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    table th {
+        background-color: dimgrey;
+        color: white;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #eee;
+    }
+
+    table tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    table th {
+        background-color: dimgrey;
+        color: white;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #eee;
+    }
+
+    table tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    table th {
+        background-color: dimgrey;
+        color: white;
+    }
+</style>
+
+<script type="text/javascript" language="javascript">
+
+    $(document).ready(function () {
+
+        function disableBack() { window.history.forward() }
+
+        window.onload = disableBack();
+        window.onpageshow = function (evt) {
+            if (evt.persisted) disableBack()
+        }
+
+    });
+
+
+    function printDiv(divID) {
+        //Get the HTML of div
+        var divElements = document.getElementById(divID).innerHTML;
+        //Get the HTML of whole page
+        var oldPage = document.body.innerHTML;
+
+        //Reset the page's HTML with div's HTML only
+        document.body.innerHTML =
+          "<html><head><title>Transaction Status</title></head><body>" +
+          divElements + "</body>";
+
+        //Print Page
+        window.print();
+
+        //Restore orignal HTML
+        document.body.innerHTML = oldPage;
+
+
+    }
+
+</script>
+
+<div id="page-wrapper-inn">
+
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Transaction Status</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <br />
+                <div id="Print_table">
+                  
+
+                    <table style=" border-width: 1px; height: 350px; width: 70%; margin: auto;" bordercolor="blue" cellpadding="2" cellspacing="5">
+                        <tr >
+                            <td colspan="2" style="text-align: Left;" ><img src=" ~/images/logo.png" alt="Forest Department, Government of Rajasthan" title="Logo" style="margin:8px;" class=""></td>                           
+                        </tr>
+
+                        <tr>
+                            <td>Receipt Number:</td>
+                            <td>@Model.TransactionID</td>
+                        </tr>
+                        <tr>
+                            <td>Request ID:</td>
+                            <td>@Model.RequestedId</td>
+                        </tr>
+                        <tr>
+                            <td>Module Name:</td>
+                            <td>@Model.ModuleName</td>
+                        </tr>
+                        <tr>
+                            <td>Service Type Name:</td>
+                            <td>@Model.ServiceTypeName</td>
+                        </tr>
+                        <tr>
+                            <td>Permission Name:</td>
+                            <td>@Model.PermissionName</td>
+                        </tr>
+                        <tr>
+                            <td>Sub Permissio Name:</td>
+                            <td>@Model.SubPermissioName</td>
+                        </tr>
+
+                        <tr>
+                            <td>Name Of Applicant:</td>
+                            <td>@Model.PaidForCitizenName</td>
+                        </tr>
+
+                        <tr>
+                            <td>Received By:</td>
+                            <td>@Model.PaidBy</td>
+                        </tr>
+
+                        <tr>
+                            <td>Received On:</td>
+                            <td>@Model.PaidOn</td>
+                        </tr>
+
+                        @*<tr>
+                            <td>Paid For Citizen Name:</td>
+                            <td>@Model.PaidForCitizenName</td>
+                        </tr>*@
+
+
+                        <tr>
+                            <td>Amount Received:</td>
+                            <td>@Model.PaidAmount</td>
+                        </tr>
+                        <tr>
+                            <td>Payment Mode:</td>
+                            <td>@Model.PaymentMode</td>
+                        </tr>
+
+                        @if (@Model.PaymentMode != "CASH")
+                        {
+                        <tr>
+                            <td>Bank Name:</td>
+                            <td>@Model.BankName</td>
+                        </tr>
+                        <tr>
+                            <td>IFSC Code:</td>
+                            <td>@Model.IFSCCode</td>
+                        </tr>
+                        <tr>
+                            <td>Cheque Number:</td>
+                            <td>@Model.ChequeNumber</td>
+                        </tr>
+                        <tr>
+                            <td>Cheque Date:</td>
+                            <td>@Model.ChequeDate</td>
+                        </tr>
+                      }
+                    </table>
+                </div>
+                <br />
+                @using (Html.BeginForm("", "", FormMethod.Post, new { id = "pay" }))
+                {
+                    <div style="text-align:center;"  role="form"> @*class="form-horizontal"*@
+                        <button id="btnPrint" type="submit" name="Command" class="btn btn-success" style="width:80px;margin: 5px;" value=" print" onclick="javascript: printDiv('Print_table'); return false;">Print</button>
+                                         
+                        @if (Convert.ToString(HttpContext.Current.Session["IsDepartmentalKioskUser"].ToString()) == "True")
+                        {
+                            <button>
+                                <a class="btn btn-success" target="_blank" href='@Url.Action("BoardingPass", "BoardingMaster", new { KioskBoarding = Encryption.encrypt(Model.RequestedId) })'><i class="fa fa-download"></i> Generate Boarding Pass</a>
+                            </button>
+                        }
+                        <a href='@Url.Action("dashboard", "dashboard")'>
+                            Home
+                        </a>    
+
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+

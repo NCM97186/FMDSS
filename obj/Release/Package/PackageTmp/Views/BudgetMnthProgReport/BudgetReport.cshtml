@@ -1,0 +1,768 @@
+﻿@using FMDSS.Models.ForesterDevelopment.BudgetAllocation.ViewModel
+@model FMDSS.Models.ForesterDevelopment.BudgetAllocation.ViewModel.MonthlyProgressReportModel
+@{
+    ViewBag.Title = "BudgetMonthlyProgressReport";
+    Layout = "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<script src="~/js/jquery.min.js"></script>
+
+<style>
+    #tbl {
+        display: block;
+        overflow: scroll;
+    }
+</style>
+<style>
+    .Bold {
+        font-size: 20px;
+    }
+
+    tfoot {
+        color: green;
+    }
+</style>
+
+<script type="text/javascript">
+    function ViewFile(reqFor,reqType,code,service)
+    {
+        //reqFor="Division OR Circle OR HQ OR Santatury"
+        //reqType="Forest" Or "Wildlife"
+        //Code= Circle Code Or Division Code
+            var strname = "AmritaDevi";
+            var ssoid =  "@Convert.ToString(Session["SSOID"])";
+            $("#ssoId").val(ssoid);
+            $("#requestFor").val(strname);
+
+            $("#reqFor").val(reqFor);
+            $("#reqType").val(reqType);
+            $("#code").val(code);
+            $("#Service").val(service); //Service Means Allocation Or Expenditure
+           // var actionUrl = origin + "/FMDSSGIS/permitlocation/GetRequest.aspx";
+            //var actionUrl = origin + "/FMDSSGIS/budgethead/budgethead.aspx";
+            var actionUrl = "@System.Web.Configuration.WebConfigurationManager.AppSettings["GisBugetPath"].ToString()";
+            document.getElementById("form11").action = actionUrl;
+            document.getElementById("form11").submit();
+
+    }
+
+
+</script>
+<!--GIS Data Post 22-04-2016-->
+<form id="form11" name="form11" method="post">
+    <input type="hidden" id="portalid" name="portalid" value="rajcomp123" />
+    <input type="hidden" id="ssoId" name="ssoId" value="" />
+    <input type="hidden" id="reqFor" name="reqFor" value="" />
+    <input type="hidden" id="reqType" name="reqType" value="" />
+    <input type="hidden" id="Service" name="Service" value="" />
+    <input type="hidden" id="code" name="code" value="" />
+
+    @*<input type="hidden" id="returnurl1" name="returnurl" value="http://localhost:17105/AmritaDeviAward/getGISData" />*@
+    @*<input type="hidden" id="returnurl" name="returnurl" value="" />*@
+</form>
+<div id="page-wrapper-inn">
+    @if (TempData["Message"] != null)
+    {
+        <script type="text/javascript" language="javascript">
+            alert('@TempData["Message"]');
+        </script>
+    }
+    @Html.Partial("_PartialBudgetLink")
+
+    <div class="col-lg-12 pad">
+        <div class="col-lg-10">
+            <h1 class="page-header">Monthly Progress Report (@Session["User"].ToString())</h1>
+        </div>
+        <div class="col-lg-2">
+            <button type="button" class="btn btn-success confirm-toggle" name="Command" value="0" id="AddMaster">
+                <i class="fa fa-check"></i> Show Master
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+
+                <div class="panel-body">
+
+                    <div class="col-xs-12">
+                        @using (Html.BeginForm("BudgetReport", "BudgetMnthProgReport", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data", id = "IdFor" }))
+                        {
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Financial Year: <span class="mandatory"></span></label>
+                                    @Html.DropDownListFor(x => x.FinancialYear, (IEnumerable<SelectListItem>)ViewBag.Financial, "--Select--", new { @class = "form-control", @id = "FinancialYearId" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Scheme: <span class="mandatory"></span></label>
+                                    @Html.DropDownListFor(x => x.Scheme_Name, (IEnumerable<SelectListItem>)ViewBag.SchemeList, "--Select--", new { @class = "form-control", @id = "SchemeID" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Budget Head: <span class="mandatory"></span></label>
+                                    @Html.DropDownListFor(x => x.BudgetHead, (IEnumerable<SelectListItem>)ViewBag.BudgetHead, "--Select--", new { @class = "form-control", @id = "BudgetHeadList" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Budget Sub-Head: <span class="mandatory"></span></label>
+                                    @Html.DropDownListFor(x => x.SubBudgetHead, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", @id = "SubBudgetHeadList", name = "SubBudgetHeadId" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Activity: <span class="mandatory"></span></label>
+                                    @Html.DropDownListFor(x => x.Activity_Name, (IEnumerable<SelectListItem>)ViewBag.Activity, "--Select--", new { @class = "form-control", @id = "ActivityList" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Sub-Activity: <span class="mandatory"></span></label>
+                                    @Html.DropDownListFor(x => x.SubActivity_Name, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", @id = "SubActivityList" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Circle: <span class="mandatory"></span></label>
+                                    @Html.DropDownListFor(x => x.Circle_Code, (IEnumerable<SelectListItem>)ViewBag.Circle, "--Select--", new { @class = "form-control", @id = "Circle_Code" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Division: <span class="mandatory"></span></label>
+                                    @Html.DropDownListFor(x => x.Division_Code, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", @id = "Division_Code" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Sanctuary: <span class="mandatory"></span></label>
+                                    @Html.DropDownListFor(model => model.SantuaryCode, new List<SelectListItem> {
+                                                   new SelectListItem{Text="Select",Value=" "}}, new { @class = "form-control", @id = "Sanctuary" })
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    @Html.Hidden("FinancialYears", new { @id = "FinancialYears" })
+                                    @Html.Hidden("Scheme_Names", new { @id = "Scheme_Names" })
+                                    @Html.Hidden("Circle_Names", new { @id = "Circle_Names" })
+                                    @Html.Hidden("Division_Names", new { @id = "Division_Names" })
+                                    @Html.Hidden("SantuaryNames", new { @id = "SantuaryNames" })
+                                    <label><span class="mandatory"></span></label>
+                                    <button type="submit" class="btn btn-success confirm-toggle" name="Save" id="Submit">
+                                        <i class="fa fa-check"></i> Submit
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    <label><span class="mandatory"></span></label>
+                                    <button type="reset" class="btn btn-danger" name="Cancel">
+                                        <i class="fa fa-arrow-circle-right"></i> Cancel
+                                    </button>
+                                </div>
+                            </div>
+
+
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    <label><span class="mandatory"></span></label>
+                                    <button type="button" class="btn btn-info" onclick="tablesToExcel(['tbl'], ['tbl'], 'BudgetMonthlyReport', 'Excel')">Export to Excel</button>
+                                </div>
+                            </div>
+                            <br />
+                            @*<div class="col-lg-4">
+                                    <div class="form-group">
+                                        <label><span class="mandatory"></span></label>
+                                        <button class="btn btn-info pull-right" onclick="tablesToExcel(['tbl'], ['tbl'], 'BudgetMonthlyReport', 'Excel')">Export to Excel</button>
+                                    </div>
+                                </div>*@
+
+                        }
+                        @*<div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>From Date: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.model.FromDate, new { @class = "form-control datefield", @id = "FromDate", name = "FromDate" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>To Date: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.model.ToDate, new { @class = "form-control datefield", @id = "ToDate", name = "ToDate" })
+                                </div>
+                            </div>*@
+                        <div class="col-lg-12">
+                            <br />
+
+                            <br />
+                            <a href="javascript:void(0);" onclick="fnShowHide(0);">Toggle column 1<br></a>
+                            <a href="javascript:void(0);" onclick="fnShowHide(1);">Toggle column 1<br></a>
+                            <a href="javascript:void(0);" onclick="fnShowHide(2);">Toggle column 1<br></a>
+                            <div id="DivExport" class="dataTable_wrapper table-responsive scroll-x scroll-y simplebar horizontal">
+                                <table id="tbl" class="table table-striped table-bordered table-hover gridtable">
+                                    <thead>
+                                        <tr>
+                                            <th width="4%">
+                                                S.No
+                                            </th>
+                                            <th width="5%">
+                                                Financial Year
+                                            </th>
+                                            <th>
+                                                Scheme Name
+                                            </th>
+                                            <th>
+                                                Budget Head/Budget Sub-Head
+                                            </th>
+
+                                            <th>
+                                                Activity/Sub-Activity
+                                            </th>
+
+                                            <th>
+                                                Allocation at Level (HQ/Circle/Division)
+                                            </th>
+
+                                            <th>
+                                                Circle
+                                            </th>
+                                            <th>
+                                                Division
+                                            </th>
+                                            <th>
+                                                Santuary
+                                            </th>
+                                            <th>
+                                                Allocated Amount(in Lakh)
+                                            </th>
+                                            <th>
+                                                Cumulative Expenditure(in Lakh)
+                                            </th>
+                                            <th>
+                                                Remaining Amount(in Lakh)
+                                            </th>
+                                            <th class='aViewKMLFile'>
+                                                GIS
+                                            </th>
+                                            <th>
+                                                Monthly Progress
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{ int i = 0;}
+                                        @foreach (var item in (List<MonthlyProgressReportModel>)TempData["BudgetReportList"])
+                                        {
+                                            <tr>
+                                                @{ i++;}
+                                                @Html.HiddenFor(d => item.FinancialYearId, new { @id = "FinancialYearId" + i })
+                                                @Html.HiddenFor(d => item.SchemeID, new { @id = "SchemeID" + i })
+                                                @Html.HiddenFor(d => item.BudgetHeadId, new { @id = "BudgetHeadId" + i })
+                                                @Html.HiddenFor(d => item.SubBudgetHeadId, new { @id = "SubBudgetHeadId" + i })
+                                                @Html.HiddenFor(d => item.ActivityID, new { @id = "ActivityID" + i })
+                                                @Html.HiddenFor(d => item.SubActivityID, new { @id = "SubActivityID" + i })
+                                                @Html.HiddenFor(d => item.ISCircleDivision, new { @id = "ISCircleDivision" + i })
+                                                @Html.HiddenFor(d => item.Circle_Code, new { @id = "Circle_Code" + i })
+                                                @Html.HiddenFor(d => item.Division_Code, new { @id = "Division_Code" + i })
+
+
+                                                <td>
+
+                                                    @i
+                                                </td>
+                                                <td>
+                                                    @*BUDGETALLOCATION-@item.BudgetHeadAllocationID (*@
+                                                    @item.FinancialYear
+
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Scheme_Name)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.BudgetHead) / @Html.DisplayFor(model => item.SubBudgetHead)
+                                                </td>
+
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Activity_Name) / @Html.DisplayFor(model => item.SubActivity_Name)
+                                                </td>
+
+                                                <td>
+                                                    @Html.DisplayFor(model => item.ISCircleDivision)
+                                                </td>
+
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Circle_Name)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Division_Name)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.SantuaryName)
+                                                </td>
+                                                <td class="TAmount">
+                                                    @Html.DisplayFor(model => item.AllocatedAmount)
+                                                </td>
+                                                <td class="AAmount">
+                                                    @Html.DisplayFor(model => item.Expenditure)
+                                                </td>
+                                                <td class="EAmount">
+                                                    @Html.DisplayFor(model => item.RemaningAmount)
+                                                </td>
+                                                @{
+                                                 string Code = item.ISCircleDivision.ToLower() == "circle" ? item.Circle_Code : item.ISCircleDivision.ToLower() == "division" ? item.Division_Code : item.ISCircleDivision.ToLower() == "hq" ? item.Circle_Code : item.ISCircleDivision.ToLower() == "sanctuary" ? item.Division_Code : "";
+                                                 string IsCircleOrDivision = item.ISCircleDivision.ToLower() == "circle" ? "Circle" : item.ISCircleDivision.ToLower() == "division" ? "Division" : item.ISCircleDivision.ToLower() == "hq" ? "HQ" : item.ISCircleDivision.ToLower() == "sanctuary" ? "Sanctuary" : "None";
+                                                }
+                                                <td class="giscolumn">
+
+                                                    <a class='aViewKMLFile' target="_blank" onclick='ViewFile("@IsCircleOrDivision","@item.IsWildlifeOrForest","@Code","Expenditure");' href='javascript:void(0)'><img src='../images/globe.png' width='30' /></a>
+                                                </td>
+                                                <td>
+                                                    <i style='cursor:pointer;color:blue' onclick="GetMonthlyStatus(@i)" class='fa aViewKMLFile'>Monthly Report</i>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            @*Col Span not use because Export time not set Propertly*@
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td class="Bold">
+                                                Total
+                                            </td>
+                                            <td id="TotalAmount" class="Bold"></td>
+                                            <td id="AllocatedAmount" class="Bold"></td>
+                                            <td id="ExpenditureAmount" class="Bold"></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-12">
+        <div class="modal fade in" id="myModalReport" tabindex="-1" role="dialog" aria-hidden="false">
+            <div class="modal-dialog" style="width:1000px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel">
+                            Monthly Progress(Lakh in INR)
+                        </h4>
+                    </div>
+                    <br />
+                    <div class="modal-body">
+                        <!-- From URL Get -->
+
+                        <table id="temp1" class="table table-striped table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Year</th>
+                                   
+                                    <th>April</th>
+                                    <th>May</th>
+                                    <th>June</th>
+                                    <th>July</th>
+                                    <th>August</th>
+                                    <th>September</th>
+                                    <th>October</th>
+                                    <th>November</th>
+                                    <th>December</th>
+                                     <th>January</th>
+                                    <th>February</th>
+                                    <th>March</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblMonthly"></tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer" id="fot-f">
+                        <div id="btn" class="col-lg-12">
+
+                            <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                                <i class="fa fa-times fa-fw"></i> Close
+                            </button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+    var RootURl = '@Url.Content("~/")';
+</script>
+<script type="text/javascript">
+
+    $("#Submit").click(function () {
+        var FY = $("#FinancialYearId option:Selected").val();
+        var Scheme = $("#SchemeID option:Selected").val();
+        var Circle = $("#Circle_Code option:Selected").val();
+        var Division = $("#Division_Code option:Selected").val();
+        var SantuaryName = $("#Sanctuary option:Selected").val();
+        if(FY!="" && FY!="0")
+        {
+            $("#FinancialYears").val($("#FinancialYearId option:Selected").text().trim());
+        }
+        else
+        {
+            $("#FinancialYears").val('N/A');
+        }
+
+        if (Scheme != "" && Scheme != "0") {
+            $("#Scheme_Names").val($("#SchemeID option:Selected").text().trim());
+        }
+        else {
+            $("#Scheme_Names").val('N/A');
+        }
+
+        if (Circle != "" && Circle != "0") {
+            $("#Circle_Names").val($("#Circle_Code option:Selected").text().trim());
+            $("#Circle_NameExcel").val($("#Circle_Code option:Selected").text().trim());
+        }
+        else {
+            $("#Circle_Names").val('N/A');
+        }
+
+        if (Division != "" && Division != "0") {
+            $("#Division_Codes").val($("#Division_Code option:Selected").text().trim());
+        }
+        else {
+            $("#Division_Names").val('N/A');
+        }
+
+        if (SantuaryName != "" && SantuaryName != "0") {
+            $("#SantuaryNames").val($("#Sanctuary option:Selected").text().trim());
+        }
+        else {
+            $("#SantuaryNames").val('N/A');
+        }
+
+    });
+
+    $("#BudgetHeadList").bind("change", function (e) {
+        var budgetHead = $("#BudgetHeadList option:Selected").val();
+        if (budgetHead != '') {
+
+            $("#SubBudgetHeadList").empty();
+            var option = $("<option />");
+            option.attr("value", '0').text('--Select--');
+            $('#SubBudgetHeadID').append(option);
+            $.ajax({
+                type: 'POST',
+                url: RootURl + 'BudgetExpenditure/GetBudgetSubHead',
+                dataType: 'json',
+                data: { budgetHead: budgetHead },
+                success: function (data) {
+                    $.each(data, function (i, items) {
+
+                        $("#SubBudgetHeadList").append('<option value="' + items.Value + '">' +
+                            items.Text + '</option>');
+                    });
+
+                    $("#SubBudgetHeadList option").each(function () {
+                        if ($(this).text().trim().toLowerCase() == 'none') {
+                            $(this).attr("selected", "selected");
+                        }
+                    });
+                },
+            });
+
+        }
+
+    });
+
+    $("#ActivityList").bind("change", function (e) {
+
+        var ActivityID = $('#ActivityList option:Selected').val();
+
+        $("#SubActivityList").empty();
+        if (ActivityID != '') {
+            var option = $("<option />");
+            option.attr("value", '0').text('--Select--');
+            $('#SubActivityID').append(option);
+            $.ajax({
+                type: 'POST',
+                url: RootURl + 'BudgetExpenditure/GetSubActivity',
+                dataType: 'json',
+                data: { ActivityID: ActivityID },
+                success: function (data) {
+                    $.each(data, function (i, items) {
+
+                        $("#SubActivityList").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+
+                    });
+                    $("#SubActivityList option").each(function () {
+                        if ($(this).text().trim().toLowerCase() == 'none') {
+                            $(this).attr("selected", "selected");
+                        }
+                    });
+                },
+
+            });
+        }
+
+
+    });
+
+    $('#Division_Code').change(function (e) {
+        $("#Sanctuary").empty();
+        $("#Sanctuary").append('<option value="">--Select--</option>');
+        if ($("#Division_Code").val() != "" && $("#Division_Code").val() != "0") {
+            var DIV_CODE = $("#Division_Code").val();
+            $.ajax({
+                type: 'GET',
+                url: RootURl + 'BudgetAllocationCircle/GetSanctuaryList',
+                dataType: 'json',
+                data: { Div_Code: DIV_CODE },
+                success: function (result) {
+                    $.each(result, function (i, items) {
+                        $("#Sanctuary").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+
+                    });
+                },
+
+            });
+        }
+        else {
+            $("#Sanctuary").append('<option value="">--Select--</option>');
+
+        }
+
+    });
+
+    $('#Circle_Code').change(function (e) {
+        var Circle_Code = $('#Circle_Code option:Selected').val();
+        $("#Division_Code").empty();
+        var option = $("<option />");
+        option.attr("value", '').text('--Select--');
+        $('#Division_Code').append(option);
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("GetDivision","BudgetExpenditure")',
+            dataType: 'json',
+            data: { circleCode: Circle_Code },
+            success: function (circle) {
+                $.each(circle, function (i, items) {
+                    $("#Division_Code").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+
+        });
+
+    });
+
+    function isObjectEmpty(obj) {
+        if (obj !== null) {
+            return '<p style="color: red;">' + parseFloat(obj).toFixed(2) + '</p>';
+        }
+        else {
+            return parseFloat(0).toFixed(2);
+        }
+    }
+
+    function isObjectEmptyForYear(obj) {
+        if (obj !== null) {
+            return obj;
+        }
+        else {
+            return '<p style="color: red;">No Expenditure</p>';
+        }
+    }
+
+
+    function GetMonthlyStatus(Index) {
+        $("#tblMonthly").empty();
+        var tblInfo = {
+            FinancialYear: $("#FinancialYearId" + Index).val(),
+            Scheme_Name: $("#SchemeID" + Index).val(),
+            BudgetHead: $("#BudgetHeadId" + Index).val(),
+            SubBudgetHead: $("#SubBudgetHeadId" + Index).val(),
+            Activity_Name: $("#ActivityID" + Index).val(),
+            SubActivity_Name: $("#SubActivityID" + Index).val(),
+            ISCircleDivision: $("#ISCircleDivision" + Index).val(),
+            Circle_Code: $("#Circle_Code" + Index).val(),
+            Division_Code: $("#Division_Code" + Index).val(),
+            FromDate: null,
+            ToDate: null,
+        }
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("GetMonthStatusReport", "BudgetMnthProgReport")',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(tblInfo),
+            success: function (data) {
+                for (var i = 0; i < data.list1.length; i++) {
+                    if (data != null && data.list1 != null) {
+                        var rowdata = "<tr><td>" + isObjectEmptyForYear(data.list1[i].Year) + "</td><td>"
+                                   
+                                   + isObjectEmpty(data.list1[i].April) + "</td><td>"
+                                   + isObjectEmpty(data.list1[i].May) + "</td><td>"
+                                   + isObjectEmpty(data.list1[i].June) + "</td><td>"
+                                   + isObjectEmpty(data.list1[i].July) + "</td><td>"
+                                   + isObjectEmpty(data.list1[i].August) + "</td><td>"
+                                   + isObjectEmpty(data.list1[i].September) + "</td><td>"
+                                   + isObjectEmpty(data.list1[i].October) + "</td><td>"
+                                   + isObjectEmpty(data.list1[i].November) + "</td><td>"
+                                   + isObjectEmpty(data.list1[i].December) + "</td><td>"
+                                   + isObjectEmpty(data.list1[i].January) + "</td><td>"
+                                   + isObjectEmpty(data.list1[i].February) + "</td><td>"
+                                   + isObjectEmpty(data.list1[i].March) + "</td></tr>";
+
+                        $("#tblMonthly").append(rowdata);
+                    }
+                }
+                $('#myModalReport').modal('show');
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+    }
+    $(function () {
+        $('.gridtable').DataTable({
+            responsive: true,
+            "bSort": true
+        })
+    });
+</script>
+<script type="text/javascript">
+    $.noConflict(true);
+    var tablesToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+        , tmplWorkbookXML = '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'
+          + '<DocumentProperties xmlns="urn:schemas-microsoft-com:office:office"><Author>Axel Richter</Author><Created>{created}</Created></DocumentProperties>'
+          + '<Styles>'
+          + '<Style ss:ID="Currency"><NumberFormat ss:Format="Currency"></NumberFormat></Style>'
+          + '<Style ss:ID="Date"><NumberFormat ss:Format="Medium Date"></NumberFormat></Style>'
+          + '</Styles>'
+          + '{worksheets}</Workbook>'
+        , tmplWorksheetXML = '<Worksheet ss:Name="{nameWS}"><Table>{rows}</Table></Worksheet>'
+        , tmplCellXML = '<Cell{attributeStyleID}{attributeFormula}><Data ss:Type="{nameType}">{data}</Data></Cell>'
+        , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+        , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (tables, wsnames, wbname, appname) {
+            var ctx = "";
+            var workbookXML = "";
+            var worksheetsXML = "";
+            var rowsXML = "";
+            //var getFilterFromDate = document.getElementById('FromDate').value;
+            //var getFilterToDate = document.getElementById('ToDate').value;
+            wbname = wbname + '.xls';
+            for (var i = 0; i < tables.length; i++) {
+                if (!tables[i].nodeType) tables[i] = document.getElementById(tables[i]);
+                for (var j = 0; j < tables[i].rows.length; j++) {
+
+                    //Check Button And Anchor Tag Skil in Excel Developed by Rajveer
+                    rowsXML += '<Row>'
+                    for (var k = 0; k < tables[i].rows[j].cells.length; k++) {
+                        var dataType = tables[i].rows[j].cells[k].getAttribute("data-type");
+                        var dataStyle = tables[i].rows[j].cells[k].getAttribute("data-style");
+                        var dataValue = tables[i].rows[j].cells[k].getAttribute("data-value");
+                        dataValue = (dataValue) ? dataValue : tables[i].rows[j].cells[k].innerHTML.trim();
+                        if (dataValue.indexOf('button') == -1 && dataValue.indexOf("aViewKMLFile") == -1 && dataValue.indexOf("aViewKMLFile") == -1) {
+                            var dataFormula = tables[i].rows[j].cells[k].getAttribute("data-formula");
+                            dataFormula = (dataFormula) ? dataFormula : (appname == 'Calc' && dataType == 'DateTime') ? dataValue : null;
+                            ctx = {
+                                attributeStyleID: (dataStyle == 'Currency' || dataStyle == 'Date') ? ' ss:StyleID="' + dataStyle + '"' : ''
+                                   , nameType: (dataType == 'Number' || dataType == 'DateTime' || dataType == 'Boolean' || dataType == 'Error') ? dataType : 'String'
+                                   , data: (dataFormula) ? '' : dataValue
+                                   , attributeFormula: (dataFormula) ? ' ss:Formula="' + dataFormula + '"' : ''
+                            };
+                            rowsXML += format(tmplCellXML.trim(), ctx);
+                        }
+                    }
+                    rowsXML += '</Row>'
+
+                    //End
+                }
+                ctx = { rows: rowsXML, nameWS: wsnames[i] || 'Sheet' + i };
+                worksheetsXML += format(tmplWorksheetXML, ctx);
+                rowsXML = "";
+            }
+
+            ctx = { created: (new Date()).getTime(), worksheets: worksheetsXML };
+            workbookXML = format(tmplWorkbookXML, ctx);
+
+            console.log(workbookXML);
+
+            var link = document.createElement("A");
+            link.href = uri + base64(workbookXML);
+            link.download = wbname || 'BudgetMonthlyReport.xls';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    })();
+</script>
+<script type="text/javascript">
+    $(function () {
+        $(document).ready(function () {
+            var TotalAmount = 0.0;
+            var AllocatedAmount = 0.0;
+            var ExpAmount = 0.0;
+            if ($("#tbl tbody tr").length > 0) {
+                $(".TAmount").each(function () {
+                    TotalAmount = parseFloat(TotalAmount) + parseFloat($(this).text());
+                });
+
+                $(".AAmount").each(function () {
+                    AllocatedAmount = parseFloat(AllocatedAmount) + parseFloat($(this).text());
+                });
+
+                $(".EAmount").each(function () {
+                    ExpAmount = parseFloat(ExpAmount) + parseFloat($(this).text());
+                });
+            }
+
+
+            $("#TotalAmount").text(TotalAmount.toFixed(2));
+            $("#AllocatedAmount").text(AllocatedAmount.toFixed(2));
+            $("#ExpenditureAmount").text(ExpAmount.toFixed(2));
+        });
+    });
+</script>
+<script type="text/javascript">
+    function fnShowHide(iCol) {
+        /* Get the DataTables object again - this is not a recreation, just a get of the object */
+        var oTable = $('#tbl').dataTable();
+
+        var bVis = oTable.fnSettings().aoColumns[iCol].bVisible;
+        oTable.fnSetColumnVis(iCol, bVis ? false : true);
+    }
+</script>

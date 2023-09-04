@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://esanchar.rajasthan.gov.in/webservice/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://esanchar.rajasthan.gov.in/webservice/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://esanchar.rajasthan.gov.in/webservice/">
+      <s:element name="PostMessage">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="serviceName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="campaignName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="phoneNo" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="message" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="PostMessageResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="PostMessageResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AuthHeader" type="tns:AuthHeader" />
+      <s:complexType name="AuthHeader">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+        </s:sequence>
+        <s:anyAttribute />
+      </s:complexType>
+      <s:element name="PostBulkMessagesXML">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="messageXML" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="PostBulkMessagesXMLResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="PostBulkMessagesXMLResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="PostBulkMessagesEntity">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="campaignMessage" type="tns:CampaignBulkMessageEntity" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="CampaignBulkMessageEntity">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:BusinessEntityBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="CampaignName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="ServiceName" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="IsCommonMessage" type="s:boolean" />
+              <s:element minOccurs="1" maxOccurs="1" name="IsParameterizedMessage" type="s:boolean" />
+              <s:element minOccurs="0" maxOccurs="1" name="CommonMessage" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="CampaignRecords" type="tns:ArrayOfCampaignBulkMessageRecordEntity" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="BusinessEntityBase">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="CreatedBy" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="UpdatedBy" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="CreateDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="UpdateDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="DeleteFlag" nillable="true" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="CampaignBulkMessageParameter">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:BusinessEntityBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="ParameterKey" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="ParameterValue" type="s:string" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="CampaignBulkMessageRecordEntity">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:BusinessEntityBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="PhoneNumber" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Message" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="MessageParameters" type="tns:ArrayOfCampaignBulkMessageParameter" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfCampaignBulkMessageParameter">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="CampaignBulkMessageParameter" nillable="true" type="tns:CampaignBulkMessageParameter" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfCampaignBulkMessageRecordEntity">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="CampaignBulkMessageRecordEntity" nillable="true" type="tns:CampaignBulkMessageRecordEntity" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="PostBulkMessagesEntityResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="PostBulkMessagesEntityResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="PingService">
+        <s:complexType />
+      </s:element>
+      <s:element name="PingServiceResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="PingServiceResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="PostMessageSoapIn">
+    <wsdl:part name="parameters" element="tns:PostMessage" />
+  </wsdl:message>
+  <wsdl:message name="PostMessageSoapOut">
+    <wsdl:part name="parameters" element="tns:PostMessageResponse" />
+  </wsdl:message>
+  <wsdl:message name="PostMessageAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="PostBulkMessagesXMLSoapIn">
+    <wsdl:part name="parameters" element="tns:PostBulkMessagesXML" />
+  </wsdl:message>
+  <wsdl:message name="PostBulkMessagesXMLSoapOut">
+    <wsdl:part name="parameters" element="tns:PostBulkMessagesXMLResponse" />
+  </wsdl:message>
+  <wsdl:message name="PostBulkMessagesXMLAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="PostBulkMessagesEntitySoapIn">
+    <wsdl:part name="parameters" element="tns:PostBulkMessagesEntity" />
+  </wsdl:message>
+  <wsdl:message name="PostBulkMessagesEntitySoapOut">
+    <wsdl:part name="parameters" element="tns:PostBulkMessagesEntityResponse" />
+  </wsdl:message>
+  <wsdl:message name="PostBulkMessagesEntityAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="PingServiceSoapIn">
+    <wsdl:part name="parameters" element="tns:PingService" />
+  </wsdl:message>
+  <wsdl:message name="PingServiceSoapOut">
+    <wsdl:part name="parameters" element="tns:PingServiceResponse" />
+  </wsdl:message>
+  <wsdl:portType name="eSancharServiceSoap">
+    <wsdl:operation name="PostMessage">
+      <wsdl:input message="tns:PostMessageSoapIn" />
+      <wsdl:output message="tns:PostMessageSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="PostBulkMessagesXML">
+      <wsdl:input message="tns:PostBulkMessagesXMLSoapIn" />
+      <wsdl:output message="tns:PostBulkMessagesXMLSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="PostBulkMessagesEntity">
+      <wsdl:input message="tns:PostBulkMessagesEntitySoapIn" />
+      <wsdl:output message="tns:PostBulkMessagesEntitySoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="PingService">
+      <wsdl:input message="tns:PingServiceSoapIn" />
+      <wsdl:output message="tns:PingServiceSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="eSancharServiceSoap" type="tns:eSancharServiceSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="PostMessage">
+      <soap:operation soapAction="http://esanchar.rajasthan.gov.in/webservice/PostMessage" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:PostMessageAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PostBulkMessagesXML">
+      <soap:operation soapAction="http://esanchar.rajasthan.gov.in/webservice/PostBulkMessagesXML" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:PostBulkMessagesXMLAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PostBulkMessagesEntity">
+      <soap:operation soapAction="http://esanchar.rajasthan.gov.in/webservice/PostBulkMessagesEntity" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:PostBulkMessagesEntityAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PingService">
+      <soap:operation soapAction="http://esanchar.rajasthan.gov.in/webservice/PingService" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="eSancharServiceSoap12" type="tns:eSancharServiceSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="PostMessage">
+      <soap12:operation soapAction="http://esanchar.rajasthan.gov.in/webservice/PostMessage" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:PostMessageAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PostBulkMessagesXML">
+      <soap12:operation soapAction="http://esanchar.rajasthan.gov.in/webservice/PostBulkMessagesXML" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:PostBulkMessagesXMLAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PostBulkMessagesEntity">
+      <soap12:operation soapAction="http://esanchar.rajasthan.gov.in/webservice/PostBulkMessagesEntity" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:PostBulkMessagesEntityAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PingService">
+      <soap12:operation soapAction="http://esanchar.rajasthan.gov.in/webservice/PingService" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="eSancharService">
+    <wsdl:port name="eSancharServiceSoap" binding="tns:eSancharServiceSoap">
+      <soap:address location="http://10.68.126.10/services/esancharservice.asmx" />
+    </wsdl:port>
+    <wsdl:port name="eSancharServiceSoap12" binding="tns:eSancharServiceSoap12">
+      <soap12:address location="http://10.68.126.10/services/esancharservice.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

@@ -1,0 +1,1792 @@
+﻿@model FMDSS.Models.ForestProtection.OffenseRegistrationfinal
+
+@{
+    ViewBag.Title = "OffenseRegistrationfinal";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+    //Layout = null;
+}
+<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js" type="text/javascript"></script>
+<script src="~/js/validation.js" type="text/javascript"></script>
+<link href="~/css/timepicki.css" type="text/css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+<script src="~/js/OffenceRegistrationFinal.js"></script>
+<script src="~/Scripts/BhamashaServices.js"></script>
+<style>
+    .bhamashahIDLabel {
+        float: left;
+        width: 100%;
+    }
+
+    .upper {
+        text-transform: uppercase;
+    }
+
+    .bhamashahIDBtn {
+        border: 1px solid #fff;
+        margin-left: 5px;
+        padding: 5px 10px;
+    }
+</style>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+</script>
+<style>
+    input[type="file"] {
+        height: 34px;
+    }
+
+    .auto-scrol {
+        height: 585px;
+        overflow-y: auto;
+    }
+    .disabledTab {
+        pointer-events: none;
+    }
+    #myTab li a {
+        position: relative;
+        display: block;
+        padding: 10px 7px;
+        font-size: 14px !important;
+    }
+</style>
+<style>
+    #myModalWitness .modal-dialog {
+        width: 900px;
+        margin: 80px auto;
+    }
+</style>
+<script type="text/javascript">
+        var $j = jQuery.noConflict();
+        $j(document).ready(function () {
+            $j(".timepicker").timepicki();            
+        });
+    </script>
+<script src="~/Scripts/jquery.blockUI.js"></script>
+<script>
+    $j(document).ready(function () {
+        $j('#VechileRTO').change(function () {
+
+            if ($j('#VechileRTO').val() == 'YES') {
+
+
+                $j('#BtnGetRTODetails').prop("disabled", false);
+
+                $j('#VechileOwnerName').prop("disabled", true);
+                $j('#VechileMake').prop("disabled", true);
+                $j('#VechileModel').prop("disabled", true);
+                $j('#VechileChassisNo').prop("disabled", true);
+                $j('#VechileEngineNo').prop("disabled", true);
+            }
+            else {
+                $j('#BtnGetRTODetails').prop("disabled", true);
+
+                $j('#VechileOwnerName').prop("disabled", false);
+                $j('#VechileMake').prop("disabled", false);
+                $j('#VechileModel').prop("disabled", false);
+                $j('#VechileChassisNo').prop("disabled", false);
+                $j('#VechileEngineNo').prop("disabled", false);
+            }
+        });
+    });
+</script>
+<script>
+    $j(document).ajaxStart($j.blockUI).ajaxStop($j.unblockUI);
+</script>
+
+
+<script>
+
+    function GetRTODetails() {
+
+        var VechileRegistrationNo = $("#VechileRegistrationNo").val();
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'OffenseRegistrationfinal/GetRTOVechileRDetails', // we are calling json method
+            dataType: 'json',
+            data: { VechileRegistrationNumber: VechileRegistrationNo },
+            success: function (ReturnData) {
+
+
+
+                $("#VechileOwnerName").val(ReturnData.Rc_owner_name);
+
+                // $("#VechileType").val() = "";
+                $("#VechileMake").val(ReturnData.Rc_maker_desc);
+                $("#VechileModel").val(ReturnData.Rc_maker_model);
+                $("#VechileChassisNo").val(ReturnData.Rc_chasi_no);
+                $("#VechileEngineNo").val(ReturnData.Rc_eng_no);
+
+
+
+
+
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+
+        });
+    }
+</script>
+
+
+
+
+<style>
+    #myModalDashboard {
+        z-index: 99999;
+    }
+
+    .element.style {
+        z-index: 99999999999 !important;
+    }
+
+</style>
+<div id="page-wrapper-inn">
+            <div class="col-lg-12 pad">
+                <h1 class="page-header">Offense/Parivad Detail</h1>
+            </div>
+            <div class="col-lg-12">                             
+              @Html.Partial("OffenseDetail2");               
+            </div>
+            <!-- /.col-lg-12 -->
+            <!-- Row -->                 
+            <input id="hdnTabInfo" type="hidden" value="@ViewBag.TabInfo" />  
+            <input id="hdnIsComplete" type="hidden" value="@Model.Iscomplete" />  
+            <input id="hdnApproveStatus" type="hidden" value="@Model.ApproveStatus" />  
+            <input id="hdnDfoApproveStatus" type="hidden" value="@Model.DfoApproveStatus" />
+            <input id="hdnWarrantApproveStatus" type="hidden" value="@Model.WarrantApproveStatus" />             
+            <input id="hdnOffenseCode" type="hidden" value="@Session["FPMOffenseID"]">             
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="">
+                        @if (TempData["status"] != null)
+                        {
+                            <script type="text/javascript" language="javascript">
+                             alert('@TempData["status"]');
+                            </script>
+                        }
+                      
+                            <!-- Tab1 -->
+                            <div class="col-md-12">
+                                <div class="panel with-nav-tabs panel-default">
+                                    <div class="panel-heading">
+                                        <ul class="nav nav-tabs" id="myTab">                                           
+                                            <li id="tab1" class=""><a href="#tab1default" data-toggle="tab"><i class="fa fa-user fa-fw"></i>Crime Scene</a></li>
+                                            <li id="tab2" class=""><a href="#tab2default" data-toggle="tab"><i class="fa fa-user fa-fw"></i>Seized Items</a></li>
+                                            <li id="tab3" class=""><a href="#tab3default" data-toggle="tab"><i class="fa fa-user fa-fw"></i> Witness Details</a></li>                                          
+                                            <li id="tab4" class="disabled disabledTab"><a href="#tab5default1" data-toggle="tab"><i class="fa fa-user fa-fw"></i>Hukum Talbi/Notice for appearance</a></li>
+                                            <li id="tab5" class="disabled disabledTab"><a href="#tab5default2" data-toggle="tab"><i class="fa fa-user fa-fw"></i>Notice Delivery</a></li>
+                                            <li id="tab6" class="disabled disabledTab"><a href="#tab6default" data-toggle="tab"><i class="fa fa-user fa-fw"></i> File Court Case</a></li>
+                                            <li id="tab7" class="disabled disabledTab"><a href="#tab7default" data-toggle="tab"><i class="fa fa-user fa-fw"></i> Issue Jamanat</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="tab-content">
+                                                <div class="tab-pane fade active in" id="tab1default">
+                                         
+                                                <div class="col-lg-12">
+                                                    <label>Crime Scene Description:</label>
+                                                    <div class="divider"></div>
+                                                </div>
+                                                <div>
+                                                    <label>If Survey not avaliable click here:</label>
+                                                    <a href='@Url.Action("Create", "CrimeSurvey", new { @OffenseCode = Encryption.encrypt(Session["FPMOffenseID"].ToString()) })'>
+                                                        Crime Scene
+                                                    </a>
+                                                </div>
+                                                <div id="tbl" class="table-responsive">
+                                                    @if (ViewData["SurveyDetail"] != "" && ViewData["SurveyDetail"] != null) { 
+                                                    <table class="table table-striped table-bordered table-hover gridtable">
+                                                        <thead>
+                                                            <tr>                                                               
+                                                                <th style="width:8%;">Visit date</th>
+                                                                <th style="width:8%;">Visit time</th>
+                                                                <th style="width:8%;">Visit place</th>                                                               
+                                                                <th style="width:10%;">Village</th>
+                                                                <th style="width:10%;">Range</th>
+                                                                <th style="width:10%;">Crime description</th>
+                                                                <th style="width:10%;">File View</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach (var item in ViewData["SurveyDetail"] as IEnumerable<FMDSS.Models.ForestProtection.OffenseRegistrationfinal>)
+                                                            {
+                                                                <tr>                                                                   
+                                                                    <td>@Html.DisplayFor(model => item.VisitDate)</td>
+                                                                    <td>@Html.DisplayFor(model => item.VisitTime)</td>
+                                                                    <td>@Html.DisplayFor(model => item.VisitPlace)</td>                                                                 
+                                                                    <td>@Html.DisplayFor(model => item.Village)</td>
+                                                                    <td>@Html.DisplayFor(model => item.Range)</td>
+                                                                    <td>@Html.DisplayFor(model => item.Description)</td>
+                                                                    <td data-toggle="modal" data-target="#myModalFile" style="cursor:pointer"><img src='../images/jpeg.png' width='30' />
+                                                                        @*<a href='@Url.Action("FileView", "OffenseRegistrationfinal")' target='_blank'>
+                                                                            View File/Image
+                                                                        </a>*@
+                                                                    </td>
+                                                                </tr>
+                                                            }
+
+                                                        </tbody>
+                                                    </table>
+                                                    }   
+                                                    </div>
+                                                @using (Html.BeginForm("SubmitSeizedItemTeam", "OffenseRegistrationfinal", FormMethod.Post))
+                                                {
+                                                   
+                                                    <div class="panel-body">
+
+                                                        <div class="col-lg-12">
+                                                            <label>Assisting Team Details:</label>
+                                                            <div class="divider"></div>
+                                                        </div>
+                                                        @Html.HiddenFor(X => X.SeizedItemId, new { @id = "SeizedItemId", name = "SeizedItemId" })
+                                                        <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label>Name of 1st Officer:<span class="mandatory">*</span></label>
+                                                                @Html.DropDownListFor(x => x.FirstOfficer, (IEnumerable<SelectListItem>)ViewBag.FOfficers, "--Select--", new { id = "FirstOfficer", @class = "form-control", Required = "Required" })
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label>Designation of 1st Officer:</label>
+                                                                @Html.TextBoxFor(x => x.FirstOfficerDesig, new { @class = "form-control", @id = "FirstOfficerDesig" })
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label>Name of 2nd Officer:<span class="mandatory">*</span></label>
+                                                                @Html.DropDownListFor(x => x.SecondOfficer, (IEnumerable<SelectListItem>)ViewBag.FOfficers, "--Select--", new { id = "SecondOfficer", @class = "form-control", Required = "Required" })
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label>Designation of 2nd Officer:</label>
+                                                                @Html.TextBoxFor(x => x.SecondOfficerDesig, new { @class = "form-control", @id = "SecondOfficerDesig" })
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label>Name of 3rd Officer:<span class="mandatory">*</span></label>
+                                                                @Html.DropDownListFor(x => x.ThirdOfficer, (IEnumerable<SelectListItem>)ViewBag.FOfficers, "--Select--", new { id = "ThirdOfficer", @class = "form-control", Required = "Required" })
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label>Designation of 3rd Officer:</label>
+                                                                @Html.TextBoxFor(x => x.ThirdOfficerDesig, new { @class = "form-control", @id = "ThirdOfficerDesig" })
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label>Name of 4th Officer:<span class="mandatory">*</span></label>
+                                                                @Html.DropDownListFor(x => x.FourthOfficer, (IEnumerable<SelectListItem>)ViewBag.FOfficers, "--Select--", new { id = "FourthOfficer", @class = "form-control", Required = "Required" })
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label>Designation of 4th Officer:</label>
+                                                                @Html.TextBoxFor(x => x.FourthOfficerDesig, new { @class = "form-control", @id = "FourthOfficerDesig" })
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-12 hidebutton" id="btn">
+                                                            <button id="btnsizedItemTeam" type="submit" class="btn btn-success" name="Command" value="save" title="Submit">
+                                                                <i class="fa fa-check"></i> Save
+                                                            </button>
+
+                                                            <button type="submit" name="Command" value="Cancel" class="btn btn-danger" title="Cancel" onclick="reload()">
+                                                                <i class="fa fa-times fa-fw"></i> Cancel
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                }                                                          
+                                                </div>
+
+                                                <div class="tab-pane fade" id="tab2default">
+                                                    @using (Html.BeginForm("SubmitSeizedItem", "OffenseRegistrationfinal", FormMethod.Post))
+                                                    {
+                                                        <div class="panel-body">
+                                                            <div class="col-lg-12">
+                                                                <label>Add Description of the Seized Items:</label>
+                                                                <div class="divider"></div>
+                                                            </div>
+                                                           
+
+                                                            <div class="col-lg-12">
+                                                                <label>Select the Item which is Seized:</label>
+                                                                <div class="divider"></div>
+                                                            </div>
+
+                                                            <div class="col-lg-12">
+                                                                <div class="form-group">
+                                                                    <label class="checkbox-inline">
+                                                                        @Html.CheckBoxFor(x => x.Vechile, new { @id = "Vechile" }) Vehicle
+                                                                    </label>
+                                                                    <label class="checkbox-inline">
+                                                                        @Html.CheckBoxFor(x => x.ForestProduce, new { @id = "ForestProduce" })Forest Produce
+                                                                    </label>
+                                                                    <label class="checkbox-inline">
+                                                                        @Html.CheckBoxFor(x => x.Equipment, new { @id = "Equipment" })Equipment
+                                                                    </label>
+                                                                    <label class="checkbox-inline">
+                                                                        @Html.CheckBoxFor(x => x.Animal, new { @id = "Animal" })Animal
+                                                                    </label>
+                                                                    <label class="checkbox-inline">
+                                                                        @Html.CheckBoxFor(x => x.AnimalArticle, new { @id = "AnimalArticle" })Animal Article
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div id="DivVechile" style="display:none;">
+                                                                <div class="col-lg-12">
+                                                                    <label>Vechicle Details:</label>
+                                                                    <div class="divider"></div>
+                                                                </div>
+                                                                <div class="col-lg-2">
+                                                                    <div class="form-group">
+                                                                        <label>RTO Services:</label>
+                                                                        @Html.DropDownListFor(x => x.VechileRTO, new List<SelectListItem>
+                                                                           {
+                                                                             new SelectListItem { Text = "--Select--", Value = ""},
+                                                                             new SelectListItem { Text = "YES", Value = "YES"},
+                                                                             new SelectListItem { Text = "NO", Value = "NO"},
+                                                                          },
+                                                                          new
+                                                                          {
+                                                                              @id = "VechileRTO",
+                                                                              @name = "VechileRTO",
+                                                                              @class = "form-control"
+                                                                          })
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-12"></div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Vehicle registration no:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.VechileRegistrationNo, new { @class = "form-control", @id = "VechileRegistrationNo", @maxlength = "15" })                                                                       
+                                                                    </div>
+                                                                    
+                                                                    <div class="form-group">
+                                                                        <button type="button" class="btn btn-success" title="Save" style="width:30%" name="Command" onclick="GetRTODetails()" value="Get RTO Details" id="BtnGetRTODetails">
+                                                                            <i class="fa fa-plus"></i> Get RTO Details
+                                                                        </button>
+                                                                    </div>
+                                                                  </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Owner’s Name:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.VechileOwnerName, new { @class = "form-control", @id = "VechileOwnerName", @maxlength = "100" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Vehicle type:<span class="mandatory">*</span></label>
+                                                                        @Html.DropDownListFor(x => x.VechileType, (IEnumerable<SelectListItem>)ViewBag.VechileType, "--Select--", new { id = "VechileType", @class = "form-control" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Vehicle Make:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.VechileMake, new { @class = "form-control", @id = "VechileMake", @maxlength = "100" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Vehicle Model:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.VechileModel, new { @class = "form-control", @id = "VechileModel", @maxlength = "100" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Vehicle Chassis number:<span class="mandatory"></span></label>
+                                                                        @Html.TextBoxFor(x => x.VechileChassisNo, new { @class = "form-control", @id = "VechileChassisNo", @maxlength = "100" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Vehicle Engine Number:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.VechileEngineNo, new { @class = "form-control", @id = "VechileEngineNo", @maxlength = "100" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Past offenses by the vehicle:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.PastOffensesByVechile, new { @class = "form-control", @id = "PastOffensesByVechile", @maxlength = "200" })
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Upload Doc:<span class="mandatory">*</span><span> (Only.jpg/.pdf/.png/.gif allowed with max size 100kb)</span></label>
+                                                                        @Html.TextBoxFor(x => x.VechileUploadDoc, new { @class = "form-control", @id = "VechileUploadDoc",@type="file" })
+                                                                        <input type="hidden" id="hdVechileDoc" value="" name="hdVechileDoc" />
+                                                                        <div id="errordivUpload" style="display:none" class="alert-danger1"></div>                                                                       
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <button type="button" id="btnVechileUpload" name="Command" value="Cancel" style="width:30%" class="btn btn-danger" title="Cancel">
+                                                                            <i class="fa fa-times fa-fw"></i> Upload
+                                                                        </button>
+                                                                    </div>
+                                                                </div>                                                               
+                                                                <div class="col-lg-12"></div>                                                          
+                                                                <div class="col-lg-2">
+                                                                    <div class="form-group">
+                                                                        <label>Add Vehicle:</label><br>
+                                                                        <button type="button" class="btn btn-success" title="Add Vehicle" name="btn_addVechile" onclick="AddVechile();" value="">
+                                                                            <i class="fa fa-plus"></i> Add Vehicle
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div id="tbl" class="table-responsive">
+                                                                    <!--Table grid-->
+                                                                    <table class="table table-striped table-bordered table-hover">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th style="width:7%;">S.No</th>
+                                                                                <th>Vehicle Registration No.</th>
+                                                                                <th>Vehicle Type</th>
+                                                                                <th>Vehicle Chassis Number</th>
+                                                                                <th>Vehicle Engine Number</th>
+                                                                                <th style="width:9%;">Action</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody id="tblAddVechile"></tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div id="DivProduce" style="display:none;">
+                                                                <div class="col-lg-12">
+                                                                    <label>Produce Details:</label>
+                                                                    <div class="divider"></div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Types of produce:<span class="mandatory">*</span></label>
+                                                                        @Html.DropDownListFor(x => x.ProduceType, (IEnumerable<SelectListItem>)ViewBag.ProduceType, "--Select--", new { id = "ProduceType", @class = "form-control" })
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Species Name:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.SpeciesName, new { @class = "form-control", @id = "SpeciesName", @maxlength = "100" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Quantity (Volume/Weight in Kg):<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.QuantityOfProduce, new { @class = "form-control", @id = "QuantityOfProduce", @maxlength = "20" })
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Upload Doc:<span class="mandatory">*</span> <span> (Only.jpg/.pdf/.png/.gif allowed with max size 100kb)</span></label>
+                                                                        @Html.TextBoxFor(x => x.ProduceUploadDoc, new { @class = "form-control", @id = "ProduceUploadDoc", @type = "file" })
+                                                                        <input type="hidden" id="hdProduceDoc" value="" name="hdProduceDoc" />
+                                                                        <div id="errordivUpload" style="display:none" class="alert-danger1"></div>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <button type="button" id="btnProduceUpload" name="Command" value="Cancel" style="width:30%" class="btn btn-danger" title="Cancel">
+                                                                            <i class="fa fa-times fa-fw"></i>Upload
+                                                                        </button>
+                                                                    </div>
+                                                                </div>                                                              
+                                                                <div class="col-lg-2">
+                                                                    <div class="form-group">
+                                                                        <label>Add Produce:</label><br>
+                                                                        <button type="button" class="btn btn-success" title="Add Produce" name="btn_Produce" onclick="AddProduce()" value="" id="btn_Produce">
+                                                                            <i class="fa fa-plus"></i> Add Produce
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div id="tbl" class="table-responsive">
+                                                                    <!--Table grid-->
+                                                                    <table class="table table-striped table-bordered table-hover">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th style="width:7%;">S. No</th>
+                                                                                <th>Types of Produce</th>
+                                                                                <th>Species Name</th>
+                                                                                <th>Quantity (in Volume/Weight)</th>
+                                                                                <th style="width:9%;">Action</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody id="tbl_Produce"></tbody>
+                                                                    </table>
+                                                                    <!--/.Table grid-->
+                                                                    <!--Produce popup-->
+                                                                    <!--/.Vechicle popup-->
+                                                                </div>
+                                                            </div>
+                                                            <div id="DivEquipment" style="display:none;">
+                                                                <div class="col-lg-12">
+                                                                    <label>Equipment Details:</label>
+                                                                    <div class="divider"></div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Type of Equipment:<span class="mandatory">*</span></label>
+                                                                        @Html.DropDownListFor(x => x.EquipmentType, (IEnumerable<SelectListItem>)ViewBag.EquipmentType, "--Select--", new { id = "EquipmentType", @class = "form-control" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Make:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.EquipmentMake, new { @class = "form-control", @id = "EquipmentMake", @maxlength = "100" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Model:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.EquipmentModel, new { @class = "form-control", @id = "EquipmentModel", @maxlength = "100" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Caliber:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.EquipmentCaliber, new { @class = "form-control", @id = "EquipmentCaliber", @maxlength = "100" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Identification No.:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.EquipmentIdentificationNo, new { @class = "form-control", @id = "EquipmentIdentificationNo", @maxlength = "100" })
+
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Size (in inch):<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.EquipmentSize, new { @class = "form-control", @id = "EquipmentSize", @maxlength = "20" })
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Upload Doc:<span class="mandatory">*</span><span> (Only.jpg/.pdf/.png/.gif allowed with max size 100kb)</span></label>
+                                                                        @Html.TextBoxFor(x => x.EquipmentUploadDoc, new { @class = "form-control", @id = "EquipmentUploadDoc", @type = "file" })
+                                                                        <input type="hidden" id="hdEquipmentDoc" value="" name="hdEquipmentDoc" />
+                                                                        <div id="errordivUpload" style="display:none" class="alert-danger1"></div>
+                                                                    </div>                                                                   
+                                                                </div> 
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <br>                                                                        
+                                                                            <button type="button" id="btnEquipmentUpload" name="Command" value="Cancel" style="width:30%" class="btn btn-danger" title="Cancel">
+                                                                                <i class="fa fa-times fa-fw"></i> Upload
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                <div class="col-lg-12"></div>
+                                                                    <div class="col-lg-2">
+                                                                        <div class="form-group">
+                                                                            <label>Add Equipment:</label><br>
+                                                                            <button type="button" class="btn btn-success" title="Add Equipment" name="Command" onclick="AddEquipment()" value="" id="btnAddEquipment">
+                                                                                <i class="fa fa-plus"></i> Add Equipment
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div id="tbl" class="table-responsive">
+                                                                        <!--Table grid-->
+                                                                        <table class="table table-striped table-bordered table-hover">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th style="width:7%;">S.No</th>
+                                                                                    <th>Type of Equipment</th>
+                                                                                    <th>Model</th>
+                                                                                    <th>Identification No</th>
+                                                                                    <th style="width:9%;">Action</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody id="tblEquipment"></tbody>
+                                                                        </table>
+                                                                        <!--/.Table grid-->
+                                                                        <!--Equipment popup-->
+                                                                        <!--/.Equipment popup-->
+                                                                    </div>
+                                                                </div>
+                                                            <div id="DivAnimal" style="display:none;">
+                                                                <div class="col-lg-12">
+                                                                    <label>Animal Details:</label>
+                                                                    <div class="divider"></div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Animal Name:<span class="mandatory">*</span></label>
+                                                                        @Html.DropDownListFor(x => x.AnimalCommanName, (IEnumerable<SelectListItem>)ViewBag.AnimalName, "--Select--", new { id = "AnimalCommanName", @class = "form-control" })
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Scientfic name of Animal:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.AnimalScientificName, new { @class = "form-control", @id = "AnimalScientificName", @maxlength = "100" })
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Description of Animal:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.AnimalDescription, new { @class = "form-control", @id = "AnimalDescription", @maxlength = "200" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Weight of Animal(kg):<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.AnimalWeight, new { @class = "form-control", @id = "AnimalWeight", @maxlength = "20" })
+
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Upload Doc:<span class="mandatory">*</span><span> (Only.jpg/.pdf/.png/.gif allowed with max size 100kb)</span></label>
+                                                                        @Html.TextBoxFor(x => x.AnimalUploadDoc, new { @class = "form-control", @id = "AnimalUploadDoc", @type = "file" })
+                                                                        <input type="hidden" id="hdAnimalDoc" value="" name="hdAnimalDoc" />
+                                                                        <div id="errordivUpload" style="display:none" class="alert-danger1"></div>
+                                                                    </div>                                                                   
+                                                                </div>  
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <br>
+                                                                        <button type="button" id="btnAnimalUpload" name="Command" value="Cancel" style="width:30%" class="btn btn-danger" title="Cancel">
+                                                                            <i class="fa fa-times fa-fw"></i> Upload
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-12"></div>
+                                                                    <div class="col-lg-2">
+                                                                        <div class="form-group">
+                                                                            <label>Add Animal:</label><br>
+                                                                            <button type="button" class="btn btn-success" title="Add Animal" name="Command" onclick="AddAnimal()" value="" id="btnAddAnimal">
+                                                                                <i class="fa fa-plus"></i> Add Animal
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div id="tbl" class="table-responsive">
+                                                                        <!--Table grid-->
+                                                                        <table class="table table-striped table-bordered table-hover">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th style="width:7%;">S. No</th>
+                                                                                    <th>Scientfic name of Animal</th>
+                                                                                    <th>Common name of the Animal</th>
+                                                                                    <th>Weight</th>
+                                                                                    <th style="width:9%;">Action</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody id="tblAnimal"></tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            <div id="DivAnimalArticle" style="display:none">
+                                                                <div class="col-lg-12">
+                                                                    <label>Animal Article Details:</label>
+                                                                    <div class="divider"></div>
+                                                                </div>
+
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Scientfic name of Animal:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.ArticleAnimalScientificName, new { @class = "form-control", @id = "ArticleAnimalScientificName", @maxlength = "100" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Common name of the Animal:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.ArticleAnimalCommanName, new { @class = "form-control", @id = "ArticleAnimalCommanName", @maxlength = "100" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Name of Animal Artical:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.NameOfAnimalArticle, new { @class = "form-control", @id = "NameOfAnimalArticle", @maxlength = "100" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Description of Animal Article:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.DescriptionOfAnimalArticle, new { @class = "form-control", @id = "DescriptionOfAnimalArticle", @maxlength = "200" })
+                                                                    </div>
+                                                                </div>
+
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Quantity (in Volume/Weight):<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.ArticleQuantity, new { @class = "form-control", @id = "ArticleQuantity", @maxlength = "10" })
+
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Upload Doc:<span class="mandatory">*</span> <span>(Only.jpg/.pdf/.png/.gif allowed with max size 100kb)</span></label>
+                                                                        @Html.TextBoxFor(x => x.AnimalArticleUploadDoc, new { @class = "form-control", @id = "AnimalArticleUploadDoc", @type = "file" })
+                                                                        <input type="hidden" id="hdArticleDoc" value="" name="hdArticleDoc" />
+                                                                        <div id="errordivUpload" style="display:none" class="alert-danger1"></div>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <button type="button" id="btnArticleUpload" name="Command" value="Cancel" style="width:30%" class="btn btn-danger" title="Cancel">
+                                                                            <i class="fa fa-times fa-fw"></i> Upload
+                                                                        </button>
+                                                                    </div>
+                                                                </div>                                                               
+                                                                <div class="col-lg-2">
+                                                                    <div class="form-group">
+                                                                        <label>Add Animal Article:</label><br>
+                                                                        <button type="button" class="btn btn-success" title="Add Animal Article" name="Command" value="" onclick="AddAnimalArticle()" id="btnAnimalArticle">
+                                                                            <i class="fa fa-plus"></i> Add Animal Article
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div id="tbl" class="table-responsive">
+                                                                    <!--Table grid-->
+                                                                    <table class="table table-striped table-bordered table-hover">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th style="width:7%;">S. No</th>
+                                                                                <th>Scientfic name of Animal:</th>
+                                                                                <th>Common name of the Animal</th>
+                                                                                <th>Name of Animal Artical:</th>
+                                                                                <th style="width:9%;">Action</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody id="tblAnimalArticle"></tbody>
+                                                                    </table>
+
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-lg-12 hidebutton" id="btn">
+                                                                <button id="btnsizedItem" type="submit" class="btn btn-success" name="Command" value="save" title="Submit">
+                                                                    <i class="fa fa-check"></i> Save
+                                                                </button>
+
+                                                                <button type="submit" name="Command" value="Cancel" class="btn btn-danger" title="Cancel">
+                                                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                                                </button>
+
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+
+                                                <div class="tab-pane fade" id="tab3default">
+                                                    @using (Html.BeginForm("SubmitWitnessDetails", "OffenseRegistrationfinal", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                                    {
+
+                                                        <div class="panel-body">
+                                                            <div class="col-lg-12">
+                                                                <label>Witness Details:</label>
+                                                                <div class="divider"></div>
+                                                            </div>
+                                                            @Html.HiddenFor(X => X.WitnessId, new { @id = "WitnessId", name = "WitnessId" })
+                                                            <input type="hidden" id="hdnwitnessrowid" name="hdnwitnessrowid">
+                                                            <div class="" role="form">
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>
+                                                                            Bhamashah ID:<span class="mandatory">*</span>
+                                                                        </label>
+                                                                        <select class="form-control" id="ddlBhamsha">
+                                                                            <option value="0">NO</option>
+                                                                            <option value="1">YES</option>
+
+                                                                        </select>
+
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <div class="col-lg" id="divBhamasha" style="display:none;">
+                                                                            <div class="form-group">
+                                                                                <label class="bhamashahIDLabel">
+                                                                                    Enter Bhamasha-ID:<span class="mandatory">*</span>
+                                                                                </label>
+                                                                                <input type="text" class="form-control" style="width:120px; ! important; float:left;" maxlength="7" id="txtBhamasha" placeholder="Bhamasha-ID" />
+
+                                                                                <input type="button" class="btn-info confirm-toggle bhamashahIDBtn" value="GO" id="btnGetBhamashawitness" />
+                                                                            </div>
+                                                                        </div>
+
+
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-12"></div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Name of Witness: <span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.WitnessName, new { @class = "form-control", @id = "WitnessName", @maxlength = "100" })
+                                                                    </div>
+                                                                </div>
+
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Father Name: <span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.FatherName, new { @class = "form-control", @id = "FatherName", @maxlength = "100" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Spouse Name:</label>
+                                                                        @Html.TextBoxFor(x => x.SpouseName, new { @class = "form-control", @id = "SpouseName", @maxlength = "100" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Category: </label>
+                                                                        @*@Html.TextBoxFor(x => x.Caste, new { @class = "form-control", @id = "Caste", @maxlength = "100" })*@
+                                                                        @Html.DropDownList("Category", (IEnumerable<SelectListItem>)ViewBag.ddlOCaste, "--Select--", new { @class = "form-control", title = "Select Caste", @id = "Category", @name = "Category" })
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>
+                                                                            Caste:
+                                                                        </label>
+                                                                        @Html.TextBoxFor(x => x.Caste, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "Caste", @name = "Caste" })
+                                                                        <div id="errordivOCaste" style="display:none" class="alert-danger1"></div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Residential Address1:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.ResidentialAddress1, new { @class = "form-control", @id = "ResidentialAddress1", @maxlength = "200" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Residential Address2:</label>
+                                                                        @Html.TextBoxFor(x => x.ResidentialAddress2, new { @class = "form-control", @id = "ResidentialAddress2", @maxlength = "200" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Pin Code:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.Pincode, new { @class = "form-control", @id = "Pincode", @maxlength = "6" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>State: <span class="mandatory">*</span></label>
+                                                                        @Html.DropDownListFor(x => x.State, new List<SelectListItem>
+                                                                           {
+                                                                             new SelectListItem { Text = "--Select--", Value = ""},
+                                                                             new SelectListItem { Text = "Rajasthan", Value = "Rajasthan"},
+                                                                          },
+                                                                          new
+                                                                          {
+                                                                              @id = "State",
+                                                                              @name = "State",
+                                                                              @class = "form-control"
+                                                                          })
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>District: <span class="mandatory">*</span></label>
+                                                                        @Html.DropDownListFor(x => x.District, (IEnumerable<SelectListItem>)ViewBag.District, "--Select--", new { id = "District", @class = "form-control" })
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Village/City name: <span class="mandatory">*</span></label>
+                                                                        @Html.DropDownListFor(x => x.Village, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @id = "Village", @name = "Village", @class = "form-control" })
+
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Mobile No: <span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.PhoneNo, new { @class = "form-control", @id = "PhoneNo", @maxlength = "10" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>E-mail ID:</label>
+                                                                        @Html.TextBoxFor(x => x.EmailId, new { @class = "form-control", @id = "EmailId", @maxlength = "100" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Photo ID (only in case of severe offense): <span class="mandatory">*</span></label>
+                                                                        @Html.DropDownListFor(x => x.PhotoId, new List<SelectListItem>
+                                                                           {
+                                                                             new SelectListItem { Text = "--Select--", Value = ""},
+                                                                             new SelectListItem { Text = "Driving License", Value = "Driving License"},
+                                                                             new SelectListItem { Text = "PAN card", Value = "PAN card"},
+                                                                             new SelectListItem { Text = "Voter ID", Value = "Voter ID"},
+                                                                             new SelectListItem { Text = "Passport", Value = "Passport"},
+                                                                          },
+                                                                          new
+                                                                          {
+                                                                              @id = "PhotoId",
+                                                                              @name = "PhotoId",
+                                                                              @class = "form-control"
+                                                                          })
+                                                                    </div>
+                                                                </div>
+                                                                <input type="hidden" id="hdUploadId" />
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Upload ID:<a style="display:none;" id="viewdoc">view document</a></label>
+                                                                        @Html.TextBoxFor(x => x.UploadId, new { @class = "form-control", @id = "UploadId", type = "file" })
+                                                                        <label><span class="spanmark">* Only .jpg/.pdf/.png/.gif file formats are allowed with max size:100kb.</span></label>                                                                       
+                                                                        <div id="errordivUploadId" style="display:none" class="alert-danger1"></div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group col-lg-6">
+                                                                    <label>Upload:</label>
+                                                                    <button type="button" class="btn btn-success" title="Save" name="Command" value="" id="btnUpload">
+                                                                        <i class="fa fa-plus"></i> Upload
+                                                                    </button>
+                                                                </div>
+                                                                <div class="col-lg-12"></div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Age of Witness:<span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.WitnessAge, new { @class = "form-control", @id = "WitnessAge", @maxlength = "3" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Date of Statement: <span class="mandatory">*</span></label>
+                                                                        <div id="datepicker" class="input-group date">
+                                                                            @Html.TextBoxFor(x => x.StatementDate, new { @class = "form-control datefield", @id = "StatementDate" })
+                                                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Statement from Witness: <span class="mandatory">*</span></label>
+                                                                        @Html.TextAreaFor(x => x.WitnessStatement, new { @class = "form-control", @id = "WitnessStatement", @maxlength = "200" })
+                                                                    </div>
+                                                                </div>
+                                                                <input type="hidden" id="hdUploadSignedStatement" />
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Upload (Signed Statement):<a style="display:none;" id="viewdoc1">view document</a></label><br>
+                                                                        @Html.TextBoxFor(x => x.UploadSignedStatement, new { @class = "form-control", @id = "UploadSignedStatement", type = "file" })
+                                                                        <label><span class="spanmark">*Only .jpg/.pdf/.png/.gif file formats allowed with max size:100kb.</span></label>
+                                                                       
+                                                                            <button type="button" class="btn btn-success" title="Save" name="Command" value="" id="btnUpload1">
+                                                                                <i class="fa fa-plus"></i> Upload
+                                                                            </button>
+                                                                       
+                                                                        <div id="errordivSigned" style="display:none" class="alert-danger1"></div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-12"></div>
+                                                                <div class="col-lg-4">
+                                                                    <div class="form-group">
+                                                                        <label>Add Witness:</label><br>
+                                                                        <button type="button" class="btn btn-success" title="Save" name="Command" onclick="AddWitness()" value="" id="btnWitness">
+                                                                            <i class="fa fa-plus"></i> Add Witness
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-12">
+                                                                    <!--Table grid-->
+                                                                    <table class="table table-striped table-bordered table-hover">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th style="width:7%;">S.No</th>
+                                                                                <th>Name of Witness</th>
+                                                                                <th>Father Name</th>
+                                                                                <th>Address:</th>
+                                                                                <th>State:</th>
+                                                                                <th style="width:9%;">View</th>
+                                                                                <th style="width:9%;">Edit</th>
+                                                                                <th style="width:9%;">Delete</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody id="tblWitness"></tbody>
+                                                                    </table>
+                                                                </div>
+
+                                                                <div class="col-lg-12 hidebutton" id="btn">
+                                                                    <button id="btnWitness" type="submit" value="save" name="Command" class="btn btn-success" title="Submit">
+                                                                        <i class="fa fa-check"></i> save
+                                                                    </button>
+
+                                                                    <button type="submit" name="Command" value="Cancel" class="btn btn-danger" title="Cancel">
+                                                                        <i class="fa fa-times fa-fw"></i> Cancel
+                                                                    </button>
+
+                                                                </div>
+                                                            </div>
+
+
+                                                        </div>
+                                                    }
+
+                                                </div>
+
+                                                <div class="tab-pane fade" id="tab5default1">
+                                                    @using (Html.BeginForm("SubmitWarrantDetails", "OffenseRegistrationfinal", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                                    {
+                                                        <div class="panel-body">
+                                                            <div class="col-lg-12">
+                                                                <label>Notice of appearnce:</label>
+                                                                <div class="divider"></div>
+                                                            </div>
+                                                            <input type="hidden" id="hdnWarrantrowid" name="hdnWarrantrowid">
+                                                            <div class="" role="form">
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Name of Offender: <span class="mandatory">*</span></label>
+                                                                        @*@Html.TextBoxFor(x => x.NameOfOffender, new { @class = "form-control", title = "Enter Name of Offender", @maxlength = 100, @id = "NameOfOffender" })*@
+
+                                                                        @Html.DropDownListFor(x => x.NameOfOffender, (IEnumerable<SelectListItem>)ViewBag.OffenderName, "--Select--", new { id = "NameOfOffender", @class = "form-control" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Clothes Worn: <span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.ClothesWorn, new { @class = "form-control", title = "Enter offender's clothes Worn", @maxlength = 100, @id = "ClothesWorn" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Color of Clothes: <span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.ColorOfClothes, new { @class = "form-control", title = "Enter offender's clothes color", @maxlength = 100, @id = "ColorOfClothes" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Physical Appearance: <span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.PhysicalAppearance, new { @class = "form-control", title = "Enter physical appearance", @maxlength = 100, @id = "PhysicalAppearance" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Height(Centimeter) : <span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.Height, new { @class = "form-control", title = "Enter offender's height", @maxlength = 3, @id = "Height" })
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Other special details:</label>
+                                                                        @Html.TextBoxFor(x => x.OtherSpecialDetails, new { @class = "form-control", title = "Enter offender's other special details", @maxlength = 100, @id = "OtherSpecialDetails" })
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Date of appearance:</label>
+                                                                        @Html.TextBoxFor(x => x.Appearancedate, new { @class = "form-control datefield", title = "Enter offender's appearnace date", @id = "Appearancedate" })
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Time of appearance:</label>
+                                                                        <div id="datepicker" class="input-group date">
+                                                                            @Html.TextBoxFor(x => x.Appearancetime, new { @class = "form-control timepicker", title = "Enter offender's appearance time", @id = "Appearancetime" })
+                                                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>          
+                                                                         </div>                                                                                                                                  
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Place of appearance:</label>
+                                                                        @*@Html.TextBoxFor(x => x.AppearancePlace, new { @class = "form-control", title = "Enter offender's appearance place", @id = "AppearancePlace" })*@                                                                    
+                                                                        @Html.DropDownListFor(x => x.AppearancePlace, (IEnumerable<SelectListItem>)ViewBag.ddlPlace, "--Select--", new { id = "AppearancePlace", @class = "form-control" })
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-2" >
+                                                                    <div class="form-group">
+                                                                        <label>Add Offender:</label><br>
+                                                                        <button type="button" class="btn btn-success" title="Save" name="Command" onclick="AddWarrant()" value="" id="btnWarrant">
+                                                                            <i class="fa fa-plus"></i> Add Offender
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div id="tbl" class="table-responsive">
+                                                                    <!--Table grid-->
+                                                                    <table id="tblWarrant" class="table table-striped table-bordered table-hover">
+                                                                        <thead>
+                                                                            <tr>                                                                               
+                                                                                <th>Name of Offender</th>
+                                                                                <th>Clothes Worn</th>
+                                                                                <th>Color of Clothes</th>
+                                                                                <th>Physical Appearance</th>   
+                                                                                <th>Appearance date</th>   
+                                                                                <th>Appearance time</th>   
+                                                                                <th>Appearance place</th>   
+                                                                                <th>Action</th>                                                                                    
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody id="tblwarrant"></tbody>
+                                                                    </table>
+                                                                    <!--/.Table grid-->
+                                                                </div>
+
+                                                                <div class="col-lg-12 hidebutton1" id="btn">
+                                                                    <button type="submit" class="btn btn-success" value="save" name="Command" id="btnWarrant" title="Submit">
+                                                                        <i class="fa fa-check"></i> save
+                                                                    </button>
+
+                                                                    <button type="submit" name="Command" value="Cancel" class="btn btn-danger" title="Cancel">
+                                                                        <i class="fa fa-times fa-fw"></i> Cancel
+                                                                    </button>
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <div class="tab-pane fade" id="tab5default2">
+                                                    @using (Html.BeginForm("SubmitWarrantDelivery", "OffenseRegistrationfinal", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                                    { 
+                                                     <div class="panel-body">
+                                                            <div class="col-lg-12">
+                                                                <label>Notice Delivey:</label>
+                                                                <div class="divider"></div>
+                                                            </div>
+                                                                                                                                                   
+                                                            <div class="" role="form">
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Delivery mode <span class="mandatory">*</span></label>
+                                                                        @Html.DropDownListFor(x => x.DeliveryMode, new List<SelectListItem>
+                                                                           {
+                                                                             new SelectListItem { Text = "--Select--", Value = ""},
+                                                                             new SelectListItem { Text = "Post", Value = "Post"},                                                                          
+                                                                             new SelectListItem { Text = "Chaspa", Value = "Chasba"},
+                                                                             new SelectListItem { Text = "Personal handover", Value = "Personal handover"},
+                                                                          },
+                                                                          new
+                                                                          {
+                                                                              @id = "DeliveryMode",
+                                                                              @name = "DeliveryMode",
+                                                                              @class = "form-control"
+                                                                          })
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <div class="form-group">
+                                                                        <label>Delivery date: <span class="mandatory">*</span></label>
+                                                                        @Html.TextBoxFor(x => x.DeliveryDate, new { @class = "form-control datefield", title = "", @id = "DeliveryDate" })
+                                                                        <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.DeliveryDate)</div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-12 hidebutton2" id="btn">
+                                                                    <button type="submit" class="btn btn-success" value="save" name="Command" id="btnDelivery" title="Submit">
+                                                                        <i class="fa fa-check"></i> save
+                                                                    </button>
+
+                                                                    <button type="submit" name="Command" value="Cancel" class="btn btn-danger" title="Cancel">
+                                                                        <i class="fa fa-times fa-fw"></i> Cancel
+                                                                    </button>
+
+                                                                </div>
+                                                            </div>
+                                                      </div>
+                                                    
+                                                    }
+                                                </div>
+                                                <div class="tab-pane fade" id="tab6default">
+                                                    @using (Html.BeginForm("SubmitFileCourtCase", "OffenseRegistrationfinal", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                                    {
+
+                                                    <div class="panel-body">
+                                                        <div class="col-lg-12">
+                                                            <label>File Court Case:</label>
+                                                            <div class="divider"></div>
+                                                        </div>
+
+                                                        <table class="table table-striped table-bordered table-hover">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width:12%">OffenseId</th>
+                                                                    <th style="width:12%">Court Name</th>
+                                                                    <th style="width:12%">CaseNo</th>
+                                                                    <th style="width:12%">CourtType</th>
+                                                                    <th style="width:12%">ProsecutionDate</th>
+                                                                    <th style="width:12%">DecisionTaken</th>
+                                                                    <th style="width:12%">Date Of Decision Taken</th>
+                                                                    <th style="width:12%">Reason Of Case Failed </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @if (ViewData["CourtCaseDetail"] != null)
+                                                                    {
+                                                                        foreach (var item in ViewData["CourtCaseDetail"] as IEnumerable<FMDSS.Models.ForestProtection.OffenseRegistrationfinal>)
+                                                                        {
+                                                                    <tr>
+                                                                        <td class="reqid">
+                                                                            @Html.DisplayFor(model => item.OffenseCode)
+                                                                        </td>
+                                                                        <td class="reqid">
+                                                                            @Html.DisplayFor(model => item.CourtName)
+                                                                        </td>
+                                                                        <td class="reqid">
+                                                                            @Html.DisplayFor(model => item.CourtCaseNo)
+                                                                        </td>
+                                                                        <td class="reqid">
+                                                                            @Html.DisplayFor(model => item.CourtType)
+                                                                        </td>
+                                                                        <td class="reqid">
+                                                                            @Html.DisplayFor(model => item.ProsecutionDate)
+                                                                        </td>
+                                                                        <td class="reqid">
+                                                                            @Html.DisplayFor(model => item.DecisionTaken)
+                                                                        </td>
+                                                                        <td class="reqid">
+                                                                            @Html.DisplayFor(model => item.DateOfDecisionTaken)
+                                                                        </td>
+                                                                        <td class="reqid">
+                                                                            @Html.DisplayFor(model => item.ReasonOfCaseFailed)
+                                                                        </td>
+
+
+
+                                                                    </tr>
+                                                                        }
+                                                                    }
+                                                            </tbody>
+                                                        </table>
+
+
+
+                                                        @Html.HiddenFor(X => X.CaseId, new { @id = "CaseId", name = "CaseId" })
+                                                        <div class="" role="form">
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Court Name: <span class="mandatory">*</span></label>
+                                                                    @Html.TextBoxFor(x => x.CourtName, new { @class = "form-control", title = "Name of Court", @maxlength = 100, @id = "CourtName" })
+                                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.CourtName)</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Court Case No.: <span class="mandatory">*</span></label>
+                                                                    @Html.TextBoxFor(x => x.CourtCaseNo, new { @class = "form-control", title = "Court Case Number", @maxlength = 100, @id = "courtCaseNo" })
+                                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.CourtCaseNo)</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Court Type:<span class="mandatory">*</span></label>
+                                                                    @Html.DropDownListFor(x => x.CourtType, new List<SelectListItem>
+                                                               {
+                                                                 new SelectListItem { Text = "--Select--", Value = ""},
+                                                                 new SelectListItem { Text = "District Court", Value = "District Court"},
+                                                                 new SelectListItem { Text = "High Court", Value = "High Court"},
+                                                                 new SelectListItem { Text = "Supreme Court", Value = "Supreme Court"},
+                                                              },
+                                                              new
+                                                              {
+                                                                  @id = "CourtType",
+                                                                  @name = "CourtType",
+                                                                  @class = "form-control"
+                                                              })
+                                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.CourtType)</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Place of Court:<span class="mandatory">*</span></label>
+                                                                    <div class="form-group">
+                                                                        @Html.TextBoxFor(x => x.CourtPlace, new { @class = "form-control", title = "Enter court place", @maxlength = 100, @id = "CourtPlace" })
+                                                                        <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.CourtPlace)</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Date of prosecution:<span class="mandatory">*</span></label>
+                                                                    <div id="datepicker" class="input-group date">
+                                                                        @Html.TextBoxFor(x => x.ProsecutionDate, new { @class = "form-control datefield", @id = "ProsecutionDate" })
+                                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                                    </div>
+                                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.ProsecutionDate)</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Decision Taken:<span class="mandatory">*</span></label>
+                                                                    @Html.DropDownListFor(x => x.DecisionTaken, new List<SelectListItem>
+                                                               {
+                                                                 new SelectListItem { Text = "--Select--", Value = ""},
+                                                                 new SelectListItem { Text = "Decision1", Value = "Decision1"},
+                                                                 new SelectListItem { Text = "Decision2", Value = "Decision2"},
+                                                                 new SelectListItem { Text = "Decision3", Value = "Decision3"},
+                                                              },
+                                                              new
+                                                              {
+                                                                  @id = "DecisionTaken",
+                                                                  @name = "DecisionTaken",
+                                                                  @class = "form-control"
+                                                              })
+                                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.DecisionTaken)</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Date of decision taken:<span class="mandatory">*</span></label>
+                                                                    <div id="datepicker" class="input-group date">
+                                                                        @Html.TextBoxFor(x => x.DateOfDecisionTaken, new { @class = "form-control datefield", @id = "DateOfDecisionTaken" })
+                                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                                    </div>
+                                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.DateOfDecisionTaken)</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Reason for Conviction:</label>
+                                                                    @Html.TextBoxFor(x => x.ConvictionReason, new { @class = "form-control", @maxlength = 100, @id = "ConvictionReason" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Reason of Case Failed:</label>
+                                                                    @Html.DropDownListFor(x => x.ReasonOfCaseFailed, new List<SelectListItem>
+                                                               {
+                                                                 new SelectListItem { Text = "--Select--", Value = ""},
+                                                                 new SelectListItem { Text = "Reason1", Value = "Reason1"},
+                                                                 new SelectListItem { Text = "Reason2", Value = "Reason2"},
+                                                                 new SelectListItem { Text = "Reason3", Value = "Reason3"},
+                                                                 new SelectListItem { Text = "Reason4", Value = "Reason4"},
+                                                              },
+                                                              new
+                                                              {
+                                                                  @id = "ReasonOfCaseFailed",
+                                                                  @name = "ReasonOfCaseFailed",
+                                                                  @class = "form-control"
+                                                              })
+
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Interim Order:</label>
+                                                                    @Html.TextBoxFor(x => x.InterimOrder, new { @class = "form-control", @id = "InterimOrder", type = "file" })
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Final Judgment Order:</label>
+                                                                    @Html.TextBoxFor(x => x.FinalJudgmentOrder, new { @class = "form-control", @id = "FinalJudgmentOrder", type = "file" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-12" id="btn">
+
+                                                                <button id="btnFCourtCase" type="submit" class="btn btn-success" name="Command" value="save" title="save">
+                                                                    <i class="fa fa-check"></i> save
+                                                                </button>
+
+                                                                <button type="submit" name="Command" value="Cancel" class="btn btn-danger" title="Cancel" onclick="reload()">
+                                                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                                                </button>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    }
+
+                                                </div>
+
+                                                <div class="tab-pane fade" id="tab7default">
+                                                    @using (Html.BeginForm("SubmitIssueJamanat", "OffenseRegistrationfinal", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                                    {
+                                                    <div class="panel-body">
+                                                        <div class="col-lg-12">
+                                                            <label>Issue Jamanat:</label>
+                                                            <div class="divider"></div>
+                                                        </div>
+                                                        @Html.HiddenFor(X => X.JamanatId, new { @id = "JamanatId", name = "JamanatId" })
+                                                        <div class="" role="form">
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Name of the guarantor: <span class="mandatory">*</span></label>
+                                                                    @Html.TextBoxFor(x => x.GuarantorName, new { @class = "form-control", @maxlength = 100, @id = "GuarantorName" })
+                                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.GuarantorName)</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Father’s name of the guarantor: <span class="mandatory">*</span></label>
+                                                                    @Html.TextBoxFor(x => x.GuarantorFatherName, new { @class = "form-control", @maxlength = 100, @id = "GuarantorFatherName" })
+                                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.GuarantorFatherName)</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>ID proof type of the guarantor: <span class="mandatory">*</span></label>
+                                                                    @Html.DropDownListFor(x => x.GuarantorIdProofType, new List<SelectListItem>
+                                                               {
+                                                                 new SelectListItem { Text = "--Select--", Value = ""},
+                                                                 new SelectListItem { Text = "Driving License", Value = "Driving License"},
+                                                                 new SelectListItem { Text = "PAN card", Value = "PAN card"},
+                                                                 new SelectListItem { Text = "Voter ID", Value = "Voter ID"},
+                                                                 new SelectListItem { Text = "Passport", Value = "Passport"},
+                                                              },
+                                                              new
+                                                              {
+                                                                  @id = "GuarantorIdProofType",
+                                                                  @name = "GuarantorIdProofType",
+                                                                  @class = "form-control"
+                                                              })
+                                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.GuarantorIdProofType)</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Id proof copy:</label>
+                                                                    @Html.TextBoxFor(x => x.IdProof, new { @class = "form-control", @id = "IdProof", type = "file" })
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Category:<span class="mandatory">*</span> </label>
+                                                                    @*@Html.TextBoxFor(x => x.Caste, new { @class = "form-control", @id = "Caste", @maxlength = "100" })*@
+                                                                    @Html.DropDownList("GuarantorCategory", (IEnumerable<SelectListItem>)ViewBag.ddlOCaste, "--Select--", new { @class = "form-control", title = "Select Category", @id = "GuarantorCategory", @name = "GuarantorCategory" })
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Caste of the guarantor: </label>
+                                                                    @Html.TextBoxFor(x => x.GuarantorCaste, new { @class = "form-control", @maxlength = 100, @id = "GuarantorCaste" })
+                                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.GuarantorCaste)</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Address of the guarantor: <span class="mandatory">*</span></label>
+                                                                    @Html.TextBoxFor(x => x.GuarantorAddress, new { @class = "form-control", @maxlength = 200, @id = "GuarantorAddress" })
+                                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.GuarantorIdProofType)</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Residential Address1:</label>
+                                                                    @Html.TextBoxFor(x => x.GuarantorResidentialAddress1, new { @class = "form-control", @maxlength = 200, @id = "GuarantorResidentialAddress1" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Residential Address2:</label>
+                                                                    @Html.TextBoxFor(x => x.GuarantorResidentialAddress2, new { @class = "form-control", @maxlength = 200, @id = "GuarantorResidentialAddress2" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Pin Code:</label>
+                                                                    @Html.TextBoxFor(x => x.GuarantorPincode, new { @class = "form-control", @maxlength = 6, @id = "GuarantorPincode" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Village/City name: <span class="mandatory">*</span></label>
+                                                                    @Html.TextBoxFor(x => x.GuarantorVillageOrCity, new { id = "GuarantorVillageOrCity",@name="GuarantorVillageOrCity", @maxlength = 50, @class = "form-control" })
+                                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.GuarantorVillageOrCity)</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Nearest Tehsil to Guarantor:</label>
+                                                                    @Html.TextBoxFor(x => x.GuarantorNearestTehsil, new { @class = "form-control", @maxlength = 10, @id = "GuarantorNearestTehsil" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Nearest District to Guarantor:</label>
+                                                                    @Html.DropDownListFor(x => x.GuarantorNearestDistrict, (IEnumerable<SelectListItem>)ViewBag.District, "--Select--", new { id = "GuarantorNearestDistrict", @class = "form-control" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Nearest Police Station to offender:</label>
+                                                                    @Html.TextBoxFor(x => x.OffenderNearestPoliceStation, new { @class = "form-control", @maxlength = 10, @id = "OffenderNearestPoliceStation" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Nearest Tehsil to offender:</label>
+                                                                    @Html.TextBoxFor(x => x.OffenderNearestTehsil, new { @class = "form-control", @maxlength = 10, @id = "OffenderNearestTehsil" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Nearest District to the offender:</label>
+                                                                    @Html.DropDownListFor(x => x.OffenderNearestDistrict, (IEnumerable<SelectListItem>)ViewBag.District, "--Select--", new { id = "OffenderNearestDistrict", @class = "form-control" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Amount of Bail / Muchalka: <span class="mandatory">*</span></label>
+                                                                    @Html.TextBoxFor(x => x.AmountOfBail, new { @class = "form-control", @maxlength = 20, @id = "AmountOfBail" })
+                                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.AmountOfBail)</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Date of Guaranteer: <span class="mandatory">*</span></label>
+                                                                    <div id="datepicker" class="input-group date">
+                                                                        @Html.TextBoxFor(x => x.GuaranteerDate, new { @class = "form-control datefield", @id = "GuaranteerDate" })
+                                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                                    </div>
+                                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.GuaranteerDate)</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Date of Submitting Muchalka: <span class="mandatory">*</span></label>
+                                                                    <div id="datepicker" class="input-group date">
+                                                                        @Html.TextBoxFor(x => x.MuchalkaSubmitDate, new { @class = "form-control datefield", @id = "MuchalkaSubmitDate" })
+                                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+
+                                                                    </div>
+                                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.MuchalkaSubmitDate)</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Witness (1) Name: <span class="mandatory">*</span></label>
+                                                                    @Html.TextBoxFor(x => x.WitnessName1, new { @class = "form-control", @maxlength = 100, @id = "WitnessName1" })
+                                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.WitnessName1)</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label>Witness (2) Name: <span class="mandatory">*</span></label>
+                                                                    @Html.TextBoxFor(x => x.WitnessName2, new { @class = "form-control", @maxlength = 100, @id = "WitnessName2" })
+                                                                    <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.WitnessName2)</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-12" id="btn">
+
+                                                                <button id="btnJamanat" type="submit" name="Command" value="save" class="btn btn-success" title="Submit">
+                                                                    <i class="fa fa-check"></i> save
+                                                                </button>
+
+                                                                <button type="submit" name="Command" value="Cancel" class="btn btn-danger" title="Cancel" onclick="reload()">
+                                                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                                                </button>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.Tab1 -->
+                         
+                            <div class="col-lg-12"></div>
+
+                            <!-- Btn Groping -->
+                            <div class="btn-padd">
+                                <div id="btn" class="col-lg-12">
+                                    @*<button type="button" class="btn btn-default" title="Generate FIR" data-toggle="modal" data-target="#GenerateFIR">
+                                        <i class="fa fa-edit fa-fw"></i> Generate FIR
+                                    </button>*@
+                                    @using (Html.BeginForm("FinalSubmit", "OffenseRegistrationfinal", FormMethod.Post))
+                                        {
+                                            <button type="submit" class="btn btn-success" title="Save" name="Command" value="Submit" id="btn_submit1">
+                                                <i class="fa fa-check"></i> Submit
+                                            </button>
+
+                                                                     @*<button type="reset" class="btn btn-warning" title="Reset">
+                                        <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                            </button>*@
+
+                                            <button id="btn_cancel" type="submit" name="Command" value="Cancel" class="btn btn-danger" title="Cancel">
+                                                <i class="fa fa-times fa-fw"></i> Cancel
+                                            </button>
+                                            if (HttpContext.Current.Session["FPMOffenseID"] != null)
+                                            {
+                                                <a id="btn_Previous" style="float:none" class="btn btn-warning" href='@Url.Action("SubmitDetails3", "OffenseRegistration", new { id = Encryption.encrypt(Session["FPMOffenseID"].ToString()) })'>
+                                                    Previous
+                                                </a>
+
+                                            }
+                                        }
+                                  
+                                    
+                                </div>
+                            </div>
+                            <!-- /.Btn Groping -->
+
+                      
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+</div>
+
+<div class="modal fade in" id="myModalWitness" tabindex="-1" role="dialog" aria-hidden="false">
+    <div class="modal-dialog mdw">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="myModalLabel">
+                    Witness Details
+                </h4>
+            </div>
+            <br />
+            <div class="modal-body tbl-scroll">
+                <!-- From URL Get -->
+                <table class="table table-striped table-bordered table-hover">
+                    <tbody id="tbdyWitness"></tbody>
+                </table>
+            </div>
+            <div class="modal-footer" id="fot-f">
+                <div id="btn" class="col-lg-12">
+
+                    <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                        <i class="fa fa-times fa-fw"></i> Close
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade in" id="myModalFile" tabindex="-1" role="dialog" aria-hidden="false">
+    <div class="modal-dialog mdw">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="myModalLabel">
+                  Download/View File 
+                </h4>
+            </div>
+            <br />
+            <div class="modal-body tbl-scroll">
+                <div class="dataTable_wrapper">
+                    <table id="tblCrimeFile" class="table table-striped table-bordered table-hover table-responsive gridtable">
+                        <thead>
+                            <tr>
+                                <th>OffenseCode</th>
+                                <th>File</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in ViewData["filelist"] as IEnumerable<FMDSS.Models.ForestProtection.OffenseRegistrationfinal>)
+                            {
+                                <tr>
+                                    <td>@item.OffenseCode</td>
+                                    <td><a href="@Url.Content(item.FileView)" target='_blank'><img src='../images/jpeg.png' width='30' /></a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            <div class="modal-footer" id="fot-f">
+                <div id="btn" class="col-lg-12">
+
+                    <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                        <i class="fa fa-times fa-fw"></i> Close
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade in" id="myModalDashboard" tabindex="-1" role="dialog" aria-hidden="false">
+    <div class="modal-dialog mdw">
+        <div class="modal-content" style="height:500px;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="myModalLabel">
+                    View Member(s) Detail
+                </h4>
+            </div>
+            <div id="divmember">
+                <table class="table table-striped table-bordered table-hover">
+                    <tbody id="tblMemberDetails"></tbody>
+                </table>
+            </div>
+            <!-- /.modal-body -->
+            <div class="modal-footer" id="fot-f">
+                <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>

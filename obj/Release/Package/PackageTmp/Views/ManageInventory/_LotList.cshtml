@@ -1,0 +1,119 @@
+﻿<div class="panel-body">
+    <div class="col-lg-3 rgt pull-right Padding-bottom10">
+        <button type="button" class="btn btn-success AddNewAuction pull-right" data-toggle="modal" onclick="OpenDialog('_AddNewLot',0)" id="btnAddNewLot" data-target="#myModalAddItemDOD" title="Add New Lot">
+            <i class="fa fa-plus"></i> Add New Lot
+        </button>
+    </div>
+    <div class="table-responsive request-id">
+        <table class="table table-striped table-bordered table-hover" id="dtAssignLot">
+            <thead>
+                <tr>
+                    <th>S.No.</th>
+                    <th>Depot Name</th>
+                    <th>Product Type</th>
+                    <th>Product Name</th>
+                    <th>Unit</th>
+                    <th>Max Quantity</th>
+                    <th>Current Lot Number</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in ViewData["lstAssignedLot"] as IEnumerable<FMDSS.Models.ForestProduction.LotMaster>)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(model => item.SNo)</td>
+                        <td>@Html.DisplayFor(model => item.Depot_Name)</td>
+                        <td>@Html.DisplayFor(model => item.ProductType)</td>
+                        <td>@Html.DisplayFor(model => item.ProductName)</td>
+                        <td>@Html.DisplayFor(model => item.UnitName)</td>
+                        <td>@Html.DisplayFor(model => item.LotQty)</td>
+                        <td>@Html.DisplayFor(model => item.DisplayLotNumber)</td>
+                        <td>
+                            <button type="button" id="btnViewLot" class="btn btn-success btn-circle" title="View" data-toggle="modal" data-target="#myLotDetails" onclick="GetLotDetails(this,'View')" value="@item.LotID">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                            <button type="button" id="btnEditLot" class="btn btn-warning btn-circle" title="Edit" data-toggle="modal" data-target="#myModalAddItemDOD" onclick="OpenDialogForLot('_EditLot','@item.LotID')" value="@item.LotID">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            <button type="button" id="btnDeleteLot_@item.LotID" class="btn btn-danger btn-circle" title="Delete" onclick="DeleteLotDetails(this)" value="@item.LotID">
+                                <i class="fa fa-times"></i>
+                            </button> 
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function UpdateLotResponse(response) {
+        @{
+            FMDSS.Entity.ResponseMsg result = new FMDSS.Entity.ResponseMsg();
+            if (ViewBag.ResponseMsg != null)
+            {
+                result = (FMDSS.Entity.ResponseMsg)ViewBag.ResponseMsg;
+            }
+        }
+        if ('@result.ReturnMsg' != null) {
+            alert('@result.ReturnMsg');
+            if ('@result.IsError' == 'False') {
+                $('#myModalAddItemDOD').modal('toggle');
+            }
+        }
+    }
+
+    function GetLotDetails(cntrl, action) {
+        var lotID = cntrl.value;  
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'ManageInventory/GetLotDetails',
+            dataType: 'json',
+            data: { objID: lotID },
+            success: function (data) {
+                if (action = 'VIEW') {
+                    $("#tbdyLot").empty();
+                    bardata = "<tr><td><b>Depot Name</b></td><td>" + data.list.Depot_Name +
+                        "</td></tr><tr><td><b>Product Type</b></td><td>" + data.list.ProductType +
+                        "</td></tr><tr><td><b>Product Name</b></td><td>" + data.list.ProductName +
+                        "</td></tr><tr><td><b>Unit Name</b></td><td>" + data.list.UnitName +
+                        "</td></tr><tr><td><b>Max Lot Quantity</b></td><td>" + data.list.LotQty +
+                        "</td></tr><tr><td><b>Current Lot Number</b></td><td>" + data.list.DisplayLotNumber +
+                        "</td></tr>";
+                    $("#tbdyLot").append(bardata);
+                }
+            },
+            error: function (ex) {
+                alert('Failed to retrieve lot details.');
+            }
+        });
+    }
+
+    function DeleteLotDetails(cntrl) {
+        var lotID = cntrl.value;
+        if (confirm("@FMDSS.Globals.Constant.ConfirmMsgDelete")) {
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageInventory/DeleteObject',
+                dataType: 'json',
+                data: { objType:"Lot", objID: lotID },
+                success: function (response) { 
+                    alert(response.result.ReturnMsg);  
+                    if (response.result.IsError == false) {
+                        $('#btnDeleteLot_' + lotID).closest('tr').hide('slow');
+                    }
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve lot details.');
+                }
+            });
+        }
+    }
+
+</script>
+<style>
+    .Padding-bottom10{
+        padding-bottom:10px;
+    }
+</style>

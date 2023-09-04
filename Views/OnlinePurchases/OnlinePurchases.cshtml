@@ -1,0 +1,214 @@
+﻿@{
+    ViewBag.Title = "OnlinePurchases";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+     
+            
+        $('#purchasesCategory').change(function (e) {
+            //$('#Districts').empty();
+            //$('#Village').empty();
+            //$('#Nursery').empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'OnlinePurchases/GetProduceNursery', // we are calling json method
+                dataType: 'json',
+                data: { purchasesCategory: $("#purchasesCategory").val() },
+                success: function (range) {
+                    $.each(range, function (i, items) {
+                        $("#produceNursery").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+       
+            $('#divisionCode').change(function (e) {
+                alert("Hello");
+                //$('#Districts').empty();
+                //$('#Village').empty();
+                //$('#Nursery').empty();
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'AddNoticeNumber/getRange', // we are calling json method
+                    dataType: 'json',
+                    data: { divisionCode: $("#divisionCode").val() },
+                    success: function (range) {
+                        $.each(range, function (i, items) {
+                            $("#rangeCode").append('<option value="' + items.Value + '">' +
+                             items.Text + '</option>');
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve states.' + ex);
+                    }
+
+                });
+                return false;
+            });
+
+            $('#rangeCode').change(function (e) {
+                //$('#Districts').empty();
+                //$('#Village').empty();
+                //$('#Nursery').empty();
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'AddNoticeNumber/getRange', // we are calling json method
+                    dataType: 'json',
+                    data: { divisionCode: $("#rangeCode").val() },
+                    success: function (range) {
+                        $.each(range, function (i, items) {
+                            $("#villageCode").append('<option value="' + items.Value + '">' +
+                             items.Text + '</option>');
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve states.' + ex);
+                    }
+
+                });
+                return false;
+            });
+
+            $('#divisionCode').change(function (e) {
+                //$('#Districts').empty();
+                //$('#Village').empty();
+                //$('#Nursery').empty();
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'AddNoticeNumber/getRange', // we are calling json method
+                    dataType: 'json',
+                    data: { divisionCode: $("#divisionCode").val() },
+                    success: function (range) {
+                        $.each(range, function (i, items) {
+                            $("#rangeCode").append('<option value="' + items.Value + '">' +
+                             items.Text + '</option>');
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve states.' + ex);
+                    }
+
+                });
+                return false;
+            });
+        });
+    
+</script>
+
+
+@using (Html.BeginForm("ProcedOnlinePurchases", "OnlinePurchases", FormMethod.Post, new { id = "submitForm" }))
+{
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header"><span>Online Purchase of Produce</span></h1>
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!-- <div class="panel-heading">Online Purchase</div>-->
+                <!-- /.panel-heading -->
+
+                <div class="panel-body">
+
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Select Category: <span class="mandatory">*</span></label>
+                            <select class="form-control" id="purchasesCategory">
+                                <option>---Select---</option>
+                                <option>Forest Produce</option>
+                                <option>Nursery</option>
+                                
+                            </select>
+                        </div>
+                    </div>
+
+                    
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Region Name: <span class="mandatory"></span></label>
+                           @Html.DropDownList("ProduceNursery", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "produceNursery" })
+                       
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Circle Name: <span class="mandatory"></span></label>
+                            @Html.DropDownList("ProduceNursery", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "produceNursery" })
+</div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Division Name.: <span class="mandatory">*</span></label>
+                            @Html.DropDownList("ProduceNursery", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "produceNursery" })
+
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Range Name: <span class="mandatory">*</span></label>
+                            @Html.DropDownList("RangeCode", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "rangeCode" })
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Village Name: <span class="mandatory">*</span></label>
+                            @Html.DropDownList("VillageCode", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "villageCode" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Select Depot: <span class="mandatory">*</span></label>
+                            @Html.DropDownList("DepotId", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "depotId" })
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Select Forest Produce/Nursery: <span class="mandatory">*</span></label>
+                            @Html.DropDownList("ProduceNursery", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "produceNursery" })
+                        </div>
+                    </div>
+
+
+                    <!-- Btn Groping -->
+                    <div class="btn-padd">
+                        <div id="btn" class="col-lg-12">
+                           
+                            <button type="reset" class="btn btn-warning">
+                                <i class="fa fa-th-list fa-fw"></i> Proced
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.Btn Groping -->
+
+                </div>
+                <!-- /.panel-body -->
+
+            </div>
+            <!-- /.panel -->
+
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>
+
+}

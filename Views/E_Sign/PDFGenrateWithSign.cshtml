@@ -1,0 +1,407 @@
+﻿@model FMDSS.App_Start.PDFModel
+@{
+    ViewBag.Title = "PDFGenrateWithSign";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+
+<script type="text/javascript">
+    function ShowPopUp(data) {
+        $(".modal-body").text(data);
+        $("#modal-window").modal('show');
+    }
+    //Rajveer
+
+    //Step 1
+    function SendOTPEsignIntegration() {
+        //  $(".modal").css("z-index","0");
+        var RequestId = $('#RequestId').val();
+        $.ajax({
+            type: 'GET',
+            url: "../E_Sign/SendOTPESign",
+            dataType: 'json',
+            data: { RequestId: RequestId },
+            success: function (result) {
+                if (result.Status == 1) {
+                    $("#TransationID").val(result.TransactionId);
+
+                    $("#AadharCardModal").modal("show");
+                }
+                else {
+                    $("#modal-window").modal("hide");
+                    console.log(result);
+                    alert("Some error has occurred please try again later!!!");
+                }
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+
+    }
+
+    function ReGenratePDF(TableName, RequestID) {
+        if (TableName != '' && RequestID != '') {
+            $('#RequestId').val(RequestID);
+            $('#TableName').val(TableName);
+            SendOTPEsignIntegration();
+        }
+    }
+</script>
+
+@using (Html.BeginForm("PDFGenrateWithSign", "E_Sign", FormMethod.Post, new { enctype = "multipart/form-data", data_behavior = "confirm" }))
+{
+    <div id="modal-window" style="display:none;" title="Transation" class="modal fade">
+        <div class="modal-dialog" style="width: 50%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">DMS Integration Request and Response</h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-dismiss="modal" id="btn-close" class="btn btn-danger">Close</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
+
+    <div class="modal fade in" id="AadharCardModal" tabindex="-1" role="dialog" aria-hidden="false">
+        <div class="modal-dialog mdw">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                    <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> Please Enter Valid OTP on your Ragisterted Mobile Number </label></h4>
+                </div>
+
+                <div class="modal-body">
+                    <!-- From URL Get -->
+                    @Html.TextBox("OTP", null, new { @class = "form-control" })
+                    @Html.Hidden("TransationID", null, new { @class = "form-control", @id = "TransationID" })
+
+                    @Html.HiddenFor(model => model.GenratePDFModel.RequestId, new { @id = "RequestId" })
+                    @Html.HiddenFor(model => model.GenratePDFModel.TableName, new { @id = "TableName" })
+                    <!-- /. From URL Get -->
+                </div>
+                <!-- /.modal-body -->
+                <div class="modal-footer" id="fot-f">
+                    <div id="btn" class="col-lg-12">
+                        <button name="button" id="clicks" class="btn btn-success" type="submit" value="Save" style="width: auto">
+                            <i class="fa fa-times fa-fw"></i> Save
+                        </button>
+                        <button name="button" class="btn btn-danger" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                            <i class="fa fa-times fa-fw"></i> Close
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+}
+
+<div class="panel-heading"> <span>@Html.Raw(TempData["Message"]) </span> </div>
+<div class="col-lg-9 pad">
+    <h1 class="page-header">Without E-Sign PDF Log</h1>
+
+</div>
+<div class="row">
+
+    <div class="col-md-9">
+
+
+        <div class="panel with-nav-tabs panel-default">
+
+            <div class="panel-heading">
+                <ul class="nav nav-tabs" id="myTab">
+                    <li class="active"><a href="#tab2default" data-toggle="tab"><i class="fa fa-user fa-fw"></i>PDF</a></li>
+                    <li class=""><a href="#tab3default " data-toggle="tab"><i class="fa fa-comment fa-fw"></i>DMS Logs</a></li>
+                </ul>
+
+            </div>
+            <div class="panel-body">
+                <div class="tab-content">
+                    <div class="tab-pane fade  in tbl-scroll active" id="tab2default">
+                        <div class="panel-body">
+                            <div class="col-lg-8">
+                                <div class="form-group">
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="Search" id="searchval" onblur="searchs();">
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered table-hover table-responsive " id="dataTablesMatch">
+                                        <thead>
+                                            <tr>
+
+                                                <th>
+                                                    Module Name
+                                                </th>
+                                                <th>
+                                                    Request ID
+                                                </th>
+                                                <th>
+                                                    Created Date
+                                                </th>
+                                                <th>
+                                                    Name (Email ID)
+                                                </th>
+                                                <th>
+                                                    Aadhar_ID
+                                                </th>
+                                                <th>
+                                                    Action
+                                                </th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model.PDFLogFileModel)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.ModuleName)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.RequestID)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.CreatedDate)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.Name)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.Aadhar_ID)
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="button" id="GenratePDF" value="Re Genrate" class="btn btn-info" onclick=ReGenratePDF('@item.ModuleName','@item.RequestID')>
+                                                    </td>
+                                                </tr>
+                                            }
+
+
+                                        </tbody>
+
+                                    </table>
+
+
+                                </div>
+                                <!-- /.table-responsive -->
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="tab-pane fade in tbl-scroll " id="tab3default">
+
+                        <div class="panel-body">
+                            <div class="col-lg-8">
+                                <div class="form-group">
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="Search" id="searchval1" onblur="searchs1();">
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered table-hover table-responsive" id="dataTablesUnMatch">
+                                        <thead>
+                                            <tr>
+
+                                                <th>
+                                                    Module Name
+                                                </th>
+                                                <th>
+                                                    Request ID
+                                                </th>
+                                                <th>
+                                                    Request
+                                                </th>
+                                                <th>
+                                                    Response
+                                                </th>
+                                                <th>
+                                                    Created Date
+                                                </th>
+                                                <th>
+                                                    Name (Email ID)
+                                                </th>
+                                                <th>
+                                                    Aadhar_ID
+                                                </th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model.DMSErrorModel)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.ModuleName)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.RequestID)
+                                                    </td>
+                                                    <td>
+                                                        <a href="#" onclick="ShowPopUp('@item.Request')">View</a>
+                                                    </td>
+                                                    <td>
+                                                        <a href="#" onclick="ShowPopUp('@item.Response')">View</a>
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.CreatedDate)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.Name)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.Aadhar_ID)
+                                                    </td>
+
+                                                </tr>
+                                            }
+
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+                                <!-- /.table-responsive -->
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- /.Tab3 -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.Tab1 -->
+
+
+
+
+</div>
+
+
+<script type="text/javascript">
+    $.noConflict(true);
+    var tablesToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+        , tmplWorkbookXML = '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'
+          + '<DocumentProperties xmlns="urn:schemas-microsoft-com:office:office"><Author>Axel Richter</Author><Created>{created}</Created></DocumentProperties>'
+          + '<Styles>'
+          + '<Style ss:ID="Currency"><NumberFormat ss:Format="Currency"></NumberFormat></Style>'
+          + '<Style ss:ID="Date"><NumberFormat ss:Format="Medium Date"></NumberFormat></Style>'
+          + '</Styles>'
+          + '{worksheets}</Workbook>'
+        , tmplWorksheetXML = '<Worksheet ss:Name="{nameWS}"><Table>{rows}</Table></Worksheet>'
+        , tmplCellXML = '<Cell{attributeStyleID}{attributeFormula}><Data ss:Type="{nameType}">{data}</Data></Cell>'
+        , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+        , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (tables, wsnames, wbname, appname) {
+            var ctx = "";
+            var workbookXML = "";
+            var worksheetsXML = "";
+            var rowsXML = "";
+            var getFilterFromDate = document.getElementById('FromDate').value;
+            var getFilterToDate = document.getElementById('ToDate').value;
+            wbname = wbname + "FromDate:-" + getFilterFromDate + "- ToDate:-" + getFilterToDate + '.xls';
+            for (var i = 0; i < tables.length; i++) {
+                if (!tables[i].nodeType) tables[i] = document.getElementById(tables[i]);
+                for (var j = 0; j < tables[i].rows.length; j++) {
+                    rowsXML += '<Row>'
+                    for (var k = 0; k < tables[i].rows[j].cells.length; k++) {
+                        var dataType = tables[i].rows[j].cells[k].getAttribute("data-type");
+                        var dataStyle = tables[i].rows[j].cells[k].getAttribute("data-style");
+                        var dataValue = tables[i].rows[j].cells[k].getAttribute("data-value");
+                        dataValue = (dataValue) ? dataValue : tables[i].rows[j].cells[k].innerHTML.trim();
+                        if (dataValue.indexOf('button') == -1) {
+                            var dataFormula = tables[i].rows[j].cells[k].getAttribute("data-formula");
+                            dataFormula = (dataFormula) ? dataFormula : (appname == 'Calc' && dataType == 'DateTime') ? dataValue : null;
+                            ctx = {
+                                attributeStyleID: (dataStyle == 'Currency' || dataStyle == 'Date') ? ' ss:StyleID="' + dataStyle + '"' : ''
+                                   , nameType: (dataType == 'Number' || dataType == 'DateTime' || dataType == 'Boolean' || dataType == 'Error') ? dataType : 'String'
+                                   , data: (dataFormula) ? '' : dataValue
+                                   , attributeFormula: (dataFormula) ? ' ss:Formula="' + dataFormula + '"' : ''
+                            };
+                            rowsXML += format(tmplCellXML.trim(), ctx);
+                        }
+                    }
+                    rowsXML += '</Row>'
+
+                }
+                ctx = { rows: rowsXML, nameWS: wsnames[i] || 'Sheet' + i };
+                worksheetsXML += format(tmplWorksheetXML, ctx);
+                rowsXML = "";
+            }
+
+            ctx = { created: (new Date()).getTime(), worksheets: worksheetsXML };
+            workbookXML = format(tmplWorkbookXML, ctx);
+
+            console.log(workbookXML);
+
+            var link = document.createElement("A");
+            link.href = uri + base64(workbookXML);
+            link.download = wbname || 'Reconciliation.xls';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    })();
+</script>
+<script type="text/javascript">
+
+    function searchs() {
+        var val = $("#searchval").val();
+        $('#dataTablesMatch tbody tr').each(function (i) {
+            if ($(this).find('td').text().toLowerCase().trim().indexOf(val) > -1) {
+                $(this).show();
+            }
+            else {
+                $(this).hide();
+            }
+            if (val == '') {
+                $(this).show();
+            }
+        });
+    }
+
+    function searchs1() {
+        var val = $("#searchval1").val();
+        $('#dataTablesUnMatch tbody tr').each(function (i) {
+            if ($(this).find('td').text().toLowerCase().trim().indexOf(val) > -1) {
+                $(this).show();
+            }
+            else {
+                $(this).hide();
+            }
+            if (val == '') {
+                $(this).show();
+            }
+        });
+    }
+
+</script>
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+

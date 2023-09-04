@@ -1,0 +1,280 @@
+﻿@model FMDSS.Models.ForestProtection.CaseInvestigationStatus
+@{
+    ViewBag.Title = "CaseStatus";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+<style>
+    #myModalCase .modal-header { margin-bottom: 5px}
+    #myModalCase .modal-footer {clear:both}
+
+</style>
+<script src="~/Scripts/jquery-1.8.2.js"></script>
+<script type="text/javascript">
+
+    $(function (e) {
+
+        $(".datefield").datepicker({ maxDate: new Date(), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id $=auto]").focus(); } });
+
+        var d = new Date($('#hdCurrentdate').val());
+        d.setDate(d.getDate());
+        var day = d.getDate();
+        var month = d.getMonth() + 1;
+        var year = d.getFullYear();
+        if (day < 10) {
+            day = "0" + day;
+        }
+        if (month < 10) {
+            month = "0" + month;
+        }
+        var tdate = day + "/" + month + "/" + year;
+        $(".datefield").datepicker({ maxDate: tdate, dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id $=auto]").focus(); } });            
+
+
+
+     //$('#InvestigationDate').focusout(function () {
+
+     //       if ($('#InvestigationDate').val() != '') {
+
+     //           var d1 = new Date($('#hdOffenseDate').val());
+     //           d1.setDate(d.getDate());
+     //           var day = d1.getDate();
+     //           var month = d1.getMonth() + 1;
+     //           var year = d1.getFullYear();
+     //           if (day < 10) {
+     //               day = "0" + day;
+     //           }
+     //           if (month < 10) {
+     //               month = "0" + month;
+     //           }
+     //           var t1date = day + "/" + month + "/" + year;
+
+
+     //           var d2 = new Date($('#InvestigationDate').val());
+     //           d2.setDate(d.getDate());
+     //           var day = d2.getDate();
+     //           var month = d2.getMonth() + 1;
+     //           var year = d2.getFullYear();
+     //           if (day < 10) {
+     //               day = "0" + day;
+     //           }
+     //           if (month < 10) {
+     //               month = "0" + month;
+     //           }
+     //           var t2date = day + "/" + month + "/" + year;
+
+
+     //           if (t1date > t2date) {
+     //               alert('Offense date cannot be less than completion date');
+     //               return false;
+     //           }
+
+
+     //       }
+
+
+            
+
+
+
+
+     //   });
+
+
+
+
+        $('#btnForward').click(function () {
+           
+
+            if ($('#InvestigationDate').val() == '') {
+                $('#errordivInvestDate').show();
+                $('#errordivInvestDate').html("Please enter Investigation date!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#InvestigationDate').focus();
+                return false;
+                e.preventDefault();
+            }
+            else {
+                $('#errordivInvestDate').hide();
+            }
+            if ($('#InvestigationDate').val() != '') {
+
+                var d1 = new Date($('#hdOffenseDate').val());
+                d1.setDate(d.getDate());
+                var day = d1.getDate();
+                var month = d1.getMonth() + 1;
+                var year = d1.getFullYear();
+                if (day < 10) {
+                    day = "0" + day;
+                }
+                if (month < 10) {
+                    month = "0" + month;
+                }
+                var t1date = day + "/" + month + "/" + year;
+
+
+                var d2 = new Date($('#InvestigationDate').val());
+                d2.setDate(d.getDate());
+                var day = d2.getDate();
+                var month = d2.getMonth() + 1;
+                var year = d2.getFullYear();
+                if (day < 10) {
+                    day = "0" + day;
+                }
+                if (month < 10) {
+                    month = "0" + month;
+                }
+                var t2date = day + "/" + month + "/" + year;
+
+                if (t1date > t2date) {
+
+                    $('#errordivInvestDate').show();
+                    $('#errordivInvestDate').html("Completion date cannot be less than offense date" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#InvestigationDate').val('');
+                    return false;
+                    e.preventDefault();
+                }
+                else {
+                    $('#errordivInvestDate').hide();
+                }
+            }
+            if ($('#DispatchNo').val() == '') {
+                $('#errordivDispatch').show();
+                $('#errordivDispatch').html("Please enter dispatch no!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#DispatchNo').focus();
+                return false;
+                e.preventDefault();
+            }
+            else {
+                $('#errordivDispatch').hide();
+            }
+        });
+    });
+    function CaseStatus(OffenseCode) {
+        var d = OffenseCode.split(',');     
+        $('#OffenseCode').val(d[0]);
+        $('#hdOffenseDate').val(d[1]);
+    }
+</script>
+<input type="hidden" id="hdCurrentdate" value="@TempData["CurrentDate"]">
+<div id="page-wrapper-inn">
+    @if (TempData["Investigation"] != null)
+    {
+
+        <script type="text/javascript" language="javascript">
+                alert('@TempData["Investigation"]');
+        </script>
+    }
+    <div class="col-lg-12 pad">
+        <h1 class="page-header" id="Pheader">Investigation Completion Details</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+
+              
+    @using (Html.BeginForm("SaveInvestigationDetails", "CitizenParivadRegistration", FormMethod.Post, new { enctype = "multipart/form-data", data_behavior = "confirm" }))
+    {
+    <div class="panel-body">
+        <div class="dataTable_wrapper">
+            <div id="tbl" class="table-responsive">
+
+                <table class="table table-striped table-bordered table-hover gridtable">
+                    <thead>
+                        <tr>
+                            <th>Offense ID</th>
+                            <th>Place of Offense</th>
+                            <th>Offense Date</th>
+                            <th>Description</th>
+                            <th>Complaint Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in ViewData["Caselist"] as IEnumerable<FMDSS.Models.ForestProtection.CaseInvestigationStatus>)
+                                    {
+                                        if (item.OffenseCode != "")
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.OffenseCode)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.OffensePlace)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.OffenseDate)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.OffenseDescription)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.ComplaintFound)
+                                                </td>
+                                                <td>
+                                                    <button id="btnCase" type="button" class="btn btn-success" title="Edit" data-toggle="modal" onclick="CaseStatus('@Html.DisplayFor(model => item.OffenseCode),@Html.DisplayFor(model => item.OffenseDate)')" data-target="#myModalCase">Action</button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+        <input type="hidden" id="hdOffenseDate" name="hdOffenseDate" />
+          <div class="modal fade in" id="myModalCase" tabindex="-1" role="dialog" aria-hidden="false">
+            <div class="modal-dialog mdw">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel">
+                            Investigation Submission Details
+                        </h4>
+                    </div>
+                       <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>OffenseCode:</label>
+                            @Html.TextBoxFor(x => x.OffenseCode, new { @class = "form-control", @id = "OffenseCode", name = "OffenseCode",@readonly="readonly" })                         
+                        </div>
+                    </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Investigation Complete date: <span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(x => x.InvestigationDate, new { @class = "form-control datefield", @title = "", @placeholder = "", @id = "InvestigationDate", name = "InvestigationDate" })
+                                <div id="errordivInvestDate" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Dispatch No: <span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(x => x.DispatchNo, new { @class = "form-control", @title = "", @maxlength = 100, @id = "DispatchNo", name = "DispatchNo" })
+                                <div id="errordivDispatch" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                      <div class="modal-footer" id="fot-f">
+                        <div id="btn">
+                            <button id="btnForward" type="submit" class="btn btn-success" name="Command" value="Forward">
+                                <i class="fa fa-check"></i> Submit
+                            </button>
+
+                            <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                                <i class="fa fa-times fa-fw"></i> Close
+                            </button>
+
+                        </div>
+                    </div>
+                    </div>
+           
+            </div>
+        </div>
+    </div>
+        }
+    </div>        
+  </div>
+    </div>
+</div>      
+                    
+                               

@@ -1,0 +1,228 @@
+﻿@{
+    ViewBag.Title = "Payment";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+    /*table.imagetable {
+        font-family: verdana,arial,sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #999999;
+        border-collapse: collapse;
+    }
+
+        table.imagetable th {
+            background: #b5cfd2 url('cell-blue.jpg');
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #999999;
+        }
+
+        table.imagetable td {
+            background: #ccc;
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #999999;
+        }*/
+</style>
+@*<script src="~/js/jquery.min.js"></script>*@
+<script type="text/javascript" language="javascript">
+
+    $(document).ready(function () {
+
+        function disableBack() { window.history.forward() }
+
+        window.onload = disableBack();
+        window.onpageshow = function (evt) {
+            if (evt.persisted) disableBack()
+        }
+
+    });
+
+</script>
+
+@*<div id="page-wrapper-inn">
+
+    <!--    content-->
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!--<div class="panel-heading"></div>
+                <!-- /.panel-heading -->
+                    <br /><br /><br /><br />
+                    <table style="text-align:right; border-width:1px; margin:auto;" bordercolor="blue" cellpadding="2" cellspacing="5" class="imagetable">
+                      @if (HttpContext.Current.Session["PaymentType"] == "OrganisingCamp")
+                      {
+                            <tr style="color:blue">
+                            <th style="width:250px">Transaction_Id</th>
+                            <th style="width:250px">Processing fees</th>
+                            <th style="width:250px">Name</th>
+                            <th style="width:250px">Status</th>
+                        </tr>
+                        foreach (var item in ViewData.Model)
+                        {
+                            <tr style="color:Black">
+                                <td>@item["Transaction_Id"] </td>
+                                <td>@item["ProcessingFees"]</td>
+                                <td>@item["EnterBy"]</td>
+                                <td>@item["Status"]</td>
+                            </tr>
+                        }
+                      }
+                     else{
+                           <tr style="color:blue">
+                            <th style="width:250px">Transaction_Id</th>
+                            <th style="width:250px">Member fees</th>
+                            <th style="width:250px">Vechile Fees</th>
+                            <th style="width:250px">Total Deposit</th>
+                            <th style="width:250px">Name</th>
+                            <th style="width:250px">Status</th>
+                        </tr>
+                        foreach (var item in ViewData.Model)
+                        {
+                            <tr style="color:Black">
+                                <td>@item["Transaction_Id"] </td>
+                                <td>@item["Memberfees"] </td>
+                                <td>@item["VechileFees"]</td>
+                                <td>@item["DepositFees"]</td>
+                                <td>@item["EnterBy"]</td>
+                                <td>@item["Status"]</td>
+                            </tr>
+                        }
+                     }
+                    </table>
+                    <br />
+                    <div style="text-align:center;">
+                        <label>Total Amount Payable</label>
+                        @Html.Raw(HttpContext.Current.Session["totalprice"])
+                    </div>
+                    @using (Html.BeginForm("Pay", "FilmShooting", FormMethod.Post, new { id = "pay" }))
+                    {
+                        <div style="text-align:center" class="form-horizontal" role="form">
+                            <button id="btnPay" type="submit" name="Command" value="pay">Pay</button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>*@
+
+
+<div id="page-wrapper-inn">
+
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">
+            <!--<i class="fa fa-rupee"></i>--> Payment
+            <!-- <small class="pull-right pdate">Date: 17/12/2015</small> -->
+        </h1>
+    </div>
+    <!-- /.col-lg-12 -->
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <section class="payment">
+
+                        <!-- Table row -->
+                        <div class="row">
+                            <div class="col-xs-12 table-responsive">
+                                <table class="table table-striped table-bordered table-hover">
+                                    @if (HttpContext.Current.Session["PaymentType"] == "OrganisingCamp")
+                                    {
+                                        <tr>
+                                            <th>Transaction_Id</th>
+
+                                            <th>Camp Fee</th>
+                                            <th>Entry fees</th>
+                                            <th>Emitra Charges</th>
+                                            <th>Amount To be Paid</th>
+                                            <th>Name</th>
+                                            <th>Status</th>
+                                        </tr>
+                                        foreach (var item in ViewData.Model)
+                                        {
+                                            <tr>
+                                                <td>@item["Transaction_Id"] </td>
+                                                <td>@item["CampFee"]</td>
+                                                <td>@item["ProcessingFees"]</td>
+                                                <td>@item["Tax"]</td>
+                                                <td>@item["AmountTobePaid"]</td>
+                                                <td>@item["EnterBy"]</td>
+
+
+                                                <td><span class="btn btn-danger">@item["Status"]</span></td>
+
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <th>Transaction_Id</th>
+                                            <th>Member fees</th>
+                                            <th>Vechile/Equipment Fees</th>
+                                           
+
+                                            <th>Total Deposit</th>
+                                            <th>Emitra Charges</th>
+                                            <th>Name</th>
+                                            <th>Status</th>
+                                        </tr>
+                                        foreach (var item in ViewData.Model)
+                                        {
+                                            <tr>
+                                                <td>@item["Transaction_Id"] </td>
+                                                <td>@item["Memberfees"] </td>
+                                                <td>@item["VechileFees"]</td>
+                                                <td>@item["DepositFees"]</td>
+                                                <td>@item["Tax"]</td>
+                                              
+                                                <td>@item["EnterBy"]</td>
+                                                <td><button type="button" class="btn btn-danger"><i class="fa fa-clock-o fa-fw"></i> @item["Status"]</button></td>
+
+                                            </tr>
+                                        }
+                                    }
+
+                                </table>
+                            </div><!-- /.col -->
+                        </div><!-- /.row -->
+                        <!-- this row will not appear when printing -->
+                        <div class="row no-print">
+                            <div class="col-xs-12">
+                                <label>Total Amount Payable</label>: @Html.Raw(HttpContext.Current.Session["totalprice"])
+
+
+                                @using (Html.BeginForm("Pay", "FilmShooting", FormMethod.Post, new { id = "pay" }))
+                                {
+                                    <div style="text-align:center" class="form-horizontal" role="form">
+                                        <button id="btnPay" type="submit" name="Command" value="pay" class="btn btn-primary pull-right"><i class="fa fa-check"></i> Pay Now</button>
+
+                                    </div>
+                                }
+
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>
+
+
+
+
+
+
+

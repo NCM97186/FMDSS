@@ -1,0 +1,162 @@
+﻿@model FMDSS.Models.BookOnlineTicket.OnlineBookingSeatsModel
+@{
+    ViewBag.Title = "Online Booking";
+    //Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+
+
+
+<div class="panel-heading"> <span>@Html.Raw(TempData["Message"]) </span> </div>
+<div class="col-lg-9 pad">
+    <h1 class="page-header">Current Wildlife Booking Half and Full Day and Special Category Seats</h1>
+
+</div>
+<div class="row">
+
+    <div class="col-md-9">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                @using (Html.BeginForm("Index", "OnlineBookingSeats", FormMethod.Post, new { enctype = "multipart/form-data", data_behavior = "confirm" }))
+                {
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label>Total Gypsy in Half/Full Day (PER DAY):<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.TotalNoOfGypsyHDFD, new { @class = "form-control ", id = "TotalNoOfGypsyHDFD", @readonly = "readonly" })
+                            @Html.ValidationMessageFor(s => s.TotalNoOfGypsyHDFD)
+                        </div>
+
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label>No of Gypsy in Special Quota (PER DAY):<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.TotalNoOfGypsyVIPBooking, new { @class = "form-control ", id = "TotalNoOfGypsyVIPBooking", @readonly = "readonly" })
+                            @Html.ValidationMessageFor(s => s.TotalNoOfGypsyVIPBooking)
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label>Total Gypsy (PER DAY):<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.OverAllGypsy, new { @class = "form-control ", id = "OverAllGypsy", @readonly = "readonly" })
+                            @Html.ValidationMessageFor(s => s.OverAllGypsy)
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label>No of Gypsy in Full Day:<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.TotalNoOfGypsyFD, new { @class = "form-control ", id = "TotalNoOfGypsyFD" })
+                            @Html.ValidationMessageFor(s => s.TotalNoOfGypsyFD)
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label>No of Gypsy in Half Day (Per Shift):<span class="mandatory">*</span></label>
+                            @Html.HiddenFor(model => model.VehicleIDFDFD, new { @class = "form-control ", id = "VehicleIDFDFD" })
+                            @Html.TextBoxFor(model => model.TotalNoOfGypsyHD, new { @class = "form-control ", id = "TotalNoOfGypsyHD" })
+                            @Html.ValidationMessageFor(s => s.TotalNoOfGypsyHD)
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="form-group">
+
+                            <label>No of Gypsy in Special Quota (Per Shift):<span class="mandatory">*</span></label>
+                            @Html.HiddenFor(model => model.VehicleIDVIP, new { @class = "form-control ", id = "VehicleIDVIP" })
+                            @Html.TextBoxFor(model => model.TotalNoOfGypsyVIP, new { @class = "form-control ", id = "TotalNoOfGypsyVIP", @readonly = "readonly" })
+                            @Html.ValidationMessageFor(s => s.TotalNoOfGypsyVIP)
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label>CWLW GYPSY Quota:<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.TotalSeatForCWLW, new { @class = "form-control CalVIP", id = "TotalSeatForCWLW", @onchange = "CalVIPGYPSY()" })
+                            @Html.ValidationMessageFor(s => s.TotalSeatForCWLW)
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label>CCF GYPSY Quota:<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.TotalSeatForCCF, new { @class = "form-control CalVIP", id = "TotalSeatForCCF", @onchange = "CalVIPGYPSY()" })
+                            @Html.ValidationMessageFor(s => s.TotalSeatForCCF)
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label>Incharge GYPSY Quota:<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.TotalSeatForIncharge, new { @class = "form-control CalVIP", id = "TotalSeatForIncharge", @onchange = "CalVIPGYPSY()" })
+                            @Html.ValidationMessageFor(s => s.TotalSeatForIncharge)
+                        </div>
+                    </div>
+
+
+                    <div id="btn" class="col-lg-12">
+
+                        <button type="submit" class="btn btn-success" value="Save" id="submit1">
+                            <i class="fa fa-check"></i> Submit
+                        </button>
+
+                    </div>
+
+                }
+            </div>
+        </div>
+
+
+    </div>
+    <!-- /.Tab1 -->
+
+
+
+
+</div>
+<script type="text/javascript">
+    $("#submit1").click(function () {
+
+        var TotalNoOfGypsyVIP = $("#TotalNoOfGypsyVIP").val();
+        var TotalSeatForCWLW = $("#TotalSeatForCWLW").val();
+        var TotalSeatForCCF = $("#TotalSeatForCCF").val();
+        var TotalSeatForIncharge = $("#TotalSeatForIncharge").val();
+        if (TotalNoOfGypsyVIP != null && TotalSeatForCWLW != null && TotalSeatForCCF != null && TotalSeatForIncharge != null) {
+
+            var TotalQuata = parseInt(TotalSeatForCWLW) + parseInt(TotalSeatForCCF) + parseInt(TotalSeatForIncharge);
+            if (parseInt(TotalQuata) != parseInt(TotalNoOfGypsyVIP)) {
+                alert("Special Category Gypsy doestn't match authorized person Quota!!!");
+                return false;
+            }
+        }
+        else {
+            alert("Special Category should not be null!!!");
+            return false;
+        }
+
+
+
+    });
+
+
+    function CalVIPGYPSY() {
+        var TotalSeatForCWLW = parseInt($("#TotalSeatForCWLW").val());
+        var TotalSeatForCCF = parseInt($("#TotalSeatForCCF").val());
+        var TotalSeatForIncharge = parseInt($("#TotalSeatForIncharge").val());
+
+        if (TotalSeatForCWLW != null && TotalSeatForCCF != null && TotalSeatForIncharge != null && TotalSeatForCWLW != "NAN" && TotalSeatForCCF != "NAN" && TotalSeatForIncharge != "NAN") {
+            var SUM = TotalSeatForCWLW + TotalSeatForCCF + TotalSeatForIncharge;
+            $("#TotalNoOfGypsyVIP").val(SUM);
+        }
+
+    }
+
+
+</script>
+
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+

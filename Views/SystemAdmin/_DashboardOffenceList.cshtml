@@ -1,0 +1,80 @@
+﻿@model IEnumerable<FMDSS.Models.Admin.DashboardOffence>
+
+<div class="panel panel-default">
+    <div class="panel-heading" style="background-color:#dbdbdb;">
+        <strong>Offence List</strong>
+    </div>
+    <div class="panel-body">
+        <table id="tbl_@ViewBag.ParentID" name="tblOffenceList" cellpadding="0" cellspacing="0" class="table table-striped table-bordered table-hover table-responsive">
+            <thead><tr><th>#</th><th>FIR Number</th><th>Range Name</th><th>Naka Name</th><th>Division</th></thead>
+            <tbody>
+                @if (Model != null)
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.SNo</td>
+                            <td><a href="javascript:void(0);" onclick="ShowDashboardData('Offence', '@item.Offense_code', 'OffenceDetailsByOffenceCode', this)">@item.FIRNumber</a></td>
+                            <td>@item.RANGE_NAME</td>
+                            <td>@item.NakaName</td>
+                            <td>@item.DIV_NAME</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+@Html.Hidden("hdnRootURL", Url.Content("~/"))
+<div class="modal fade in" data-backdrop="static" id="myModalDashboard" tabindex="2" role="dialog" aria-hidden="false"></div>
+<div class="modal fade in" data-backdrop="static" id="modalAEvidence" tabindex="1" role="dialog" aria-hidden="false"></div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#tbl_@ViewBag.ParentID').DataTable({
+            responsive: true,
+            "bSort": true,
+            "aLengthMenu": [[5, 25, 50, 75, -1], [5, 25, 50, 75, "All"]],
+            "iDisplayLength": 5,
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'excelHtml5',
+                    title: 'Offence Summary Report',
+                    text: 'Export to excel'
+                },
+            ],
+        });
+    });
+
+    function ShowDashboardData(moduleName, parentID, type, cntrlID) {
+        var status = $('#hfStatus').val();
+        var fromdate = $('#FromDate0').val();
+        var todate = $('#ToDate0').val();
+        var offenceId = $("#ddlOffence").val() | 0;
+       
+       // (string moduleName, string parentID, string type, string status, string fromDate, string toDate, int OffenceId)
+        $.ajax({
+            type: 'GET',
+            data: { moduleName: moduleName, parentID: parentID, type: type, status: status, fromDate: fromdate, toDate: todate, OffenceId: offenceId },
+            url: RootUrl + 'SystemAdmin/GetDashboardDetails',
+            dataType: 'html',
+            success: function (data) {
+                $("#myModalDashboard").html(data);
+                $('#myModalDashboard').show();
+                $('.panel-default').scrollTop($('.panel-default').height())
+
+
+            },
+            error: function (ex) {
+                console.log(ex.error);
+            }
+        });
+    }
+</script>
+
+
+
+
+
+

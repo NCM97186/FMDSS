@@ -1,0 +1,110 @@
+﻿@model List<FMDSS.Entity.FRAViewModel.AppealRequestDetailsVM>
+
+<div class="panel-body scrollGrid">
+    <div class="col-lg-12">
+        <table id="dtAppealDetails" class="table table-striped table-bordered table-hover gridtable">
+            <thead>
+                <tr>
+                    <th>Appeal Req. ID</th>
+                    <th>Claim Req. ID</th>
+                    <th>Entry Type</th>
+                    <th>Claim Type</th>
+                    <th>Claim Request Date</th>
+                    <th>Rejection Date</th>
+                    <th>Appeal Reason</th>
+                    <th>Raised By</th>
+                    <th>Rejected By</th>
+                    <th>Claimant Name</th>
+                    <th>Father Name</th>
+                    <th>Mobile</th>
+                    <th>Occupied Forest Land</th>
+                    <th>Occupancy Type</th>
+                    <th>Van Khand Name</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>DistrictName</th>
+                    <th>BlockName</th>
+                    <th>VillageName</th>
+                    <th>GPName</th>
+                    <th>Appeal Status</th>
+                    <th>Attachment</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null)
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.AppealRequestIDWithPrefix</td>
+                            @if (String.IsNullOrEmpty(item.ClaimRequestID))
+                            {
+                                <td>@item.ClaimRequestIDWithPrefix</td>
+                            }
+                            else
+                            {
+                                <td><a href="javascript:void(0)" data-toggle="modal" data-target="#modalWorkFlowDetails" onclick="GetWorkFlowDetailsView(@item.ClaimRequestID)">@item.ClaimRequestIDWithPrefix</a></td>
+                            }
+                            <td>@item.EntryType</td>
+                            <td>@item.ClaimTypeName</td>
+                            <td>@item.ClaimRequestDate</td>
+                            <td>@item.RejectionDate</td>
+                            <td>@item.AppealReason</td>
+                            <td>@item.RaisedBy</td>
+                            <td>@item.RejectedAt</td>
+                            <td>@item.ClaimantName</td>
+                            <td>@item.FatherName</td>
+                            <td>@item.Mobile</td>
+                            <td>@item.TotalAreaAgainstOccupiedForestLand</td>
+                            <td>@item.OccupancyType</td>
+                            <td>@item.ForestSectionName</td>
+                            <td>@item.Latitude</td>
+                            <td>@item.Longitude</td>
+                            <td>@item.DistrictName</td>
+                            <td>@item.BlockName</td>
+                            <td>@item.VillageName</td>
+                            <td>@item.GPName</td>
+                            <td>@item.AppealStatus</td>
+                            <td>
+                                @if (String.IsNullOrEmpty(item.ClaimRequestID))
+                            {
+                                <a href="javascript:void(0)" data-toggle="modal" data-target="#modalAEvidence" onclick="GetAttachedEvidence(@item.AppealID,6)">View Attachment</a>
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </td>
+                    </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#dtAppealDetails').DataTable({
+            responsive: true,
+            "aaSorting": [],
+            'aoColumnDefs': [{
+                'bSortable': false,
+                'aTargets': ['nosort']
+            }]
+        });
+    });
+</script>
+<style>
+    .scrollGrid {
+        width: 1068px;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    #page-wrapper-inn .btn {
+        width: auto;
+    }
+</style>
+

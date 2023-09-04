@@ -1,0 +1,190 @@
+﻿@model List<FMDSS.Entity.Protection.ViewModel.OffenceSummaryQtrReportVM> 
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Offence Summary Quarter Report</strong>
+    </div>
+    <div class="panel-body">
+        <div id="tbl" class="table-responsive">
+            <div class="col-lg-3 padding-bottom" style="float:right;"><button class="btn btn-info pull-right" onclick="tablesToExcel(['tblOffenceSummaryReport'], ['tblOffenceSummaryReport'], 'OffenceSummaryReport', 'Excel')">Export to Excel</button></div>
+            <table class="table table-bordered" id="tblOffenceSummaryReport">
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>Division</th>
+                        <th class="no-wrap">TotalCase</th>
+                        <th class="no-wrap">Pending In Court Till Last Qtr</th>
+                        <th class="no-wrap">Pending In Dept Till Last Qtr</th>
+                        <th class="no-wrap">Pending In Court Current Qtr</th>
+                        <th class="no-wrap">Pending In Dept Current Qtr</th>
+                        <th class="no-wrap">Total Pending In Court</th>
+                        <th class="no-wrap">Total Pending In Dept</th>
+                        <th class="no-wrap">Closed Current Qtr</th>
+                        <th class="no-wrap">Compount Amt Current Qtr</th>
+                        <th class="no-wrap">Pending In Dept < 1 Year</th>
+                        <th class="no-wrap">Pending In Dept betwn 1 & 3 Yrs</th>
+                        <th class="no-wrap">Pending In Dept > 3 Yrs</th>
+                        
+                        
+                    </tr> 
+                </thead> 
+                    @if (Model.Count > 0)
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(model => item.RowNo)</td>
+                                <td>@Html.DisplayFor(model => item.DIV_NAME)</td>  
+                                @*<td>@item.TotalCase</td>*@ 
+                                <td><a href="javascript:void(0);" data-toggle="modal" data-target="#modalData" onclick="GetRequestDetails('PendingInCourt_LastQtr','@item.DIV_CODE')">@item.PendingInCourt_LastQtr</a></td> 
+                                <td><a href="javascript:void(0);" data-toggle="modal" data-target="#modalData" onclick="GetRequestDetails('PendingInDept_LastQtr','@item.DIV_CODE')">@item.PendingInDept_LastQtr</a></td> 
+                                <td><a href="javascript:void(0);" data-toggle="modal" data-target="#modalData" onclick="GetRequestDetails('PendingInCourt_CurrentQtr','@item.DIV_CODE')">@item.PendingInCourt_CurrentQtr</a></td> 
+                                <td><a href="javascript:void(0);" data-toggle="modal" data-target="#modalData" onclick="GetRequestDetails('PendingInDept_CurrentQtr','@item.DIV_CODE')">@item.PendingInDept_CurrentQtr</a></td> 
+                                <td><a href="javascript:void(0);" data-toggle="modal" data-target="#modalData" onclick="GetRequestDetails('TotalPendingInCourt','@item.DIV_CODE')">@item.TotalPendingInCourt</a></td>
+                                <td><a href="javascript:void(0);" data-toggle="modal" data-target="#modalData" onclick="GetRequestDetails('TotalPendingInDept','@item.DIV_CODE')">@item.TotalPendingInDept</a></td> 
+                                <td><a href="javascript:void(0);" data-toggle="modal" data-target="#modalData" onclick="GetRequestDetails('Closed_CurrentQtr','@item.DIV_CODE')">@item.Closed_CurrentQtr</a></td> 
+                                <td><a href="javascript:void(0);" data-toggle="modal" data-target="#modalData" onclick="GetRequestDetails('CompountAmt_CurrentQtr','@item.DIV_CODE')">@item.CompountAmt_CurrentQtr</a></td>
+                                <td><a href="javascript:void(0);" data-toggle="modal" data-target="#modalData" onclick="GetRequestDetails('PendingInDept_LessThanOneYrs','@item.DIV_CODE')">@item.PendingInDept_LessThanOneYrs</a></td>
+                                <td><a href="javascript:void(0);" data-toggle="modal" data-target="#modalData" onclick="GetRequestDetails('PendingInDept_btwnOneAndThreeYrs','@item.DIV_CODE')">@item.PendingInDept_btwnOneAndThreeYrs</a></td> 
+                                <td><a href="javascript:void(0);" data-toggle="modal" data-target="#modalData" onclick="GetRequestDetails('PendingInDept_GtrThanThreeYrs','@item.DIV_CODE')">@item.PendingInDept_GtrThanThreeYrs</a></td> 
+                                
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="13">No record found.</td>
+                        </tr>
+                    }
+            </table>
+        </div>
+    </div>
+</div>
+<div class="modal fade in" data-backdrop="static" id="modalData" tabindex="-1" role="dialog" aria-hidden="false"></div>
+<script type="text/javascript" src="~/js/jquery.min.js"></script> 
+  
+<script type="text/javascript">
+    $.noConflict(true);
+    var tablesToExcel = (function () { 
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , tmplWorkbookXML = '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'
+                + '<DocumentProperties xmlns="urn:schemas-microsoft-com:office:office"><Author>Axel Richter</Author><Created>{created}</Created></DocumentProperties>'
+                + '<Styles>'
+                + '<Style ss:ID="Currency"><NumberFormat ss:Format="Currency"></NumberFormat></Style>'
+                + '<Style ss:ID="Date"><NumberFormat ss:Format="Medium Date"></NumberFormat></Style>'
+                + '</Styles>'
+                + '{worksheets}</Workbook>'
+            , tmplWorksheetXML = '<Worksheet ss:Name="{nameWS}"><Table>{rows}</Table></Worksheet>'
+            , tmplCellXML = '<Cell{attributeStyleID}{attributeFormula}><Data ss:Type="{nameType}">{data}</Data></Cell>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (tables, wsnames, wbname, appname) { 
+            var ctx = "";
+            var workbookXML = "";
+            var worksheetsXML = "";
+            var rowsXML = "";
+            console.log(tables);
+            var getFilterFromDate = document.getElementById('txtFromDate').value;
+            var getFilterToDate = document.getElementById('txtToDate').value;
+            wbname = wbname + "FromDate:-" + getFilterFromDate + "- ToDate:-" + getFilterToDate + '.xls';
+
+            for (var i = 0; i < tables.length; i++) {
+                if (!tables[i].nodeType) tables[i] = document.getElementById(tables[i]);
+                for (var j = 0; j < tables[i].rows.length; j++) {
+                    rowsXML += '<Row>'
+                    for (var k = 0; k < tables[i].rows[j].cells.length; k++) {
+                        var dataType = tables[i].rows[j].cells[k].getAttribute("data-type");
+                        var dataStyle = tables[i].rows[j].cells[k].getAttribute("data-style");
+                        var dataValue = tables[i].rows[j].cells[k].getAttribute("data-value");
+                        dataValue = (dataValue) ? dataValue : tables[i].rows[j].cells[k].innerHTML.trim();
+                        if (dataValue.indexOf('button') == -1) {
+                            var dataFormula = tables[i].rows[j].cells[k].getAttribute("data-formula");
+                            dataFormula = (dataFormula) ? dataFormula : (appname == 'Calc' && dataType == 'DateTime') ? dataValue : null;
+                            ctx = {
+                                attributeStyleID: (dataStyle == 'Currency' || dataStyle == 'Date') ? ' ss:StyleID="' + dataStyle + '"' : ''
+                                , nameType: (dataType == 'Number' || dataType == 'DateTime' || dataType == 'Boolean' || dataType == 'Error') ? dataType : 'String'
+                                , data: (dataFormula) ? '' : dataValue
+                                , attributeFormula: (dataFormula) ? ' ss:Formula="' + dataFormula + '"' : ''
+                            };
+                            rowsXML += format(tmplCellXML.trim(), ctx);
+                        }
+                    }
+                    rowsXML += '</Row>'
+
+                }
+                ctx = { rows: rowsXML, nameWS: wsnames[i] || 'Sheet' + i };
+                worksheetsXML += format(tmplWorksheetXML, ctx);
+                rowsXML = "";
+            }
+
+            ctx = { created: (new Date()).getTime(), worksheets: worksheetsXML };
+            workbookXML = format(tmplWorkbookXML, ctx);
+
+            console.log(workbookXML);
+
+            var link = document.createElement("A");
+            link.href = uri + base64(workbookXML);
+            link.download = wbname || 'OffenceDetails.xls';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    })();
+</script>
+<script> 
+    var rootURl = '@Url.Content("~/")'; 
+    function GetRequestDetails(actionCode, divCode) {
+        var data = {
+            ActionCode: actionCode, DIV_CODE: divCode,
+            FromDate: $('#txtFromDate').val(), ToDate: $('#txtToDate').val()
+        };
+        $.ajax({
+            type: 'GET',
+            data: data,
+            url: rootURl + "MISProtection/OffenceSummaryQuarterSubReport",
+            dataType: 'html',
+            success: function (data) {
+                $('#modalData').html(data);
+            },
+            error: function (ex) {
+                console.log(ex.error);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+
+        $(document).ready(function () {
+            table = $('#tblOffenceSummaryReport').DataTable({
+                "paging": true,
+                "aLengthMenu": [[10, 25, 50, 75, 100, 500, -1], [10, 25, 50, 75, 100, 500, "All"]],
+                "iDisplayLength": 50,
+                "bDestroy": true
+                //"bProcessing": true,
+                //"bServerSide": true
+            });
+        });
+
+
+        $('#spnFinancialYear').html(' ' + $('#ddlFinancialYear>option:selected').text());
+        $('#spnPeriod').html(' ' + $('#ddlFinancialPeriod>option:selected').text());
+    })
+</script>
+
+<style>
+    .padding-bottom {
+        padding-bottom: 7px;
+    }
+
+    .no-wrap {
+        white-space: normal
+    }
+
+    table {
+        display: block;
+        overflow: auto;
+        white-space: nowrap;
+        max-height: 450px;
+    }
+</style>

@@ -1,0 +1,1433 @@
+﻿@{
+    ViewBag.Title = "OrganisingCamp";
+    //if (HttpContext.Current.Session["IsKioskUser"].ToString().ToUpperInvariant() == "TRUE")
+    //{
+    //    Layout = "~/Views/Shared/_kiosklayout.cshtml";
+    //}
+    //else
+    //{
+    //    Layout = "~/Views/Shared/_Layout.cshtml";
+    //}
+
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString());
+}
+
+<script src="~/js/jquery.min.js"></script>
+<style type="text/css">
+    .ui-autocomplete {
+        position: absolute;
+        cursor: default;
+        left: 319px;
+        top: 331px;
+    }
+
+    .ui-autocomplete-loading {
+        background-color: white;
+    }
+
+    .ui-autocomplete li {
+        list-style-type: none;
+        margin-left: -43px;
+        padding: 0;
+        background-color: rgb(187, 207, 243);
+    }
+
+    .ui-autocomplete ul {
+        margin: 0;
+        padding: 0;
+        background-color: White;
+    }
+
+    #overlay {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        background: LightGray;
+        opacity: 0.1;
+        filter: alpha(opacity=80);
+        z-index: 5000;
+    }
+
+    #loading {
+        width: 50px;
+        height: 57px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin: -28px 0 0 -25px;
+    }
+
+    .p {
+        margin-top: 0%;
+    }
+</style>
+
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+
+
+
+    $(document).ready(function () {
+
+        autoPlacesuggest()
+        $("#ddl_MemberType").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+
+        $(".datefield").datepicker({ minDate: new Date(), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        var currentDate = new Date();
+        $("#durationfrom").datepicker("setDate", currentDate);
+
+        $("#Applicant_type").change(function () {
+            var applicant = $("#Applicant_type option:selected").text();
+            $('#appLicant').val(applicant);
+            //alert(applicant);
+
+        });
+
+        $("#idProofType").change(function () {
+            var idProofType = $("#idProofType option:selected").text();
+            $('#idproofName').val(idProofType);
+            //alert(applicant);
+
+        });
+
+
+        $('#btnReset').click(function (e) {
+            $('#slblerr').text('');
+            $('#Applicant_type').val('');
+            $('#ddl_Districts').val('');
+            $('#Place').val('');
+            $('#purposeofcamp').val('');
+            $('#noofmembercamp').val('');
+            $('#idProofType').val('');
+            $('#idProofNo').val('');
+            $('#idproofofapplicant').val('');
+            $('#durationfrom').val('');
+            $('#durationto').val('');
+            $('#noofdayscamp').val('');
+            $('#processingfees').val('');
+
+
+        });
+
+        $('#noofmembercamp').keypress(function (e) {
+            var kc = e.which;
+            if (kc >= 48 && kc <= 57) {
+            }
+            else {
+                e.preventDefault();
+            }
+        })
+
+        //$('#cpostalCode').keypress(function (e) {
+        //    var kc = e.which;
+        //    if (kc >= 48 && kc <= 57) {
+        //    }
+        //    else {
+        //        e.preventDefault();
+        //    }
+        //})
+
+        $('#contactNumber').keypress(function (e) {
+            var kc = e.which;
+            if (kc >= 48 && kc <= 57) {
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+        $('#cname').keypress(function (e) {
+            var kc = e.which;
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+        $('#purposeofcamp, #cname, #caddress1, #caddress2, #clandmark, #idProofNo,#cpostalCode').keypress(function (e) {
+
+            var kc = e.which;
+
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95) || (kc >= 44 && kc <= 57) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        })
+
+
+
+        $("#ddl_Districts").bind("change", function (e) {
+
+            var district = $("#ddl_Districts option:selected").text();
+            $('#disId').val(district);
+
+
+            var districtID = $("#ddl_Districts").val();
+
+            $('#ddl_Place').empty();
+            var values = {
+                DistrictID: districtID
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8', 
+                data: JSON.stringify(values),
+                url: RootUrl + 'FilmShooting/PlaceByDistrict',
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddl_Place").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+            });
+        });
+
+        $("#btnSubmitCrew").bind("click", function () {
+            var rowCount = $('#temp tr').not('thead tr').length;
+            var existRow = $('#noofmembercamp').val();
+            if (!existRow)
+            { existRow = 0 }
+            if (rowCount < existRow) {
+                var onEventLaunchCrewInfo = new PostCrewInfo();
+                onEventLaunchCrewInfo.launchCrewInfo();
+            }
+            else {
+                alert('You can not add more members');
+
+            }
+        });
+
+
+        $(document).on('keypress', '#durationfrom,#durationto', function (event) {
+
+            event.preventDefault();
+            return false;
+
+        });
+        $('#durationfrom,#durationto').keydown(function (event)
+        { return cancelBackspace(event) });
+
+
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+        $("#durationfrom").change(function () {
+            $("#durationto").val('');
+        });
+        $("#durationto").change(function () {
+            var str1 = $("#durationfrom").val();
+            var str2 = $("#durationto").val();
+
+            var L = 3, d1 = $("#durationfrom").val().split('/'), d2 = $("#durationto").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                parseDate(str1, str2);
+            }
+            else {
+                $("#durationto").val('');
+                alert('Date Must be GreaterThen From Date');
+            }
+        });
+
+
+        function parseDate(fromDate, toDate) {
+            var oneDay = 24 * 60 * 60 * 1000;	// hours*minutes*seconds*milliseconds
+            var frmDate = fromDate.split('/');
+            var tDate = toDate.split('/');
+            var newfromDate = new Date(frmDate[2], frmDate[1], frmDate[0]);
+            var newtDate = new Date(tDate[2], tDate[1], tDate[0]);
+
+            var diffDays = (Math.abs((newfromDate.getTime() - newtDate.getTime()) / (oneDay))) + 1;
+            $('#noofdayscamp').val(diffDays);
+
+
+            var values = {
+                fromDate: $("#durationfrom").val(),
+                toDate: $("#durationto").val(),
+                campID: $("#ddl_CampArea").val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                 
+                data: JSON.stringify(values),
+                url: RootUrl + 'FilmShooting/CheckCampAvailability',
+                success: function (data) {
+                    var noOfCamp = data;
+                    var bookingCamp = $('#noofcamp').val();
+                    if (parseInt(noOfCamp) >= parseInt(bookingCamp)) {
+                       
+                       
+                        $('#CampFee').val(parseFloat($('#noofdayscamp').val()) * parseFloat($('#TentAmount').text()));
+
+
+                    }
+                    else {
+
+                        alert("Camp Not Available Between This Time Period !! \nOnly Camp Available: " + data);
+                        $("#durationto").val('');
+                        $('#noofdayscamp').val('');
+                        $('#lbl_CampAvailability').text("Only Camp Available: " + data);
+                        return false;
+                    }
+                },
+            });
+
+
+
+
+
+
+        }
+
+        $("#ddl_Nation").bind("change", function () {
+            var val = $("#ddl_Nation").val();
+            $('#ddl_MemberType').empty();
+            if (val == '1') {
+                $("#ddl_MemberType").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                $("#ddl_MemberType").append('<option value="' + 1 + '">' + "Child" + '</option>');
+                $("#ddl_MemberType").append('<option value="' + 2 + '">' + "Adult" + '</option>');
+                $("#ddl_MemberType").append('<option value="' + 3 + '">' + "Student" + '</option>');
+
+                $("#ddl_cIDType").val('0');
+                $("#ddl_cIDType").prop("disabled", false);
+            }
+            else if (val == '2') {
+                $("#ddl_MemberType").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                $("#ddl_MemberType").append('<option value="' + 1 + '">' + "Child" + '</option>');
+                $("#ddl_MemberType").append('<option value="' + 2 + '">' + "Adult" + '</option>');
+
+                $("#ddl_cIDType").val('1');
+                $("#ddl_cIDType").prop("disabled", true);
+            }
+            else {
+                $("#ddl_MemberType").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                $("#ddl_cIDType").val('6');
+                $("#ddl_cIDType").prop("disabled", true);
+            }
+        });
+        $('#txt_cIDno').keypress(function (e) {
+
+            var kc = e.which;
+
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95) || (kc >= 44 && kc <= 57) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+        $('#txt_cIDno').change(function () {
+            var idNo;
+            var newid = $('#txt_cIDno').val();
+
+            var filter = /(?!.*\.{2})(?!-*\-{2})^[a-zA-Z0-9-_./]+$/
+            if (filter.test(newid)) {
+
+                var decimal = /^\d+(\.\d+|e)(e?-\d+)?$/;
+                if (decimal.test(newid)) {
+                    $('#txt_cIDno').val('');
+                    document.getElementById("errorIDNo").style.display = 'block';
+                    return false;
+                }
+                else {
+                    document.getElementById("errorIDNo").style.display = 'none';
+
+                    $('#temp tr').each(function (i) {
+                        var $tds = $(this).find('td');
+                        idNo = $tds.eq(5).text();
+                        if (newid != '') {
+                            if (idNo == newid) {
+                                alert('This ID number already exist. Please enter another ID number.');
+                                $('#txt_cIDno').val('');
+                                { return false; }
+                            }
+                            else { return true; }
+                        }
+                    });
+
+                }
+            }
+            else {
+                document.getElementById("errorIDNo").style.display = 'block';
+                $('#txt_cIDno').val('');
+                return false;
+            }
+
+
+
+        });
+
+        $('#idProofNo').change(function () {
+            var idNo;
+            var newid = $('#idProofNo').val();
+
+            var filter = /(?!.*\.{2})(?!-*\-{2})^[a-zA-Z0-9-_./]+$/
+            if (filter.test(newid)) {
+
+                var decimal = /^\d+(\.\d+|e)(e?-\d+)?$/;
+                if (decimal.test(newid)) {
+                    $('#idProofNo').val('');
+                    $('#errordiv5').html("Please Enter Valid ID No. !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    document.getElementById("errordiv5").style.display = 'block';
+                    return false;
+                }
+                else {
+                    $('#errordiv5').html("");
+                    return true;
+                }
+            }
+            else {
+                $('#errordiv5').html("Please Enter Valid ID No. !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#idProofNo').val('');
+                return false;
+            }
+
+
+
+        });
+
+        $('#ddl_Place').blur(function (e) {
+            var placeID = $("#hdPlaceId").val();           
+            $('#ddl_CampArea').empty();
+            $("#ddl_CampArea").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            var values = {
+                PlaceID: placeID
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                 
+                data: JSON.stringify(values),
+                url: RootUrl + 'FilmShooting/getCampArea',
+                success: function (data) {
+                    
+
+                    $.each(data, function (i, items) {
+                        $("#ddl_CampArea").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+            });
+        });
+
+        $('#ddl_CampType').change(function (e) {
+            $("#ddl_CampArea").val('0');
+        });
+
+        $('#ddl_CampArea').change(function (e) {
+            $("#durationto").val('');
+            $("#noofdayscamp").val('');
+            $("#processingfees").val('0');
+            $("#CampFee").val('0');
+
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'FilmShooting/GetCampFees', // we are calling json method
+                
+                dataType: 'json',
+                data: { CampID: $("#ddl_CampArea").val(), CampType: $("#ddl_CampType option:selected").text() },
+                success: function (fee) {
+
+                    $('#TentAmount').text(fee[0].TentAmount);
+                    $('#IndianAdultFees_TigerProject').text(fee[0].IndianAdultFees_TigerProject);
+                    $('#IndianAdultFees_Surcharge').text(fee[0].IndianAdultFees_Surcharge);
+                    $('#ForeignerAdultFees_TigerProject').text(fee[0].ForeignerAdultFees_TigerProject);
+                    $('#ForeignerAdultFees_Surcharge').text(fee[0].ForeignerAdultFees_Surcharge);
+                    $('#StudentAdultFees_TigerProject').text(fee[0].StudentAdultFees_TigerProject);
+                    $('#StudentAdultFees_Surcharge').text(fee[0].StudentAdultFees_Surcharge);
+                    $('#CampAllowedPerDay').text(fee[0].CampAllowedPerDay);
+                    $('#MemberPerCamp').text(fee[0].MemberPerCamp);
+
+
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $("#ddl_MemberType").change(function () {
+
+            var districtID = $("#ddl_Districts").val();
+            var placeID = $("#ddl_Place").val();
+            var nationality = $("#ddl_Nation").val();
+            var memberType = $("#ddl_MemberType").val();
+            var values = {
+                PlaceID: placeID,
+                DistrictID: districtID,
+                Nationality: nationality,
+                MemberType: memberType
+            };
+
+
+            var Fee, Surcharge;
+
+            if (nationality == 1) // indian
+            {
+                if (memberType == 1) // child
+                {
+                    $('#hdn_memberfee').val(0);
+                }
+                else if (memberType == 2) // Adult
+                {
+                    Fee = $('#IndianAdultFees_TigerProject').text();
+                    Surcharge = $('#IndianAdultFees_Surcharge').text()
+                    $('#hdn_memberfee').val(parseFloat(Fee) + parseFloat(Surcharge));
+                }
+                else if (memberType == 3) // Student
+                {
+                    Fee = $('#StudentAdultFees_TigerProject').text();
+                    Surcharge = $('#StudentAdultFees_Surcharge').text()
+                    $('#hdn_memberfee').val(parseFloat(Fee) + parseFloat(Surcharge));
+
+                }
+
+            }
+            else if (nationality == 2) {
+
+
+                if (memberType == 1) // child
+                {
+                    $('#hdn_memberfee').val(0);
+                }
+                else if (memberType == 2) // Adult
+                {
+                    Fee = $('#ForeignerAdultFees_TigerProject').text();
+                    Surcharge = $('#ForeignerAdultFees_Surcharge').text()
+
+                    $('#hdn_memberfee').val(parseFloat(Fee) + parseFloat(Surcharge));
+                }
+            }
+
+
+
+
+            //$.ajax({
+            //    type: 'POST',
+            //    contentType: 'application/json; charset=utf-8',
+            //    data: JSON.stringify(values),
+            //    url: RootUrl + 'TicketBooking/SelectFee',
+            //    success: function (data) {
+            //        $.each(data, function (i, items) {
+
+            //            $('#lbl_feePerMember').text("Fees Per Member: " + items.FeePerMember);
+            //            $('#hdn_memberfee').val(items.FeePerMember);
+            //        });
+            //    },
+            //    traditional: true,
+            //    error: function (data) { console.log(data) }
+            //});
+        });
+
+        $('#ddl_Place1').change(function (e) {
+            $("#durationto").val('');
+            $("#noofdayscamp").val('');
+            $("#processingfees").val('0');
+            $("#CampFee").val('0');
+            var plc = $("#ddl_Place option:selected").text();
+            $('#plcId').val(plc);
+            
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'FilmShooting/GetCampFees', // we are calling json method
+                
+                dataType: 'json',
+                data: { PlaceID: $("#ddl_Place").val(), DistrictID: $("#ddl_Districts").val() },
+                success: function (fee) {
+
+                    $('#perdayfees').text("Fees per day: " + fee);
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $("#Applicant_type").change(function () {
+            if ($('#Applicant_type').val() == 'As Govt.Agency' || $('#Applicant_type').val() == 'As Private Agency') {
+                $('#dvAgency').css("display", "block");
+            }
+            else
+                $('#dvAgency').css("display", "none");
+        });
+
+
+        $('#btnSave').click(function (e) {
+
+
+            if ($('#Applicant_type').val() == '') {
+                $('#errordiva').show();
+                $('#errordiva').html("Please fill the Applicant Type!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#Applicant_type").offset().top
+
+                }, 600);
+                return false;
+            }
+
+            else { $('#errordiva').hide(); }
+
+
+            if ($('#ddl_Districts').val() == '') {
+                $('#errordiv21').show();
+                $('#errordiv21').html("Please Select District !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#ddl_Districts").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv21').hide(); }
+
+            if ($('#ddl_Place').val() == '' || $('#ddl_Place').val() == '0') {
+                $('#errordiv22').show();
+                $('#errordiv22').html("Please Select Place!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#ddl_Place").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv22').hide(); }
+
+            if ($('#ddl_CampType').val() == '' || $('#ddl_CampType').val() == '0') {
+                $('#errorCampType').show();
+                $('#errorCampType').html("Please Select Camp Type !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $("#ddl_CampType").focus();
+                return false;
+            }
+            else { $('#errorCampType').hide(); }
+
+
+            if ($('#ddl_CampArea').val() == '' || $('#ddl_CampArea').val() == '0') {
+                $('#errorCampArea').show();
+                $('#errorCampArea').html("Please Select Camp Site !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $("#ddl_CampArea").focus();
+                return false;
+            }
+            else { $('#errorCampArea').hide(); }
+
+            if ($('#purposeofcamp').val() == '') {
+                $('#errordiv2').show();
+                $('#errordiv2').html("Please fill Purpose!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#purposeofcamp").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv2').hide(); }
+
+            if ($('#noofmembercamp').val() == '') {
+                $('#errordiv3').show();
+                $('#errordiv3').html("Please Enter No. of Guest/Visitor!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $("#noofmembercamp").focus();
+                return false;
+            }
+            else { $('#errordiv3').hide(); }
+
+            if ($('#idProofType').val() == '') {
+                $('#errordiv4').show();
+                $('#errordiv4').html("Please Select ID Type!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#idProofType").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv4').hide(); }
+
+            if ($('#idProofNo').val() == '') {
+                $('#errordiv5').show();
+                $('#errordiv5').html("Please Enter ID Proof Number!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#idProofNo").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv5').hide(); }
+
+
+            if ($('#idproofofapplicant').val() == '') {
+                $('#errordiv6').show();
+                $('#errordiv6').html("Please Select ID Proof of Applicant!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#idproofofapplicant").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv6').hide(); }
+
+            if ($('#durationfrom').val() == '') {
+                $('#errordiv7').show();
+                $('#errordiv7').html("Please Select From Date!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#durationfrom").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordiv7').hide(); }
+
+            if ($('#durationto').val() == '') {
+
+                $('#errordiv8').show();
+                $('#errordiv8').html("Please Select To Date!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                $('html, body').animate({
+                    scrollTop: $("#durationto").offset().top
+                }, 600);
+                return false;
+            }
+
+            else { $('#errordiv8').hide(); }
+
+            if ($('#processingfees').val() == '0') {
+
+                alert('fee can not be 0!!');
+                return false;
+            }
+
+            var rowCount = $('#temp tr').not('thead tr').length;
+            var existRow = $('#noofmembercamp').val();
+            if (!existRow)
+            { existRow = 0 }
+            if (rowCount != existRow) {
+                alert('Please fill all members details.');
+                return false;
+            }
+
+        });
+
+        $('#btnReset').click(function (e) {
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                
+                data: JSON.stringify(),
+                url: RootUrl + 'FilmShooting/ClearData',
+                success: function (data) {
+                    $("#applyTable").empty();
+                    $('html, body').animate({ scrollTop: $("#Applicant_type").offset().top }, 600);
+                },
+            });
+
+
+        });
+
+        $("#idproofofapplicant").change(function (e) {
+
+            var iSize = ($("#idproofofapplicant")[0].files[0].size / 1048576);
+
+            if (iSize > 2) {
+                $("#idproofofapplicant").val('');
+                $('#errordiv6').show();
+                $('#errordiv6').html("Revenue Record file size should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $("#idproofofapplicant").focus();
+                return false;
+
+            }
+            else { $('#errordiv6').hide(); }
+
+
+            var file = $("#idproofofapplicant").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $("#idproofofapplicant").val('');
+                    $('#errordiv6').show();
+                    $('#errordiv6').html("Please upload only jpeg or jpg or pdf or png or gif file format!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $("#idproofofapplicant").focus();
+                    return false;
+                } else {
+                    $('#errordiv6').hide();
+                }
+            }
+
+            else { $('#errordiv6').hide(); }
+        });
+
+        $('#noofmembercamp').change(function (e) {
+
+            var noofday = $('#noofdayscamp').val();
+            var campfees = document.getElementById("perdayfees").textContent;
+            var feesperDay = campfees.split(":");
+            var existValue = $('#processingfees').val();
+            if (!existValue) { existValue = 0; }
+
+            if (parseInt(noofday) > 0) {
+                // alert(existValue);
+                //  alert((parseInt(noofday, 10) * parseFloat(feesperDay[1])));
+                //  $('#processingfees').val(parseInt(existValue) - (parseInt(noofday, 10) * parseFloat(feesperDay[1])));
+            }
+            $("#durationto").val('');
+            $("#noofdayscamp").val('');
+
+            var CampAllowedPerDay = $('#CampAllowedPerDay').text();
+            var MemberPerCamp = $('#MemberPerCamp').text();
+
+
+            var memberVal = $('#noofmembercamp').val();
+            if (memberVal == '0') {
+                alert('Value must be greater than 0!!');
+                $('#noofmembercamp').val('');
+                $('#noofcamp').val('0');
+                return false;
+            }
+            else {
+                if (parseInt(memberVal) <= parseInt(MemberPerCamp)) {
+                    $('#noofcamp').val('1');
+                }
+                else if (parseInt(memberVal) > parseInt(MemberPerCamp)) {
+                    if (parseInt(memberVal) % parseInt(MemberPerCamp) === 0) {
+                        var result = (parseInt(memberVal) / parseInt(MemberPerCamp));
+                        $('#noofcamp').val(parseInt(result));
+                    }
+                    else {
+                        var result = (parseInt(memberVal) / parseInt(MemberPerCamp));
+                        $('#noofcamp').val(parseInt(result) + 1);
+                    }
+                }
+            }
+        });
+    });
+    function reload() {
+        var r = confirm("Do you want to leave page!");
+        if (r) {
+            window.location = RootUrl + "Dashboard/dashboard";
+        }
+        else {
+            //do nothing
+        }
+    }
+    function PostCrewInfo() {
+        this.launchCrewInfo = function () {
+
+
+            if ($('#cname').val() == '') {
+                $('#errordivname').show();
+                $('#errordivname').html("Please Enter Name!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $("#cname").focus();
+                return false;
+            }
+            else { $('#errordivname').hide(); }
+
+            if ($('#caddress1').val() == '') {
+                $('#errordivaddress1').show();
+                $('#errordivaddress1').html("Please Enter Address1!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $("#caddress1").focus();
+                return false;
+            }
+            else { $('#errordivaddress1').hide(); }
+
+            if ($('#cpostalCode').val() == '') {
+                $('#errordivPostal').show();
+                $('#errordivPostal').html("Please Enter Postal Code!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $("#cpostalCode").focus();
+                return false;
+            }
+            else { $('#errordivPostal').hide(); }
+
+            if ($('#ddl_Gender').val() == '' || $('#ddl_Gender').val() == '0') {
+                document.getElementById("errorGender").style.display = 'block';
+                $("#ddl_Gender").focus();
+                return false;
+            }
+            else { document.getElementById("errorGender").style.display = 'none'; }
+
+            if ($('#ddl_cIDType').val() == '' || $('#ddl_cIDType').val() == '0') {
+                document.getElementById("errorIDtype").style.display = 'block';
+                $("#ddl_cIDType").focus();
+                return false;
+            }
+            else { document.getElementById("errorIDtype").style.display = 'none'; }
+
+            if ($('#txt_cIDno').val() == '') {
+                document.getElementById("errorIDNo").style.display = 'block';
+                $("#txt_cIDno").focus();
+                return false;
+            }
+            else { document.getElementById("errorIDNo").style.display = 'none'; }
+
+            if ($('#ddl_Nation').val() == '' || $('#ddl_Nation').val() == '0') {
+                document.getElementById("errorNationality").style.display = 'block';
+                $("#ddl_Nation").focus();
+                return false;
+            }
+            else { document.getElementById("errorNationality").style.display = 'none'; }
+
+            if ($('#ddl_MemberType').val() == '' || $('#ddl_MemberType').val() == '0') {
+                document.getElementById("errorMemberType").style.display = 'block';
+                $("#ddl_MemberType").focus();
+                return false;
+            }
+            else { document.getElementById("errorMemberType").style.display = 'none'; }
+
+
+            var cname = $("#cname").val();
+            var caddress1 = $("#caddress1").val();
+            var caddress2 = $("#caddress2").val();
+            var clandmark = $("#clandmark").val();
+            var cpostalCode = $("#cpostalCode").val();
+
+
+            var crewInfo = {
+                CrewMemberid: $('#Hdn_Id').val(),
+                Name: cname,
+                Address1: caddress1,
+                Address2: caddress2,
+                Landmark: clandmark,
+                PostalCode: cpostalCode,
+                Gender: $("#ddl_Gender  option:selected").text(),
+                CrewIDType: $("#ddl_cIDType  option:selected").text(),
+                CrewIDNo: $("#txt_cIDno").val(),
+                Nationality: $("#ddl_Nation  option:selected").text(),
+                MemberType: $("#ddl_MemberType  option:selected").text(),
+                MemberFee: $('#hdn_memberfee').val(),
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+               
+                data: JSON.stringify(crewInfo),
+                url: RootUrl + "FilmShooting/PostDataCrew",
+                success: function (data) {
+
+
+                    var bardata = "<tr class='rowid'><td>" + data.Name + "</td><td>" + data.Address1 + "</td><td>" + data.Address2 + "</td><td>" + data.Landmark + "</td><td>" + data.PostalCode + "</td><td>" + data.CrewIDNo + "</td><td>" + data.MemberFee + "</td><td>" + "<button class=get-delete>Delete</button>" + "</td></tr>";
+                    $("#applyTable").append(bardata);
+
+                    $('#Hdn_Id').val(data.CrewMemberid);
+
+                    var crValue = $('#processingfees').val();
+                    if (!crValue) { crValue = 0; }
+                    var memberFees = $('#hdn_memberfee').val();
+                    if (!memberFees) { memberFees = 0; }
+                    $('#processingfees').val((parseInt(memberFees, 10) + parseFloat(crValue)));
+
+                    $('#lbl_feePerMember').val('');
+                    $('#hdn_memberfee').val('');
+                    $("#cname").val('');
+                    $("#caddress1").val('');
+                    $("#caddress2").val('');
+                    $("#clandmark").val('');
+                    $("#cpostalCode").val('');
+                    $("#ddl_Gender").val('0');
+                    $("#ddl_cIDType").val('0');
+                    $("#txt_cIDno").val('');
+                    $("#ddl_Nation").val('0');
+                    $("#ddl_MemberType").empty();
+                    $("#ddl_MemberType").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                    $("#ddl_MemberType").val('0');
+                },
+
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+        }
+    }
+
+    $(document).on('click', '.get-delete', function (e) {
+        var $row = jQuery(this).closest('tr');
+        var $columns = $row.find('td');
+        var ID = $.trim($columns[5].innerHTML);
+        var amt = $.trim($columns[6].innerHTML);
+        jQuery(this).closest('tr').remove();
+        var i = 0;
+        var RowInfo = {
+            Id: ID
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            
+            data: JSON.stringify(RowInfo),
+            url: RootUrl + 'FilmShooting/deleteOC_MemberData',
+            success: function (data) {
+                var crValue = $('#processingfees').val();
+                if (!crValue) { crValue = 0; }
+                $('#processingfees').val((parseInt(crValue, 10) - parseFloat(amt)));
+            },
+            error: function (ex) { alert(ex); }
+
+        });
+        e.preventDefault();
+    });
+</script>
+
+<script>
+    function Postsubmit() {
+        var result = confirm("Are your sure. Do you want to submit?");
+        if (result) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+  
+</script>
+<script language="Javascript">
+
+    function isNumberKey(evt) {
+        var id = $(evt.target).attr("id");
+        document.getElementById("error").style.display = 'none';
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57)) {
+            if (id == 'noofmembercamp') {
+                document.getElementById("error").style.display = 'block';
+            }
+            return false;
+        }
+        else
+            return true;
+    }
+
+    function autoPlacesuggest() {
+
+        $(".autoPlacesuggest").autocomplete({
+            source: function (request, response) {
+                if (document.getElementById('ddl_Place').value.length >= 2) {
+                    $.ajax({
+                        type: "POST",
+                       
+                        url: RootUrl + 'FilmShooting/getDistrict',
+                        data: { Place: $.trim($("#ddl_Place").val()), disttype: "ISOrganisingCamp" },
+                        success: function (data) {
+                            source: data.d;
+                            if (data.d != 'undefined') {
+                                response($.map(data, function (item) {
+                                    $('#hdPlaceId').val(item.Value);
+                                    return { label: item.Text, value: item.Text };
+
+                                }))
+                            }
+                            else
+                                alert('No data found');
+                        },
+                        error: function (result) {
+
+                        }
+                    });
+                }
+                else {
+                    response('');
+                }
+            }
+        });
+    }
+
+</script>
+
+
+@using (Html.BeginForm("SubmitOrganizingCamp", "FilmShooting", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    <div id="page-wrapper-inn">
+        <div class="col-lg-12 pad">
+            <h1 class="page-header">Organising Camp</h1>
+        </div>
+        <!-- /.col-lg-12 -->
+        <!-- Row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <!--<div class="panel-heading"></div>
+                    <!-- /.panel-heading -->
+
+                    <div class="panel-body">
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label> Applicant Type: <span class="mandatory">*</span></label>
+                                <select class="form-control" id="Applicant_type" name="ApplicantType" required>
+                                    <option value="">---Please Select Application Type---</option>
+                                    <option value="1">Individual</option>
+                                    <option value="2">Organizational</option>
+                                </select>
+                                <input type="hidden" id="appLicant" name="AppLicant">
+                            </div>
+                            <div id="errordiva" style="display:none" class="alert-danger1"></div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <label>Camp Info</label>
+                            <div class="divider"></div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Select Place:<span class="mandatory">*</span></label>
+                                @*@Html.DropDownList("Place", (IEnumerable<SelectListItem>)ViewBag.PriorityID, "--Select--", new { @class = "form-control", id = "ddl_Place" })*@
+                                <input type="text" class="form-control autoPlacesuggest" id="ddl_Place" name="ddl_Place">
+                                <input type="hidden" id="hdPlaceId" name="hdPlaceId">  
+                                <input type="hidden" id="plcId" name="PlcName">
+                            </div>
+                            <div id="errordiv21" style="display:none" class="alert-danger1"></div>
+                        </div>
+                        <div class="col-lg-6 un-bold" style="display:none;">
+                            <div class="form-group">
+                                <label>Select Place:<span class="mandatory">*</span></label>
+
+                                @Html.DropDownList("Place", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "ddl_Place" })
+                                <input type="hidden" id="plcId" name="PlcName">
+                            </div>
+                            <div id="errordiv22" style="display:none" class="alert-danger1"></div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label> Camp Type: <span class="mandatory">*</span></label>
+                                <select class="form-control" id="ddl_CampType" name="CampType" required>
+                                    <option value="">--Select--</option>
+                                    @*<option value="1">Backpackers</option>*@
+                                    <option value="2">Large Tent</option>
+                                </select>
+                                <input type="hidden" id="appLicant" name="AppLicant">
+                            </div>
+                            <div id="errorCampType" style="display:none" class="alert-danger1"></div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Select Camp Site:<span class="mandatory">*</span></label>
+
+                                @Html.DropDownList("CampArea", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "ddl_CampArea" })
+                            </div>
+                            <div id="errorCampArea" style="display:none" class="alert-danger1"></div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label> Purpose Of Organising Camp:<span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="purposeofcamp" maxlength="100" name="PurposeOfCamp" title="Enter the purpose for organizing the camp. E.G. Leisure" />
+                            </div>
+                            <div id="errordiv2" style="display:none" class="alert-danger1"></div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Number of Member For Camp:<span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="noofmembercamp" name="Noofmembercamp" maxlength="2"
+                                       title="Enter the total number of members organizing the camp. E.G. 5" onkeypress="return isNumberKey(event);" />
+                                <span id="error" style="color: Red; display: none">* Input digits (0 - 9)</span>
+                            </div>
+                            <div id="errordiv3" style="display:none" class="alert-danger1"></div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Number of Tent Required:<span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="noofcamp" name="Noofcamp" readonly />
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <label>Duration</label>
+                            <div class="divider"></div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>From Date: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control datefield" id="durationfrom" name="Durationfrom" title="Enter the camping START date" />
+                            </div>
+                            <div id="errordiv7" style="display:none" class="alert-danger1"></div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>To Date: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control datefield" id="durationto" name="Durationto" title="Enter the camping END date" />
+                            </div>
+                            <div id="errordiv8" style="display:none" class="alert-danger1"></div>
+                        </div>
+                        <div class="col-lg-12" id="Div_Info">
+
+                        </div>
+
+
+                        <div class="col-lg-12">
+                            <label>Name & Address of Guest/Visitor</label>
+                            <div class="divider"></div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Name: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="cname" name="crewMember.Name" title="Enter name of the person E.G. Manoj" />
+                            </div>
+                            <div id="errordivname" style="display:none" class="alert-danger1"></div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Address Line 1: <span class="mandatory">*</span></label>
+                                <input type="text" maxlength="100" class="form-control" id="caddress1" name="crewMember.Address1" title="Enter first line of address of the Guest/Visitor" />
+                            </div>
+                            <div id="errordivaddress1" style="display:none" class="alert-danger1"></div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label> Address Line 2:</label>
+                                <input type="text" maxlength="100" class="form-control" id="caddress2" name="crewMember.Address2" title="Enter second line of address of the Guest/Visitor" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Landmark Address: </label>
+                                <input type="text" maxlength="100" class="form-control" id="clandmark" name="crewMember.Landmark" title="Enter nearest Fixed Land Mark Description" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Postal Code: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="cpostalCode" maxlength="10" title="Enter the PIN code" />
+                            </div>
+                            <div id="errordivPostal" style="display:none" class="alert-danger1"></div>
+                        </div>
+
+
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Gender: <span class="mandatory">*</span></label>
+                                <select class="form-control" id="ddl_Gender" name="ddl_Gender">
+                                    <option value="0">---Select---</option>
+                                    <option value="1">Male</option>
+                                    <option value="2">Female</option>
+                                    <option value="3">Transgender</option>
+                                </select>
+                                <span id="errorGender" style="display: none" class="alert-danger1">* Please Select Gender</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Select Nationality:<span class="mandatory">*</span></label>
+                                <select class="form-control" name="ddl_Nation" id="ddl_Nation">
+                                    <option value="0">Select</option>
+                                    <option value="1">Indian</option>
+                                    <option value="2">Foreigner</option>
+                                </select>
+                                <span id="errorNationality" style="display: none" class="alert-danger1">* Please Select Nationality.</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Select Member Type:<span class="mandatory">*</span></label>
+                                <select class="form-control" name="ddl_MemberType" id="ddl_MemberType"></select>
+                                <span id="errorMemberType" style="display: none" class="alert-danger1">* Please Select Member Type.</span>
+                                <label id="lbl_feePerMember" for="email"></label>
+                                <input type="hidden" id="hdn_memberfee" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Select ID Type: <span class="mandatory">*</span></label>
+                                <select class="form-control" name="ddl_cIDType" id="ddl_cIDType">
+                                    <option value="0">Select</option>
+                                    <option value="1">Passport</option>
+                                    <option value="2">Aadhar</option>
+                                    <option value="3">Driving Licence</option>
+                                    <option value="4">Voter ID</option>
+                                    <option value="5">PAN Card</option>
+                                    <option value="6">Student Card</option>
+                                </select>
+                                <span id="errorIDtype" style="display: none" class="alert-danger1">* Please Select ID Type</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>ID proof No: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" maxlength="25" id="txt_cIDno" name="txt_cIDno" title="Enter the ID proof number of the selected ID" />
+                                <span id="errorIDNo" style="display: none" class="alert-danger1">* Please Enter Valid ID No.</span>
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group" id="btn-cont1">
+                                <button type="button" id="btnSubmitCrew" class="btn btn-success">Add</button>
+                                <button type="button" id="btnView" class="btn btn-success" data-toggle="modal" data-target="#myModal">View </button>
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <label>&nbsp;</label>
+                            <div class="divider"></div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Select Photo ID Type: <span class="mandatory">*</span></label>
+                                <select class="form-control" id="idProofType" name="IdProofType">
+                                    <option value="">Select</option>
+                                    <option value="1">Passport</option>
+                                    <option value="2">Aadhar</option>
+                                    <option value="3">Driving Licence</option>
+                                    <option value="4">Voter ID</option>
+                                    <option value="5">PAN Card</option>
+                                </select>
+                                <input type="hidden" id="idproofName" name="IdproofName">
+                            </div>
+                            <div id="errordiv4" style="display:none" class="alert-danger1"></div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Photo ID proof No: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="idProofNo" name="IdProofNo" maxlength="25" placeholder="Enter ID no" title="Enter the ID proof number of the selected ID" />
+                            </div>
+                            <div id="errordiv5" style="display:none" class="alert-danger1"></div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Photo ID proof of applicant: <span class="mandatory">*</span></label>
+                                <input type="file" class="form-control" id="idproofofapplicant" name="FileNameOfIdProof" required />
+                            </div>
+                            <div id="errordiv6" style="display:none" class="alert-danger1"></div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <br />
+                                <label><span class="mandatory">* Please carry original photo ID at the time of Entry</span></label>
+                                <label><span class="mandatory">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <label>&nbsp;</label>
+                            <div class="divider"></div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>No. Of Days Camp: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="noofdayscamp" name="Noofdayscamp" readonly="readonly" />
+                            </div>
+                            <label id="lbl_CampAvailability" class="un-bold" for="email"></label>
+
+                            <input type="hidden" id="TentAmount" name="TentAmount" />
+                            <input type="hidden" id="IndianAdultFees_TigerProject" name="IndianAdultFees_TigerProject" />
+                            <input type="hidden" id="IndianAdultFees_Surcharge" name="IndianAdultFees_Surcharge" />
+                            <input type="hidden" id="ForeignerAdultFees_TigerProject" name="ForeignerAdultFees_TigerProject" />
+                            <input type="hidden" id="ForeignerAdultFees_Surcharge" name="ForeignerAdultFees_Surcharge" />
+                            <input type="hidden" id="StudentAdultFees_TigerProject" name="StudentAdultFees_TigerProject" />
+                            <input type="hidden" id="StudentAdultFees_Surcharge" name="StudentAdultFees_Surcharge" />
+
+                            <input type="hidden" id="CampAllowedPerDay" name="CampAllowedPerDay" value="" />
+                            <input type="hidden" id="MemberPerCamp" name="MemberPerCamp" value="" />
+
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group">
+                                <label>Total Camp Fee:<span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="CampFee" name="CampFee" readonly="readonly" />
+                                <label style="display:none" id="perdayfees" for="email"></label>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group">
+                                <label>Entry Fee:<span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="processingfees" name="Processingfees" readonly="readonly" />
+                                <label style="display:none" id="perdayfees" for="email"></label>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12 un-bold" style="display:none">
+                            <table id="tblPrice" class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Members Fee</th>
+                                        <th>Tent Fee</th>
+                                        <th>Total Fee</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbPrice"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal fade" id="myModal" role="dialog">
+                        <div class="modal-dialog modal-lg">
+                            <!-- Modal content-->
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">
+                                        &times;
+                                    </button>
+                                    <h4 class="modal-title">
+                                        Guest/Visitor List
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-horizontal" role="form">
+                                        <table id="temp" class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    @*
+                                                        <th style="display:none">Id</th>*@
+                                                    <th>Name</th>
+                                                    <th>Address1</th>
+                                                    <th>Address2</th>
+                                                    <th>LandMark</th>
+                                                    <th>Postal Code</th>
+                                                    <th>ID No</th>
+                                                    <th>Fee Amount</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="applyTable"></tbody>
+                                        </table>
+                                        <div class="form-group" id="btn-cont1">
+                                            <div class="col-sm-10">
+                                                <button type="button" class="btn btn-success" id="procedId" style="display:none">
+                                                    Proceed
+                                                </button>
+
+                                                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                                                    Close
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="btn-padd">
+                        <div id="btn" class="col-lg-12">
+                            <button type="submit" class="btn btn-success" name="Command" value="Proceed" id="btnsubmit" style="display:none">
+                                <i class="fa fa-check"></i> Proceed
+                            </button>
+
+                            <a class="btn btn-default btn-block" style="display:none" href="@Url.Action(" permissionpreview", "AllPermissionPreview" , new { pertype="Organizing Camp" }) " target=" _blank"><i class="fa fa-edit fa-fw"></i> Preview</a>
+                            <button type="submit" name="Command" id="btnSave" value="Payment" class="btn btn-success">
+                                <i class="fa fa-check"></i> Submit
+                            </button>
+                            <button type="reset" class="btn btn-warning" id="btnReset" value="Reset">
+                                <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                            </button>
+                            <button type="button" name="Command" value="Cancel" class="btn btn-danger" onclick=" reload(); return false;">
+                                <i class="fa fa-times fa-fw"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.panel-body -->
+
+                </div>
+                <!-- /.panel -->
+
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+    </div>
+}

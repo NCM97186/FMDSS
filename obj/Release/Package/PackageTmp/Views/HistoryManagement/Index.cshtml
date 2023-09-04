@@ -1,0 +1,178 @@
+﻿@model FMDSS.Models.HistoryManangementModel.HistoryDetailsModel
+@{
+    ViewBag.Title = "History Management";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_SuperAdmin.cshtml";
+}
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">History Management</h1>
+        <div class="page-header"> <span>@Html.Raw(TempData["Message"]) </span> </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-4 pull-right" id="place">
+
+            <button type="button" class="btn btn-success" id="btnAddModel" data-target="#myModal" data-toggle="modal" title="Create Hsitory">
+                <i class="fa fa-plus"></i> ADD
+            </button>
+        </div>
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="dataTable_wrapper">
+                        <div id="tbl" class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+
+                                <thead>
+                                    <tr>
+                                        <th style="width:10%;">Sr No.</th>
+
+                                        <th width="20%">Module Name</th>
+                                        <th>Module Desc</th>
+                                        <th style="width:15%;">To Date</th>
+                                        <th style="width:15%;">From Date</th>
+                                        <th style="width:15%;">File</th>
+                                        <th style="width:15%;">CreatedDate</th>
+
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @foreach (var item in Model.List)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @Html.DisplayFor(model => item.Index)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.ModuleName)
+
+                                            </td>
+
+                                            <td>
+                                                @Html.DisplayFor(model => item.ModuleDesc)
+
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.TODate)
+
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.FromDate)
+
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.FileUploader)
+
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => item.CreatedDate)
+
+                                            </td>
+                                          
+                                        </tr>
+
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="myModal" role="dialog">
+                <div class="modal-dialog modal-lg" id="modelPlace">
+                  @using (Html.BeginForm("Index", "HistoryManagement", FormMethod.Post, new { enctype = "multipart/form-data", data_behavior = "confirm" }))
+                  {
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">
+                                &times;
+                            </button>
+                           
+                        </div>
+
+                        <div class="modal-body">
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Module Name: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(m => m.model.ModuleName, new { @class = "form-control", @maxlength = "100" })
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Module Desc: <span class="mandatory">*</span></label>
+                                    @Html.TextAreaFor(m => m.model.ModuleDesc, new { @class = "form-control", @maxlength = "5000" })
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>To Date: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(m => m.model.TODate, new { @class = "form-control datefield" })
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>From Date: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(m => m.model.FromDate, new { @class = "form-control datefield" })
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>File Uploader: <span class="mandatory">*</span></label>
+                                    <input type="file" name="fileUpload" id="fileUpload" />
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="modal-footer" style="clear:both">
+                            <div id="btn" class="col-lg-12">
+
+                                <button type="submit" class="btn btn-success" value="Save" id="btn_submit1">
+                                    <i class="fa fa-check"></i> Save
+                                </button>
+
+                                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                                    <i class="fa fa-times fa-fw"></i> Close
+                                </button>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                  }
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+        var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        $(".datefield").datepicker({ dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id $=auto]").focus(); } });
+
+        // date validation ========================================================================
+        var currentDate = new Date();
+
+            $('#dataTables-example').DataTable({
+                responsive: true
+            });
+
+        });
+    
+
+            
+</script>

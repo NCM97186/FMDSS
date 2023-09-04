@@ -1,0 +1,242 @@
+﻿@model FMDSS.Entity.FRAViewModel.SurveyDetailsVM
+@{
+    var citizenRequest = Model.ClaimRequestDetailsVM;
+    var cntr = 0;
+    var activityData = new FMDSS.Repository.ClaimRequestRepository().GetLatLong(Model.SurveyDetails.ActivityData);
+}
+
+<!--Gis Data Post End-->
+
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button id="btnClose" type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h4 class="modal-title" id="myModalLabel" style="text-align:center">
+                Survey Details
+            </h4>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading" style="font-size:14px;font-weight:700;">
+                Applicant Details
+            </div>
+            <div class="panel-body">
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Request Type:</label>
+                        @citizenRequest.ClaimTypeName
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Applicant Name:</label>
+                        @citizenRequest.RaisedBy
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Block:</label>
+                        @citizenRequest.BlockName
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Village:</label>
+                        @citizenRequest.VillageName
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Gram Panchayat:</label>
+                        @citizenRequest.GPName
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Current Status:</label>
+                        @citizenRequest.CurrentStatus
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Applicant Comment:</label>
+                        @citizenRequest.RequesterComment
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Raised On:</label>
+                        @string.Format("{0}", Convert.ToDateTime(citizenRequest.RaisedOn).ToString("dd-MMM-yyyy"))
+                    </div>
+                </div>
+            </div>
+        </div>
+        @using (Ajax.BeginForm("AddSurveyDetails", "ClaimRequest", new AjaxOptions { HttpMethod = "POST", InsertionMode = InsertionMode.Replace, OnSuccess = "CloseDialogSD" }, new { id = "frmAddSurveyDetails" }))
+        {
+            <div id="divPrint" class="modal-body tbl-scroll">
+                <div class="panel panel-default">
+                    <div class="panel-heading" style="font-size:14px;font-weight:700;">
+                        Details from uploaded KML file
+                    </div>
+                    <div class="panel-body">
+                        @*<div class="col-lg-12" >
+                                <div class="form-group">
+                                    <label>
+                                        Upload KML/SHP:<span class="mandatory">* All details will be filled automatically by uploading KML file.</span>
+                                    </label>
+
+                                    <button type="button" class="btn btn-warning btn-block auto-width" onclick="UploadSHPKML()">
+                                        <i class="fa fa-check"></i> Click here to upload
+                                    </button>
+                                </div>
+                            </div>*@
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Latitude:</label>
+                                @Html.TextBoxFor(m => m.SurveyDetails.Latitude, new { @class = "form-control", @readonly = true })
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Longitude:</label>
+                                @Html.TextBoxFor(m => m.SurveyDetails.Longitude, new { @class = "form-control", @readonly = true })
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group">
+                                <label>North:</label>
+                                @Html.TextBoxFor(m => m.SurveyDetails.North, new { @class = "form-control", @readonly = true })
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group">
+                                <label>South:</label>
+                                @Html.TextBoxFor(m => m.SurveyDetails.South, new { @class = "form-control", @readonly = true })
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group">
+                                <label>West:</label>
+                                @Html.TextBoxFor(m => m.SurveyDetails.West, new { @class = "form-control", @readonly = true })
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group">
+                                <label>East:</label>
+                                @Html.TextBoxFor(m => m.SurveyDetails.East, new { @class = "form-control", @readonly = true })
+                            </div>
+                        </div>
+                        @if (activityData != null && activityData.Count>0)
+                        {
+                            cntr = 0;
+                            <table class="table table-striped table-bordered table-hover notranslate">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 1%;">SNo</th>
+                                        <th>Latitude</th>
+                                        <th>Longitude</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in activityData)
+                                    {
+                                        cntr++;
+                                        <tr>
+                                            <td>@cntr</td>
+                                            <td>@item.Lat</td>
+                                            <td>@item.Long</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+                <table id="tblSurveyDetails" class="table table-striped table-bordered table-hover notranslate">
+                    <thead>
+                        <tr style="color:#999; background-color:#ddd;">
+                            <td colspan="8"><i>All land measure units are in hectare</i></td>
+                        </tr>
+                        <tr>
+                            <th>Khasra No<span class="mandatory">*</span></th>
+                            <th>Compartment No</th>
+                            <th>Khasra No Total Area</th>
+                            <th>Occupied Forest Land Total Area</th>
+                            <th>Approved Occupied Forest Land Total Area</th>
+                            <th>Occupancy Type [Agriculture/Residence]</th>
+                            <th>Van Khand Name</th>
+                            <th>Special Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbSurveyDetails" class="tbviewdet">
+                        @if (Model != null && Model.SurveyDetails != null)
+                        {
+                            cntr = 0;
+                            foreach (var item in Model.SurveyDetails.KhasraDetailsList)
+                            {
+                                <tr>
+                                    <td>@Html.TextBoxFor(m => Model.SurveyDetails.KhasraDetailsList[cntr].KhasraNumber, new { size = "15", id = "txtKhasraNumber_" + cntr, disabled = "disabled" })</td>
+                                    <td>@Html.TextBoxFor(m => Model.SurveyDetails.KhasraDetailsList[cntr].CompartmentNumber, new { size = "15", disabled = "disabled" })</td>
+                                    <td>@Html.TextBoxFor(m => Model.SurveyDetails.KhasraDetailsList[cntr].TotalAreaAgainstKhasra, new { size = "15", disabled = "disabled" })</td>
+                                    <td>@Html.TextBoxFor(m => Model.SurveyDetails.KhasraDetailsList[cntr].TotalAreaAgainstOccupiedForestLand, new { size = "15", disabled = "disabled" })</td>
+                                    <td>@Html.TextBoxFor(m => Model.SurveyDetails.KhasraDetailsList[cntr].TotalAreaApprovedAgainstOccupiedForestLand, new { size = "15", disabled = "disabled" })</td>
+                                    <td>@Html.TextBoxFor(m => Model.SurveyDetails.KhasraDetailsList[cntr].OccupancyType, new { size = "15", disabled = "disabled" })</td>
+                                    <td>@Html.TextBoxFor(m => Model.SurveyDetails.KhasraDetailsList[cntr].ForestSectionName, new { size = "15", disabled = "disabled" })</td>
+                                    <td>
+                                        @Html.TextBoxFor(m => Model.SurveyDetails.KhasraDetailsList[cntr].SpecialRemarks, new { size = "15", disabled = "disabled" })
+                                    </td>
+
+                                </tr>
+                                cntr++;
+                            }
+
+                            if (cntr == 0)
+                            {
+                                <tr class="rowSkip">
+                                    <td colspan="8">No record found.</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr class="rowSkip">
+                                <td colspan="8">No record found.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table> 
+            </div>
+            <div class="modal-footer" id="fot-f">
+                <div id="btn" class="col-lg-12">
+
+                    <button id="btnCancel" name="button" class="btn btn-danger" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                        <i class="fa fa-times fa-fw"></i> Close
+                    </button>
+
+                </div>
+            </div>
+            @Html.HiddenFor(m => m.SurveyDetails.ClaimRequestDetailsID, new { Value = citizenRequest.ClaimRequestDetailsID })
+            @Html.HiddenFor(m => m.SurveyDetails.SurveyDetailsID, new { Value = Model.SurveyDetails != null ? Model.SurveyDetails.SurveyDetailsID : 0 })
+        }
+    </div>
+
+    <!-- /.modal-content -->
+</div>
+
+<style>
+    .auto-width {
+        width: auto !important;
+    }
+</style>
+<script>
+
+    function CloseDialogSD(res) {
+        if (res.isError != undefined && !res.isError) {
+            $('#btnCancel').trigger("click");
+            alert(res.msg);
+        }
+        else {
+            console.log(res.msg);
+        }
+
+    }
+</script> 

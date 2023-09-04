@@ -1,0 +1,80 @@
+﻿<div class="panel-body scrollGrid">
+    <div class="table-responsive request-id">
+        @{
+            var lstInventory = ViewData["lstInventory"] as IEnumerable<FMDSS.Models.ForestProduction.DODInventory>;
+        }
+        <table class="table table-striped table-bordered table-hover" id="dataTableReserveInventory">
+            <thead>
+                <tr>
+                    <th>S.No.</th>
+                    <th>Ref No.</th>
+                    <th>Depot Name</th>
+                    <th>Product Type</th>
+                    <th>Product Name</th>
+                    <th>Unit</th>
+                    <th>Qty</th>
+                    @*<th>Inventory Status</th>
+                    <th>Transfer Qty</th>*@
+                    <th>Notice Reserved Qty</th>
+                    @*<th>Write Off Qty</th>*@
+                    <th>Lot Number</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in lstInventory.Where(x => x.AvailableQty == 0))
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(model => item.SNo)</td>
+                        <td>INV-@item.InventoryID</td>
+                        <td>@Html.DisplayFor(model => item.Depot_Name)</td>
+                        <td>@Html.DisplayFor(model => item.ProductType)</td>
+                        <td>@Html.DisplayFor(model => item.ProductName)</td>
+                        <td>@Html.DisplayFor(model => item.UnitName)</td>
+                        <td>@Html.DisplayFor(model => item.Qty)</td>
+                        @*<td>@Html.DisplayFor(model => item.InventoryStatus)</td>
+                        <td>@Html.DisplayFor(model => item.TransferQty)</td>*@
+                        <td>@Html.DisplayFor(model => item.NoticeReservedQty)</td>
+                        @*<td>@Html.DisplayFor(model => item.WriteOffQty)</td>*@
+                        <td>
+                            @Html.DisplayFor(model => item.DisplayLotNumber)
+                            @*@if (item.AvailableQty > 0)
+                            {
+                                <a data-toggle="modal" data-target="#myModalAddItemDOD" href="javascript:void(0);" onclick="OpenDialogCommon('_ManageWriteOff','@item.InventoryID','WriteOff','divLoadTabData')">
+                                    @Html.DisplayFor(model => item.DisplayLotNumber)
+                                </a>
+                            }
+                            else
+                            {
+                                @Html.DisplayFor(model => item.DisplayLotNumber)
+                            }*@
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<style>
+    .scrollGrid {
+        width: 1099px;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+</style>
+<script>
+    function UpdateItemToInventoryResponse(response) {
+        @{
+            FMDSS.Entity.ResponseMsg result = new FMDSS.Entity.ResponseMsg();
+            if (ViewBag.ResponseMsg != null)
+            {
+                result = (FMDSS.Entity.ResponseMsg)ViewBag.ResponseMsg;
+            }
+        }
+        if ('@result.ReturnMsg' != null) {
+            alert('@result.ReturnMsg');
+            if ('@result.IsError' == 'False') {
+                $('#myModalAddItemDOD').modal('toggle');
+            }
+        }
+    }
+</script>

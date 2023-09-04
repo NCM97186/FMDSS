@@ -1,0 +1,561 @@
+﻿@model FMDSS.Models.ForestDevelopment.TransitPermit
+
+@{
+    ViewBag.Title = "Create";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<!-- Datepicker Css -->
+<link href="~/css/dashboard/datepicker.css" rel="stylesheet" type="text/css">
+<script src="~/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js" type="text/javascript"></script>
+<script src="~/js/validation.js" type="text/javascript"></script>
+<script src="~/Scripts/Controller/Common.js" type="text/javascript"></script>
+
+<style type="text/css">
+    .field-validation-error {
+        color: #ff0000;
+    }
+
+    .field-validation-valid {
+        display: none;
+    }
+
+    .input-validation-error {
+        border: 1px solid #ff0000;
+        background-color: #ffeeee;
+    }
+
+    .validation-summary-errors {
+        font-weight: bold;
+        color: #ff0000;
+    }
+
+    .validation-summary-valid {
+        display: none;
+    }
+
+
+    fieldset.scheduler-border {
+        border: 1px groove #ddd !important;
+        padding: 0 1.4em 1.4em 1.4em !important;
+        margin: 0 0 1.5em 0 !important;
+        -webkit-box-shadow: 0px 0px 0px 0px #000;
+        box-shadow: 0px 0px 0px 0px #000;
+    }
+
+    legend.scheduler-border {
+        font-size: 1.2em !important;
+        font-weight: bold !important;
+        text-align: left !important;
+        color: black;
+        font-size: 14px;
+        font-weight: bold;
+        border: none;
+        width: 100px;
+    }
+
+    .help {
+        float: right;
+        margin-right: 18px;
+        font-style: italic;
+    }
+</style>
+
+
+
+<script>
+
+    function GetRTODetails() {
+        var VechileRegistrationNo = $("#VehicleNumber").val();
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'OffenseRegistrationfinal/GetRTOVechileRDetails', // we are calling json method
+            dataType: 'json',
+            data: { VechileRegistrationNumber: VechileRegistrationNo },
+            success: function (ReturnData) {
+                $("#ddlModeOfTransport").val(ReturnData.Rc_vh_class_desc);
+            },
+            error: function (ex) {
+                alert('Failed to retrieve RTO details, co-ordinate with adminitrator or put manual entry.');
+            }
+
+        });
+    }
+</script>
+
+
+
+<script type="text/javascript">
+
+    $(document).ready(function (e) {
+
+
+        $('#Driver_MobNo').keyup(function () {
+
+
+            if ($('#Driver_MobNo').val().length != 10) {
+                $('#errordiv28').show();
+                $('#errordiv28').html("Please Enter 10 digit Mobile Number!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            }
+            else {
+                $('#errordiv28').hide();
+            }
+        });
+
+        $(".datefield").keypress(function (e) {
+            e.preventDefault();
+        });
+
+
+        $('#Driver_Name').keypress(function (e) {
+            var kc = e.which;
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+        $('#Driver_MobNo').keypress(function (e) {
+            var kc = e.which;
+            if (kc >= 48 && kc <= 57) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+
+        })
+        $('#btn_submit1').click(function () {
+            if ($('#exchangeMode').val() == '0') {
+
+                $('#errordivexcengemode').show();
+                $('#errordivexcengemode').html("Please Select Exchange Mode!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                $('html, body').animate({
+                    scrollTop: $("#exchangeMode").offset().top
+                }, 600);
+                return false;
+            }
+
+            else { $('#errordivexcengemode').hide(); }
+             
+            if ($('#exchangeMode').val() == '1') {
+
+                if ($('#ddl_rangeCode').val() == '') {
+
+                    $('#errordiv4').show();
+                    $('#errordiv4').html("Please Select Range!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                    $('html, body').animate({
+                        scrollTop: $("#ddl_rangeCode").offset().top
+                    }, 600);
+                    return false;
+                }
+
+                else { $('#errordiv4').hide(); }
+
+                if ($('#ddlVillCode').val() == '') {
+
+                    $('#errordiv5').show();
+                    $('#errordiv5').html("Please Select From Site!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                    $('html, body').animate({
+                        scrollTop: $("#ddlVillCode").offset().top
+                    }, 600);
+                    return false;
+                }
+
+                else { $('#errordiv5').hide(); }
+                 
+                if ($('#ddl_RangeCodeto').val() == '') {
+
+                    $('#errordiv19').show();
+                    $('#errordiv19').html("Please Select Range!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                    $('html, body').animate({
+                        scrollTop: $("#ddl_RangeCodeto").offset().top
+                    }, 600);
+                    return false;
+                }
+
+                else { $('#errordiv19').hide(); }
+
+                if ($('#ddlDepot').find('option:selected').val() == '') {
+                    $('#errordiv20').show();
+                    $('#errordiv20').html("Please Select Depot!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                    $('html, body').animate({
+                        scrollTop: $("#ddlDepot").offset().top
+                    }, 600);
+                    return false;
+                }
+
+                else { $('#errordiv20').hide(); }
+
+
+            }
+
+            if ($('#exchangeMode').val() == '3') {
+
+                if ($('#ddl_RangeCodeFrom').val() == '') {
+
+                    $('#errordiv9').show();
+                    $('#errordiv9').html("Please Select Range!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                    $('html, body').animate({
+                        scrollTop: $("#ddl_RangeCodeFrom").offset().top
+                    }, 600);
+                    return false;
+                }
+
+                else { $('#errordiv9').hide(); }
+
+                if (($('#ddlDepotFrom>option:selected').val() == '')) {
+
+                    $('#errordiv10').show();
+                    $('#errordiv10').html("Please Select Depot!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                    $('html, body').animate({
+                        scrollTop: $("#ddlDepotFrom").offset().top
+                    }, 600);
+                    return false;
+                }
+
+                else { $('#errordiv10').hide(); }
+
+                if (($('#ddlLotNumber>option:selected').val() == '')) {
+
+                    $('#errordiv11').show();
+                    $('#errordiv11').html("Please Select Received Lot Number!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                    $('html, body').animate({
+                        scrollTop: $("#ddlLotNumber").offset().top
+                    }, 600);
+                    return false;
+                }
+
+                else { $('#errordiv11').hide(); }
+
+                if ($('#ddl_RangeCodeto>option:selected').val() == '') {
+
+                    $('#errordiv19').show();
+                    $('#errordiv19').html("Please Select Range!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                    $('html, body').animate({
+                        scrollTop: $("#ddl_RangeCodeto").offset().top
+                    }, 600);
+                    return false;
+                }
+
+                else { $('#errordiv19').hide(); }
+
+                if ($('#ddlDepot>option:selected').val() == '') {
+                    $('#errordiv20').show();
+                    $('#errordiv20').html("Please Select Depot!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                    $('html, body').animate({
+                        scrollTop: $("#ddlDepot").offset().top
+                    }, 600);
+                    return false;
+                }
+                else if ($('#ddlDepotFrom>option:selected').val() == $('#ddlDepot>option:selected').val()) {
+                    $('#errordiv20').show();
+                    $('#errordiv20').html("From Depot and To Depot should not be same" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('html, body').animate({
+                        scrollTop: $("#ddlDepot").offset().top
+                    }, 600);
+
+                    return false;
+                }
+                else { $('#errordiv20').hide(); }
+
+                if ($('#TrfQty').val().trim() == '' || $('#TrfQty').val() == '0' || $('#txtAvailableQty').val().trim() == '' || $('#txtAvailableQty').val() == '0') {
+
+                    $('#errordiv23').show();
+                    $('#errordiv23').html("Please Enter Valid Transfer Qty.!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                    $('html, body').animate({
+                        scrollTop: $("#TrfQty").offset().top
+                    }, 600);
+                    return false;
+                }
+                else if (parseFloat($('#TrfQty').val().trim()) > parseFloat($('#txtAvailableQty').val().trim())) {
+                    $('#errordiv23').show();
+                    $('#errordiv23').html("Transfer Qty should be grater than available quantity" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                    $('html, body').animate({
+                        scrollTop: $("#TrfQty").offset().top
+                    }, 600);
+                    return false;
+
+                }
+                else { $('#errordiv23').hide(); }
+
+            }
+
+            var cIndx = $('#tbTPProductDetails').find('tr.rowSkip').length;
+            if (cIndx > 0) {
+
+                $('#errordivProductDetails').show();
+                $('#errordivProductDetails').html("Please add minimum one product!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                $('html, body').animate({
+                    scrollTop: $("#depotInchargeto").offset().top
+                }, 600);
+                return false;
+            } 
+            else { $('#errordivProductDetails').hide(); }
+             
+            if ($('#ddlModeOfTransport>option:selected').text() == 'Motor' && $('#VehicleNumber').val() == '') {
+
+                $('#errordiv25').show();
+                $('#errordiv25').html("Please Enter Vehicle Number!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                $('html, body').animate({
+                    scrollTop: $("#VehicleNumber").offset().top
+                }, 600);
+                return false;
+            }
+
+            else { $('#errordiv25').hide(); }
+
+        });
+
+    });
+</script>
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <div class="col-lg-10 pad">
+            <h1 class="page-header">Permission to Transit</h1>
+        </div>
+        <div class="col-lg-2 pull-right">
+            <button type="button" class="btn btn-success btn_pp pull-right" name="btn_addpopip" value="" title="Micro Plan List" onclick="location.href='@Url.Action("index", "TransitPermit")'">
+                <i class=" fa fa-th-list ">
+                </i> Transit Permit List
+            </button>
+        </div>
+    </div>
+
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="help"><a href="~/PDFFolder/User Manual_Auction_Department.pdf" target="_blank">Help Document</a></div>
+        <div class="col-lg-12">@Html.Partial("_ErrorMsg")</div>
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!--<div class="panel-heading">Processing Fees</div>-->
+                <!-- /.panel-heading -->
+                @using (Html.BeginForm("Create", "TransitPermit", FormMethod.Post, new { data_behavior = "confirm" }))
+                {
+
+                    @Html.HiddenFor(x => x.ID)
+                        <!--<div class="panel-heading">Apply for auction based on the notice with encryption of field</div>-->
+                        <!-- /.panel-heading -->
+
+                    <div class="panel-body">
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Transfer Mode: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("ExchangeMode", (IEnumerable<SelectListItem>)ViewBag.ExchangeMode, new { @class = "form-control common", title = "Select District", id = "exchangeMode" })
+                                <div id="errordivexcengemode" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12"></div>
+                        <div id="divMainContent"></div>
+                        <div class="col-lg-12"></div>
+
+
+
+                        <!-- Btn Groping -->
+                        <div class="btn-padd">
+                            <div class="col-lg-12" id="btn">
+                                <button id="btn_submit1" value="Submit" name="Command" class="btn btn-success" type="submit">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+                                <button class="btn btn-danger" value="Cancel" name="Command" onclick="reload();" type="button">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+                                <button class="btn btn-warning" type="reset">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+
+                            </div>
+                        </div>
+                        <!-- /.Btn Groping -->
+
+                    </div>
+                        <!-- /.panel-body -->
+
+                    <!-- /.panel -->
+
+                }
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    @Html.Hidden("hdnRootURL", Url.Content("~/"))
+</div>
+
+<script type="text/javascript">
+    if ('@ViewData["Message"]' != '') {
+        alert('@ViewData["Message"]');
+    }
+    var RootUrl = '@Url.Content("~/")';
+
+    var educount = 1;
+    var castcount = 1;
+
+    $(document).ready(function () {
+        $('#exchangeMode').change(function (e) {
+            var claimTypeId = $(this).val();
+            if (!$.isEmptyObject(claimTypeId)) {
+                $.ajax({
+                    type: 'GET',
+                    url: RootUrl + "TransitPermit/LoadTransitPermitRequest",
+                    data: { 'transportModeID': $(this).val() },
+                    dataType: 'html',
+                    async: true,
+                    success: function (data) {
+                        $('#divMainContent').html(data);
+                        //GetClaimRequestPupose(claimTypeId);
+                    },
+                    error: function (ex) {
+                        console.log(ex.error);
+                    }
+                });
+            }
+        });
+
+        $(document).on('keypress','.Alphanumeric', function (event) { return IsAlphanumeric(event); });
+
+        $(document).on('change','#ddlProduceType',function (e) {
+            $("#ddlProduct").empty();
+            $("#ddlProduct").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            var ddlProduceType = $("#ddlProduceType option:selected").val();
+
+            if (!$.isEmptyObject(ddlProduceType)) {
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'WorkOrder/SelectProductByProduceType', // we are calling json method
+                    dataType: 'json',
+                    data: { ProduceTypeID: ddlProduceType },
+                    success: function (range) {
+
+                        $.each(range, function (i, items) {
+                            $("#ddlProduct").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                        });
+                    },
+                    error: function (ex) {
+                        //alert('Failed to retrieve states.' + ex);
+                    }
+                });
+            }
+        });
+         
+        $(document).on('change','#ddl_RangeCodeto', function (e) {
+            $("#ddlDepot").empty().append('<option value="">--Select--</option>');
+            var fromDepot = $('#ddlDepotFrom>option:selected').val();
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'TransitPermit/getDepotData', // we are calling json method
+                dataType: 'json',
+                data: { rangeCode: $("#ddl_RangeCodeto").val() },
+                success: function (range) {
+                    if (fromDepot != undefined && fromDepot !='DummyVillCode') {
+                        range = range.filter(x => x.Value != fromDepot);
+                    }
+
+                    $.each(range, function (i, items) {
+                        $("#ddlDepot").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    // alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $(".allownumericwithoutdecimal").on("keypress keyup blur", function (event) {
+            $(this).val($(this).val().replace(/[^\d].+/, ""));
+            if ((event.which < 48 || event.which > 57)) {
+                event.preventDefault();
+            }
+        });
+
+        $(document).on('change','#ddlProduct', function (e) {
+            $('#TrfQty').val(0);
+            var ddlVillage = $("#ddlVillName option:selected").val();
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'TransitPermit/getForesProduceqty', // we are calling json method
+                dataType: 'json',
+                data: { depotId: $("#ddlDepotFrom").val(), villageCode: ddlVillage, producetype: $("#ddlProduceType").val(), product: $("#ddlProduct").val(), exchangeMode: $("#exchangeMode").val(), workOrderID: '0' },
+                success: function (stockqty) {
+                    $("#txt_AvailQty").val(stockqty.Qty);
+
+                    $("#lbl_availableQty").text("Available Quantity( In " + stockqty.ProduceUnit + "):" + stockqty.Qty);
+                    $("#unitspan").text("(In " + stockqty.ProduceUnit + ")");
+                    // $("#lbl_baserate").html("Auction Reserved Rate per " + '</b>' + stockqty.ProduceUnit + '</b>:' + stockqty.ProductRate);
+
+                },
+                error: function (ex) {
+                    // alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $(document).on('change','#ddlDepot',function (e) {
+            $('#depotInchargeto').val('');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'TransitPermit/GetDepotIncharge', // we are calling json method
+                dataType: 'json',
+                data: { depotID: $('#ddlDepot').val() },
+                success: function (data) {
+                    $('#depotInchargeto').val(data);
+                }
+            });
+        });
+    });
+
+    $(document).on('change','#ToDivisionCode', function () {
+        $("#ddl_RangeCodeto").empty().append("<option value=''>--Select--</option>");
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'TransitPermit/GetDropdownData', // we are calling json method
+            dataType: 'json',
+            data: { key: "DivTo", parentID: $(this).val() },
+            success: function (response) {
+                $.each(response.data, function (i, items) {
+                    $("#ddl_RangeCodeto").append('<option value="' + items.Value + '">' +
+                        items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                //alert('Failed to retrieve states.' + ex);
+            }
+
+        });
+        return false;
+    });
+
+    function TransportMode_Change(cntrl) {
+        if (["2", "3"].indexOf($(cntrl).find('option:selected').val()) > -1) {
+            $('#divVehicleNumber').hide();//Hide if Train/Bullock cart gets selected
+        }
+        else {
+            $('#divVehicleNumber').show();
+        }
+    }
+
+    function reload() {
+        if (confirm("Do you want to leave page!")) {
+            window.location = RootUrl + "TransitPermit/Index";
+        }
+    }  
+</script>

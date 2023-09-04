@@ -1,0 +1,138 @@
+﻿@model List<FMDSS.Entity.NPVM.OBookingDetails>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Booking Report</strong>
+    </div>
+    <div class="panel-body">
+        <div id="tbl" class="table-responsive">
+            <div class="col-lg-3 padding-bottom" style="float:right;"><button class="btn btn-info pull-right" onclick="tablesToExcel(['tblBookingReport'], ['tblBookingReport'], 'ZooBookingReport', 'Excel')">Export to Excel</button></div>
+            <table class="table table-striped table-bordered table-hover" id="tblBookingReport">
+                <thead>
+                    <tr>
+                        <th>Booking No.</th>
+                        <th>Booking Type</th>
+                        <th>Booking Date & Time</th>
+                        <th>Place Name</th>
+                        <th>Visit Date</th>
+                        <th>Total Member</th>
+                        <th>Total Amount Be Pay</th>
+                        <th>Emitra Amount</th>
+                        <th>Total Paid Amount</th>
+                        <th>EmitraTransactionId</th>
+                        @*<th>VisitorType</th>*@
+                        <th>Guide Name</th>
+                        <th>Vehicle Number</th>
+                        <th>Booking Status</th>
+                        <th>Boarding Pass Status</th>
+                        <th>Shift</th>
+                        <th>SSOID</th>
+                    </tr>
+                    @foreach (var item in Model)
+                    {
+                    <tr>
+                        <td>@item.RequestId</td>
+                        <td>@item.BookingType</td>
+                        <td>@item.BookingDate.ToString("dd-MMM-yyyy hh:mm:ss tt")</td>
+                        <td>@item.PlaceName</td>
+                        <td>@item.VisitDate.ToString("dd-MMM-yyyy")</td>
+                        <td>@item.TotalMember</td>
+                        <td>@item.TotalAmountBePay</td>
+                        <td>@item.EmitraAmount</td>
+                        <td>@item.TotalPaidAmount</td>
+                        <td>@item.EmitraTransactionId</td>
+                        @*<td>@item.VisitorType</td>*@
+                        <td>@item.GuideName</td>
+                        <td>@item.VehicleNumber</td>
+                        <td>@item.BookingStatus</td>
+                        <td>@string.Format("{0}", item.BoardingPassStatus ? "Issued" : "Not Issued")</td>
+                        <td>@item.Shift</td>
+                        <td>@item.SSOID</td>
+                    </tr>
+                    }
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    $.noConflict(true);
+    var tablesToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , tmplWorkbookXML = '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'
+                + '<DocumentProperties xmlns="urn:schemas-microsoft-com:office:office"><Author>Axel Richter</Author><Created>{created}</Created></DocumentProperties>'
+                + '<Styles>'
+                + '<Style ss:ID="Currency"><NumberFormat ss:Format="Currency"></NumberFormat></Style>'
+                + '<Style ss:ID="Date"><NumberFormat ss:Format="Medium Date"></NumberFormat></Style>'
+                + '</Styles>'
+                + '{worksheets}</Workbook>'
+            , tmplWorksheetXML = '<Worksheet ss:Name="{nameWS}"><Table>{rows}</Table></Worksheet>'
+            , tmplCellXML = '<Cell{attributeStyleID}{attributeFormula}><Data ss:Type="{nameType}">{data}</Data></Cell>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (tables, wsnames, wbname, appname) {
+            var ctx = "";
+            var workbookXML = "";
+            var worksheetsXML = "";
+            var rowsXML = "";
+            console.log(tables);
+            var getFilterFromDate = document.getElementById('txtFromDate').value;
+            var getFilterToDate = document.getElementById('txtToDate').value;
+            wbname = wbname + "FromDate:-" + getFilterFromDate + "- ToDate:-" + getFilterToDate + '.xls';
+
+            for (var i = 0; i < tables.length; i++) {
+                if (!tables[i].nodeType) tables[i] = document.getElementById(tables[i]);
+                for (var j = 0; j < tables[i].rows.length; j++) {
+                    rowsXML += '<Row>'
+                    for (var k = 0; k < tables[i].rows[j].cells.length; k++) {
+                        var dataType = tables[i].rows[j].cells[k].getAttribute("data-type");
+                        var dataStyle = tables[i].rows[j].cells[k].getAttribute("data-style");
+                        var dataValue = tables[i].rows[j].cells[k].getAttribute("data-value");
+                        dataValue = (dataValue) ? dataValue : tables[i].rows[j].cells[k].innerHTML.trim();
+                        if (dataValue.indexOf('button') == -1) {
+                            var dataFormula = tables[i].rows[j].cells[k].getAttribute("data-formula");
+                            dataFormula = (dataFormula) ? dataFormula : (appname == 'Calc' && dataType == 'DateTime') ? dataValue : null;
+                            ctx = {
+                                attributeStyleID: (dataStyle == 'Currency' || dataStyle == 'Date') ? ' ss:StyleID="' + dataStyle + '"' : ''
+                                , nameType: (dataType == 'Number' || dataType == 'DateTime' || dataType == 'Boolean' || dataType == 'Error') ? dataType : 'String'
+                                , data: (dataFormula) ? '' : dataValue
+                                , attributeFormula: (dataFormula) ? ' ss:Formula="' + dataFormula + '"' : ''
+                            };
+                            rowsXML += format(tmplCellXML.trim(), ctx);
+                        }
+                    }
+                    rowsXML += '</Row>'
+
+                }
+                ctx = { rows: rowsXML, nameWS: wsnames[i] || 'Sheet' + i };
+                worksheetsXML += format(tmplWorksheetXML, ctx);
+                rowsXML = "";
+            }
+
+            ctx = { created: (new Date()).getTime(), worksheets: worksheetsXML };
+            workbookXML = format(tmplWorkbookXML, ctx);
+
+            console.log(workbookXML);
+
+            var link = document.createElement("A");
+            link.href = uri + base64(workbookXML);
+            link.download = wbname || 'Zoobooking.xls';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    })();
+</script>
+<style>
+    .padding-bottom {
+        padding-bottom: 7px;
+    }
+    table {
+        display: block;
+        overflow: auto; 
+        white-space: nowrap;
+        max-height:450px;
+    }
+</style>

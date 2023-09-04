@@ -1,0 +1,158 @@
+﻿@model List<FMDSS.Entity.FRAViewModel.ClaimRequestDetailsVM>
+
+               
+                   <div class="modal-dialog" id="divFra">
+                       <div class="modal-content">
+                           <div class="modal-header">
+                               <button id="btnClose" type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                               <h4 class="modal-title" id="myModalLabel" style="text-align:center">
+                                   Claim Request Details
+                               </h4>
+                           </div>
+                           <div class="panel panel-default">
+                               <div class="panel-heading">
+                                   <strong>Claim Request Summary Sub Details</strong>
+                               </div>
+                               <div class="panel-body">
+                                   <div id="tbl" class="table-responsive">
+                                       @*<div class="col-lg-4 padding-bottom" style="float:right;"><button class="btn btn-info pull-right" onclick="tablesToExcel(['tblClaimRequestSummaySubReport'], 'ClaimRequestReport', 'Excel')">Export to Excel</button></div>*@
+                                       <table class="table table-striped table-bordered table-hover" id="tblClaimRequestSummaySubReport">
+                                           <thead>
+                                               <tr>
+                                                   <th>Claim Request ID</th>
+                                                   <th>Date On Which Claim Was Raised</th>
+                                                   <th>Claimant Name</th>
+                                                   <th>Claim Type</th>
+
+                                                   <th>District</th>
+                                                   <th>Gram Panchayat</th>
+                                                   <th>Village</th>
+                                                   <th>Khasra No</th>
+                                                   <th>Status</th>
+                                                   <th>Pending At</th>
+                                               </tr>
+                                               @foreach (var item in Model)
+                                               {
+                                               <tr>
+                                                   <td>@item.ClaimRequestIDWithPrefix</td>
+                                                   <td>@item.RaisedOn</td>
+                                                   <td>@item.RaisedBy</td>
+                                                   <td>@item.ClaimTypeName</td>
+                                                   <td>@item.DistrictName</td>
+                                                   <td>@item.GPName</td>
+                                                   <td>@item.VillageName</td>
+                                                   <td>@item.KhasraNumber</td>
+                                                   <td>@item.CurrentStatus</td>
+                                                   <td>@item.PendingAt</td>
+                                               </tr>
+                                               }
+                                           </thead>
+                                       </table>
+                                   </div>
+                               </div>
+                           </div>
+                           <div class="modal-footer" id="fot-f">
+                               <div id="btn" class="col-lg-12">
+
+                                   <button id="btnCancelFRADeatils" name="button" class="btn btn-danger" data-dismiss="modal"  type="button" value="Cancel" style="width: auto">
+                                       <i class="fa fa-times fa-fw"></i> Close
+                                   </button>
+
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               
+
+                   <script type="text/javascript" src="~/js/jquery.min.js"></script>
+                   <script src="~/js/bootstrap.min.js"></script>
+                   <script type="text/javascript">
+
+                      
+
+                       
+
+                     
+
+                       //$.noConflict(true);
+                       //var tablesToExcel = (function () {
+                       //    var uri = 'data:application/vnd.ms-excel;base64,'
+                       //        , tmplWorkbookXML = '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'
+                       //            + '<DocumentProperties xmlns="urn:schemas-microsoft-com:office:office"><Author>Axel Richter</Author><Created>{created}</Created></DocumentProperties>'
+                       //            + '<Styles>'
+                       //            + '<Style ss:ID="Currency"><NumberFormat ss:Format="Currency"></NumberFormat></Style>'
+                       //            + '<Style ss:ID="Date"><NumberFormat ss:Format="Medium Date"></NumberFormat></Style>'
+                       //            + '</Styles>'
+                       //            + '{worksheets}</Workbook>'
+                       //        , tmplWorksheetXML = '<Worksheet ss:Name="{nameWS}"><Table>{rows}</Table></Worksheet>'
+                       //        , tmplCellXML = '<Cell{attributeStyleID}{attributeFormula}><Data ss:Type="{nameType}">{data}</Data></Cell>'
+                       //        , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+                       //        , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+                       //    return function (tables, wsnames, wbname, appname) {
+                       //        var ctx = "";
+                       //        var workbookXML = "";
+                       //        var worksheetsXML = "";
+                       //        var rowsXML = "";
+                       //        console.log(tables);
+                       //        var getFilterFromDate = document.getElementById('txtFromDate').value;
+                       //        var getFilterToDate = document.getElementById('txtToDate').value;
+                       //        wbname = wbname + "ReportDate:-" + getFilterFromDate + '.xls';
+
+                       //        for (var i = 0; i < tables.length; i++) {
+                       //            if (!tables[i].nodeType) tables[i] = document.getElementById(tables[i]);
+                       //            for (var j = 0; j < tables[i].rows.length; j++) {
+                       //                rowsXML += '<Row>'
+                       //                for (var k = 0; k < tables[i].rows[j].cells.length; k++) {
+                       //                    var dataType = tables[i].rows[j].cells[k].getAttribute("data-type");
+                       //                    var dataStyle = tables[i].rows[j].cells[k].getAttribute("data-style");
+                       //                    var dataValue = tables[i].rows[j].cells[k].getAttribute("data-value");
+                       //                    dataValue = (dataValue) ? dataValue : tables[i].rows[j].cells[k].innerHTML.trim();
+                       //                    if (dataValue.indexOf('button') == -1) {
+                       //                        var dataFormula = tables[i].rows[j].cells[k].getAttribute("data-formula");
+                       //                        dataFormula = (dataFormula) ? dataFormula : (appname == 'Calc' && dataType == 'DateTime') ? dataValue : null;
+                       //                        ctx = {
+                       //                            attributeStyleID: (dataStyle == 'Currency' || dataStyle == 'Date') ? ' ss:StyleID="' + dataStyle + '"' : ''
+                       //                            , nameType: (dataType == 'Number' || dataType == 'DateTime' || dataType == 'Boolean' || dataType == 'Error') ? dataType : 'String'
+                       //                            , data: (dataFormula) ? '' : dataValue
+                       //                            , attributeFormula: (dataFormula) ? ' ss:Formula="' + dataFormula + '"' : ''
+                       //                        };
+                       //                        rowsXML += format(tmplCellXML.trim(), ctx);
+                       //                    }
+                       //                }
+                       //                rowsXML += '</Row>'
+
+                       //            }
+                       //            //ctx = { rows: rowsXML, nameWS: wsnames[i] || 'Sheet' + i };
+                       //            ctx = { rows: rowsXML, nameWS: "ClaimRequestDetails" || 'Sheet' + i };
+                       //            worksheetsXML += format(tmplWorksheetXML, ctx);
+                       //            rowsXML = "";
+                       //        }
+
+                       //        ctx = { created: (new Date()).getTime(), worksheets: worksheetsXML };
+                       //        workbookXML = format(tmplWorkbookXML, ctx);
+
+                       //        console.log(workbookXML);
+
+                       //        var link = document.createElement("A");
+                       //        link.href = uri + base64(workbookXML);
+                       //        link.download = wbname || 'ClaimRequestDetails.xls';
+                       //        link.target = '_blank';
+                       //        document.body.appendChild(link);
+                       //        link.click();
+                       //        document.body.removeChild(link);
+                       //        $("#btnCancel").trigger("click");
+                       //    }
+                       //})();
+                   </script>
+                   <style>
+                       .padding-bottom {
+                           padding-bottom: 7px;
+                       }
+
+                       table {
+                           display: block;
+                           overflow: auto;
+                           white-space: nowrap;
+                           max-height: 450px;
+                       }
+                   </style>

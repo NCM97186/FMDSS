@@ -1,0 +1,167 @@
+﻿@*@model FMDSS.Models.ForestProtection.OffenseRegistrationfinal*@
+
+@{
+    ViewBag.Title = "OffenseList";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+@using FMDSS.Models
+@model IEnumerable<FMDSS.Models.ForestProtection.OffenseRegistrationfinal>
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+@*<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">*@
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+</script>
+<script type="text/javascript">
+
+    function Assign(OffenseRole) {
+        var d = OffenseRole.split(',');
+        var tblinfo = {
+            OffenseCode: $.trim(d[0]),
+            UserRole: $.trim(d[1])
+        }
+        $("#tbdyScart").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'OffenseAssign/ViewDetails',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(tblinfo),
+            success: function (data) {
+                var bardata = "<tr><td>Circle</td><td>" + data.Circle +
+                 "</td></tr><tr><td>Division</td><td>" + data.Division +
+                 "</td></tr><tr><td>District</td><td>" + data.District +
+                 "</td></tr><tr><td>Block</td><td>" + data.Block +
+                 "</td></tr><tr><td>GPName</td><td>" + data.GPName +
+                 "</td></tr><tr><td>Village</td><td>" + data.Village +
+                 "</td></tr><tr><td>Range</td><td>" + data.Range +
+                 "</td></tr><tr><td>Tehsil</td><td>" + data.Tehsil +
+                 "</td></tr><tr><td>Naka</td><td>" + data.Naka +
+                 "</td></tr><tr><td>OffensePlace</td><td>" + data.OffensePlace +
+                 "</td></tr><tr><td>OffenseDescription</td><td>" + data.OffenseDescription +
+                 "</td></tr><tr><td>OffenseCategory</td><td>" + data.OffenseCategory +
+                 "</td></tr><tr><td>WildlifeProtection</td><td>" + data.WildlifeProtection +
+                 "</td></tr><tr><td>ForestProtection</td><td>" + data.ForestProtection +
+                 "</td></tr><tr><td>Offense Severity</td><td>" + data.OffenseSeverity +
+                 "</td></tr><tr><td>Offender Type</td><td>" + data.OffenderType +
+                 "</td></tr><tr><td>Offender Name</td><td>" + data.OffenderName +
+                 "</td></tr><tr><td>Offender Address</td><td>" + data.OffenderAddress +
+                 "</td></tr><tr><td>Offender PhoneNo</td><td>" + data.OffenderPhoneNo +
+                 "</td></tr><tr><td>Police Station</td><td>" + data.PoliceStation +
+                 "</td></tr><tr><td>Offender StatementDate</td><td>" + data.OffenderStatementDate +
+                 "</td></tr><tr><td>Offender Statement</td><td>" + data.OffenderStatement +
+                 "</td></tr><tr><td>Offender StatementDoc</td><td> <a href='../ForestProtectionDocument/" + data.OffenderStatementDoc + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                 "</td></tr><tr><td>Witness Name</td><td>" + data.WitnessName +
+                 "</td></tr><tr><td>Witness Address</td><td>" + data.WitnessAddress +
+                 "</td></tr><tr><td>Witness PhoneNo</td><td>" + data.WitnessPhoneNo +
+                 "</td></tr><tr><td>Witness IdType</td><td>" + data.WitnessIDType +
+                 "</td></tr><tr><td>Witness IdProof</td><td><a href='../ForestProtectionDocument/" + data.WitnessIDProofURL + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                 "</td></tr><tr><td>Witness Age</td><td>" + data.WitnessAge +
+                 "</td></tr><tr><td>Witness StatementDate</td><td>" + data.WitnessStatementDate +
+                 "</td></tr><tr><td>Witness Statement</td><td>" + data.WitnessStatement +
+                 "</td></tr><tr><td>Witness SignedStatement</td><td><a href='../ForestProtectionDocument/" + data.SignedStatementURL + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                 "</td></tr>";
+                $("#tbdyScart").append(bardata);
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+
+
+        });
+
+    }
+
+</script>
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Offense Details</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">             
+                @using (Html.BeginForm("OffenseRegistration", "OffenseRegistration", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {
+                    <div class="panel-body">                       
+                        <div class="dataTable_wrapper">
+                            <table id="tblScheme" class="table table-striped table-bordered table-hover table-responsive">
+                                <thead>
+                                    <tr>
+                                        <th style="width:8%">Offense Code</th>
+                                        <th>Offense date</th>
+                                        <th>Offense palce</th>
+                                        <th>District</th> 
+                                        <th>UserRole</th>                                        
+                                        <th style="width:8%">Action</th>                                       
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td data-toggle="modal" data-target="#myModalDfo" style="cursor:pointer" onclick="Assign('@Html.DisplayFor(model => item.OffenseCode),@Html.DisplayFor(model=>item.UserRole)')">
+                                                @Html.DisplayFor(model => item.OffenseCode)
+                                            </td>
+
+                                            <td data-toggle="modal" data-target="#myModalDfo" style="cursor:pointer" onclick="Assign('@Html.DisplayFor(model => item.OffenseCode),@Html.DisplayFor(model=>item.UserRole)')">
+                                                @Html.DisplayFor(model => item.OffenseDate)
+                                            </td>
+
+                                            <td data-toggle="modal" data-target="#myModalDfo" style="cursor:pointer" onclick="Assign('@Html.DisplayFor(model => item.OffenseCode),@Html.DisplayFor(model=>item.UserRole)')">
+                                                @Html.DisplayFor(model => item.OffensePlace)
+                                            </td>
+                                            <td data-toggle="modal" data-target="#myModalDfo" style="cursor:pointer" onclick="Assign('@Html.DisplayFor(model => item.OffenseCode),@Html.DisplayFor(model=>item.UserRole)')">
+                                                @Html.DisplayFor(model => item.DIST_NAME)
+                                            </td> 
+                                            <td data-toggle="modal" data-target="#myModalDfo" style="cursor:pointer" onclick="Assign('@Html.DisplayFor(model => item.OffenseCode),@Html.DisplayFor(model=>item.UserRole)')">
+                                                @Html.DisplayFor(model => item.UserRole)
+                                            </td>                                                                                     
+                                            <td>
+                                                <a href='@Url.Action("OffenseRegistrationfinal", "OffenseRegistrationfinal", new { @OCode = Encryption.encrypt(item.OffenseCode),@Mode= Encryption.encrypt("Warrant")})'>
+                                                    Issue Warrant
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal fade in" id="myModalDfo" tabindex="-1" role="dialog" aria-hidden="false">
+                    <div class="modal-dialog mdw">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                <h4 class="modal-title" id="myModalLabel">
+                                    Offense Details
+                                </h4>
+                            </div>
+                            <br />
+                            <div class="modal-body tbl-scroll">
+                                <!-- From URL Get -->
+                                <table class="table table-striped table-bordered table-hover">
+                                    <tbody id="tbdyScart"></tbody>
+                                </table>
+                            </div>                                        
+                            <div class="modal-footer" id="fot-f">
+                                <div id="btn" class="col-lg-12">
+                                  
+                                    <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                                        <i class="fa fa-times fa-fw"></i> Close
+                                    </button>
+
+                                </div>
+                            </div>
+                        </div>       
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+                    
+                }
+            </div>
+            <!-- /.panel -->
+        </div>
+    </div>
+</div>
+

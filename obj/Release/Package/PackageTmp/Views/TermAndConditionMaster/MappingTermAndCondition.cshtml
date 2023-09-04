@@ -1,0 +1,179 @@
+﻿@{
+    ViewBag.Title = "MappingTermAndCondition";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_SuperAdmin.cshtml";
+}
+@model FMDSS.Models.Master.TermAndCondition
+
+
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script>
+
+
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        $(document).on('click', '#Submit1', function (e) {
+            debugger;
+
+            $('#tblLstTermAndCondition tr').each(function (i, row) {
+
+                // reference all the stuff you need first
+                var $row = $(row);
+                var $HDNTermAndCondition_Text = $row.find('input[name=HDNTermAndCondition_Text]');
+                var $checkedBoxe = $row.find('input:checked');
+
+                alert($HDNTermAndCondition_Text.val());
+                alert($checkedBoxe.val());
+
+            });
+
+         
+
+
+        });
+
+
+        $(document).on('click', '.reqid', function (e) {
+
+           
+
+            var r = confirm('Are you sure you wish to map this Term And Condition ?');
+            if (r == false) {
+                return false;
+            }
+
+          
+
+
+            var ID = $(this).parents('tr').find('input[name=HDNID]').val();
+            var PID = $(this).parents('tr').find('input[name=HDNPlaceID]').val();
+            var TCID = $(this).parents('tr').find('input[name=HDNTermAndConditionID]').val();
+           // var SetDisplayOrder = $(this).parents('tr').find('input[name=SetDisplayOrder]').val();
+
+            var Status = $('#CHK_' + TCID).is(":checked");
+            var SetDisplayOrder = $('#' + TCID).val();
+
+
+           
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'TermAndConditionMaster/Mapping', // we are calling json method
+                dataType: 'json',
+                data: { IDs: ID, PIDs: PID, TCIDs: TCID, STATUS: Status, SetDisplayOrder: SetDisplayOrder },
+                success: function (circle) {
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+        });
+    });
+
+    function postRequest(ID, PID, TCID) {
+        var r = confirm('Are you sure you wish to map this Term And Condition ?');
+        if (r == false) {
+            return false;
+        }
+
+        var Status = $('#' + TCID).is(":checked");
+
+       
+        var SetDisplayOrder = $(this).parents('tr').find('input[name=SetDisplayOrder]').val();
+
+        alert(SetDisplayOrder);
+
+        //$.ajax({
+        //    type: 'POST',
+        //    url: RootUrl + 'TermAndConditionMaster/Mapping', // we are calling json method
+        //    dataType: 'json',
+        //    data: { IDs: ID, PIDs: PID, TCIDs: TCID, STATUS: Status },
+        //    success: function (circle) {
+        //    },
+        //    error: function (ex) {
+        //        alert('Failed to retrieve states.' + ex);
+        //    }
+
+        //});
+    }
+
+</script>
+
+<div class="row">
+    <div class="col-lg-9 pad">
+        <h1 class="page-header"><span>Mapping Term And Condition</span></h1>
+    </div>
+
+    @using (Html.BeginForm("MappingTermAndCondition", "TermAndConditionMaster", FormMethod.Post))
+    {
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+
+                    <div class="col-lg-1">
+                        <div class="form-group">
+                            <label>Place <span class="mandatory">*</span></label>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-9">
+                        <div class="form-group">
+
+                            @Html.DropDownListFor(model => Model.PlaceID, (IEnumerable<SelectListItem>)ViewBag.placeIDs, "--Select--", new { @class = "form-control common", id = "PlaceID" })
+                            <div id="errPlaceID" style="display:none" class="alert-danger1">Place is Required.</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <input type="submit" class="btn btn-success" name="command" value="View" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="dataTable_wrapper">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover table-responsive gridtable" id="tblLstTermAndCondition">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Place</th>
+                                        <th>Status</th>
+                                        <th>Set Display Order</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.LstTermAndCondition)
+                                    {
+                                    <tr>
+
+                                        <td>@Html.DisplayFor(model => item.Index) @Html.Hidden("HDNID", item.ID) </td>
+                                        <td>@Html.DisplayFor(model => item.TermAndCondition_Text, new { id = "TermAndCondition_Text" })  @Html.Hidden("HDNPlaceID", item.PlaceID) @Html.Hidden("HDNTermAndConditionID", item.TermAndConditionID)     </td>
+                                        <td>
+                                            <input  type="checkbox" id="CHK_@item.TermAndConditionID" class="reqid" value="true" @(item.IsActive ? "checked=\"checked\"" : "") />
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => item.SetDisplayOrder, new { id = item.TermAndConditionID, name = "SetDisplayOrder", @class = "form-control" })
+                                        </td>
+
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+</div>

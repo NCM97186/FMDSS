@@ -1,0 +1,405 @@
+﻿@model IList<FMDSS.Models.BookOnlineTicket.TicketData>
+@{
+                /**/
+
+                var captchaPrefix = ViewBag.CaptchaPrefix;
+                List<FMDSS.Models.BookOnlineTicket.DisplayColumn> displayColumn = null;
+                if (ViewBag.DisplayColumn != null)
+                {
+                    displayColumn = ViewBag.DisplayColumn;
+                }
+}
+<style type="text/css">
+    .slno {
+        width: 80% !important;
+        text-align: center;
+    }
+
+    .error {
+        border: 1px solid red;
+    }
+
+    .errortext {
+        color: red;
+    }
+
+    .table-responsive {
+        display: block;
+        overflow-x: auto;
+    }
+</style>
+<input type="hidden" value="@ViewBag.totalRows" id="hdntotalRows" />
+
+<div class="col-lg-12 pad">
+    <h4 id="hdMember" style="">Member Details</h4>
+    <span id="hdmessage" style="" class="mandatory">
+        Please carry original photo ID at the time of entry. Any wrong Id will be treated as fake booking and will be prosecuted as per Law.
+    </span>
+    <br> <div id="hdGSTmessage" style="color:#337ab7;">  </div>
+
+</div>
+@{
+    var GenderType = new SelectList(new[]
+        {
+new {ID="1", Name="Male"},
+new {ID="2", Name="Female"},
+new {ID="3", Name="Transgender"}
+},
+        "ID", "Name");
+
+}
+<div style="display:none">
+    <input type="number" id="txtOdhiPlaceAvailibiliy" name="OdhiPlaceAvailibiliy" value="@ViewBag.NormalOdhiAvailibility" />
+    <input type="number" id="txtIsOdhiPlace" name="IsOdhiPlace" value="0" />
+</div>
+<div class="form-group un-bold">
+    <table id="tblMemberInfo" class="table table-striped table-bordered table-hover table-responsive" style="max-height: 300px;">
+        <thead>
+            <tr>
+                <th>S.No.</th>
+                <th>Name</th>
+                <th>Gender</th>
+                <th>Nationality</th>
+                <th>IDType</th>
+                <th>IDNo</th>
+                @if (displayColumn != null)
+                {
+                    if (displayColumn.Any(p => p.ItemParent == FMDSS.ItemParent.CamersFee && p.ItemId == 5 && p.PlaceId == 19)) //5 = Video Camera Fees
+                    {
+                        <th>No of Video Camera</th>
+                        <th>Video Camera Fees (INR)</th>
+                    }
+                    else if (displayColumn.Any(p => p.ItemParent == FMDSS.ItemParent.CamersFee && p.ItemId == 5)) //5 = Video Camera Fees
+                    {
+                        <th style="display:none">No of Video Camera</th>
+                        <th style="display:none">Video Camera Fees (INR)</th>
+                    }
+                    if (displayColumn.Any(p => p.ItemParent == FMDSS.ItemParent.CamersFee && p.ItemId == 4)) //4 = Still Camera Fees
+                    {
+                        <th style="display:none">No of Still Camera</th>
+                        <th style="display:none">Still Camera Fees (INR)</th>
+                    }
+                    if (displayColumn.Any(p => p.ItemParent == FMDSS.ItemParent.BookingFee && p.ItemId == 0)) //4 = Still Camera Fees
+                    {
+                        <th style="display:none">Fees Per Member (INR)</th>
+                    }
+                    if (displayColumn.Any(p => p.ItemParent == FMDSS.ItemParent.VehicleFee && p.ItemId == 0)) //4 = Still Camera Fees
+                    {
+                        <th style="display:none">Vehicle Fees (INR)</th>
+                    }
+                    if (displayColumn.Any(p => p.ItemParent == FMDSS.ItemParent.GuideFee && p.ItemId == 0)) //4 = Still Camera Fees
+                    {
+                        <th style="display:none">Guide Fees (INR)</th>
+                    }
+                    <th style="display:none">Total Amount (INR)</th>
+                }
+
+            </tr>
+        </thead>
+        <tbody id="tbdMemberInfo">
+            @for (int i = 0; i < Model.Count(); i++)
+            {
+                <tr class="trRow_@i">
+                    <td style="width:10%!important;">
+                        @(i + 1).
+                    </td>
+                    <td>@Html.TextBoxFor(x => x[i].Name, new { @class = "abc_" + i }) </td>
+                    <td>
+                        @Html.DropDownListFor(x => x[i].Gender, GenderType,
+                           "--Select--", new { @class = "abc_" + i, @title = "Gender" })
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(x => x[i].VisitorTypeId, new SelectList(ViewBag.VisitorType, "Value", "Text"),
+                                "--Select--", new { @title = "Nationality", @class = "cnationality abc_" + i })
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(x => x[i].IDType, new SelectList(ViewBag.IDType, "Value", "Text"), "--Select--", new { @class = "cidtype abc_" + i, @title = "Id Type" })
+                    </td>
+                    <td>@Html.TextBoxFor(x => x[i].IDNo, new { @class = "cidno abc_" + i }) </td>
+                    @if (displayColumn != null)
+                    {
+                        if (displayColumn.Any(p => p.ItemParent == FMDSS.ItemParent.CamersFee && p.ItemId == 5 && p.PlaceId == 19)) //5 = Video Camera Fees
+                        {
+                            <td>@Html.TextBoxFor(x => x[i].NofVideoCamera, new { @class = "slno videocamera" }) </td>
+                            <td align="right" data-fee="0" id="VideoCameraAmount">
+                                0.00
+                            </td>
+                        }
+                        else if (displayColumn.Any(p => p.ItemParent == FMDSS.ItemParent.CamersFee && p.ItemId == 5)) //5 = Video Camera Fees
+                        {
+                            <td style="display:none">@Html.TextBoxFor(x => x[i].NofVideoCamera, new { @class = "slno videocamera" }) </td>
+                            <td style="display:none" align="right" data-fee="0" id="VideoCameraAmount">
+                                0.00
+                            </td>
+                        }
+                        if (displayColumn.Any(p => p.ItemParent == FMDSS.ItemParent.CamersFee && p.ItemId == 4)) //4 = Still Camera Fees
+                        {
+                            <td style="display:none">@Html.TextBoxFor(x => x[i].NoOfStillCamera, new { @class = "slno stillcamera" }) </td>
+                            <td style="display:none" align="right" data-fee="0" id="StillCameraAmount">
+                                0.00
+                            </td>
+                        }
+                        if (displayColumn.Any(p => p.ItemParent == FMDSS.ItemParent.BookingFee && p.ItemId == 0)) //4 = Still Camera Fees
+                        {
+                            <td style="display:none" align="right" id="MemberFees">
+                                0.00
+                            </td>
+                        }
+
+                        if (displayColumn.Any(p => p.ItemParent == FMDSS.ItemParent.VehicleFee && p.ItemId == 0)) //4 = Still Camera Fees
+                        {
+                            <td style="display:none" align="right" id="VehicleFees">
+                                0.00
+                            </td>
+                        }
+
+                        if (displayColumn.Any(p => p.ItemParent == FMDSS.ItemParent.GuideFee && p.ItemId == 0)) //4 = Still Camera Fees
+                        {
+                            <td style="display:none" align="right" id="GuideFees">
+                                0.00
+                            </td>
+                        }
+                    }
+                    <td style="display:none" align="right" id="TotalAmount">
+                        0.00
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+@if (ViewBag.BookingType == FMDSS.BookingType.OnlineCitizenBooking)
+{
+    <div class="col-lg-12 un-bold" style="clear:both">
+        <div class="capt">
+            <img alt="Captcha" id="imgCaptcha" src="@Url.Content("~/Captcha/Generate?p=" + captchaPrefix)" />
+            <p>
+                <input type="text" id="txtInput" name="captchavalue" style="float:left" />
+                <button type="button" id="refresh" onclick="Captcha();"><i class="fa fa-refresh fa-spin fa-fw refrs"></i></button>
+                <span class="errortext" id="captchaError"></span>
+            </p>
+        </div>
+    </div>
+    if (ViewBag.PlaceId == 60)
+    {
+        <div id="divIndemnityBond">
+            <div class="col-lg-12" style="border:1px dashed black;">
+                <div style="padding:5px">
+                    <p style="text-align:center">
+                        Form-I A<br />
+                        (See Rule Sub-rule A)<br />
+                        (Indemnity bond) to be submitted by a visitor prior to entering in<br />
+                        Jhalana/Amagarh Leopard Conservation Reserve
+                    </p>
+                    <p style="text-align:justify">I/ we hereby state that I am / we are aware of the risks involved in visiting the Jhalana/Amagarh Leopard Conservation Reserve. I / we further state that I am / we are entering the Jhalana/Amagarh Leopard Conservation Reserve at my / our own risk and I / we shall be fully liable if any accident occurs. I am / we are fully satisfied with the security arrangement made by the Jhalana/Amagarh Leopard Conservation Reserve management and I am/we are also responsible for damage to my / our belonging (Life, Camera, binocular, video camera etc) I am / we informed that in case of any unforeseen accident the Jhalana/Amagarh Leopard Conservation Reserve management shall not be responsible in any manner whatsoever.</p>
+                    <p>I /we, also agree that should thereby need of any litigation the same would be enable only in a court of law in the state of Rajasthan. I /we submit this indemnity bond with full consciousness.</p>
+
+                    <input type="radio" name="bond_agreement" value="1"> Agree
+                    <input type="radio" name="bond_agreement" value="0" checked> Disagree
+                </div>
+            </div>
+        </div>
+    }
+}
+<div class="col-lg-12 un-bold" style="clear:both">
+    <div class="form-group" id="btn-cont1">
+        <label> &nbsp;</label>
+        <button type="button" class="btn btn-success" value="Submit" id="btn_Submit">Submit</button>
+        <button type="button" id="btnCancel" class="btn btn-danger">Cancel</button>
+    </div>
+</div>
+<div class="row">
+    <div class="modal fade in " style="display:none" id="myConfirmDialog" tabindex="-1" role="dialog" aria-hidden="false">
+        <div class="modal-dialog mdw">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myConfirm">
+                        <span id="modalHeading" style="font-weight:600;font-size:17px;">Odhi Place Confirmation ?</span>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <div hidden="hidden"><span id="spn_status" hidden="hidden"></span></div>
+                </div>
+                <div class="modal-body">
+                    <h4>Do you want to choose the Odhi Place Option?<br /> if You Choose Odhi Place then Extra Charges (INR: @ViewBag.OdhiCharge) will be applicable. <br />To Choose the Odhi Place Option Click On Yes Otherwise Click on to No for Normal Booking .</h4>
+                </div>
+                <div class="modal-footer">
+                    <div id="btn" class="col-lg-12">
+                        <button type="button" class="btn btn-success" onclick="SetOdhiOption(1);">
+                            <i class="fa-fa-check"></i>Yes
+                        </button>
+                        <button type="button" class="btn btn-danger" onclick="SetOdhiOption(0);">
+                            <i class="fa-fa-close"></i>No
+                        </button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">
+                            <i class="fa-fa-close"></i>Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var PlaceId =@ViewBag.PlaceId;
+    function Captcha() {
+        $("#imgCaptcha").attr("src", RootUrl + "Captcha/Generate?p=@captchaPrefix&d=" + new Date());
+    }
+
+    $(document).ready(function () {
+
+        $('#btn_Submit').on('click', function () {
+            $('.error').each(function () { $(this).removeClass('error'); }); //clear all error class
+
+            if ($(".ddlVehicle").is(":visible") && ($(".ddlVehicle").val() == "" || $(".ddlVehicle").val() == "0")) {
+                $(".ddlVehicle").addClass("error");
+            }
+
+            if ($(".ddlDate").is(":visible") && $(".ddlDate").val().trim().length == 0) {
+                $(".ddlDate").addClass("error");
+            }
+
+            if ($(".ddlZone").is(":visible") && ($(".ddlZone").val() == "" || $(".ddlZone").val() == "0")) {
+                $(".ddlZone").addClass("error");
+            }
+
+            if ($(".ddlShift").is(":visible") && ($(".ddlShift").val() == "" || $(".ddlShift").val() == "0")) {
+                $(".ddlShift").addClass("error");
+            }
+            var memberCount = 0;
+            $("#tbdMemberInfo > tr").each(function (i) {   // add error class those name have value and element blank
+                if ($(".abc_" + i).first().val().trim().length > 0) {
+                    memberCount++;
+                    $(".abc_" + i).each(function () {
+                        if ($(this).val().trim().length < 1 || $(this).val().trim() === '0') {
+                            $(this).addClass('error');
+                        }
+                    });
+                }
+            });
+
+            var odhiSeat = $('#txtOdhiPlaceAvailibiliy').val() | 0;
+            if (odhiSeat > 0 && memberCount == 6) {
+
+                $("#myConfirmDialog").modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+
+                //alert('Member Count' + memberCount + ' Odhicount:' + odhiSeat);
+                $("#myConfirmDialog").modal('show');
+            } else {
+                if ($('.error').length > 0) {
+                    $('.error').first().focus();
+                    return false;
+                }
+
+                if ($('#txtInput').val() == '') {
+                    $("#captchaError").html('Enter valid captcha');
+                    $('#txtInput').addClass("error");
+                    $('#txtInput').focus();
+                    return false;
+                }
+                if (PlaceId == 60) {                 
+                    var myRadio = $("input[name=bond_agreement]");
+                    var IsIndeminityBond = myRadio.filter(":checked").val();
+                    if (IsIndeminityBond == 0) {
+                        alert('Select Indemnity Bond');
+                        return false;
+                    }
+                }
+               
+                if ($('.error').length < 1) {
+                    $('form').submit();
+                    return true;
+                }
+            }
+            return false;
+        });
+
+        $('.cnationality').on('change', getFeeData).on('change', idHide);
+        function idHide () {
+            var eleIdType = $(this).parents('tr').find('.cidtype');
+            if ($(this).val() == 2) {
+                eleIdType.children('option').hide();
+                eleIdType.children('option[value^=1]').show()
+            } else { eleIdType.children('option').show(); }
+
+        }
+        $('.videocamera').on('change', function () { CalculateFees($(this).parents('tr')) });
+        $('.stillcamera').on('change', function () { CalculateFees($(this).parents('tr')) });
+
+    });
+    function SetOdhiOption(optionId) {
+        $('#txtIsOdhiPlace').val(optionId);
+        $("#myConfirmDialog").modal('toggle');
+        if ($('.error').length > 0) {
+            $('.error').first().focus();
+            return false;
+        }
+
+        if ($('#txtInput').val() == '') {
+            $("#captchaError").html('Enter valid captcha');
+            $('#txtInput').addClass("error");
+            $('#txtInput').focus();
+            return false;
+        }
+
+        if ($('.error').length < 1) {
+            $('form').submit();
+            return true;
+        }
+    }
+    //Get server Date fro Datepicker
+    function getFeeData() {
+        var PlaceId = $(".ddlPlace option:selected").val();
+        var VehicleId = $(".ddlVehicle option:selected").val();
+        var VisitorTypeId = $(this).val();
+        var $rowObj = $(this).parents('tr');
+        var ids = { placeid: PlaceId, vehicleid: VehicleId, visitortypeid: VisitorTypeId };
+        $.ajax({
+            url: RootUrl + 'NationalPark/getFeeByVisitor',
+            type: 'POST',
+            dataType: 'json',
+            data: ids,
+            success: function (data) {
+                $rowObj.find('#VideoCameraAmount').attr("data-fee", data[0].VideoCamereFees);
+                $rowObj.find('#StillCameraAmount').attr("data-fee", data[0].StillCameraFee);
+
+                $rowObj.find('#MemberFees').html(parseFloat(data[0].MemberFee).toFixed(2));
+                $rowObj.find('#VehicleFees').html(parseFloat(data[0].VehicleFees).toFixed(2));
+                $rowObj.find('#GuideFees').html(parseFloat(data[0].GuideFee).toFixed(2));
+                CalculateFees($rowObj);
+            }
+        });
+    }
+
+    function CalculateFees($rowObj) {
+        var nation = $rowObj.find('.cnationality').val();
+        if (nation > 0) {
+            var cameraFee = $rowObj.find('#VideoCameraAmount').attr("data-fee");
+            var StillcameraFee = $rowObj.find('#StillCameraAmount').attr("data-fee");
+
+            var noOfCamera = $rowObj.find('.videocamera').val();
+            var totalCamerafee = parseFloat(noOfCamera * cameraFee);
+
+            var noOfStillCamera = $rowObj.find('.stillcamera').val();
+            var totalStillCamerafee = parseFloat(noOfStillCamera * StillcameraFee);
+
+            $rowObj.find('#VideoCameraAmount').html(totalCamerafee.toFixed(2));
+            $rowObj.find('#StillCameraAmount').html(totalStillCamerafee.toFixed(2));
+
+            var MemberFees = isNaN(parseFloat($rowObj.find('#MemberFees').html())) ? 0 : parseFloat($rowObj.find('#MemberFees').html());
+            var VehicleFees = isNaN(parseFloat($rowObj.find('#VehicleFees').html())) ? 0 : parseFloat($rowObj.find('#VehicleFees').html());
+            var GuideFees = isNaN(parseFloat($rowObj.find('#GuideFees').html())) ? 0 : parseFloat($rowObj.find('#GuideFees').html());
+            totalCamerafee = isNaN(totalCamerafee) ? 0 : totalCamerafee;
+            totalStillCamerafee = isNaN(totalStillCamerafee) ? 0 : totalStillCamerafee;
+
+            $rowObj.find('#TotalAmount').html(parseFloat(MemberFees + VehicleFees + totalCamerafee + totalStillCamerafee + GuideFees).toFixed(2));
+        }
+    }
+
+    function removeSpaces(string) {
+        return string.split(' ').join('');
+    }
+</script>

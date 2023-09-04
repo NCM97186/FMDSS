@@ -1,0 +1,154 @@
+﻿@model IEnumerable<FMDSS.Models.OnlineBooking.CS_BoardingDetails>
+
+
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $('.Update4NotArrived').on("click", function () {
+        var IDname = $(this).parents('tr').find('input[name=PrintBoardings]').val();
+
+        var tblinfo = {
+            ID: $.trim(IDname)
+        }
+        var row = $(this).parents('tr');
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'BoardingMaster/UpdateForNotArrived',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(tblinfo),
+            success: function (json) {
+
+                if (json.STATUS == "TRUE") {
+                    row.hide();
+                    currentValue = currentValue - 1;
+                    alert('inventory update at current booking window');
+                    // $("#RowHideIndex_" + Indexs).hide();
+                }
+
+            }
+
+        });
+
+    });
+
+    $(document).ready(function () {
+
+        $('#btn_Cancel').click(function () {
+            var v = $($currentTR).find('td').eq(1).find('a').text();
+            var reqId = (v).split(' ')[0];
+            var count = (v).split(' ')[1];
+            var newText = reqId + ' ' + '(' + currentValue + ')';
+            $($currentTR).find('td').eq(1).find('a').text(newText);
+            //$('#myModal').css('display', 'none');
+
+        });
+
+
+        //$(document).on('click', '.Update4NotArrived', function (e) {
+
+
+        //    var IDname = $(this).parents('tr').find('input[name=PrintBoardings]').val();
+
+        //    var tblinfo = {
+        //        ID: $.trim(IDname)
+        //    }
+        //    var row = $(this).parents('tr');
+
+        //    $.ajax({
+        //        type: 'POST',
+        //        url: RootUrl + 'BoardingMaster/UpdateForNotArrived',
+        //        contentType: 'application/json; charset=utf-8',
+        //        data: JSON.stringify(tblinfo),
+        //        success: function (json) {
+
+        //            if (json.STATUS == "TRUE") {
+
+        //                row.hide();
+
+        //                alert('inventory update at current booking window');
+
+        //                // $("#RowHideIndex_" + Indexs).hide();
+        //            }
+
+        //        }
+
+        //    });
+
+        //});
+
+
+    });
+
+</script>
+
+@using (Html.BeginForm("UpdateNotArrived", "BoardingMaster", FormMethod.Post))
+{
+
+
+    <div class="modal-content">
+
+
+        <div class="modal-body">
+
+            <table class="table  table-bordered  table-responsive gridtable" id="dataTables-example">
+
+
+                <thead>
+                    <tr>
+                        <th style="width:1%">#</th>
+                        <th style="width:10%">Booking Id</th>
+
+                        <th>Date of Visit</th>
+                        <th>Name of Visitor</th>
+                        <th>Shift </th>
+                        <th>Vehicle </th>
+                        <th>Zone </th>
+                        <th colspan="2" style="width:20%;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr style="background-color:none; background-color: @Html.DisplayFor(model => item.Colors); ">
+                            <td>@Html.DisplayFor(model => item.Index) </td>
+                            <td>@Html.DisplayFor(model => item.DisplayBookingId)</td>
+                            <td>@Html.DisplayFor(model => item.DateofVisit)</td>
+                            <td>@Html.DisplayFor(model => item.NameOfVisitor)</td>
+                            <td>@Html.DisplayFor(model => item.Shift)</td>
+                            <td>@Html.DisplayFor(model => item.Vehicle)</td>
+                            <td>@Html.DisplayFor(model => item.ZoneAtTheTimeOfBooking)</td>
+                            <td>
+                                @Html.Hidden("PrintBoardings", Encryption.encrypt(item.HDNBookingId + "_" + item.DisplayBookingId))
+                                @Html.Hidden("ReqID", item.DisplayBookingId)
+
+                                @if (item.IsNotArrival == true)
+                                {
+                                    <button type="button" class="IssueBoards btn btn-success Update4NotArrived" id="NotArrivedindex_@item.Index" name="NotArrivedindex_@item.Index">No Show</button>
+                                }
+
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+                @*<button type="submit" class="btn btn-success" value="Save" id="btn_submit1">
+                        <i class="fa fa-times fa-fw"></i> Close
+                    </button>*@
+                <button type="button" class="btn btn-success" data-dismiss="modal" value="Cancel" id="btn_Cancel">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+
+            </div>
+
+        </div>
+    </div>
+
+}

@@ -1,0 +1,521 @@
+﻿@model FMDSS.Models.ForestProtection.ForesterParivad
+@{
+    ViewBag.Title = "FParivadRegistration";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+<script src="~/Scripts/jquery-1.8.2.js"></script>
+<link href="~/css/timepicki.css" type="text/css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+<script src="~/js/ForesterRegistration.js"></script>
+<script type="text/javascript">
+    var RootURl = '@Url.Content("~/")';
+</script>
+<script type="text/javascript">
+    var $j = jQuery.noConflict();
+    $j(document).ready(function () {
+        $j(".timepicker").timepicki();
+    });
+</script>
+
+<script>
+
+    var ALERT_TITLE = "!!!";
+    var ALERT_BUTTON_TEXT = "Ok";
+
+    //if (document.getElementById) {
+    //    window.alert = function (txt) {
+    //        createCustomAlert(txt);
+    //    }
+    //}
+
+    function createCustomAlert(txt) {
+        d = document;
+        if (d.getElementById("modalContainer")) return;
+        mObj = d.getElementsByTagName("body")[0].appendChild(d.createElement("div"));
+        mObj.id = "modalContainer";
+        mObj.style.height = d.documentElement.scrollHeight + "px";
+
+        alertObj = mObj.appendChild(d.createElement("div"));
+        alertObj.id = "alertBox";
+        if (d.all && !window.opera) alertObj.style.top = document.documentElement.scrollTop + "px";
+        alertObj.style.left = (d.documentElement.scrollWidth - alertObj.offsetWidth) / 2 + "px";
+        alertObj.style.visiblity = "visible";
+
+        h1 = alertObj.appendChild(d.createElement("h1"));
+        h1.appendChild(d.createTextNode(ALERT_TITLE));
+
+        msg = alertObj.appendChild(d.createElement("p"));
+        //msg.appendChild(d.createTextNode(txt));
+        msg.innerHTML = txt;
+
+        btn = alertObj.appendChild(d.createElement("a"));
+        btn.id = "closeBtn";
+        btn.appendChild(d.createTextNode(ALERT_BUTTON_TEXT));
+        btn.href = "#";
+        btn.focus();
+        btn.onclick = function () { removeCustomAlert(); return false; }
+
+        alertObj.style.display = "block";
+
+    }
+
+    function removeCustomAlert() {
+        document.getElementsByTagName("body")[0].removeChild(document.getElementById("modalContainer"));
+    }
+
+</script>
+<style>
+    #modalContainer {
+        background-color: rgba(0, 0, 0, 0.3);
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0px;
+        left: 0px;
+        z-index: 10000;
+        background-image: url(tp.png); /* required by MSIE to prevent actions on lower z-index elements */
+    }
+
+    #alertBox {
+        position: relative;
+        width: 300px;
+        min-height: 100px;
+        margin-top: 310px;
+        border: 1px solid #666;
+        background-color: #fff;
+        background-repeat: no-repeat;
+        background-position: 20px 30px;
+    }
+
+    #modalContainer > #alertBox {
+        position: fixed;
+    }
+
+    #alertBox h1 {
+        margin: 0;
+        font-size: 18px;
+        background-color: #3073BB;
+        color: #FFF;
+        border-bottom: 1px solid #000;
+        padding: 2px 0 2px 5px;
+    }
+
+    #alertBox p {
+        text-align: center;
+        padding: 20px;
+    }
+
+    #alertBox #closeBtn {
+        display: block;
+        position: relative;
+        margin: 5px auto;
+        padding: 7px;
+        border: 0 none;
+        width: 70px;
+        font: 0.7em verdana,arial;
+        text-transform: uppercase;
+        text-align: center;
+        color: #FFF;
+        background-color: #357EBD;
+        border-radius: 3px;
+        text-decoration: none;
+    }
+
+    /* unrelated styles */
+
+    #mContainer {
+        position: relative;
+        width: 600px;
+        margin: auto;
+        padding: 5px;
+        border-top: 2px solid #000;
+        border-bottom: 2px solid #000;
+        font: 0.7em verdana,arial;
+    }
+
+    h1, h2 {
+        margin: 0;
+        padding: 4px;
+        font: bold 1.5em verdana;
+        border-bottom: 1px solid #000;
+    }
+
+    code {
+        font-size: 1.2em;
+        color: #069;
+    }
+
+    #credits {
+        position: relative;
+        margin: 25px auto 0px auto;
+        width: 350px;
+        font: 0.7em verdana;
+        border-top: 1px solid #000;
+        border-bottom: 1px solid #000;
+        height: 90px;
+        padding-top: 4px;
+    }
+
+        #credits img {
+            float: left;
+            margin: 5px 10px 5px 0px;
+            border: 1px solid #000000;
+            width: 80px;
+            height: 79px;
+        }
+
+    .important {
+        background-color: #F5FCC8;
+        padding: 2px;
+    }
+
+    code span {
+        color: green;
+    }
+
+    #selectedFiles div {
+        background-color: #f1f2f6;
+        height: 35px;
+        width: 100%;
+        padding: 10px;
+        box-shadow: 0 1px 2px #000;
+        font-size: 12px;
+        margin: 0 0 10px;
+    }
+
+        #selectedFiles div a {
+            border-radius: 50%;
+            background: #c9302c;
+            padding: 2px 4px 2px 2px;
+            color: #fff;
+            font-weight: bold;
+            margin: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition-property: background, box-shadow;
+            transition-duration: .3s;
+            transition-timing-function: linear;
+            -webkit-transition-duration: .3s;
+        }
+
+            #selectedFiles div a:hover, .#selectedFiles div a:focus {
+                background: #df8402;
+                box-shadow: 0 5px 10px #5d3701;
+                text-decoration: none;
+            }
+</style>
+
+<script>
+    var nowTemp = new Date();
+    var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+    var files;
+    var storedFiles = [];
+    var upc = 0;
+    var $j = jQuery.noConflict();
+
+    $j(function () {
+
+        $j(":file").attr('title', '  ');
+        var $jloading = $j('#loadingDiv').hide();
+
+        $j("input[id^='fileToUpload']").change(function (e) {
+            if (($j('#fileToUpload')[0].files[0].size / 1048576) > 2) {
+                createCustomAlert('File Size cannot be more than 2 mb!!!');
+                $j("input[id^='fileToUpload']").val('');
+            }
+            else {
+                doReCreate(e);
+            }
+        });
+
+        selDiv = $j("#selectedFiles");
+    });
+
+    function doReCreate(e) {
+        createCustomAlert('File has been selected for upload!!!');
+        upc = upc + 1;
+        handleFileSelect(e);
+
+        $j("input[id^='fileToUpload']").hide();
+
+        $j('<input>').attr({
+            type: 'file',
+            multiple: 'multiple',
+            id: 'fileToUpload' + upc,
+            class: 'form-control',
+            name: 'fileUpload',
+            style: 'float: left',
+            title: '  ',
+            onchange: "doReCreate(event)"
+
+        }).appendTo('#uploaders');
+    }
+
+    function handleFileSelect(e) {
+        selDiv = document.querySelector("#selectedFiles");
+
+        if (!e.target.files) return;
+        files = e.target.files;
+
+        for (var i = 0; i < files.length; i++) {
+            var f = files[i];
+            if (storedFiles.length <= 2) {
+                if (storedFiles.length == 0) {
+                    selDiv.innerHTML += "<div>" + f.name +
+                    "<a onclick='removeAtt(this)'> X </a></div>";
+                    storedFiles.push(f.name);
+                }
+                else {
+                    var chk = 0;
+                    for (var a = 0; a < storedFiles.length; a++) {
+                        if (storedFiles[a] == f.name) {
+                            chk = 1;
+                        }
+                    }
+                    if (chk == 0) {
+                        selDiv.innerHTML += "<div>" + f.name +
+                        "<a onclick='removeAtt(this)'> X </a></div>";
+                        storedFiles.push(f.name);
+                    }
+                }
+            }
+            else {
+                createCustomAlert('Maximum 3 files can be upload!!!');
+                e.preventDefault();
+            }
+        }
+        $j('#@Html.IdFor(i => i.FilesToBeUploaded)').val(storedFiles);
+    }
+
+    function removeAtt(t) {
+        var serEle = $j(t).parent().text().slice(0, -3);
+        var index = storedFiles.indexOf(serEle);
+        if (index !== -1) {
+            storedFiles.splice(index, 1);
+        }
+        $j(t).parent().remove();
+        $j('#@Html.IdFor(i => i.FilesToBeUploaded)').val(storedFiles);
+
+    }
+</script>
+
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Register New Complaint/Parivad</h1>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                @*@Html.Hidden("hdFPMOffenseCode", Model.OffenseCode)
+                @Html.Hidden("hdFormNo", Model.RegFormNumber)
+                @Html.Hidden("hdFPMOffenseID", Model.OffenseID)
+                @Html.Hidden("hdfpmUserRole", @Model.UserRole)*@
+                @using (Html.BeginForm("SubmitDetails", "ForesterParivadRegistration", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data", id = "IdFor" }))
+                {
+                <div class="panel-body">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <label class="checkbox-inline">
+                                @Html.CheckBoxFor(x => x.Self, new { @id = "Self" }) Self
+                            </label>
+                            <label class="checkbox-inline">
+                                @Html.CheckBoxFor(x => x.Name, new { @id = "Name" }) By-Complaint
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Name of Complainant: <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(x => x.ApplicantName, new { @class = "form-control", @id = "ApplicantName", name = "ApplicantName" })
+                            <div id="errordivName" style="display:none" class="alert-danger1"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Circle:</label>
+                            @Html.TextBox("Circle", (string)ViewBag.circle, new { @class = "form-control", @id = "txt_Circle", @readonly = "readonly" })
+                            @Html.TextBoxFor(x => x.CircleCode, new { style = "display: none;" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Division: <span class="mandatory"></span></label>
+                            @Html.TextBox("Division", (string)ViewBag.division, new { @class = "form-control", @id = "txt_Division", @readonly = "readonly" })
+                            @Html.TextBoxFor(x => x.DivisionCode, new { style = "display: none;" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>District: <span class="mandatory"></span></label>
+                            @Html.TextBox("District", (string)ViewBag.district, new { @class = "form-control", @id = "txt_district", @readonly = "readonly" })
+                            @Html.TextBoxFor(x => x.DistrictCode, new { style = "display: none;" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Range: <span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(x => x.RangeCode, (IEnumerable<SelectListItem>)ViewBag.RangeCode1, "--Select--", new { @class = "form-control", id = "ddl_range" })
+                            <div id="errordivRange" style="display:none" class="alert-danger1"></div>
+
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Naka: <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(x => x.Naka, new { @class = "form-control", @title = "Please enter the Naka", @id = "txt_Naka", @maxlength = 50 })
+                            <div id="errordivNaka" style="display:none" class="alert-danger1"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Beat: <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(x => x.Compartment, new { @class = "form-control", @title = "Please enter the Beat.", @id = "txt_Compartment", @maxlength = 50 })
+                            <div id="errordivCompartment" style="display:none" class="alert-danger1"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Forest Block: <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(x => x.ForestBlock, new { @class = "form-control", @title = "Please enter the Forest Block", @id = "txt_ForestBlock", @maxlength = 50 })
+                            <div id="errordivForestBlock" style="display:none" class="alert-danger1"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Tehsil: <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(x => x.Tehsil, new { @class = "form-control", @title = "Please enter the Tehsil", @id = "txt_Tehsil", @maxlength = 50 })
+                            <div id="errordivTehsil" style="display:none" class="alert-danger1"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="Areainha">
+                                Place of Offense:<span class="mandatory">*</span>
+                            </label>
+                            @Html.TextBoxFor(x => x.OffensePlace, new { @class = "form-control common", @title = "", @placeholder = "Enter Place of Offense ", @maxlength = 50, @id = "txt_OffensePlace" })
+                            <div id="errordivOffensePlace" style="display:none" class="alert-danger1"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+
+                        <div class="form-group">
+                            <label>Date of Offense:<span class="mandatory">*</span></label>
+                            <div id="datepicker" class="input-group date">
+                                @Html.TextBoxFor(x => x.OffenseDate, new { @class = "form-control datefield", @title = "Select the Date of Offense from date picker", @id = "txt_DateOfOffense" })
+                                <div id="errordivDateOfOffense" style="display:none" class="alert-danger1"></div>
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                <div id="errordivOffenseDate" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Time of Offense: <span class="mandatory">*</span></label>
+                            <div id="datepicker" class="input-group date">
+                                @Html.TextBoxFor(x => x.OffenseTime, new { @class = "form-control timepicker", title = "Select time", @id = "OffenseTime" })
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                <div id="errordivOffenseTime" style="display:none" class="alert-danger1"></div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Latitude(Place of Offense):(Range between 23° to 29° Eg 25.052) <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(x => x.Latitude, new { @class = "form-control", @title = "Enter the GPS latitude in the range of 23° - 29° E.G. 26.52°", @placeholder = "Enter Latitude", @maxlength = 6, @id = "txt_lat" })
+                            <div id="errordivLatitude" style="display:none" class="alert-danger1"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Longitude(Place of Offense):(Range between 67° to 78° Eg 69.053) <span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(x => x.Longitude, new { @class = "form-control", @title = "Enter the GPS longitude in the range of 67° - 78° E.G. 75.52°", @placeholder = "Enter Longitude", @maxlength = 6, @id = "txt_long" })
+                            <div id="errordivLongitude" style="display:none" class="alert-danger1"></div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Offense Category:<span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(x => x.OffenceCategory, (IEnumerable<SelectListItem>)ViewBag.OffenseCategory, "--Select--", new { id = "For_OffenceCategory", @class = "form-control" })
+                            <div id="errordivForOffenseCategory" style="display: none; position: initial !important" class="alert-danger1"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Offense Description: <span class="mandatory">*</span></label>
+                            @Html.TextAreaFor(x => x.Offence_Description, new { @class = "form-control", @title = "Please enter the Offense Description", @id = "Offence_Description", @maxlength = 500 })
+                            <div id="errordivOffenseDesc" style="display:none" class="alert-danger1"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Type of Forest / Village (Reserved/Protected/Unclassified): <span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(x => x.ForestType, (IEnumerable<SelectListItem>)ViewBag.ForestType1, "--Select--", new { id = "ddl_ForestType", @class = "form-control" })
+                            <div id="errordivForestType" style="display:none" class="alert-danger1"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Forest Officers:<span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(x => x.ForestOfficer, (IEnumerable<SelectListItem>)ViewBag.ForestOfficer, "--Select--", new { id = "ForestOfficer", name = "ForestOfficer", @class = "form-control" })
+                            <div id="errordivForestOfficer" style="display:none" class="alert-danger1"></div>
+                        </div>
+                    </div>        
+                         @Html.HiddenFor(X => X.FilesToBeUploaded)                   
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <div id="uploaders">
+                                    <label>Upload photo/evidence:</label>
+                                    <input type="file" id="fileToUpload" class="form-control" name="fileUpload" multiple="multiple" style="float: left;" />
+                                    <div id="errordivEvidenceDocURL" style="display:none; position:static" class="alert-danger1"></div>
+                                    <br />
+                                    * Only .jpg /.pdf /.png /.gif file formats are allowed with max size: 2Mb.
+                                    <div class="control-section" style="padding: 0px;">
+                                        <div id="selectedFiles"></div>
+                                    </div>
+                                    <span id="spnFile" style="float: left; color: #FF0000"></span>
+                                    @Html.ValidationMessage("File")
+                                    @Html.Hidden("hdnFileUpload")
+                                </div>
+                            </div>
+                          </div>
+                            @*<div class="col-lg-6">
+                            <div class="form-group">
+                                <label id="lbl1">Photo 1<span class="mandatory">*</span><a style="display:none;" id="viewPhotoURL1">view document</a></label>
+                                <label id="lbl2">Photo 2 <span class="mandatory">*</span><a style="display:none;" id="viewPhotoURL2">view document</a></label>
+                                <label id="lbl3">Photo 3 <span class="mandatory">*</span><a style="display:none;" id="viewPhotoURL3">view document</a></label>
+                            </div>
+                        </div>*@
+                 
+                                                          
+                        <div class="col-lg-12"></div>
+                        <div class="col-lg-12" id="btn">
+                            <button type="submit" class="btn btn-success" name="Command" id="btnNext" value="Save" title="Submit">
+                                <i class="fa fa-check"></i> Save
+                            </button>
+
+                            <button type="button" name="Command" value="Cancel" class="btn btn-danger" title="Cancel" onclick="reload()">
+                                <i class="fa fa-times fa-fw"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+
+        </div>
+    </div>
+
+  
+</div>
+

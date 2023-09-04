@@ -1,0 +1,305 @@
+﻿@{
+    ViewBag.Title = "AddApplicantCordinator";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //"~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+    $(document).ready(function () {
+        $('#researchId').keypress(function (e) {
+            var kc = e.which;
+            if (kc >= 48 && kc <= 57) {
+            }
+            else {
+                e.preventDefault();
+            }
+        })
+        if ($("#rbl_Activityes").is(":checked")) {
+            $('#dvActivity').show();
+        }
+        $("#rbl_Activityes, #rbl_Activityno").change(function () {
+            if ($("#rbl_Activityes").is(":checked")) {
+                $('#dvActivity').show();
+            }
+            else if ($("#rbl_Activityno").is(":checked")) {
+                $('#dvActivity').hide();
+            }
+        });
+        $("#temp").hide();
+        $("#researchId").change(function () {
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ApplicantCordinator/GetResearchInfo', // we are calling json method
+                dataType: 'json',
+                data: { researchId: $("#researchId").val() },
+                success: function (data) {
+                    $("#subjectforresearch").val(data.Subjectforresearch);
+                    $("#durationfrom").val(data.Durationfrom);
+                    $("#durationto").val(data.Durationto);
+                    $("#researchLocation").val(data.ResearchLocation);
+                    $("#researchPurpose").val(data.ResearchPurpose);
+                    $("#researchWildlife").val(data.ResearchWildlife);
+                },
+                error: function (ex) {
+                }
+            });
+            return false;
+        });
+        $('#btnAdd').click(function (e) {
+            if ($('#researchId').val() == '') {
+                $('#errordivid').show();
+                $('#errordivid').html("Please Enter Old Research Id!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('html, body').animate({
+                    scrollTop: $("#researchId").offset().top
+                }, 600);
+                return false;
+            }
+            else { $('#errordivid').hide(); }
+            $("#temp").show();
+            //alert(activity);
+            var activity = $('input[name=Activity_TakenBy]:checked').val();
+            //var activity = $("#category").val();
+            var researchId = $("#researchId").val();
+            var subjectforresearch = $("#subjectforresearch").val();
+            var durationfrom = $("#durationfrom").val();
+            var durationto = $("#durationto").val();
+            var researchLocation = $("#researchLocation").val();
+            var researchPurpose = $("#researchPurpose").val();
+            var researchWildlife = $("#researchWildlife").val();
+            //alert("Hello");
+            var researchinfo = {
+                Id: $('#Hdn_Id').val(),
+                Activity_TakenBy: activity,
+                ResearchId: researchId,
+                Subjectforresearch: subjectforresearch,
+                Durationfrom: durationfrom,
+                Durationto: durationto,
+                ResearchLocation: researchLocation,
+                ResearchPurpose: researchPurpose,
+                researchWildlife: researchWildlife
+            };
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(researchinfo),
+                url: RootUrl + 'ApplicantCordinator/GetActivity',
+                success: function (data) {
+                    if (data.Subjectforresearch != null) {
+                        var bardata = "<tr><td style='display:none;'>" + data.Id + "</td><td>" + data.Activity_TakenBy + "</td><td>" + data.ResearchId + "</td><td>" + data.Subjectforresearch + "</td><td>" + data.Durationfrom + "</td><td>" + data.Durationto + "</td><td>" + data.ResearchLocation + "</td><td>" + data.ResearchPurpose + "</td><td>" + data.ResearchWildlife + "</td>" + "</td></tr>";
+                        $("#applyTable").append(bardata);
+                        $('#Hdn_Id').val(data.Id);
+                        $("#researchId").val('');
+                        $("#subjectforresearch").val('');
+                        $("#durationfrom").val('');
+                        $("#durationto").val('');
+                        $("#researchLocation").val('');
+                        $("#researchPurpose").val('');
+                        $("#researchWildlife").val('');
+                    }
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+        $('#btnFinal').click(function (e) {
+            if ($("#rbl_Activityes").is(":checked") && $("#researchId").val() == '') {
+                alert('Please Enter Past Research Id ');
+                return false;
+            }
+        });
+
+        $("#ProjectDescription").change(function (e) {
+            var iSize = ($("#ProjectDescription")[0].files[0].size / 1048576);
+            if (iSize > 2) {
+                $("#ProjectDescription").val('');
+                $('#errPrjDesc').show();
+                $('#errPrjDesc').html("Project Description file size should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#ProjectDescription').focus();
+                return false;
+            }
+            else { $('#errPrjDesc').hide(); }
+
+            var file = $("#ProjectDescription").val();
+            var exts = ['ppt', 'pptx'];
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $("#ProjectDescription").val('');
+                    $('#errPrjDesc').show();
+                    $('#errPrjDesc').html("Please upload only ppt/pptx file format!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#ProjectDescription').focus();
+                    return false;
+                } else {
+                    $('#errPrjDesc').hide();
+                }
+            }
+            else { $('#errPrjDesc').hide(); }
+        });
+    });
+    function reload() {
+        var r = confirm("Do you want to leave page!");
+        if (r) {
+            window.location = RootUrl + "Dashboard/dashboard";
+        }
+        else {
+            //do nothing
+        }
+    }
+</script>
+
+@using (Html.BeginForm("addfinalResearch", "ApplicantCordinator", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <div id="page-wrapper-inn">
+        <div class="col-lg-12 pad">
+            <h1 class="page-header"><span> Applicant / Coordinator Details</span></h1>
+        </div>
+        <!-- /.col-lg-12 -->
+        <!-- Row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <label>
+                                    Research Activities
+                                    undertaken in Past:<span class="mandatory">*</span>
+                                </label>
+                                <input type="radio" name="IsActivity" id="rbl_Activityes" value="Yes" checked />Yes. &nbsp;&nbsp;&nbsp;&nbsp;
+                                <input type="radio" name="IsActivity" id="rbl_Activityno" value="No" />No
+                            </div>
+                            <div id="errordivid" style="display:none" class="alert-danger1"></div>
+                        </div>
+
+
+                        <div class="form-group">
+                            <div class="border-add" id="dvActivity">
+
+
+                                <div class="col-lg-6" style="display:none;">
+
+                                    <div class="form-group">
+                                        <label>
+                                            Research Activities
+                                            undertaken in Past by:<span class="mandatory">*</span>
+                                        </label>
+                                        <div class="form-group">
+                                            <input type="radio" name="Activity_TakenBy" id="category" value="Applicant" class="chk" checked="checked" />Applicant. &nbsp;&nbsp;&nbsp;&nbsp;
+                                            <input type="radio" name="Activity_TakenBy" id="category1" class="chk" value="Coordinator" />Coordinator
+                                            <input type="hidden" id="Hdn_Id" value="0" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Old Research Id: <span class="mandatory">*</span></label>
+                                        <input type="text" class="form-control" id="researchId" name="ResearchId" />
+                                    </div>
+                                    <div id="errordivid" style="display:none" class="alert-danger1"></div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>  Subject of Research:</label>
+                                        <input type="text" class="form-control" id="subjectforresearch" name="Subjectforresearch" readonly="readonly" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>  Duration of Research:</label>
+                                        <label>From </label>
+                                        <input type="text" class="form-control" id="durationfrom" name="Durationfrom" readonly="readonly" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>To </label>
+                                        <input type="text" class="form-control" id="durationto" name="Durationto" readonly="readonly" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>  Location of Research: </label>
+                                        <input type="text" class="form-control" id="researchLocation" name="ResearchLocation" readonly="readonly" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>  Purpose of Research:</label>
+                                        <input type="text" class="form-control" id="researchPurpose" name="ResearchPurpose" readonly="readonly" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label> Benefits of Research to Forest & wild Life Management</label>
+                                        <input type="text" class="form-control" id="researchWildlife" name="ResearchWildlife" readonly="readonly" />
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>
+                                            Project Description:<span class="mandatory">*</span>
+                                        </label>
+                                        <input type="file" class="form-control common" id="ProjectDescription" name="ProjectDescription" style="width:80%" title="Upload Project description " />
+                                        <label><span class="spanmark">* Only .ppt /.pptx file formats are allowed with max size: 2Mb.</span></label>
+                                        <div id="errPrjDesc" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Btn Groping -->
+                                <div class="btn-padd">
+                                    <div id="btn" class="col-lg-12">
+                                        <button type="button" class="btn btn-success" value="Add" id="btnAdd">
+                                            <i class="fa fa-check"></i> Add
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12" id="temp">
+                            <div id="tbl-new" class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th style="display:none;">Id</th>
+                                            <th>Activity Taken By</th>
+                                            <th>Research Id</th>
+                                            <th>Subject</th>
+                                            <th>Duration From</th>
+                                            <th>Duration To</th>
+                                            <th>Location</th>
+                                            <th>Purpose</th>
+                                            <th>Benefit To Forest</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="applyTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-lg-12"></div>
+                        <div class="btn-padd">
+                            <div id="btn-ap" class="col-lg-12">
+                                <a class="btn btn-default btn-block" style="display:none" href="@Url.Action("PermissionPreview", "AllPermissionPreview", new { pertype = "Research" }) " target=" _blank"><i class="fa fa-edit fa-fw"></i> Preview</a>
+                                <button type="submit" class="btn btn-success" name="Command" value="Save" id="btnFinal">
+                                    <i class="fa fa-check"></i> Save
+                                </button>
+                                <button type="reset" class="btn btn-warning">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+                                <button type="button" name="command" value="Cancel" class="btn btn-danger" onclick="reload(); return false;">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+

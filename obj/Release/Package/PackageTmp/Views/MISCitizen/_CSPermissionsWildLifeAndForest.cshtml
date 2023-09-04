@@ -1,0 +1,208 @@
+﻿@using System.Data;
+@using FMDSS.Globals;
+@{
+    DataSet ds = null; DataTable tbl = null; DataTable tblTrail = null; DataTable dtWildlife = null;  DataTable tblCmd = null; DataTable dtMemberInfo = null;
+    int currentApprovalLevel = 0; string ruleType = string.Empty;
+    ds = ViewBag.Data;
+
+    tbl = ds.Tables[0];
+    if (Util.isValidDataSet(ds, 1))
+    {
+        tblTrail = ds.Tables[1];
+        if (ds.Tables.Contains("Table3"))
+        {
+            dtMemberInfo = ds.Tables[3];
+        }
+        if (Util.isValidDataSet(ds, 2, true))
+        {
+            tblCmd = ds.Tables[2];
+            currentApprovalLevel = string.IsNullOrEmpty(Convert.ToString(tblCmd.Rows[0]["CurrentApprovalLevel"])) ? 0 : Convert.ToInt32(tblCmd.Rows[0]["CurrentApprovalLevel"]);
+            ruleType = Convert.ToString(tblCmd.Rows[0]["RuleType"]);
+        }
+    }
+
+}
+
+
+<div id="divPrint" class="modal-body tbl-scroll divPrintone" style="height:430px;">
+    @{
+        string submitclassWL = "nav-item";
+        string forwardclassWL = "nav-item";
+        string reviewedclassWL = "nav-item";
+        string goiclassWL = "nav-item";
+        string pdateclassWL = "nav-item";
+        string pdoneclassWL = "nav-item";
+        string approvedclassWL = "nav-item";
+
+
+        string wildlifeclass = "hide";
+
+
+
+        DataRow[] drWild = tblTrail.Select("AreaType='Wildlife' OR AreaType='N/A'");
+        if (drWild.Count() > 0)
+        {
+            dtWildlife = tblTrail.Select("AreaType='Wildlife' OR AreaType='N/A'").CopyToDataTable();
+        }
+        wildlifeclass = "show";
+
+
+
+
+    }
+
+    @if (dtWildlife != null && dtWildlife.Rows.Count > 0)
+    {
+        <div id="smartwizardWildlife" class="@wildlifeclass">
+            <h4>Wildlife Status:</h4>
+            <ul>
+
+                @foreach (DataRow dr in dtWildlife.Rows)
+                {
+                    if (dr["Action"].ToString() == "Submitted")
+                    {
+                        submitclassWL = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Forwarded")
+                    {
+                        forwardclassWL = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Reviewed")
+                    {
+                        reviewedclassWL = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Letter sent to GOI" || dr["Action"].ToString() == "Letter sent to GOR" || dr["Action"].ToString() == "Letter sent to GOI & GOR")
+                    {
+                        goiclassWL = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Set Presentation Date")
+                    {
+                        pdateclassWL = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Presentation")
+                    {
+                        pdoneclassWL = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Approved")
+                    {
+                        approvedclassWL = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Rejected")
+                    {
+                        approvedclassWL = "nav-item rejected";
+                    }
+
+
+                }
+                <li class="@submitclassWL"><a href="#step-1">Step 1<br /><small>Submitted</small></a></li>
+                <li class="@forwardclassWL"><a href="#step-2">Step 2<br /><small>Forwarded</small></a></li>
+                <li class="@reviewedclassWL"><a href="#step-3">Step 3<br /><small>Reviewed</small></a></li>
+                <li class="@goiclassWL"><a href="#step-4">Step 4<br /><small>Sent to GOI/GOR</small></a></li>
+                <li class="@pdateclassWL"><a href="#step-5">Step 5<br /><small>Presention Date Set</small></a></li>
+                <li class="@pdoneclassWL"><a href="#step-6">Step 6<br /><small>Presention Done</small></a></li>
+                <li class="@approvedclassWL"><a href="#step-7">Step 7<br /><small>Approved/Rejected</small></a></li>
+
+
+
+
+
+            </ul>
+        </div>
+    }
+
+    <h4>Basic Details:</h4>
+    <table class="table table-striped table-bordered table-hover">
+        <tbody id="tbReqDetail">
+            @foreach (DataColumn dc in tbl.Columns)
+            {
+                string colVal = Convert.ToString(tbl.Rows[0][dc.ColumnName]);
+                if (!string.IsNullOrEmpty(colVal))
+                {
+                    if (dc.ColumnName.Contains(" File"))
+                    {
+                        <tr><td>@dc.ColumnName</td><td><a href="@colVal" target="_blank" title="View @dc.ColumnName"> <i class="fa fa-eye"></i> </a></td></tr>
+                    }
+                    else
+                    {
+                        <tr><td>@dc.ColumnName</td><td>@colVal</td></tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+    <h4>Team Details:</h4>
+    <table class="table table-striped table-bordered table-hover">
+        <thead>
+            <tr>
+                <td>Member Name</td>
+                <td>Member Type</td>
+                <td>Gender</td>
+            </tr>
+        </thead>
+        <tbody>
+            @if (dtMemberInfo != null && dtMemberInfo.Rows.Count > 0)
+            {
+                for (int i = 0; i < dtMemberInfo.Rows.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            @Convert.ToString(dtMemberInfo.Rows[i]["MemberName"])
+                        </td>
+                        <td>
+                            @Convert.ToString(dtMemberInfo.Rows[i]["MemberType"])
+                        </td>
+                        <td>
+                            @Convert.ToString(dtMemberInfo.Rows[i]["Gender"])
+                        </td>
+                    </tr>
+                }
+
+            }
+            else
+            {
+                <tr>
+                    <td colspan="3"><strong>No record found.</strong></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <h4>Action Taken Details:</h4>
+    <table class="table table-striped table-bordered table-hover" id="tbTrail">
+        <thead>
+            <tr>
+                @foreach (DataColumn trailDc in tblTrail.Columns)
+                {
+                    <th>@trailDc.ColumnName</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (DataRow dr in tblTrail.Rows)
+            {
+                <tr>
+                    @for (int i = 0; i < tblTrail.Columns.Count; i++)
+                    {
+                        <td>@dr[i]</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<script src="~/Content/StepWizard/jquery.smartWizard.js"></script>
+<link href="~/Content/StepWizard/smart_wizard.css" rel="stylesheet" />
+<link href="~/Content/StepWizard/smart_wizard_theme_circles.css" rel="stylesheet" /> 
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('#smartwizardWildlife').smartWizard({
+            selected: 0,
+            theme: 'circles',
+            transitionEffect: 'fade',
+            showStepURLhash: false
+        });
+
+    });
+
+</script>
+

@@ -1,0 +1,323 @@
+﻿@model FMDSS.Models.Master.AuctionRevenueMaster
+@{
+    ViewBag.Title = "RevenueDataManage";
+    Layout = "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<style>
+    #page-wrapper-inn .table > thead > tr > th:last-child {
+        width: 170px !important;
+    }
+
+    #myModal {
+        z-index: 1050;
+    }
+
+    .ad-srl {
+        overflow-y: auto;
+        height: 820px;
+    }
+</style>
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script type="text/javascript">
+
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+
+        $(document).on('change', '.radioTendupatta', function () {
+
+            if ($(this).is(":checked")) {
+                var val = $(this).val();
+                alert(val);
+
+                if (val == "Others")
+                    $('#dvProduct').show();
+                else
+                    $('#dvProduct').hide();
+            }
+        });
+
+        $('#depotId').change(function (e) {
+            $("#producetype").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/getForesProduce', // we are calling json method
+                dataType: 'json',
+                data: { depotId: $("#depotId").val() },
+                success: function (produce) {
+
+                    $.each(produce.list3, function (i, items) {
+                        $("#producetype").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+            return false;
+        });
+
+        $('#ddl_rangeCode').change(function (e) {
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'RevenueDataManage/getDepot', // we are calling json method
+                dataType: 'json',
+                data: { rangeCode: $("#ddl_rangeCode").val() },
+                success: function (produce) {
+
+                    $.each(produce, function (i, items) {
+                        $("#depotId").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+            return false;
+        });
+
+        $('#producetype').change(function (e) {
+            $("#forestProductID").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/getForesProduct', // we are calling json method
+                dataType: 'json',
+                data: { depotId: $("#depotId").val(), producetype: $("#producetype").val() },
+                success: function (produce) {
+                    $.each(produce, function (i, items) {
+                        $("#forestProductID").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+            return false;
+        });
+
+        $('#forestProductID').change(function (e) {
+            $("#produceUnit").val('');
+            $("#produceUnit").text('');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageNotice/getForesProduceqty', // we are calling json method
+                dataType: 'json',
+                data: { depotId: $("#depotId").val(), producetype: $("#producetype").val(), product: $("#forestProductID").val() },
+                success: function (stockqty) {
+
+                    $("#produceUnit").val(stockqty.ProduceUnit);
+                    $("#hdn_avQty").val(stockqty.Qty);
+                    $("#hdn_productRate").val(stockqty.ProductRate);
+                    $("#lbl_availableQty").text("Available Quantity:" + stockqty.Qty);
+                    $("#unitspan").text("(In " + stockqty.ProduceUnit + ")");
+                    $("#lbl_baserate").html("Auction Reserved Rate per " + '</b>' + stockqty.ProduceUnit + '</b>:' + stockqty.ProductRate);
+
+                    if ($("#chkSchedlrNotice").is(":checked")) {
+                        BindProduct_Quantity_by_Scheduler(stockqty.Qty);
+                    }
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+            return false;
+        });
+    });
+</script>
+
+@using (Html.BeginForm("SubmitAuctionRevenueform", "RevenueDataManage", FormMethod.Post))
+{
+    <input type="hidden" id="Hdn_ID" name="ID" value="1">
+    <div id="page-wrapper-inn">
+
+        <div class="col-lg-12 pad">
+            <div class="col-lg-10 pad">
+                <h1 class="page-header"><span>Auction Revenue Master</span></h1>
+                @if (@TempData["Revenue_Status"] != null)
+                {
+                    <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["Revenue_Status"]</div>
+                }
+            </div>
+            <div class="col-lg-2 pull-right">
+                <button type="button" class="btn btn-success btn_pp pull-right" name="btn_addpopip" value="" title="Auction scheduler" onclick="location.href='@Url.Action("index", "RevenueDataManage")'">
+                    <i class=" fa fa-th-list ">
+                    </i> Auction Revenue List
+                </button>
+            </div>
+        </div>
+        <!-- /.col-lg-12 -->
+        <!-- Row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+
+                    <div class="panel-body">
+
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Range Name: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.RangeCode, (IEnumerable<SelectListItem>)ViewBag.RangeCode, new { @class = "form-control common", title = "Select Range", id = "ddl_rangeCode" })
+
+
+                                <input type="hidden" id="hd_rangeCode" name="Hd_RangeCode" />
+                                <div id="rangeerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Place/Depot of Auction: <span class="mandatory">*</span></label>
+
+                                @Html.DropDownListFor(x => x.DepotId, new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "depotId" })
+
+                                  <input type="hidden" id="hd_depotId" name="Hd_DepotId" />
+                                <div id="depoterrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Product Type: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.ForestProduceID, new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "producetype" })
+
+
+                                <input type="hidden" id="hd_producetype" name="Hd_ForestProduceID" />
+
+
+                                <div id="produceerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Product: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.ForestProductID, new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "forestProductID" })
+
+                              
+                                <input type="hidden" id="hd_forestProductID" name="Hd_ForestProductID" />
+
+                                <div id="producterrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Name of Unit: <span class="mandatory">*</span></label>
+                                <input class="form-control" id="produceUnit" name="ProduceUnit" readonly="readonly">
+
+
+                                <div id="produceerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Revenue Year: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("RevenueYear", (IEnumerable<SelectListItem>)ViewBag.RevenueYear, "--Select--", new { @class = "form-control", id = "revenueYearID" })
+
+                                <div id="rangeerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Revenue Quantity<span id="unitspan"></span>:<span class="mandatory">*</span></label>
+                               
+                                @Html.TextBoxFor(x => x.Qty, new { @class = "form-control", title = "Enter  Number eg: 1234555", @placeholder = "Enter Amount", @maxlength = 15, @id = "txt_qty" })
+
+
+
+                                <input type="hidden" id="hd_Qty" name="Hd_Qty" />
+                                <input type="hidden" id="hdn_avQty" />
+
+                                <label id="lbl_availableQty" for="email" class="pull-left"></label>
+                                <label id="lbl_baserate" for="email" class="pull-right"></label>
+                                <div id="textqtyerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Revenue Amount(INR): <span class="mandatory">*</span></label>
+                                
+                                @Html.TextBoxFor(x => x.RevinueAmount, new { @class = "form-control Alphanumeric", title = "Enter  Number eg: 1234555", @placeholder = "Enter Amount", @maxlength = 50, @id = "revinueAmount" })
+
+
+
+
+                                <div id="produceerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12"></div>
+
+
+
+
+                        <!-- Btn Groping -->
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_Save">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+                                <button type="reset" class="btn btn-warning">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+                                <button type="button" value="Cancel" class="btn btn-danger" onclick="reload(); return false;">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+
+                            </div>
+                        </div>
+                        <!-- /.Btn Groping -->
+
+                    </div>
+                    <!-- /.panel-body -->
+
+                </div>
+                <!-- /.panel -->
+
+            </div>
+            <!-- /.col-lg-12 -->
+
+            <div class="modal fade in" id="myViewNoticeModal2" tabindex="-1" role="dialog" aria-hidden="false">
+                <div class="modal-dialog mdw">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                            <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> </label></h4>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- From URL Get -->
+                            <input type="hidden" id="pHdn_No" name="PHdn_No" />
+                            <div id="divPublish"></div>
+
+                            <!-- /. From URL Get -->
+                        </div>
+                        <!-- /.modal-body -->
+                        <div class="modal-footer" id="fot-f">
+                            <div id="btn" class="col-lg-12">
+
+                                <button name="button" class="btn btn-danger" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                                    <i class="fa fa-times fa-fw"></i> Close
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- /.modal-content -->
+                </div>
+                <!-- /.modal-dialog -->
+            </div>
+        </div>
+    </div>
+
+}

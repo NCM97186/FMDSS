@@ -1,0 +1,930 @@
+﻿@model FMDSS.Models.MIS.NOCDivisionReportModel
+@{
+    ViewBag.Title = "Report";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+
+<script>
+
+
+
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+
+        if ($('option:selected', $('#Duration')).index() == 1) {
+            $("#divdate").css("display", "block");
+        }
+        else {
+            $("#divdate").css("display", "none");
+        }
+
+
+
+        // date validation ========================================================================
+        var currentYear = (new Date).getFullYear();
+
+        var Range = '2008:' + (currentYear + 1)
+
+        $("#FromDate,#ToDate").datepicker({ maxDate: new Date(), yearRange: Range, dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        var currentDate = new Date();
+
+        $("#FromDate").change(function () {
+            $("#ToDate").val('');
+        });
+
+        $(document).on('keypress', '#FromDate,#ToDate', function (event) {
+
+            event.preventDefault();
+            return false;
+
+        });
+
+        $('#FromDate,#ToDate').keydown(function (event)
+        { return cancelBackspace(event) });
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+        $("#ToDate").change(function () {
+            var str1 = $("#FromDate").val();
+            var str2 = $("#ToDate").val();
+
+            var L = 3, d1 = $("#FromDate").val().split('/'), d2 = $("#ToDate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#ToDate").val('');
+                alert('Date Must be GreaterThen From Date');
+            }
+        });
+
+        // date validation ========================================================================
+
+
+        $('#Duration').change(function (e) {
+
+            if ($('option:selected', $('#Duration')).index() == 1) {
+                $("#divdate").css("display", "block");
+            }
+            else {
+                $("#divdate").css("display", "none");
+            }
+
+            $('#PermissionType_Text').val($("#PermissionType option:selected").text());
+        });
+
+
+
+        $('#Circle').change(function (e) {
+
+            $('#Circle_Text').val($("#Circle option:selected").text());
+
+
+            $("#Division").empty();
+            $("#Range").empty();
+            $("#Range").append('<option value="' + "0" + '">' + "--Select--" + '</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MISCitizen/DivisionData', // we are calling json method
+                dataType: 'json',
+                data: { circleCode: $("#Circle").val() },
+                success: function (circle) {
+                    $.each(circle, function (i, items) {
+                        $("#Division").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#Division').change(function (e) {
+            $("#Range").empty();
+            $('#Division_Text').val($("#Division option:selected").text());
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MISCitizen/RangeData', // we are calling json method
+                dataType: 'json',
+                data: { DivisionCode: $("#Division").val() },
+                success: function (divCode) {
+                    $.each(divCode, function (i, items) {
+                        $("#Range").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#Range').change(function (e) {
+            $('#Range_Text').val($("#Range option:selected").text());
+        });
+
+
+
+        $('#PermissionType').change(function (e) {
+            $('#PermissionType_Text').val($("#PermissionType option:selected").text());
+        });
+
+
+
+        $(document).on('click', '.RejectedRecords', function (e) {
+
+            var Categorys = $(this).parents('tr').find('input[name=Categorys]').val();
+            var StatusNames = $(this).parents('tr').find('input[name=StatusNames]').val();
+            var PlaceId = $(this).parents('tr').find('input[name=index]').val();
+
+            ('#btn_' + PlaceId).src = "images/minus.png";
+            $('#ID_' + PlaceId).toggle();
+
+            $('#ID_' + PlaceId).html("");
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MISCitizen/GetNOCsRejectApplicationData', // we are calling json method
+                dataType: 'json',
+                data: { category: Categorys, status: StatusNames, },
+                success: function (response) {
+                    var str = '<thead><th>ApplicationNo</th><th>Remark</th></thead>';
+                    $('#ID_' + PlaceId).append(str);
+                    $.each(response, function (i, item) {
+                        $('#ID_' + PlaceId).append('<tbody><tr> <td>  <a id="btnAddModel" data-target="#myModal" data-toggle="modal" href="javascript:void(0);" onclick=CallApplicationNo("' + response[i].ApplicationNo + '_' + StatusNames + '") >' + response[i].ApplicationNo + ' </a></td> <td> ' + response[i].Remark + ' </td> </tr>  </tbody>');
+                    });
+                },
+                error: function (ex) {
+                    alert(ex.error);
+                }
+            });
+
+        });
+
+
+        $('#btn_submit1').click(function (e) {
+
+            if ($('option:selected', $('#Duration')).index() == 0) {
+                $("#errDuration").css("display", "block");
+                $('#errDuration').focus();
+                return false;
+            }
+            else {
+                $("#errDuration").css("display", "none");
+                $("#errFromDate").css("display", "none");
+                $("#errToDate").css("display", "none");
+            }
+
+            if ($('option:selected', $('#Duration')).index() == 1) {
+
+                if ($('#FromDate').val() == '') {
+                    $("#errFromDate").css("display", "block");
+                    $('#errFromDate').focus();
+                    return false;
+                }
+                else {
+                    $("#errFromDate").css("display", "none");
+                }
+
+                if ($('#ToDate').val() == '') {
+                    $("#errToDate").css("display", "block");
+                    $('#errToDate').focus();
+                    return false;
+                }
+                else {
+                    $("#errToDate").css("display", "none");
+                }
+            }
+
+
+
+
+            var isSummary = $("#action").val().toLowerCase();
+            if (isSummary == "details") {
+                if ($('option:selected', $('#Circle')).index() == 0) {
+                    $("#errCircle").css("display", "block");
+                    $('#errCircle').focus();
+                    return false;
+                }
+                else {
+                    $("#errCircle").css("display", "none");
+                }
+
+                if ($('option:selected', $('#Division')).index() == 0) {
+                    $("#errDivision").css("display", "block");
+                    $('#errDivision').focus();
+                    return false;
+                }
+                else {
+                    $("#errDivision").css("display", "none");
+                }
+
+                if ($('option:selected', $('#Range')).index() == 0) {
+                    $("#errRange").css("display", "block");
+                    $('#errRange').focus();
+                    return false;
+                }
+                else {
+                    $("#errRange").css("display", "none");
+                }
+
+                if ($('option:selected', $('#SubPermissionType')).index() == 0) {
+                    $("#errPermissionTypeSubCategory").css("display", "block");
+                    $('#errPermissionTypeSubCategory').focus();
+                    return false;
+                }
+                else {
+                    $("#errPermissionTypeSubCategory").css("display", "none");
+                }
+            }
+        });
+
+
+        $("#action").change(function () {
+            CheckActionType();
+        });
+
+
+
+    });
+
+    $(document).ready(function () { CheckActionType(); });
+    function CheckActionType() {
+        var val = $("#action").val();
+        $(".isdetailornot").attr("style", "display:block");
+        if (val.toLowerCase() == "summary") {
+            $(".isdetailornot").attr("style", "display:none");
+        }
+    }
+    function CallApplicationNo(id) {
+
+
+        $.ajax({
+            type: 'GET',
+            url: RootUrl + 'MISCitizen/GetNOCApplicationDetails', // we are calling json method
+            dataType: 'html',
+            data: { ids: id },
+            success: function (data) {
+                $('#modelPlace').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+
+    };
+
+
+
+</script>
+
+<div class="row">
+    <div class="col-lg-9 pad">
+        <h1 class="page-header"><span> NOCs Reports</span></h1>
+    </div>
+
+    <div id="modal-window" style="display:none;" title="Transation" class="modal fade">
+        <div class="modal-dialog" style="width: 50%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">Requested Id</h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="btn-close" class="btn btn-danger">Close</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
+
+
+
+    @using (Html.BeginForm("GetNOPDivisionbyStatusReport", "MISCitizen", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="divdate1">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Details:</label>
+                                @Html.DropDownListFor(model => model.model.Action, new List<SelectListItem> { new SelectListItem { Text = "Details", Value = "Details" }, new SelectListItem { Text = "Summary", Value = "Summary" } }, new { @class = "form-control", id = "action" })
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Duration:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(model => model.model.DURATION, (IEnumerable<SelectListItem>)ViewBag.Duration, new { @class = "form-control", id = "Duration" })
+                                <div id="errDuration" class="alert-danger1" style="display:none"> Duration is Required. </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divdate">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>From Date:<span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(model => model.model.DATETIME_FROM, new { @class = "form-control common datefield", id = "FromDate" })
+                                <span id="errFromDate" style="display: none" class="alert-danger1">From Date is Required.</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>To Date:<span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(model => model.model.DATETIME_TO, new { @class = "form-control common datefield", id = "ToDate" })
+                                <span id="errToDate" style="display: none" class="alert-danger1">To Date is Required.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 isdetailornot">
+                        <div class="form-group">
+                            <label>Circle:<span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(model => model.model.CIRCLE_CODE, (IEnumerable<SelectListItem>)ViewBag.CIRCLE, new { @class = "form-control", id = "Circle" })
+                            <div id="errCircle" style="display:none" class="alert-danger1">Circle is Required.</div>
+                            @Html.Hidden("Circle_Text", new { @class = "form-control", id = "Circle_Text" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 isdetailornot">
+                        <div class="form-group">
+                            <label>Division:<span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(model => model.model.DIVISON_CODE, (IEnumerable<SelectListItem>)ViewBag.Division, new { @class = "form-control", id = "Division" })
+                            <div id="errDivision" style="display:none" class="alert-danger1">Division is Required.</div>
+                            @Html.Hidden("Division_Text", new { @class = "form-control", id = "Division_Text" })
+                        </div>
+                    </div>
+
+
+                    <div id="btn" class="col-lg-12">
+                        <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit1">
+                            <i class="fa fa-check"></i> Submit
+                        </button>
+                        <button type="button" class="btn btn-warning" id="btn_reset">
+                            <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <br /><br /><br />
+
+            @if (Model.model.Action.ToLower() == "details")
+            {
+                <div class="panel panel-default">
+                    <div class="panel with-nav-tabs panel-default">
+                        <div class="panel-heading">
+                            <ul class="nav nav-tabs" id="myTab">
+                                <li class="active"><a href="#tab1default" data-toggle="tab"><i class="fa fa-star fa-fw"></i>Total</a></li>
+                                <li class=""><a href="#tab2default" data-toggle="tab"><i class="fa fa-user fa-fw"></i>Pending</a></li>
+                                <li class=""><a href="#tab3default " data-toggle="tab"><i class="fa fa-comment fa-fw"></i>Approved</a></li>
+                                <li class=""><a href="#tab4default" data-toggle="tab"><i class="fa fa-user fa-fw"></i>Rejected</a></li>
+                                <li class=""><a href="#tab5default " data-toggle="tab"><i class="fa fa-comment fa-fw"></i>Reviewed</a></li>
+                            </ul>
+                        </div>
+                        <div class="panel-body">
+                            <div class="tab-content">
+
+                                <div class="tab-pane fade  in tbl-scroll active" id="tab1default">
+                                    <div class="panel-body">
+                                        <div class="col-lg-4 pull-right" id="place">
+                                            <a class="btn btn-success" title="Export to Excel" onclick="tableToExcel('dataTables-example', 'Report')"><i class="fa fa-download"></i> Export to Excel</a>
+                                        </div>
+                                        <div class="table-responsive request-id">
+                                            <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                                                <thead>
+                                                    <tr>
+                                                        <th>
+                                                            #
+                                                        </th>
+                                                        <th>
+                                                            Div Code
+                                                        </th>
+                                                        <th>
+                                                            Status
+                                                        </th>
+                                                        <th>
+                                                            Noc Permission
+                                                        </th>
+                                                        <th>
+                                                            Education  Permission
+                                                        </th>
+                                                        <th>
+                                                            Camp Permission
+                                                        </th>
+                                                        <th>
+                                                            Film Shooting Permission
+                                                        </th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var item in Model.TotalStatus.Select((value, index) => new { Value = value, Index = index + 1 }))
+                                                    {
+                                                        <tr>
+                                                            <td>
+                                                                <span>@item.Index</span>
+
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.DIV_CODE)
+                                                            </td>
+
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.STATUS)
+                                                            </td>
+                                                            <td>
+                                                                <a href="#" id="reqID" onclick="showRequestedIDs('@item.Value.MultipleRequestID')">  @Html.DisplayFor(modelItem => item.Value.NOCsPermission)</a>
+
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.EducationPermission)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.CampPermission)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.FilmShootingPermission)
+                                                            </td>
+
+                                                        </tr>
+                                                    }
+
+
+                                                </tbody>
+
+                                            </table>
+
+                                        </div>
+                                        <!-- /.table-responsive -->
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane fade  in tbl-scroll" id="tab2default">
+                                    <div class="panel-body">
+                                        <div class="col-lg-4 pull-right" id="place">
+                                            <a class="btn btn-success" title="Export to Excel" onclick="tableToExcel('dataTables-example1', 'Report')"><i class="fa fa-download"></i> Export to Excel</a>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example1">
+                                                <thead>
+                                                    <tr>
+                                                        <th>
+                                                            #
+                                                        </th>
+                                                        <th>
+                                                            Div Code
+                                                        </th>
+                                                        <th>
+                                                            Status
+                                                        </th>
+                                                        <th>
+                                                            Noc Permission
+                                                        </th>
+                                                        <th>
+                                                            Education  Permission
+                                                        </th>
+                                                        <th>
+                                                            Camp Permission
+                                                        </th>
+                                                        <th>
+                                                            Film Shooting Permission
+                                                        </th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var item in Model.Pending.Select((value, index) => new { Value = value, Index = index + 1 }))
+                                                    {
+                                                        <tr>
+                                                            <td>
+                                                                <span>@item.Index</span>
+
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.DIV_CODE)
+                                                            </td>
+
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.STATUS)
+                                                            </td>
+                                                            <td>
+                                                                <a href="#" id="reqID" onclick="showRequestedIDs('@item.Value.MultipleRequestID')">  @Html.DisplayFor(modelItem => item.Value.NOCsPermission)</a>
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.EducationPermission)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.CampPermission)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.FilmShootingPermission)
+                                                            </td>
+
+                                                        </tr>
+                                                    }
+
+
+                                                </tbody>
+
+                                            </table>
+
+
+                                        </div>
+                                        <!-- /.table-responsive -->
+                                    </div>
+
+                                </div>
+
+
+                                <div class="tab-pane fade in tbl-scroll" id="tab3default">
+
+                                    <div class="panel-body">
+                                        <div class="col-lg-4 pull-right" id="place">
+                                            <a class="btn btn-success" title="Export to Excel" onclick="tableToExcel('dataTables-example2', 'Report')"><i class="fa fa-download"></i> Export to Excel</a>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example2">
+                                                <thead>
+                                                    <tr>
+                                                        <th>
+                                                            #
+                                                        </th>
+                                                        <th>
+                                                            Div Code
+                                                        </th>
+                                                        <th>
+                                                            Status
+                                                        </th>
+                                                        <th>
+                                                            Noc Permission
+                                                        </th>
+                                                        <th>
+                                                            Education  Permission
+                                                        </th>
+                                                        <th>
+                                                            Camp Permission
+                                                        </th>
+                                                        <th>
+                                                            Film Shooting Permission
+                                                        </th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var item in Model.Approved.Select((value, index) => new { Value = value, Index = index + 1 }))
+                                                    {
+                                                        <tr>
+                                                            <td>
+                                                                <span>@item.Index</span>
+
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.DIV_CODE)
+                                                            </td>
+
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.STATUS)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.NOCsPermission)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.EducationPermission)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.CampPermission)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.FilmShootingPermission)
+                                                            </td>
+
+                                                        </tr>
+                                                    }
+
+
+                                                </tbody>
+
+                                            </table>
+
+                                        </div>
+                                        <!-- /.table-responsive -->
+                                    </div>
+                                </div>
+                                <!-- /.Tab3 -->
+
+                                <div class="tab-pane fade in tbl-scroll" id="tab4default">
+
+                                    <div class="panel-body">
+                                        <div class="col-lg-4 pull-right" id="place">
+                                            <a class="btn btn-success" title="Export to Excel" onclick="tableToExcel('dataTables-example3', 'Report')"><i class="fa fa-download"></i> Export to Excel</a>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example3">
+                                                <thead>
+                                                    <tr>
+                                                        <th>
+                                                            #
+                                                        </th>
+                                                        <th>
+                                                            Div Code
+                                                        </th>
+                                                        <th>
+                                                            Status
+                                                        </th>
+                                                        <th>
+                                                            Noc Permission
+                                                        </th>
+                                                        <th>
+                                                            Education  Permission
+                                                        </th>
+                                                        <th>
+                                                            Camp Permission
+                                                        </th>
+                                                        <th>
+                                                            Film Shooting Permission
+                                                        </th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var item in Model.Rejected.Select((value, index) => new { Value = value, Index = index + 1 }))
+                                                    {
+                                                        <tr>
+                                                            <td>
+                                                                <span>@item.Index</span>
+
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.DIV_CODE)
+                                                            </td>
+
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.STATUS)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.NOCsPermission)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.EducationPermission)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.CampPermission)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.FilmShootingPermission)
+                                                            </td>
+
+                                                        </tr>
+                                                    }
+
+
+                                                </tbody>
+
+                                            </table>
+
+                                        </div>
+                                        <!-- /.table-responsive -->
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane fade in tbl-scroll" id="tab5default">
+
+                                    <div class="panel-body">
+                                        <div class="col-lg-4 pull-right" id="place">
+                                            <a class="btn btn-success" title="Export to Excel" onclick="tableToExcel('dataTables-example', 'Report')"><i class="fa fa-download"></i> Export to Excel</a>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example4">
+                                                <thead>
+                                                    <tr>
+                                                        <th>
+                                                            #
+                                                        </th>
+                                                        <th>
+                                                            Div Code
+                                                        </th>
+                                                        <th>
+                                                            Status
+                                                        </th>
+                                                        <th>
+                                                            Noc Permission
+                                                        </th>
+                                                        <th>
+                                                            Education  Permission
+                                                        </th>
+                                                        <th>
+                                                            Camp Permission
+                                                        </th>
+                                                        <th>
+                                                            Film Shooting Permission
+                                                        </th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var item in Model.Reviewed.Select((value, index) => new { Value = value, Index = index + 1 }))
+                                                    {
+                                                        <tr>
+                                                            <td>
+                                                                <span>@item.Index</span>
+
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.DIV_CODE)
+                                                            </td>
+
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.STATUS)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.NOCsPermission)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.EducationPermission)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.CampPermission)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.FilmShootingPermission)
+                                                            </td>
+
+                                                        </tr>
+                                                    }
+
+
+                                                </tbody>
+
+                                            </table>
+
+                                        </div>
+                                        <!-- /.table-responsive -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            }
+            else if (Model.model.Action.ToLower() == "summary")
+            {
+                <div class="panel panel-default">
+                    <div class="panel with-nav-tabs panel-default">
+                        <div class="panel-heading">
+                            <ul class="nav nav-tabs" id="myTab">
+                                <li class="active"><a href="#tab1default" data-toggle="tab"><i class="fa fa-star fa-fw"></i>Total</a></li>
+                            </ul>
+                        </div>
+                        <div class="panel-body">
+                            <div class="tab-content">
+                                <div class="tab-pane fade  in tbl-scroll active" id="tab1default">
+                                    <div class="panel-body">
+                                        <div class="col-lg-4 pull-right" id="place">
+                                            <a class="btn btn-success" title="Export to Excel" onclick="tableToExcel('dataTables-example5', 'Report')"><i class="fa fa-download"></i> Export to Excel</a>
+                                        </div>
+                                        <div class="table-responsive request-id">
+                                            <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example5">
+                                                <thead>
+                                                    <tr>
+                                                        <th>
+                                                            #
+                                                        </th>
+                                                        <th>
+                                                            Permission
+                                                        </th>
+                                                        <th>
+                                                            Total
+                                                        </th>
+                                                        <th>
+                                                            Pending
+                                                        </th>
+                                                        <th>
+                                                            Approved
+                                                        </th>
+                                                        <th>
+                                                            Rejected
+                                                        </th>
+                                                        <th>
+                                                            Reviewed
+                                                        </th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var item in Model.modelsummary.Select((value, index) => new { Value = value, Index = index + 1 }))
+                                                    {
+                                                        <tr>
+                                                            <td>
+                                                                <span>@item.Index</span>
+
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.Permission)
+                                                            </td>
+
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.Total)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.Pending)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.Approved)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.Rejected)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Value.Reviewed)
+                                                            </td>
+
+                                                        </tr>
+                                                    }
+
+
+                                                </tbody>
+
+                                            </table>
+
+                                        </div>
+                                        <!-- /.table-responsive -->
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    }
+
+</div>
+
+<script type="text/javascript">
+    $.noConflict(true);
+</script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+          , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+          , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+          , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+
+<script type="text/javascript">
+    //$("#reqID").click(function () {
+    //    //$("#modal-body").text($("#").val());
+    //    $("#modal-window").modal('show');
+
+    //});
+
+    function showRequestedIDs(id) {
+        $(".modal-body").html('');
+        var mydata = id.replace(/ *, */g, '<br>');
+
+        $(".modal-body").html(mydata);
+        $("#modal-window").modal('show');
+    }
+
+
+    $(function () {
+        $("#modal-window").on("click", "#btn-close", function () {
+            $("#modal-window").modal("hide");
+        });
+    });
+</script>
+

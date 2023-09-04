@@ -1,0 +1,1714 @@
+     
+
+@model FMDSS.Models.ForestProtection.CitizenParivad
+@{
+    ViewBag.Title = "CitizenParivad";
+    //if (HttpContext.Current.Session["IsKioskUser"].ToString().ToUpperInvariant() == "TRUE")
+    //{
+    //    Layout = "~/Views/Shared/_kiosklayout.cshtml";
+    //}
+    //else
+    //{
+    //    Layout = "~/Views/Shared/_Layout.cshtml";
+    //}
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //
+}
+<style>
+
+    th {
+  background-color: #03497d;
+  color: white;
+}
+</style>
+<script src="~/Scripts/jquery-1.8.2.js"></script>
+<input type="hidden" id="hdCurrentdate" value="@TempData["CurrentDate"]">
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <center>  <h2 class="page-header" id="Pheader">Register New Complaint/Parivad</h2></center> 
+    </div>    
+    <div class="row">
+        <div class="col-lg-12">
+            <div id="tbl" class="table-responsive">
+
+                <table class="table table-striped table-bordered table-hover gridtable">
+                    <thead>
+                        <tr>
+                            <th>Offense ID</th>
+                            <th>Place of Offense</th>
+                            <th>Offense Date</th>
+                            <th>Description</th>
+                            <th>Complaint Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in ViewData["OffenseList"] as IEnumerable<FMDSS.Models.ForestProtection.CaseInvestigationStatus>)
+                        {
+                            if (item.OffenseCode != "")
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(model => item.OffenseCode)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.OffensePlace)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.OffenseDate)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.OffenseDescription)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.ComplaintFound)
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+
+            <div class="panel panel-default">             
+                @using (Html.BeginForm("SaveOffenderDetails", "CitizenParivadRegistration", FormMethod.Post, new { enctype = "multipart/form-data", data_behavior = "confirm" }))
+                {
+
+
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>
+                                        Offense Category:<span class="mandatory">*</span>
+                                    </label>
+                                    @Html.DropDownListFor(x => x.OffenseCategory, ViewBag.OffenseCategory as List<SelectListItem>, "--Select--", new { id = "ddl_OffenseCategory", @class = "form-control" })
+                                    <div id="errordivOffenseCategory" style="display: none; " class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Select District: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.DistrictID, new { @class = "form-control autoDistrictsuggest", title = "Select District", name = "district", id = "district" })
+                                    @Html.HiddenFor(x => x.hdnDistCode, new { id = "hdnDistCode", name = "hdnDistCode" })
+                                    <div id="errordivddlDistrict" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Panchayat Samiti:</label>
+                                    @Html.TextBoxFor(x => x.BlockCode, new { @class = "form-control autoBlocksuggest", title = "Select blockname", name = "blockname", id = "blockname" })
+                                    @Html.HiddenFor(x => x.hdnBlockCode, new { id = "hdnBlockCode", name = "hdnBlockCode" })
+                                    <div id="errordivddlBlockName" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label for="GramPanchayat">
+                                        <br />
+                                        Gram Panchayat Name:
+                                    </label>
+                                    @Html.TextBoxFor(x => x.GPCode, new { @class = "form-control autoGPsuggest", title = "Select GP Name", name = "ddlGPName", id = "ddlGPName" })
+                                    @Html.HiddenFor(x => x.hdnGPCode, new { id = "hdnGPCode", name = "hdnGPCode" })
+                                    <div id="errordivddlGPName" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label for="Village">
+                                        <br />
+                                        Village Name:
+                                    </label>
+                                    @Html.TextBoxFor(x => x.VillageCode, new { @class = "form-control autoVillagesuggest", title = "Select GP Name", name = "ddlVillName", id = "ddlVillName" })
+                                    @Html.HiddenFor(x => x.hdnVillageCode, new { id = "hdnVillageCode", name = "hdnVillageCode" })
+                                    <div id="errordivddlVillName" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            @*<div class="col-lg-6">
+                <div class="form-group">
+                    <label>Select District: <span class="mandatory">*</span></label>
+                    @Html.DropDownList("ddlDistrict", (IEnumerable<SelectListItem>)ViewBag.ddlDistrict1, "--Select--", new { @class = "form-control", title = "Select District", id = "district" })
+                    <div id="errordivddlDistrict" style="display:none" class="alert-danger1"></div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Panchayat Samiti:</label>
+                    @Html.DropDownList("ddlBlockName", (IEnumerable<SelectListItem>)ViewBag.ddlBlockName1, new { @class = "form-control", title = "Select Block Name", @id = "blockname" })
+                    <div id="errordivddlBlockName" style="display:none" class="alert-danger1"></div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label for="GramPanchayat">
+                        Gram Panchayat Name:
+                    </label>
+                    @Html.DropDownList("ddlGPName", (IEnumerable<SelectListItem>)ViewBag.ddlGPName1, new { @class = "form-control", title = "Select GP Name", @id = "ddlGPName" })
+                    <div id="errordivddlGPName" style="display:none" class="alert-danger1"></div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label for="Village">
+                        Village Name:
+                    </label>
+
+                    @Html.DropDownList("ddlVillName", (IEnumerable<SelectListItem>)ViewBag.ddlVillName1, new { @class = "form-control", title = "Select Village Name", @id = "ddlVillName" })
+                    <div id="errordivddlVillName" style="display:none" class="alert-danger1"></div>
+
+                </div>
+            </div>*@
+
+                            @*<div class="col-lg-12">
+                <div class="form-group">
+                    <a class="btn btn-info btn-circle" title="Get GIS Details" onclick="return FPMparivad();">
+                        <i class="fa fa-map-marker"></i>
+                    </a>
+
+                </div>
+            </div>*@
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label for="Areainha">
+                                        Place of Offense & any Landmark for reaching:<span class="mandatory">*</span>
+                                    </label>
+                                    @Html.TextBoxFor(x => x.OffensePlace, new { @class = "form-control common", @title = "", @placeholder = "Enter Place of Offense ", @maxlength = 50, @id = "txt_OffensePlace" })
+
+                                    <div id="errordivOffensePlace" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>
+                                        Latitude (Range between 23° to 29° Eg 25.052):<span class="mandatory">*</span>
+                                    </label>
+                                    @Html.TextBoxFor(x => x.Lattitude, new { @class = "form-control", title = "Enter lattitude", @maxlength = 6, @id = "Lattitude", name = "Latitude" })
+                                    <div id="errordivLat" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>
+                                        Longitude (Range between 67° to 78° Eg 69.053):<span class="mandatory">*</span>
+                                    </label>
+                                    @Html.TextBoxFor(x => x.Longitude, new { @class = "form-control", title = "Enter longitude", @maxlength = 6, @id = "Longitude", name = "Longitude" })
+                                    <div id="errordivLong" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+
+                            <div class="col-lg-4">
+
+                                <div class="form-group">
+                                    <br />
+                                    <label>Date of offense seen:<span class="mandatory">*</span></label>
+                                    <div id="datepicker" class="input-group date">
+                                        @Html.TextBoxFor(x => x.DateOfOffense, new { @class = "form-control datefield", @title = "Select the Date of Offense from date picker", @readonly = "True", @id = "txt_DateOfOffense" })
+                                        <div id="errordivDateOfOffense" style="display:none" class="alert-danger1"></div>
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label>Actual time of Offense: <span class="mandatory">*</span></label>
+                                <div id="datepicker" class="input-group date">
+                                    @Html.TextBoxFor(x => x.TimeOfOffense, new { @class = "form-control timepicker", title = "Select time", @id = "OffenseTime" })
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    <div id="errordivOffenseTime" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label>
+                                    Offense Description:
+                                </label>
+                                @Html.TextAreaFor(x => x.Description, new { @class = "form-control", @maxlength = 250, @id = "txt_Description", @title = "", @placeholder = "" })
+
+                                <div id="errordivDescription" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <label>Upload Photo/Evidence:</label>                           
+                            @Html.TextBoxFor(x => x.UploadEvidence, new { @class = "form-control", @id = "UploadEvidence", type = "file" })                          
+                            <div id="errordivUploadEvidence" style="display:none" class="alert-danger1"></div>
+                            <label>(only jpeg/jpg/pdf/png/gif file format with max size 100kb)</label>
+                        </div>
+                            </div>
+
+                        <div class="row">
+                        <div class="col-lg-2">
+                            <label>Offender Known:<span class="mandatory">*</span></label>
+                            <div class="divider"></div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-group">
+                                <label class="radio-inline">
+                                    <input type="radio" id="Addknown-Offender" checked="checked" value="Known" name="Offender">Yes 
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" id="Unknown-Offender" value="UnKnown" name="Offender">No 
+                                </label>
+                                <div id="errordivOUOffender" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4"></div>
+                            </div>
+
+                        <div class="col-lg-12">
+                            <div class="panel-group" id="accordion">
+                                <!--Tab For Known Offender-->
+                                <div class="panel panel-primary" style="display: none; margin-top: 15px;">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse1" aria-expanded="false" class="collapsed">
+                                                <i class="fa  fa-angle-double-right fa-fw"></i>  Offender details
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div id="collapse1" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+                                        <div class="panel-body">
+                                            <div class="" role="form">
+                                             
+                                                <div class="col-lg-6">
+                                                    <input type="hidden" id="hdnOffenderrowid" name="hdnOffenderrowid">
+                                                    <div class="form-group">
+                                                        <label>
+                                                            Name of accused:<span class="mandatory">*</span>
+                                                        </label>
+                                                        @Html.TextBoxFor(x => x.OffenderName, new { @class = "form-control", @title = "", @placeholder = "", @name = "OffenderName", @maxlength = 50, @id = "txt_OffenderName" })
+
+                                                        <div id="errordivOffenderName" style="display:none" class="alert-danger1"></div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label>
+                                                            Father Name:
+                                                        </label>
+                                                        @Html.TextBoxFor(x => x.OFatherName, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txt_OFatherName", @name = "OFatherName" })
+
+                                                        <div id="errordivOFatherName" style="display:none" class="alert-danger1"></div>
+                                                    </div>
+                                                </div>
+
+                                          
+
+
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label>
+                                                            Residential Address1:
+                                                        </label>
+                                                        @Html.TextBoxFor(x => x.OAddress1, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 100, @id = "txt_OAddress1", @name = "OAddress1" })
+
+                                                        <div id="errordivOAddress1" style="display:none" class="alert-danger1"></div>
+                                                    </div>
+                                                </div>                                               
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label>State: <span class="mandatory">*</span></label>
+                                                        @Html.DropDownList("ddlOState", (IEnumerable<SelectListItem>)ViewBag.ddlOState, new { @class = "form-control", title = "Select District", @id = "ddlOState", @name = "OStateCode" })
+                                                        <div id="errordivddlOState" style="display:none" class="alert-danger1"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6" id="divDDlDistrict">
+                                                    <div class="form-group">
+                                                        <label>District: <span class="mandatory">*</span></label>
+                                                        @Html.DropDownList("ddlODistrict", (IEnumerable<SelectListItem>)ViewBag.ddlODistrict, "--Select--", new { @class = "form-control", title = "Select District", @id = "ddlODistrict", @name = "ODistrictCode" })
+                                                        <div id="errordivOddlDistrict" style="display:none" class="alert-danger1"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6" id="divtxtDistrict" style="display:none">
+                                                    <div class="form-group">
+                                                        <label>District: <span class="mandatory">*</span></label>
+                                                        @Html.TextBoxFor(x => x.txtdistrict, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txtdistrict", @name = "txtdistrict" })
+                                                        <div id="errordivddlODistrict1" style="display:none" class="alert-danger1"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6" id="divDDlVillage">
+                                                    <div class="form-group">
+                                                        <label>
+                                                            City/Village Name:<span class="mandatory">*</span>
+                                                        </label>
+                                                        @Html.DropDownListFor(x => x.OVillageCode, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "txt_OVillageCode", name = "OVillageCode", @class = "form-control" })
+                                                        <div id="errordivddlVillName" style="display:none" class="alert-danger1"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6" id="divtxtVillage" style="display:none">
+                                                    <div class="form-group">
+                                                        <label>City/Village Name: <span class="mandatory">*</span></label>
+                                                        @Html.TextBoxFor(x => x.txtvillage, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 50, @id = "txtvillage", @name = "txtvillage" })
+                                                        <div id="errordivddlVillName1" style="display:none" class="alert-danger1"></div>
+                                                    </div>
+                                                </div>                                                                                                                                     
+
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label>Add Offender:</label><br>
+                                                        <button type="button" class="btn btn-success" title="Save" name="Command" value="Submit" id="btn_addoffender" style="width:auto">
+                                                            <i class="fa fa-plus"></i> Add Offender
+                                                        </button>
+
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-lg-12">
+                                                    <table id="tbl_Offenderinfo" class="table table-striped table-bordered table-hover" style="display:none">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Name</th>
+                                                                <th>Father Name</th>
+                                                                <th>Address</th>                                                                
+                                                                <th>Edit</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="tb_OffenderInfo"></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--/.Tab For Known Offender-->
+                                <!--Tab For Unknown Offender-->
+                                <div class="panel panel-primary" style="display: block;">
+                                    <div class="panel-heading">
+                                        <div class="row">
+                                            <h4 class="panel-title">
+
+                                                <a data-toggle="collapse" data-parent="#accordion" href="#UnknownOffender" aria-expanded="false" class="collapsed">
+                                                    <i class="fa  fa-angle-double-right fa-fw"></i> Offender details
+                                                </a>
+                                            </h4>
+                                        </div>
+                                    </div>
+                                    <div id="UnknownOffender" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+                                        <div class="panel-body">
+                                            <div class="" role="form">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label>
+                                                            Number of Suspects:<span class="mandatory">*</span>
+                                                        </label>
+                                                        @Html.TextBoxFor(x => x.ONumberOfOffender, new { @class = "form-control", @title = "", @placeholder = "", @maxlength = 2, @id = "txt_ONumberOfOffender" })
+                                                        <div id="errordivONumberOfOffender" style="display:none" class="alert-danger1"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label>
+                                                            Remarks about offenders :
+                                                        </label>
+                                                        @Html.TextAreaFor(x => x.OffenderDescription, new { @class = "form-control", @maxlength = 250, @id = "txt_OffenderDescription", @title = "", @placeholder = "" })
+                                                        <div id="errordivOffenderDescription" style="display:none" class="alert-danger1"></div>
+                                                    </div>
+                                                </div>
+                                              
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--/.Tab For Unknown Offender-->
+                            </div>
+                        </div>
+                    @*</div>*@
+
+                   <!-- Btn Groping -->
+                    <div class="btn-padd">
+                        <div id="btn" class="col-lg-12">
+                            <button type="Submit" class="btn btn-success confirm-toggle" name="Command" value="submit" id="Savepermission">
+                                <i class="fa fa-check"></i> Submit
+                            </button>
+
+                            <button type="reset" class="btn btn-warning">
+                                <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                            </button>
+                            <button type="submit" name="Command" value="Cancel" class="btn btn-danger">
+                                <i class="fa fa-times fa-fw"></i> Cancel
+                            </button>
+                        </div>
+                        </div>
+                    </div>
+                        <!-- ./Btn Groping -->
+                }
+            </div>
+
+            <!-- /.panel-body -->
+
+        </div>
+        <!-- /.panel -->
+     
+    </div>
+
+
+    <!-- /.page-wrapper-inn -->
+    <!-- /.Form design -->
+</div>
+<!-- Footer -->
+<!-- /.Footer -->
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="~/js/jquery.min.js" type="text/javascript"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<link href="~/css/timepicki.css" type="text/css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+<style type="text/css">
+    .ui-autocomplete {
+        position: absolute;
+        cursor: default;
+        left: 319px;
+        top: 331px;
+    }
+
+    .ui-autocomplete-loading {
+        background-color: white;
+    }
+
+    .ui-autocomplete li {
+        list-style-type: none;
+        margin-left: -43px;
+        padding: 0;
+        background-color: rgb(187, 207, 243);
+    }
+
+    .ui-autocomplete ul {
+        margin: 0;
+        padding: 0;
+        background-color: White;
+    }
+
+    #overlay {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        background: LightGray;
+        opacity: 0.1;
+        filter: alpha(opacity=80);
+        z-index: 5000;
+    }
+
+    #loading {
+        width: 50px;
+        height: 57px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin: -28px 0 0 -25px;
+    }
+
+    .p {
+        margin-top: 0%;
+    }
+</style>
+
+<script type="text/javascript">
+    var $ = jQuery.noConflict();
+    $(document).ready(function () {
+        $(".timepicker").timepicki();
+        autoDistrictsuggest();
+        autoBlocksuggest();
+        autoGPsuggest();
+        autoVillagesuggest();
+        $('#txt_OffenderName,#txt_OFatherName,#OClothesWorn,#OColorOfClothes,#OPhysicalAppearance,#txt_OSpouseName,#txtvillage,#txt_OffensePlace,#txt_OCasteName').keypress(function (e) {
+            if (e.ctrlKey || e.altKey) {
+                e.preventDefault();
+            } else {
+                var key = (e.which) ? e.which : e.keyCode
+                if (e.shiftKey) {
+                    if (key == 64 || key == 33 || key == 35 || key == 36 || key == 37 || key == 94 || key == 38 || key == 42 || key == 40 || key == 41) {
+                        e.preventDefault();
+                    }
+                }
+                if (!((key == 8) || (key == 32) || (key == 46) || (key >= 35 && key <= 40) || (key >= 65 && key <= 90) || (key >= 97 && key <= 122))) {
+                    e.preventDefault();
+                }
+            }
+        });
+
+        $('#OHeight').bind('keypress', function (evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode
+            // var charCode = evt.which;
+
+            if ((charCode == 46) || (charCode >= 97 && charCode <= 122) || (charCode >= 65 && charCode <= 90)) {
+                return false;
+            }
+            else {
+                if (charCode >= 48 && charCode <= 57 || charCode == 46) {
+                    return true;
+                }
+                else {
+                    evt.preventDefault();
+                }
+            }
+        });
+
+        $('#Lattitude,#Longitude').bind('keypress', function (evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode
+            // var charCode = evt.which;
+
+            if ((charCode == 46 && this.value.split('.').length > 1) || (charCode >= 97 && charCode <= 122) || (charCode >= 65 && charCode <= 90)) {
+                return false;
+            }
+            else {
+                if (charCode >= 48 && charCode <= 57 || charCode == 46) {
+                    return true;
+                }
+                else {
+                    evt.preventDefault();
+                }
+            }
+        });
+
+        $('#OOtherSpecialDetails,#txt_OAddress1,#txt_OAddress2,#txt_Description').keypress(function (e) {
+            var kc = e.which;
+            if (e.shiftKey) {
+                if (kc == 64 || kc == 33 || kc == 35 || kc == 36 || kc == 37 || kc == 94 || kc == 38 || kc == 42 || kc == 40 || kc == 41) {
+                    e.preventDefault();
+                }
+            }
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95) || (kc >= 47 && kc <= 57) || (kc >= 44 && kc < 46) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+    });
+</script>
+<script type="text/javascript">
+    var errorCount = '';
+    var RootUrl = '@Url.Content("~/")';
+    $(document).ready(function () {
+
+        var d = new Date($('#hdCurrentdate').val());
+        d.setDate(d.getDate());
+        var day = d.getDate();
+        var month = d.getMonth() + 1;
+        var year = d.getFullYear();
+        if (day < 10) {
+            day = "0" + day;
+        }
+        if (month < 10) {
+            month = "0" + month;
+        }
+        var tdate = day + "/" + month + "/" + year;
+        $(".datefield").datepicker({ maxDate: tdate, dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id $=auto]").focus(); } });
+        //  var currentDate = new Date();
+        $("#txt_DateOfOffense").datepicker("setDate", tdate);
+
+
+
+        $(".Unknown").hide();
+        $(".known").show();
+        //$('#district').change(function (e) {
+        //    var ddldist = $("#district option:selected").val();
+        //    //   alert(ddldist);
+        //    //  $('#blockname').val(ddldist);
+        //    $("#blockname").empty();
+        //    $.ajax({
+        //        type: 'POST',
+        //        url: RootUrl + 'MicroPlan/GetBlockName', // we are calling json method
+        //        dataType: 'json',
+        //        data: { District: ddldist },
+        //        success: function (range) {
+        //            //  $("#blockname").append('<option value=0>--Select--</option>');
+        //            $.each(range, function (i, items) {
+        //                $("#blockname").append('<option value="' + items.Value + '">  ' + items.Text + '</option>');
+        //            });
+        //        },
+        //        error: function (ex) {
+        //            alert('Failed to retrieve states.' + ex);
+        //        }
+
+        //    });
+
+        //});
+
+        //$('#blockname').change(function (e) {
+        //    var ddldist = $("#district option:selected").val();
+        //    var ddlblockname = $("#blockname option:selected").val();
+        //    $("#ddlGPName").empty();
+        //    //$('#blockname').val(ddldist);
+
+        //    $.ajax({
+        //        type: 'POST',
+        //        url: RootUrl + 'MicroPlan/GetGramPName', // we are calling json method
+        //        dataType: 'json',
+        //        data: { District: ddldist, BlockName: ddlblockname },
+        //        success: function (range) {
+        //            //   $("#ddlGPName").append('<option value=0>--Select--</option>');
+        //            $.each(range, function (i, items) {
+        //                $("#ddlGPName").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+        //            });
+        //        },
+        //        error: function (ex) {
+        //            alert('Failed to retrieve states.' + ex);
+        //        }
+
+        //    });
+
+        //});
+
+        //$('#ddlGPName').change(function (e) {
+        //    var ddldist = $("#district option:selected").val();
+        //    var ddlblockname = $("#blockname option:selected").val();
+        //    var ddlGPName = $("#ddlGPName option:selected").val();
+        //    $("#ddlVillName").empty();
+        //    //$('#blockname').val(ddldist);
+
+        //    $.ajax({
+        //        type: 'POST',
+        //        url: RootUrl + 'MicroPlan/GetVillageName', // we are calling json method
+        //        dataType: 'json',
+        //        data: { District: ddldist, BlockName: ddlblockname, GPName: ddlGPName },
+        //        success: function (range) {
+        //            //  $("#ddlVillName").append('<option value=0>--Select--</option>');
+        //            $.each(range, function (i, items) {
+        //                $("#ddlVillName").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+        //            });
+        //        },
+        //        error: function (ex) {
+        //            alert('Failed to retrieve states.' + ex);
+        //        }
+
+        //    });
+
+        //});
+
+        $('#ddlVillName').blur(function (e) {
+            var VillCode = $('#hdnVillageCode').val();
+            if (VillCode != '' && $('#district').val() == '' && $('#ddlGPName').val() == '' && $('#blockname').val() == '') {
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'CitizenParivadRegistration/GethierarchyDetails', // we are calling json method
+                    dataType: 'json',
+                    // data: { Village: VillCode, Block: "", GP: "", option: "6" },
+                    data: { Division: "", District: "", Block: "", Gram: "", Range: "", Village: VillCode, Option: "OVILLAGE" },
+                    success: function (data) {
+                        $('#district').val(data.DistrictID);
+                        $('#hdnDistCode').val(data.hdnDistCode);
+                        $('#blockname').val(data.BlockCode);
+                        $('#hdnBlockCode').val(data.hdnBlockCode);
+                        $('#ddlGPName').val(data.GPCode);
+                        $('#hdnGPCode').val(data.hdnGPCode);
+                        e.preventDefault();
+                    }
+                });
+            }
+
+        });
+
+        $('#ddlGPName').blur(function (e) {
+
+            var GPCode = $('#hdnGPCode').val();
+            if (GPCode != '' && $('#district').val() == '' && $('#blockname').val() == '') {
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'CitizenParivadRegistration/GethierarchyDetails', // we are calling json method
+                    dataType: 'json',
+                    // data: { Village: "", Block: "", GP: GPCode, option: "7" },
+                    data: { Division: "", District: "", Block: "", Gram: GPCode, Village: "", Option: "OGRAM" },
+                    success: function (data) {
+                        $('#district').val(data.DistrictID);
+                        $('#hdnDistCode').val(data.hdnDistCode)
+                        $('#blockname').val(data.BlockCode);
+                        $('#hdnBlockCode').val(data.hdnBlockCode)
+                        e.preventDefault();
+                    }
+                });
+            }
+
+        });
+
+        $('#blockname').blur(function (e) {
+
+            var BlockCode = $('#hdnBlockCode').val();
+            if (BlockCode != '' && $('#district').val() == '') {
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'CitizenParivadRegistration/GethierarchyDetails', // we are calling json method
+                    dataType: 'json',
+                    //data: { Village: "", Block: BlockCode, GP: "", option: "8" },
+                    data: { Division: "", District: "", Block: BlockCode, Gram: "", Village: "", Option: "OBLOCK" },
+                    success: function (data) {
+                        $('#district').val(data.DistrictID);
+                        $('#hdnDistCode').val(data.hdnDistCode)
+                        e.preventDefault();
+                    }
+                });
+            }
+
+        });
+
+
+        $('#Addknown-Offender').on('click', function () {
+            $(".Unknown").hide();
+            $(".known").show();
+            //$('html, body').animate({ scrollTop: $(".known").offset().top - 120 }, 'slow');
+        });
+
+        $('#Unknown-Offender').on('click', function () {
+            $(".known").hide();
+            $(".Unknown").show();
+            //$('html, body').animate({ scrollTop: $(".Unknown").offset().top - 120 }, 'slow');
+        });
+
+        $('#ddlODistrict').change(function (e) {
+            $("#txt_OVillageCode").empty();
+            $("#txt_OVillageCode").append('<option value="' + '' + '">' +
+                    '--Select--' + '</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'OffenseRegistration/getVillage', // we are calling json method
+                dataType: 'json',
+                data: { dist_code: $("#ddlODistrict option:selected").val() },
+                success: function (states) {
+                    $.each(states, function (i, vill) {
+                        $("#txt_OVillageCode").append('<option value="' + vill.Value + '">' +
+                         vill.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        });
+
+    });
+
+    $('#Longitude').keydown(function (e) {
+        var kc = e.keyCode;
+        var position = $(this).val().length;
+        if (position == 2 && kc != 8) {
+            if (parseInt($(this).val().substring(0, 2), 10) >= 67 && parseInt($(this).val().substring(0, 2), 10) <= 78) {
+                var value = $('#Longitude').val();
+                $('#Longitude').val(value + '.');
+            }
+        }
+        if (position > 2 && kc != 8) {
+            if (!(parseInt($(this).val().substring(0, 2), 10) >= 67 && parseInt($(this).val().substring(0, 2), 10) <= 78)) {
+                $('#errordivLong').show();
+                $('#errordivLong').html("Enter the GPS longitude between 67° to 78°!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Longitude').focus();
+                e.preventDefault();
+            }
+        }
+    });
+
+    $('#Lattitude').keydown(function (e) {
+        var kc = e.keyCode;
+        var position = $(this).val().length;
+        if (position == 2 && kc != 8) {
+            if (parseInt($(this).val().substring(0, 2), 10) >= 23 && parseInt($(this).val().substring(0, 2), 10) <= 29) {
+                var value = $('#Lattitude').val();
+                $('#Lattitude').val(value + '.');
+            }
+        }
+        if (position > 2 && kc != 8) {
+            if (!(parseInt($(this).val().substring(0, 2), 10) >= 23 && parseInt($(this).val().substring(0, 2), 10) <= 29)) {
+                $('#errordivLat').show();
+                $('#errordivLat').html("Enter the GPS latitude between 23° - 29°!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                e.preventDefault();
+            }
+
+        }
+    });
+
+
+
+
+
+    $("#UploadEvidence").change(function (e) {
+
+        var iSize = parseFloat($("#UploadEvidence")[0].files[0].size / 1024).toFixed(2);
+        if (iSize > 100) {
+            $('#UploadEvidence').val('');
+            $('#errordivUploadEvidence').show();
+            $('#errordivUploadEvidence').html("Evidence should not be larger than 100kb!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#UploadEvidence').focus();
+            return false;
+        }
+        var file = $("#UploadEvidence").val();
+        var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+        if (file) {
+            // split file name at dot
+            var get_ext = file.split('.');
+            // reverse name to check extension
+            get_ext = get_ext.reverse();
+            // check file type is valid as given in 'exts' array
+
+            if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                $('#UploadEvidence').val('');
+                $('#errordivUploadEvidence').show();
+                $('#errordivUploadEvidence').html("Please upload only jpeg or jpg or pdf or png or gif file format in Upload ID Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#UploadEvidence').focus();
+                return false;
+            } else {
+                $('#errordivUploadEvidence').hide();
+            }
+        }
+        else { $('#errordivUploadEvidence').hide(); }
+
+    });
+
+
+    $("#Savepermission").on('click', function () {
+
+        if ($('#ddl_OffenseCategory').val() == '' || $('#ddl_OffenseCategory').val() == null || $('#ddl_OffenseCategory').val() == '0') {
+            $('#errordivOffenseCategory').show();
+            $('#errordivOffenseCategory').html("Please Select the Offense Category!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#ddl_OffenseCategory').focus();
+            return false;
+        }
+        else { $('#errordivOffenseCategory').hide(); }
+
+
+
+        if ($('#district').val() == '' || $('#district').val() == null || $('#district').val() == '0') {
+            $('#errordivddlDistrict').show();
+            $('#errordivddlDistrict').html("Please Select the District!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#district').focus();
+            return false;
+        }
+        else { $('#errordivddlDistrict').hide(); }
+
+        //if ($('#blockname').val() == '' || $('#blockname').val() == null || $('#blockname').val() == '0') {
+        //    $('#errordivddlBlockName').show();
+        //    $('#errordivddlBlockName').html("Please Select the Block!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+        //    $('#blockname').focus();
+        //    return false;
+        //}
+        //else { $('#errordivddlBlockName').hide(); }
+
+        //if ($('#ddlGPName').val() == '' || $('#ddlGPName').val() == null || $('#ddlGPName').val() == '0') {
+        //    $('#errordivddlGPName').show();
+        //    $('#errordivddlGPName').html("Please Select the Gram Panchayat Name!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+        //    $('#ddlGPName').focus();
+        //    return false;
+        //}
+        //else { $('#errordivddlGPName').hide(); }
+
+        //if ($('#ddlVillName').val() == '' || $('#ddlVillName').val() == null || $('#ddlVillName').val() == '0') {
+        //    $('#errordivddlVillName').show();
+        //    $('#errordivddlVillName').html("Please Select the Village Name!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+        //    $('#ddlVillName').focus();
+        //    return false;
+        //}
+        //else { $('#errordivddlVillName').hide(); }
+
+        //if ($('#Lattitude').val() == '') {
+        //    $('#errordivLat').show();
+        //    $('#errordivLat').html("Please enter Lattitude!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+        //    $('#Lattitude').focus();
+        //    return false;
+        //}
+        //else { $('#errordivLat').hide(); }
+
+        //if ($('#Longitude').val() == '') {
+        //    $('#errordivLong').show();
+        //    $('#errordivLong').html("Please enter Longitude!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+        //    $('#Longitude').focus();
+        //    return false;
+        //}
+        //else { $('#errordivLong').hide(); }
+
+
+        if (($('#Lattitude').val().substr(0, 1) == '.') && ($('#Lattitude').val().length <= 1)) {
+            $('#errordivLat').show();
+            $('#errordivLat').html("Please enter the Latitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#Lattitude').focus();
+            return false;
+        }
+        else { $('#errordivLat').hide(); }
+
+        if ((parseFloat($('#Lattitude').val())) <= 0) {
+            $('#errordivLat').show();
+            $('#errordivLat').html("Please enter the Latitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#Lattitude').focus();
+            return false;
+        }
+        else { $('#errordivLat').hide(); }
+
+        if (!(parseInt($('#Lattitude').val().substring(0, 2), 10) >= 23 && parseInt($('#Lattitude').val().substring(0, 2), 10) <= 29)) {
+            $('#errordivLat').show();
+            $('#errordivLat').html("Enter the GPS latitude between 23° - 29°!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#Lattitude').focus();
+            return false;
+        }
+        else { $('#errordivLat').hide(); }
+
+        if ($('#Longitude').val() == '') {
+            $('#errordivLong').show();
+            $('#errordivLong').html("Please enter the Longitude !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#Longitude').focus();
+            return false;
+        }
+        else { $('#errordivLong').hide(); }
+
+        if (($('#Longitude').val().substr(0, 1) == '.') && ($('#Longitude').val().length <= 1)) {
+            $('#errordivLong').show();
+            $('#errordivLong').html("Please enter the Longitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#Longitude').focus();
+            return false;
+        }
+        else { $('#errordivLong').hide(); }
+
+        if ((parseFloat($('#Longitude').val())) <= 0) {
+            $('#errordivLong').show();
+            $('#errordivLong').html("Please enter the Longitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#Longitude').focus();
+            return false;
+        }
+        else { $('#errordivLong').hide(); }
+
+
+        if (!(parseInt($('#Longitude').val().substring(0, 2), 10) >= 67 && parseInt($('#Longitude').val().substring(0, 2), 10) <= 78)) {
+            $('#errordivLong').show();
+            $('#errordivLong').html("Enter the GPS longitude between 67° to 78°!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#Longitude').focus();
+            return false;
+        }
+        else { $('#errordivLong').hide(); }
+
+        if ($('#txt_OffensePlace').val() == '') {
+            $('#errordivOffensePlace').show();
+            $('#errordivOffensePlace').html("Please enter the Place of Offense/Landmark!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#txt_OffensePlace').focus();
+            return false;
+        }
+        else { $('#errordivOffensePlace').hide(); }
+        if ($('#txt_DateOfOffense').val() == '') {
+            $('#errordivDateOfOffense').show();
+            $('#errordivDateOfOffense').html("Please enter the Date of Offense!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#txt_DateOfOffense').focus();
+            return false;
+        }
+
+        else { $('#errordivDateOfOffense').hide(); }
+
+        if ($('#OffenseTime').val() == '') {
+            $('#errordivOffenseTime').show();
+            $('#errordivOffenseTime').html("Please enter the Time of Offense!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#OffenseTime').focus();
+            return false;
+        }
+        else { $('#errordivOffenseTime').hide(); }
+        if ($("#Addknown-Offender").prop("checked")) {
+
+
+            if ($("#tb_OffenderInfo").html() == '') {
+                $('#collapse1').collapse('show');
+                $('#errordivOUOffender').show();
+                $('#errordivOUOffender').html("Please Fill atleast one Known/Unknown Offender Records!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                return false;
+            }
+            else { $('#errordivOUOffender').hide(); }
+
+        }
+        else if ($("#Unknown-Offender").prop("checked")) {
+
+            if ($('#txt_ONumberOfOffender').val() == '') {
+                $('#UnknownOffender').collapse('show');
+                $('#errordivONumberOfOffender').show();
+                $('#errordivONumberOfOffender').html("Please enter the Number of Offenders!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txt_ONumberOfOffender').focus();
+                return false;
+            }
+            else { $('#errordivddlVillName').hide(); }
+
+            if ($('#txt_ONumberOfOffender').val() != '' && parseInt($('#txt_ONumberOfOffender').val(), 10) == 0) {
+                $('#UnknownOffender').collapse('show');
+                $('#errordivONumberOfOffender').show();
+                $('#errordivONumberOfOffender').html("Please enter valid Number of Offenders!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txt_ONumberOfOffender').focus();
+                errorCount = "1";
+                return false;
+            }
+            else { $('#errordivddlVillName').hide(); errorCount = ""; }
+
+            //if ($('#txt_OffenderDescription').val() == '') {
+            //    $('#errordivONumberOfOffender').show();
+            //    $('#errordivONumberOfOffender').html("Please enter the Number of Offenders!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            //    $('#txt_OffenderDescription').focus();
+            //    return false;
+            //}
+            //else { $('#errordivddlVillName').hide(); }
+        }
+    });
+
+    $("#btn_addoffender").bind("click", function () {
+
+        if ($("#Addknown-Offender").prop("checked")) {
+            if ($('#txt_OffenderName').val() == '') {
+                $('#errordivOffenderName').show();
+                $('#errordivOffenderName').html("Please enter the Name of the Offender!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txt_OffenderName').focus();
+                errorCount = "1";
+                return false;
+            }
+            else { $('#errordivOffenderName').hide(); errorCount = ""; }
+
+            //if ($('#txt_OFatherName').val() == '') {
+            //    $('#errordivOFatherName').show();
+            //    $('#errordivOFatherName').html("Please enter the Father Name!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            //    $('#txt_OFatherName').focus();
+            //    errorCount = "1";
+            //    return false;
+            //}
+            //else { $('#errordivOFatherName').hide(); errorCount = ""; }
+
+
+
+            //if ($('#txt_OAddress1').val() == '') {
+            //    $('#errordivOAddress1').show();
+            //    $('#errordivOAddress1').html("Please enter the Residential Address1!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            //    $('#txt_OAddress1').focus();
+            //    errorCount = "1";
+            //    return false;
+            //}
+            //else { $('#errordivOAddress1').hide(); errorCount = ""; }
+
+            if ($('#ddlOState').val() == '' || $('#ddlOState').val() == null || $('#ddlOState').val() == '0') {
+                $('#errordivddlOState').show();
+                $('#errordivddlOState').html("Please Select the State!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#ddlOState').focus();
+                errorCount = "1";
+                return false;
+            }
+            else { $('#errordivddlOState').hide(); errorCount = ""; }
+
+            var oState = $("#ddlOState option:selected").val();
+
+            if (oState == "1") {
+
+                if ($('#ddlODistrict').val() == '' || $('#ddlODistrict').val() == null || $('#ddlODistrict').val() == '0') {
+
+                    $('#errordivOddlDistrict').show();
+                    $('#errordivOddlDistrict').html("Please Select the District!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#ddlODistrict').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $('#errordivOddlDistrict').hide(); errorCount = ""; }
+
+                if ($('#txt_OVillageCode').val() == '' || $('#txt_OVillageCode').val() == null || $('#txt_OVillageCode').val() == '0') {
+                    $('#errordivddlVillName').show();
+                    $('#errordivddlVillName').html("Please enter the City/Village Name!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#txt_OVillageCode').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $('#errordivddlVillName').hide(); errorCount = ""; }
+            }
+            else if (oState == "2") {
+
+                if ($('#txtdistrict').val() == '') {
+                    $('#errordivddlODistrict1').show();
+                    $('#errordivddlODistrict1').html("Please enter the District!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#txtdistrict').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $('#errordivddlODistrict1').hide(); errorCount = ""; }
+                if ($('#txtvillage').val() == '') {
+                    $('#errordivddlVillName1').show();
+                    $('#errordivddlVillName1').html("Please enter the village!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#txtvillage').focus();
+                    errorCount = "1";
+                    return false;
+                }
+                else { $('#errordivddlVillName1').hide(); errorCount = ""; }
+
+            }
+
+
+            //if ($('#txt_OVillageCode').val() == '') {
+            //    $('#errordivddlVillName').show();
+            //    $('#errordivddlVillName').html("Please enter the City/Village Name!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            //    $('#txt_OVillageCode').focus();
+            //    errorCount = "1";
+            //    return false;
+            //}
+            //else { $('#errordivddlVillName').hide(); errorCount = ""; }
+
+        }
+        else if ($("#Unknown-Offender").prop("checked")) {
+
+            if ($('#txt_ONumberOfOffender').val() == '') {
+                $('#UnknownOffender').collapse('show');
+                $('#errordivONumberOfOffender').show();
+                $('#errordivONumberOfOffender').html("Please enter the Number of Offenders!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txt_ONumberOfOffender').focus();
+                errorCount = "1";
+                return false;
+            }
+            else { $('#errordivONumberOfOffender').hide(); errorCount = ""; }
+
+            if ($('#txt_ONumberOfOffender').val() != '' && parseInt($('#txt_ONumberOfOffender').val(), 10) == 0) {
+                $('#UnknownOffender').collapse('show');
+                $('#errordivONumberOfOffender').show();
+                $('#errordivONumberOfOffender').html("Please enter valid Number of Offenders!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txt_ONumberOfOffender').focus();
+                errorCount = "1";
+                return false;
+            }
+            else { $('#errordivONumberOfOffender').hide(); errorCount = ""; }
+
+            //if ($('#txt_OffenderDescription').val() == '') {
+            //    $('#errordivONumberOfOffender').show();
+            //    $('#errordivONumberOfOffender').html("Please enter the Number of Offenders!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            //    $('#txt_OffenderDescription').focus();
+            //    errorCount = "1";
+            //    return false;
+            //}
+            //else { $('#errordivddlVillName').hide(); errorCount = ""; }
+
+        }
+    })
+    //$(document).on('change', '#ddlOState', function () {
+
+    //    var oState = $("#ddlOState option:selected").val();
+
+    //    if (oState == "1") {
+
+    //        $("#txtdistrict").val('');
+    //        $('#divtxtDistrict').hide();
+    //        $('#divDDlDistrict').show();
+    //    }
+    //    else if (oState == "2") {
+    //        $("#ddlODistrict").val($("#ddlODistrict option:first").val());
+    //        $('#divtxtDistrict').show();
+    //        $('#divDDlDistrict').hide();
+
+    //    }
+    //    else {
+    //        $('#divtxtDistrict').hide();
+    //        $('#divDDlDistrict').show();
+    //        $("#ddlODistrict").val($("#ddlODistrict option:first").val());
+    //        $("#txtdistrict").val('');
+    //    }
+    //});
+
+
+    $(document).on('change', '#ddlOState', function () {
+        var oState = $("#ddlOState option:selected").val();
+        if (oState == "1") {
+            $("#txtdistrict,#txtvillage").val('');
+            $('#divtxtDistrict,#divtxtVillage').hide();
+            $('#divDDlDistrict,#divDDlVillage').show();
+        }
+        else if (oState == "2") {
+            $("#ddlODistrict").val($("#ddlODistrict option:first").val());
+            $('#divtxtDistrict,#divtxtVillage').show();
+            $('#divDDlDistrict,#divDDlVillage').hide();
+        }
+        else {
+            $('#divtxtDistrict').hide();
+            $('#divDDlDistrict').show();
+            $("#ddlODistrict").val($("#ddlODistrict option:first").val());
+            $("#txtdistrict,#txtvillage").val('');
+        }
+    });
+
+
+    //$('#txt_Description,#txt_OffenderName,#txt_OFatherName,#txt_OSpouseName,#txt_OCaste,#txt_OAddress1,#txt_OVillageCode,#txt_OPoliceStation,#txt_OffenderDescription,#txtdistrict').keypress(function (e) {
+    //    var kc = e.which;
+
+    //    if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 13 || kc == 95 || kc == 37 || kc == 46 || kc == 38) || (kc >= 47 && kc <= 57) || (kc >= 44 && kc < 46) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+    //    }
+    //    else {
+    //        e.preventDefault();
+    //    }
+    //});
+    @*$('#txt_OEmailID').keypress(function (e) {
+                var regex ="^[a-zA-Z0-9_\\.-]+@([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
+                return regex.test($('#txt_OEmailID').val());
+
+                });*@
+
+    $('#txt_OPincode,#txt_OPhoneNo,#txt_OffenderAge,txt_ONumberOfOffender').keypress(function (event) {
+
+        return isOnlyNumber(event, this)
+
+    });
+    $("#btn_addoffender").bind("click", function () {
+        if (errorCount == '') {
+            SaveOffenderDetails();
+        }
+    });
+
+
+
+
+    function SaveOffenderDetails() {
+
+        var oDistrict = '';
+        var oType = $("input[type='radio'][name='Offender']:checked").val();
+        var oName = $("#txt_OffenderName").val();
+        var oFname = $("#txt_OFatherName").val();
+        var oAddress1 = $("#txt_OAddress1").val();
+        //var oState = $("#ddlOState option:selected").text();
+        var oState = $("#ddlOState").val();
+
+        if ($("#ddlOState").val() == "1") {
+            oDistrict = $("#ddlODistrict option:selected").val();
+            var oVillage = $("#txt_OVillageCode").val();
+        }
+
+        else if ($("#ddlOState").val() == "2") {
+            oDistrict = $("#txtdistrict").val();
+            var oVillage = $("#txtvillage").val();
+        }
+        var Offenderrowid = $('#hdnOffenderrowid').val();
+
+        var OffenderInfo = {
+            OOffenderrowid: Offenderrowid,
+            OOffenderType: oType,
+            OffenderName: oName,
+            OFatherName: oFname,
+            OAddress1: oAddress1,
+            OStateCode: oState,
+            ODistrictCode: oDistrict,
+            OVillageCode: oVillage
+
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(OffenderInfo),
+            url: RootUrl + "CitizenParivadRegistration/SaveOffenderList",
+            success: function (data) {
+                //   for (var i = 0; i < data.length; i++) {
+                if (data.OffenderName != '') {
+                    var id = "'" + data.OOffenderrowid + "'";
+                    //var rowdata = "<tr class='rowid'><td>" + data[i].OffenderName + "</td><td>" + data[i].FatherName + "</td><td>" + data[i].Caste + "</td><td>" + data[i].VillageCode + "</td><td>" + "<button class='get-delete' value='" + data[i].oVillage + "'>Delete</button>" + "</td></tr>";
+                    var rowdata = "<tr><td style=display:none;>" + data.OOffenderrowid + "</td><td>" + data.OffenderName + "</td><td>" + data.OFatherName + "</td><td>" + data.OAddress1 + "</td><td>" + "<button type=button class='btn btn-warning btn-circle' style=cursor:pointer onclick=EditOffender(" + id + ")><i class='fa fa-edit'></i></button>" + "</td></tr>";
+                    $('#tbl_Offenderinfo tbody tr td:nth-child(1)').each(function () {
+                        if (data.OOffenderrowid == $(this).text()) {
+                            $(this).closest('tr').remove();
+                        }
+                    });
+                    $("#tb_OffenderInfo").append(rowdata);
+                    $("#tbl_Offenderinfo").css("display", "block");
+                }
+                //   }
+                $("#txt_OffenderName").val('');
+                $("#txt_OFatherName").val('');
+                $("#txt_OAddress1").val('');
+                $("#ddlOState").val($("#ddlOState option:first").val());
+                $("#ddlODistrict").val($("#ddlODistrict option:first").val());
+                $("#txtdistrict").val('');
+                $("#txt_OVillageCode").val('');
+                $('#hdnOffenderrowid').val('');
+                $("#txtdistrict,#txtvillage").val('');
+            },
+
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+    }
+
+    function EditOffender(ID) {
+        $('#hdnOffenderrowid').val(ID);
+        var tblinfo = {
+            ID: ID
+        }
+        $("#tbdyScart").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'CitizenParivadRegistration/EditDetails',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(tblinfo),
+            success: function (data) {
+                $('#txt_OffenderName').val(data.OffenderName); $('#txt_OFatherName').val(data.OFatherName);
+                $('#txt_OAddress1').val(data.OAddress1);
+                if (data.OStateCode == "Rajasthan") {
+                    $('#ddlOState').val(1);
+                    $("#txtdistrict,#txtvillage").val('');
+                    $('#divtxtDistrict,#divtxtVillage').hide();
+                    $('#divDDlDistrict,#divDDlVillage').show();
+                    $('#ddlODistrict').val(data.ODistrictCode);
+                    $('#txt_OVillageCode').val(data.OVillageCode);
+                }
+                if (data.OStateCode == "Other") {
+                    $('#ddlOState').val(2);
+                    $("#ddlODistrict").val($("#ddlODistrict option:first").val());
+                    $('#divtxtDistrict,#divtxtVillage').show();
+                    $('#divDDlDistrict,#divDDlVillage').hide();
+                    $("#txtdistrict").val(data.ODistrictCode);
+                    $("#txtvillage").val(data.OVillageCode);
+                }
+                if (data.OStateCode == "1") {
+                    $('#ddlOState').val(1);
+                    $("#txtdistrict,#txtvillage").val('');
+                    $('#divtxtDistrict,#divtxtVillage').hide();
+                    $('#divDDlDistrict,#divDDlVillage').show();
+                    $('#ddlODistrict').val(data.ODistrictCode);
+                    $('#txt_OVillageCode').val(data.OVillageCode);
+                }
+                if (data.OStateCode == "2") {
+                    $('#ddlOState').val(2);
+                    $("#ddlODistrict").val($("#ddlODistrict option:first").val());
+                    $('#divtxtDistrict,#divtxtVillage').show();
+                    $('#divDDlDistrict,#divDDlVillage').hide();
+                    $("#txtdistrict").val(data.ODistrictCode);
+                    $("#txtvillage").val(data.OVillageCode);
+                }
+
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+
+
+        });
+
+    }
+
+    function isOnlyNumber(evt, element) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode == 8) { return true; }
+        if (charCode < 48 || charCode > 57)
+            return false;
+    }
+
+    function validateEmail($email) {
+        var emailReg = /^([\w-\.]+@@([\w-]+\.)+[\w-]{2,4})?$/;
+        if (!emailReg.test($email)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    //function reload() {
+    //    location.reload(true);
+    //}
+
+    function reload() {
+        var r = confirm("Do you want to leave page!");
+        if (r) {
+            if ($('#hdnKiosk').val() == 'True') {
+
+                window.location = RootUrl + "KioskDashboard/KioskDashboard";
+
+            }
+            else {
+                window.location = RootUrl + "Dashboard/dashboard";
+            }
+
+        }
+        else {
+            //do nothing
+        }
+    }
+
+
+    function autoDistrictsuggest(e) {
+        $(".autoDistrictsuggest").autocomplete({
+            source: function (request, response) {
+                if (document.getElementById('district').value.length >= 2) {
+                    $.ajax({
+                        type: "POST",
+                        url: RootUrl + 'CitizenParivadRegistration/GetAutoComplete',
+                        data: { Division: "", District: $.trim($("#district").val()), Block: "", Gram: "", Range: "", Village: "", Option: "DISTRICT" },
+                        dataType: "json",
+                        success: function (data) {
+                            if (data != '') {
+                                source: data.d;
+                                response($.map(data, function (item) {
+                                    $('#hdnDistCode').val(item.Value);
+                                    $('#blockname,#ddlGPName,#ddlVillName').val('');
+                                    $('#hdnBlockCode,#hdnGPCode,#hdnVillageCode').val('');
+                                    return { label: item.Text, value: item.Text, id: item.Value };
+                                }));
+                            }
+                            else {
+                                alert('Match not found');
+                                $("#district,#hdnDistCode").val('');
+                            }
+                        },
+                        error: function (result) {
+                        }
+                    });
+                }
+                else {
+                    response('');
+                }
+            },
+            select: function (e, i) {
+                $('#hdnDistCode').val(i.item.id);
+
+            },
+        });
+    }
+
+    function autoBlocksuggest() {
+        $(".autoBlocksuggest").autocomplete({
+            source: function (request, response) {
+                if ($('#district').val() != '' && document.getElementById('blockname').value.length >= 2) {
+                    $.ajax({
+                        type: "POST",
+                        url: RootUrl + 'CitizenParivadRegistration/GetAutoComplete',
+                        //data: { Dist: $.trim($("#hdnDistCode").val()), Block: $.trim($("#blockname").val()), },
+                        data: { Division: "", District: $.trim($("#hdnDistCode").val()), Block: $.trim($("#blockname").val()), Gram: "", Range: "", Village: "", Option: "BLOCK" },
+                        success: function (data) {
+                            if (data != '') {
+                                source: data.d;
+                                response($.map(data, function (item) {
+                                    $('#ddlGPName,#ddlVillName').val('');
+                                    $('#hdnGPCode,#hdnVillageCode').val('');
+                                    return { label: item.Text, value: item.Text, id: item.Value };
+                                }));
+                            }
+                            else {
+                                alert('Match not found');
+                                $("#blockname,#hdnBlockCode").val('');
+                            }
+                        },
+                        error: function (result) {
+                        }
+                    });
+                }
+                else {
+
+                    if (document.getElementById('blockname').value.length >= 2) {
+                        $.ajax({
+                            type: "POST",
+                            url: RootUrl + 'CitizenParivadRegistration/GetAutoComplete',
+                            //data: { Village: $.trim($("#ddlVillName").val()) },
+                            //data: { Division: "", District: "", Block: "", Gram: "", Village: $.trim($("#ddlVillName").val()), Option: "VILLAGE" },
+                            data: { Division: "", District: "", Block: $.trim($("#blockname").val()), Gram: "", Range: "", Village: "", Option: "BLOCK" },
+                            success: function (data) {
+                                if (data != '') {
+                                    source: data.d;
+                                    response($.map(data, function (item) {
+                                        $('#ddlGPName,#ddlVillName').val('');
+                                        $('#hdnGPCode,#hdnVillageCode').val('');
+                                        return { label: item.Text, value: item.Text, id: item.Value };
+                                    }))
+                                }
+                                else {
+                                    alert('Match not found');
+                                    $("#blockname,#hdnBlockCode").val('');
+                                }
+                            },
+                            error: function (result) {
+
+                            }
+                        });
+                    }
+                    response('');
+                }
+            },
+            select: function (e, i) {
+                $('#hdnBlockCode').val(i.item.id);
+            },
+
+        });
+    }
+
+
+    function autoGPsuggest() {
+        $(".autoGPsuggest").autocomplete({
+            source: function (request, response) {
+                if ($('#district').val() != '' && $('#blockname').val() != '' && document.getElementById('ddlGPName').value.length >= 2) {
+                    $.ajax({
+                        type: "POST",
+                        url: RootUrl + 'CitizenParivadRegistration/GetAutoComplete',
+                        data: { Division: "", District: $.trim($("#hdnDistCode").val()), Block: $.trim($("#hdnBlockCode").val()), Gram: $.trim($("#ddlGPName").val()), Range: "", Village: "", Option: "GRAM" },
+                        success: function (data) {
+                            if (data != '') {
+                                source: data.d;
+                                response($.map(data, function (item) {
+                                    $('#ddlVillName').val('');
+                                    $('#hdnVillageCode').val('');
+                                    return { label: item.Text, value: item.Text, id: item.Value };
+                                }))
+                            }
+                            else {
+                                alert('Match not found');
+                                $("#ddlGPName,#hdnGPCode").val('');
+                            }
+                        },
+                        error: function (result) {
+
+                        }
+                    });
+                }
+                else {
+
+                    if (document.getElementById('ddlGPName').value.length >= 2) {
+                        $.ajax({
+                            type: "POST",
+                            url: RootUrl + 'CitizenParivadRegistration/GetAutoComplete',
+                            //data: { Village: $.trim($("#ddlVillName").val()) },
+                            //data: { Division: "", District: "", Block: "", Gram: "", Village: $.trim($("#ddlVillName").val()), Option: "VILLAGE" },
+                            data: { Division: "", District: "", Block: "", Gram: $.trim($("#ddlGPName").val()), Range: "", Village: "", Option: "GRAM" },
+                            success: function (data) {
+                                if (data != '') {
+                                    source: data.d;
+                                    response($.map(data, function (item) {
+                                        $('#ddlVillName').val('');
+                                        $('#hdnVillageCode').val('');
+                                        return { label: item.Text, value: item.Text, id: item.Value };
+                                    }))
+                                }
+                                else {
+                                    alert('Match not found');
+                                    $("#ddlGPName,#hdnGPCode").val('');
+                                }
+                            },
+                            error: function (result) {
+
+                            }
+                        });
+                    }
+                    response('');
+                }
+            },
+            select: function (e, i) {
+                $('#hdnGPCode').val(i.item.id);
+            },
+        });
+    }
+
+    function autoVillagesuggest() {
+        $(".autoVillagesuggest").autocomplete({
+            source: function (request, response) {
+                if ($('#district').val() != '' && $('#blockname').val() != '' && $('#ddlGPName').val() != '' && document.getElementById('ddlVillName').value.length >= 2) {
+                    $.ajax({
+                        type: "POST",
+                        url: RootUrl + 'CitizenParivadRegistration/GetAutoComplete',
+                        data: { Division: "", District: $.trim($("#hdnDistCode").val()), Block: $.trim($("#hdnBlockCode").val()), Gram: $.trim($("#hdnGPCode").val()), Range: "", Village: $.trim($("#ddlVillName").val()), Option: "VILLAGE" },
+                        success: function (data) {
+                            if (data != '') {
+                                source: data.d;
+                                response($.map(data, function (item) {
+                                    return { label: item.Text, value: item.Text, id: item.Value };
+                                }))
+                            }
+                            else {
+                                alert('Match not found');
+                                $("#ddlVillName,#hdnVillageCode").val('');
+                            }
+                        },
+                        error: function (result) {
+
+                        }
+                    });
+                }
+                else {
+
+                    if (document.getElementById('ddlVillName').value.length >= 2) {
+                        $.ajax({
+                            type: "POST",
+                            url: RootUrl + 'CitizenParivadRegistration/GetAutoComplete',
+                            data: { Division: "", District: "", Block: "", Gram: "", Range: "", Village: $.trim($("#ddlVillName").val()), Option: "VILLAGE" },
+                            success: function (data) {
+                                if (data != '') {
+                                    source: data.d;
+                                    response($.map(data, function (item) {
+                                        return { label: item.Text, value: item.Text, id: item.Value };
+                                    }))
+                                }
+                                else {
+                                    alert('Match not found');
+                                    $("#ddlVillName,#hdnVillageCode").val('');
+                                }
+                            },
+                            error: function (result) {
+
+                            }
+                        });
+                    }
+                    response('');
+                }
+            },
+            select: function (e, i) {
+                $('#hdnVillageCode').val(i.item.id);
+            },
+        });
+    }
+
+
+
+
+</script>
+
+
+
+<script src="~/Scripts/jquery.blockUI.js"></script>
+<script>
+    $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
+</script>
+
+<style>
+    #myModalDashboard {
+        z-index: 99999;
+    }
+
+    .element.style {
+        z-index: 99999999999 !important;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+
+    function FPMparivad() {
+        document.getElementById("ssoid").value = '@Session["SSOID"]';
+        document.getElementById("OffenseCategoryID").value = document.getElementById("ddl_OffenseCategory").value;
+        document.getElementById("DistrictID").value = document.getElementById("district").value;
+        document.getElementById("BlocknameID").value = document.getElementById("blockname").value;
+        document.getElementById("GPNameID").value = document.getElementById("ddlGPName").value;
+
+        document.getElementById("villageId").value = document.getElementById("ddlVillName").value;
+        document.getElementById("FPMparivadform").action = 'http://fmdss.forest.rajasthan.gov.in/FMDSSGIS/markoffense/offense.aspx';
+        document.getElementById("FPMparivadform").submit();
+        return false;
+    }
+
+
+</script>
+
+
+<form name="FPMparivadform" id="FPMparivadform" method="post">
+    <input type="hidden" id="ssoid" name="ssoid" />
+    <input type="hidden" id="portalid" name="portalid" value="portal123" />
+
+    <input type="hidden" id="OffenseCategoryID" name="OffenseCategoryID" />
+    <input type="hidden" id="DistrictID" name="DistrictID" />
+    <input type="hidden" id="BlocknameID" name="blocknameID" />
+    <input type="hidden" id="GPNameID" name="GPNameID" />
+
+
+    <input type="hidden" id="villageId" name="villageId" />
+
+    <input type="hidden" id="returnURL" name="returnURL" value="http://fmdss.forest.rajasthan.gov.in/FPMParivad/FPMParivad" />
+
+</form>

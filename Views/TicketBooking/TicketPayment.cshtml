@@ -1,0 +1,194 @@
+﻿@{
+    ViewBag.Title = "TicketPayment";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+    table.imagetable {
+        font-family: verdana,arial,sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #999999;
+        border-collapse: collapse;
+    }
+
+        table.imagetable th {
+            background: #b5cfd2 url('cell-blue.jpg');
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #999999;
+        }
+
+        table.imagetable td {
+            background: #ccc;
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #999999;
+        }
+</style>
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript" language="javascript">
+
+    $(document).ready(function () {
+
+        function disableBack() { window.history.forward() }
+
+        window.onload = disableBack();
+        window.onpageshow = function (evt) {
+            if (evt.persisted) disableBack()
+        }
+
+    });
+
+    $(document).on("keydown", function (e) {
+        if (e.which === 8 && !$(e.target).is("input, textarea")) {
+            e.preventDefault();
+        }
+    });
+
+
+
+
+</script>
+
+@*<div id="page-wrapper-inn">
+
+    <!--    content-->
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!--<div class="panel-heading"></div>
+                <!-- /.panel-heading -->
+                <br /><br /><br /><br />
+                <table style="text-align:right; border-width:1px; margin:auto;" bordercolor="blue" cellpadding="2" cellspacing="5" class="imagetable">
+                    <tr style="color:blue">
+                        <th style="width:250px">Transaction_Id</th>
+                        <th style="width:250px">Member Fee</th>
+                        <th style="width:250px">Camera Fees</th>
+                        <th style="width:250px">Safari Fees</th>
+                        <th style="width:250px">Accomo Fees</th>
+                        <th style="width:250px">Total Amount</th>
+                        <th style="width:250px">Enter By</th>                        
+                        <th style="width:250px">Status</th>
+                    </tr>
+                    @foreach (var item in ViewData.Model)
+                    {
+                        <tr style="color:Black">
+                            <td>@item["Transaction_Id"] </td>
+                            <td>@item["MemberFee"]</td>
+                            <td>@item["CameraFees"]</td>
+                            <td>@item["SafariFees"]</td>
+                            <td>@item["AccomoFees"]</td>
+                            <td>@item["TotalAmount"]</td>
+                            <td>@Session["User"].ToString()</td>
+                            <td>@item["Status"]</td>
+                        </tr>
+                    }
+                </table>
+                <br />
+                <div style="text-align:center;">
+                    <label>Total Cost</label>
+                    @Html.Raw(HttpContext.Current.Session["totalprice"])
+                </div>
+                @using (Html.BeginForm("Pay", "TicketBooking", FormMethod.Post, new { id = "pay" }))
+                {
+                    <div style="text-align:center" class="form-horizontal" role="form">
+                        <button id="btnPay" type="submit" name="Command" value="pay">Pay</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>*@
+
+
+
+
+<div id="page-wrapper-inn">
+
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">
+            <!--<i class="fa fa-rupee"></i>--> Payment
+            <!-- <small class="pull-right pdate">Date: 17/12/2015</small> -->
+        </h1>
+    </div>
+    <!-- /.col-lg-12 -->
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <section class="payment">
+
+                        <!-- Table row -->
+                        <div class="row">
+                            <div class="col-xs-12 table-responsive">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Transaction_Id</th>
+                                            <th>Member Fee</th>
+                                            <th>Camera Fees</th>
+                                            <th>Safari Fees</th>
+                                            <th>Accomo Fees</th>
+                                            <th>Total Amount</th>
+                                            <th>Enter By</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in ViewData.Model)
+                                        {
+                                            <tr style="color:Black">
+                                                <td>@item["Transaction_Id"] </td>
+                                                <td>@item["MemberFee"]</td>
+                                                <td>@item["CameraFees"]</td>
+                                                <td>@item["SafariFees"]</td>
+                                                <td>@item["AccomoFees"]</td>
+                                                <td>@item["TotalAmount"]</td>
+                                                <td>@Session["User"].ToString()</td>
+
+                                                <td><span class="danger-text"> @item["Status"]</span></td>
+
+                                            </tr>
+                                        }
+
+
+                                    </tbody>
+                                </table>
+                            </div><!-- /.col -->
+                        </div><!-- /.row -->
+                        <!-- this row will not appear when printing -->
+                        <div class="row no-print">
+                            <div class="col-xs-12">
+                                <label>Total Amount Payable inclusive of Service Charges</label>: @Html.Raw(HttpContext.Current.Session["totalprice"])
+
+
+                                @using (Html.BeginForm("Pay", "TicketBooking", FormMethod.Post, new { id = "pay" }))
+                                {
+                                    <div style="text-align:center" class="form-horizontal" role="form">
+                                        <button id="btnPay" type="submit" name="Command" value="pay" class="btn btn-primary pull-right"><i class="fa fa-check"></i> Pay Now</button>
+                                    </div>
+                                }
+
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>
+<!-- /#page-wrapper -->
+
+
+
+

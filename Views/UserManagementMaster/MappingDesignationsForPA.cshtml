@@ -1,0 +1,226 @@
+﻿@{
+    ViewBag.Title = "MappingDesignationsForPA";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_SuperAdmin.cshtml";
+}
+@model FMDSS.Models.Master.Designations
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script>
+
+
+    var RootUrl = '@Url.Content("~/")';
+    $(document).ready(function () {
+
+        $('#dataTables-example').DataTable({
+            responsive: true
+        });
+
+    });
+
+    $(document).ready(function () {
+
+        $('#dataTables-example2').DataTable({
+            responsive: true
+        });
+
+    });
+
+
+    function postUnMappedUserRequest(USERID) {
+        debugger;
+        var r = confirm('Are you sure you wish to map this User ?');
+        if (r == false) {
+            return false;
+        }
+        var Status = $('#' + USERID).is(":checked");
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'UserManagementMaster/MappingForPA', // we are calling json method
+            dataType: 'json',
+            data: { USERIDs: USERID, DESIGNATIONIDs: $('#DDL_Designations').val(), STATUS: Status },
+            success: function (circle) {
+                debugger;
+                if (circle == "0-0") {
+
+                    alert("There is no any service mapped with selected Designation")
+                    $('#' + USERID).removeProp('checked');
+                }
+                else if (circle == 'NAOffice')
+                {
+                    alert("There is no any office mapping for the User, for mapping select  'Mapping Forest User With Office' option in menu")
+                }
+                else if (circle == '1') {
+                    $('#INDEX_' + USERID).hide();
+
+                }
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+
+        });
+
+    }
+
+
+    function postMappedUserRequest(USERID) {
+        debugger;
+        var r = confirm('Are you sure you wish to Unmap this User ?');
+        if (r == false) {
+            return false;
+        }
+
+        var Status = $('#' + USERID).is(":checked");
+
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'UserManagementMaster/MappingForPA', // we are calling json method
+            dataType: 'json',
+            data: { USERIDs: USERID, DESIGNATIONIDs: $('#DDL_Designations').val(), STATUS: Status },
+            success: function (circle) {
+                $('#INDEX_' + USERID).hide();
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+
+        });
+    }
+</script>
+
+<div class="row">
+    <div class="col-lg-9 pad">
+        <h1 class="page-header"><span>Mapping User Designations With Permissions Approver</span></h1>
+    </div>
+
+    @using (Html.BeginForm("MappingDesignationsForPA", "UserManagementMaster", FormMethod.Post))
+    {
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label>Designations <span class="mandatory">*</span></label>
+                        </div>
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="form-group">
+                            @Html.DropDownListFor(model => Model.DesigId, (IEnumerable<SelectListItem>)ViewBag.lstDesignations, "--Select--", new { @class = "form-control common", id = "DDL_Designations" })
+                            <div id="errPlaceID" style="display:none" class="alert-danger1">Place is Required.</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <input type="submit" class="btn btn-success" value="View" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel with-nav-tabs panel-default">
+                <div class="panel-heading">
+                    <ul class="nav nav-tabs">
+
+                        <li class=""><a href="#tab2default" data-toggle="tab"><i class="fa fa-user fa-fw"></i> UnMapped User</a></li>
+                        <li class="active"><a href="#tab1default" data-toggle="tab"><i class="fa fa-star fa-fw"></i> mapped User</a></li>
+                    </ul>
+                </div>
+                <div class="panel-body">
+                    <div class="tab-content">
+                        <div class="tab-pane fade " id="tab2default">
+                            <div class="panel-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>SSO ID</th>
+                                                <th> Mapping</th> @*Complete
+                    <th>Manual Mapping</th>*@
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model.UnMappedUserLIST)
+                                            {
+                                                <tr id="INDEX_@item.USERID">
+
+                                                    <td>@Html.DisplayFor(model => item.Index)  </td>
+                                                    <td>@Html.DisplayFor(model => item.SSOID, new { id = "SSOID" })   </td>
+                                                    <td>
+                                                        <input onclick='return postUnMappedUserRequest(@item.USERID)' type="checkbox" id="@item.USERID" value="true" @(item.IsactiveView ? "checked=\"checked\"" : "") />
+                                                    </td>
+                                                    @*<td>
+                            <button type="button" class="btn btn-success btn-circle ObjectLinking" data-toggle="modal" data-target="#myModal1" title="Mapping Designation With Object Linking " onclick="return CallObjectLinkingData(@item.USERID);">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </td>*@
+
+
+                                                </tr>
+                                            }
+
+
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                                <!-- /.table-responsive -->
+                            </div>
+                        </div>
+                        <div class="tab-pane fade active in " id="tab1default">
+                            <div class="panel-body">
+                                <div class="table-responsive request-id">
+
+
+                                    <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example2">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>SSO ID</th>
+                                                <th> Mapping</th> @*Complete
+                    <th>Manual Mapping</th>*@
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model.MappedUserLIST)
+                                            {
+                                                <tr id="INDEX_@item.USERID">
+
+                                                    <td>@Html.DisplayFor(model => item.Index) </td>
+                                                    <td>@Html.DisplayFor(model => item.SSOID, new { id = "SSOID" })   </td>
+                                                    <td>
+                                                        <input onclick='return postMappedUserRequest(@item.USERID)' type="checkbox" id="@item.USERID" value="true" @(item.IsactiveView ? "checked=\"checked\"" : "") />
+                                                    </td>
+                                                    @*<td>
+                            <button type="button" class="btn btn-success btn-circle ObjectLinking" data-toggle="modal" data-target="#myModal1" title="Mapping Designation With Object Linking " onclick="return CallObjectLinkingData(@item.USERID);">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </td>*@
+                                                </tr>
+                                            }
+
+
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                                <!-- /.table-responsive -->
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+
+        </div>
+    }
+</div>

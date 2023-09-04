@@ -1,0 +1,405 @@
+﻿@{
+    ViewBag.Title = "Guide/Vehicle Choice";
+    Layout = "~/Views/Shared/_LayoutBookingRoaster.cshtml";
+}
+@section PageCss{
+    <link href="~/css/bootstrap/jquery-ui.css" rel="stylesheet" />
+    <link href="~/Select2DropdownJSCSS/css/select2.min.css" rel="stylesheet" />
+}
+
+
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header"><span>Choose Guide/Vehicle</span></h1>
+
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+
+        <div class="col-lg-12" style="padding-bottom:15px;">
+            <div class="col-lg-6">
+                <label>Select Visit Date : <span class="mandatory"></span></label>
+                <input type="text" class="form-control" id="txtBookingDate" name="BookingDate" title="Enter the date of visit" placeholder="Select Date" autocomplete="off" />
+                <span style="color:orangered;" id="spnErrDate"></span>
+            </div>
+            <div class="col-lg-6">
+                <label>Select Choice : <span class="mandatory"></span></label>
+                <select class="form-control myselect">
+                    <option value="0">--Select Choice Option--</option>
+                    <option value="1">Choice Guide</option>
+                    <option value="2">Choice Vehicel</option>
+                    <option value="3">Choice Both</option>
+                </select>
+                <span style="color:orangered;" id="spnErrChoice"></span>
+            </div>
+        </div>
+
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+
+
+                <div class="panel-body">
+
+
+
+                    <div class="col-lg-12" id="div_CitizenVisitDetails">
+                        <div class="table-responsive">
+                            <table class="table tabtext table-striped  table-bordered table-hover" , id="tbl_CitizenVisitDetails" style="width:100%;">
+                                <thead>
+                                    <tr>
+                                        <th style="width:5px;">S No.</th>
+                                        <th style="width:15px;">Ticket No.</th>
+                                        <th style="display:none">UserId</th>
+                                        <th style="width:25px;">User Name</th>
+                                        <th style="display:none">PlaceId</th>
+                                        <th style="width:35px;">Place Name</th>
+                                        <th style="display:none">ZoneId</th>
+                                        <th style="width:10px;">Zone Name</th>
+                                        <th style="display:none">ShiftId</th>
+                                        <th style="width:15px;">Shift Name</th>
+                                        <th style="width:25px;">Vehicle Type</th>
+                                        <th style="width:15px;">Member Count</th>
+                                        <th style="width:15px;">Date Of Visit</th>
+                                        <th style="width:35px;">Select Guide</th>
+                                        <th style="width:25px;">Select Vehicle</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+
+
+
+                    <!-- Btn Groping -->
+                    <div class="btn-padd">
+                        <div id="btn" class="col-lg-12">
+                            <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit1">
+                                <i class="fa fa-check"></i> Save
+                            </button>
+                            <button type="reset" class="btn btn-warning">
+                                <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                            </button>
+                            <button type="submit" name="Command" value="Cancel" class="btn btn-danger">
+                                <i class="fa fa-times fa-fw"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.Btn Groping -->
+
+                </div>
+                <!-- /.panel-body -->
+
+            </div>
+            <!-- /.panel -->
+
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>
+@section PageScript{
+    @*<script src="~/Select2DropdownJSCSS/js/jquery.js"></script>*@
+    <script src="~/Select2DropdownJSCSS/js/select2.min.js"></script>
+    <script type="text/javascript">
+    $(".myselect").select2();
+    var RootUrl = '@Url.Content("~/")';
+    //function DisableDates(date) {
+    //    var string = jQuery.datepicker.formatDate('dd/mm/yy', date);
+    //    return [dates.indexOf(string) == -1];
+    //}
+    $(document).ready(function () {
+        var flg = false;
+        var indexBack = 0;
+        //Ok Code Below
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        let mm = today.getMonth() + 1; // Months start at 0!
+        let dd = today.getDate();
+
+        if (dd < 10) dd = '0' + dd;
+        if (mm < 10) mm = '0' + mm;
+
+        var tillday = new Date();
+        tillday.setDate(tillday.getDate() + 365);
+        const yyyy2 = tillday.getFullYear();
+        let mm2 = tillday.getMonth() + 1; // Months start at 0!
+        let dd2 = tillday.getDate();
+
+        if (dd2 < 10) dd2 = '0' + dd2;
+        if (mm2 < 10) mm2 = '0' + mm2;
+
+        //var mytoday = dd + '/' + mm + '/' + yyyy;
+        //var fromDate = yyyy + '/' + mm + '/' + dd;
+        //var toDate = yyyy2 + '/' + mm2 + '/' + dd2;
+        var fromDate = dd + '/' + mm + '/' + yyyy;
+        var toDate = dd2 + '/' + mm2 + '/' + yyyy2;
+        // alert(yyyy + ' ' + yyyy2);
+        $("#txtBookingDate").datepicker("destroy");
+        $("#txtBookingDate").datepicker({
+            //beforeShowDay: DisableDates,
+            minDate: fromDate,
+            maxDate: toDate,
+            dateFormat: 'dd/mm/yy',
+            changeYear: true,
+            onSelect: function (dateText) {
+                //alert("Selected date: " + dateText + "; input's current value: " + this.value)
+                
+                //if ($('.myselect2').hasClass('myselect2')) {
+                //    $('.myselect2').removeClass();
+                //    $('.myselect2').select2("destory");
+
+                //}
+                var x = 0;
+                $.ajax({
+                    type: 'GET',
+                    url: RootUrl + 'BookingRoster/GetCitizenVisitDetailList', // we are calling json method
+                    //dataType: 'html',
+                    dataType: 'json',
+                    data: { VisitDate: dateText },
+                    success: function (visitDetal) {
+                        //alert('test');
+                        $('#tbl_CitizenVisitDetails').dataTable({
+                            "destroy": true,
+                            "paging": true,
+                            "ordering": true,
+                            "filter": true,
+                            "orderMulti": false,
+                            //"serverSide": true,
+                            "Processing": true,
+
+                            "columnDefs": [
+                                { "title": "S No.", "width": "5px", "targets": 0 },
+                                { "title": "Ticket No.", "width": "15px", "targets": 1 },
+                                { "title": "UserId", "width": "0px", "targets": 2 },
+                                { "title": "User Name", "width": "25px", "targets": 3 },
+                                { "title": "PlaceId", "width": "0px", "targets": 4 },
+                                { "title": "Place Name", "width": "35px", "targets": 5 },
+                                { "title": "ZoneId.", "width": "0px", "targets": 6 },
+                                { "title": "Zone Name", "width": "10px", "targets": 7 },
+                                { "title": "ShiftId.", "width": "0px", "targets": 8 },
+                                { "title": "Shift Name", "width": "15px", "targets": 9 },
+                                { "title": "Vehicle Type", "width": "20px", "targets": 10 },
+                                { "title": "Member Count", "width": "15px", "targets": 11 },
+                                { "title": "Date Of Visit", "width": "15px", "targets": 12 },
+                                { "title": "Select Guide", "width": "35px", "targets": 13 },
+                                { "title": "Select Vehicle", "width": "25px", "targets": 14 },
+                               
+                                //{ "width": "10px", "targets": 0 },
+                                //{ "width": "40px", "targets": 1 },
+                                //{ "width": "100px", "targets": 2 },
+                                //{ "width": "70px", "targets": 3 },
+                                //{ "width": "70px", "targets": 4 },
+                                //{ "width": "70px", "targets": 5 }
+                                //{
+                                //    "targets": [1, 8],
+                                //    "visible": false,
+                                //    "searchable": false
+                                //},
+                            ],
+                            drawCallback: function () {
+                                //$('.myselect2').select2().destroy();
+                                $('.myselect2').select2();
+                            }
+                        });
+                        var j = 0;
+                        $("#tbl_CitizenVisitDetails tbody").empty();
+                        var tblDetail = ''
+                        if (visitDetal.length > 0) {
+                            $.each(visitDetal, function (i, itm) {
+                                //tblDetail = "<tr><td><input type='checkbox' name='record'></td><td>" + name + "</td><td>" + email + "</td></tr>";
+                                tblDetail += '<tr class="myRowEvent" id="myRowId_'+j+ '"><td>' + itm.SNo + '</td>' +
+                                    '<td style="width:5px;">' + itm.TicketId + '</td>' +
+                                    '<td style="display:none">' + itm.UserId + '</td>' +
+                                    '<td  style="width:15px;">' + itm.UserName + '</td>' +
+                                    '<td style="display:none">' + itm.PlaceID + '</td>' +
+                                    '<td  style="width:25px;">' + itm.PlaceName + '</td>' +
+                                    '<td style="display:none">' + itm.ZoneId + '</td>' +
+                                    '<td  style="width:10px;">' + itm.ZoneName + '</td>' +
+                                    '<td style="display:none">' + itm.ShiftId + '</td>' +
+                                    '<td  style="width:10px;">' + itm.ShiftName + '</td>' +
+                                    '<td  style="width:15px;">' + itm.VehicleType + '</td>' +
+                                    '<td  style="width: 10px;">' + itm.MemberCount + '</td>' +
+                                    '<td  style="width:10px;">' + itm.DateOfVisit + '</td>' +
+                                    '<td  style="width:45px;">' +
+                                    '<select class="form-control myselect2" style = "width: 100%;" id="ddlGuide_'+ j + '">' +
+                                    '<option value="0" selected="selected">--Select Guide-- </option>' +                                   
+                                    '</select >' +
+                                    '</td>' +
+                                    '<td  style="width:35px;">' +
+                                    '<select class="form-control myselect2" style = "width: 100%;" id="ddlVehicleNumber_' + j + '"> ' +
+                                    '<option value="0" selected="selected">--Select Vehicle Number--</option>' +
+                                    '</select >' +
+                                    '</td >' +                                    
+                                    //'<td>' + itm.VehicleNumber + '</td>' +
+                                    '</tr >';
+                                j++;
+                            });
+
+                            
+                        }
+                        $("#tbl_CitizenVisitDetails tbody").append(tblDetail);
+
+                        //$("#div_CitizenVisitDetails").html(visitDetal);
+                        $('#div_CitizenVisitDetails').show();
+                        
+                        //$('#tbl_CitizenVisitDetails').DataTable({
+
+                        //})
+
+                        $('.myselect2').select2()
+                        $(document).on("focus", ".select2", function () {
+                            //alert($(this).parent().parent().attr("id"));
+                            var id = $(this).parent().parent().attr("id");
+                            var ticketId = ($(this).parent().parent().find("td").eq(1).html());
+                           // alert(ticketId)
+                            var indx = id.split('_')[1];    
+                            GetGuideList(ticketId, indx);
+                            
+                        });
+                        $('.myRowEvent').on("click", function () {
+                            //alert($(this).attr("id"));
+                             // alert('select2:open');
+                            //var id = $(this).attr('id');                           
+                            //var indx = id.split('_')[1];                           
+                            //var ticketId = ($(this).find("td").eq(1).html());
+                            ////alert(id + ' , ' + ticketId);
+                          
+                            //if (flg == false && (indexBack == 0 || indexBack != indx)) {
+                            //    flg = true;
+                            //    indexBack = indx;
+                            //    GetGuideList(ticketId, indx);
+                            //} else {
+                            //    flg = false;
+                            //}
+                        });
+                        $(document).on('change', "[id^='ddlGuide_']", function () {
+                            //alert('test');
+                            //alert(3);
+                            //alert($(this).val());
+                        });
+                       
+                        $(document).on('select2:select', "[id^='ddlGuide_']", function () {
+                            //alert('select2:select');
+                        });                       
+                        //$eventSelect.on("select2:select", function (e) { log("select2:select", e); });
+                        ////$(document).on('select2:open', "[id^='ddlGuide_']", function (e) {
+                        ////   // alert('select2:open');
+                        ////    var id = $(this).attr('id');                           
+                        ////    var indx = id.split('_')[1];                           
+                        ////    var ticketId = ($(this).parent().parent().find("td").eq(1).html());
+                        ////    //alert(id + ' , ' + ticketId);
+                            
+                        ////    if ($(this).length <= 1) {
+                        ////        GetGuideList(ticketId, indx);
+                        ////    }
+                        ////});
+                        $(document).on('select2:close', "[id^='ddlGuide_']", function () {
+                            //alert('select2:close');
+                        });
+                        $(document).on('select2:select', "[id^='ddlGuide_']", function () {
+                           // alert($(this).find(':selected').val());
+                        });
+                        $(document).on('select2:unselect', "[id^='ddlGuide_']", function () {
+                           // alert('select2:unselect');
+                        });
+
+                        //---------------------Vehicle--------------------------------------------
+                        $(document).on('change', "[id^='ddlVehicleNumber_']", function () {
+                            //alert('test');
+                        });
+                        $(document).on('select2:select', "[id^='ddlVehicleNumber_']", function () {
+                            //alert('select2:select');
+                        });
+                        //$eventSelect.on("select2:select", function (e) { log("select2:select", e); });
+                        $(document).on('select2:open', "[id^='ddlVehicleNumber_']", function (e) {
+                            // alert('select2:open');
+                            var id = $(this).attr('id');
+                            var indx = id.split('_')[1];
+                            var ticketId = ($(this).parent().parent().find("td").eq(1).html());
+                            var placeId = ($(this).parent().parent().find("td").eq(4).html());
+                            var vehicleType = ($(this).parent().parent().find("td").eq(10).html());
+                           
+                            GetVehicleList(ticketId, placeId, vehicleType, indx);
+                        });
+                        $(document).on('select2:close', "[id^='ddlVehicleNumber_']", function () {
+                            //alert('select2:close');
+                        });
+                        $(document).on('select2:unselect', "[id^='ddlVehicleNumber_']", function () {
+                            // alert('select2:unselect');
+                        });
+
+
+                        //if ($('#ddlGuide_0').hasClass('myselect')) {
+                        //    $('#ddlGuide_0').removeClass();
+                        //    $('#ddlGuide_0').addClass('myselect');
+
+                        //}
+                        //if ($('#ddlVehicleNumber_0').hasClass('myselect')) {
+                        //    $('#ddlVehicleNumber_0').removeClass();
+                        //    $('#ddlVehicleNumber_0').addClass('myselect');
+
+                        //}
+                        
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve place list.' + ex);
+                    }
+
+                });
+                return false;
+            }
+        });
+
+        function GetGuideList(ticketId,indx) {
+            var visitDate = $("#txtBookingDate").val();
+            
+            $.ajax({
+                type: 'GET',
+                url: RootUrl + 'BookingRoster/GetGuideList', // we are calling json method
+                //dataType: 'html',
+                dataType: 'json',
+                data: { 'VisitDate': visitDate, 'TicketId': ticketId},
+                success: function (lstGuide) {
+                    $("#ddlGuide_" + indx).empty();
+                    $("#ddlGuide_" + indx).append('<option value="0">--Select Guide-- </option>');
+                    $.each(lstGuide, function (i, items) {
+                        $("#ddlGuide_" + indx).append('<option value="' + items.Value + '">' +
+                            items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve guide list.' + ex);
+                }
+
+            });
+        }
+        function GetVehicleList(ticketId,placeId,vehicleType, indx) {
+            var visitDate = $("#txtBookingDate").val();           
+            $.ajax({
+                type: 'GET',
+                url: RootUrl + 'BookingRoster/GetVehicleList', // we are calling json method
+                //dataType: 'html',
+                dataType: 'json',
+                data: {
+                    'VisitDate': visitDate, 'TicketId': ticketId, 'VehicelType': vehicleType, 'PlaceId': placeId },
+                success: function (lstVehicel) {
+                    $("#ddlVehicleNumber_" + indx).empty();
+                    $("#ddlVehicleNumber_" + indx).append('<option value="0">--Select Vehicle Number-- </option>');
+                    $.each(lstVehicel, function (i, items) {
+                        $("#ddlVehicleNumber_" + indx).append('<option value="' + items.Value + '">' +
+                            items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve vehicle list.' + ex);
+                }
+
+            });
+        }
+    });
+
+    </script>
+}

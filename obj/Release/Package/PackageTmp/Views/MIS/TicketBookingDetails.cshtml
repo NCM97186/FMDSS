@@ -1,0 +1,328 @@
+﻿@model FMDSS.Models.MIS.MISCommonModel
+@{
+    ViewBag.Title = "TicketBookingDetails";
+
+    //if (Convert.ToString(Session["IsDepartmentalKioskUser"]) == "True")
+    //{
+
+    //    Layout = "~/Views/Shared/_Layout.cshtml";
+    //}
+    //else
+    //{
+    //    Layout = "~/Views/Shared/_SuperAdmin.cshtml";
+    //}
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //
+}
+
+
+<style>
+    
+</style>
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        // date validation ========================================================================
+        var currentYear = (new Date).getFullYear();
+
+        var Range = '2008:' + (currentYear + 1)
+
+        $("#FromDate,#ToDate").datepicker({  yearRange: Range, dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        var currentDate = new Date();
+        //$("#txt_fromdate").datepicker("setDate", currentDate);
+        //$("#txt_todate").datepicker("setDate", currentDate);
+
+        $("#FromDate").change(function () {
+            $("#ToDate").val('');
+        });
+
+        $(document).on('keypress', '#FromDate,#ToDate', function (event) {
+
+            event.preventDefault();
+            return false;
+
+        });
+
+        $('#FromDate,#ToDate').keydown(function (event)
+        { return cancelBackspace(event) });
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+        $("#ToDate").change(function () {
+            var str1 = $("#FromDate").val();
+            var str2 = $("#ToDate").val();
+
+            var L = 3, d1 = $("#FromDate").val().split('/'), d2 = $("#ToDate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#ToDate").val('');
+                alert('Date Must be GreaterThen From Date');
+            }
+        });
+
+        // date validation ========================================================================
+
+
+
+
+
+        $('#Place').change(function (e) {
+            $('#PLACE_NAME').val($("#Place option:selected").text());
+        });
+
+        $('#SHIFT_TYPE').change(function (e) {
+
+            $('#SHIFTName').val($("#SHIFT_TYPE option:selected").text());
+
+        });
+
+
+        $('#btn_submit1').click(function (e) {
+
+
+
+
+            if ($('#FromDate').val() == '') {
+                    $("#errFromDate").css("display", "block");
+                    $('#errFromDate').focus();
+                    return false;
+                }
+                else {
+                    $("#errFromDate").css("display", "none");
+                }
+
+                if ($('#ToDate').val() == '') {
+                    $("#errToDate").css("display", "block");
+                    $('#errToDate').focus();
+                    return false;
+                }
+                else {
+                    $("#errToDate").css("display", "none");
+                }
+
+
+
+                if ($('option:selected', $('#Place')).index() == 0) {
+                    $("#errPlace").css("display", "block");
+                    $('#errPlace').focus();
+                    return false;
+                }
+                else {
+                    $("#errPlace").css("display", "none");
+                }
+
+
+                if ($('option:selected', $('#SHIFT_TYPE')).index() == 0) {
+                    $("#errSHIFT_TYPE").css("display", "block");
+                    $('#errSHIFT_TYPE').focus();
+                    return false;
+                }
+                else {
+                    $("#errDuration").css("display", "none");
+                }
+
+
+                if ($('option:selected', $('#BOOKING_TYPE')).index() == 0) {
+                    $("#errBOOKING_TYPE").css("display", "block");
+                    $('#errBOOKING_TYPE').focus();
+                    return false;
+                }
+                else {
+                    $("#errBOOKING_TYPE").css("display", "none");
+
+                }
+
+
+        });
+
+    });
+
+
+</script>
+
+<div class="row">
+    <div class="col-lg-9 pad">
+        <h1 class="page-header"><span>Report : Ticket Booking Details</span></h1>
+    </div>
+
+    @using (Html.BeginForm("TicketBookingDetails", "MIS", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+
+
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <label>Date Type:<span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(model => model.DATETYPE, (IEnumerable<SelectListItem>)ViewBag.ddlDATEtYPE1, new { @class = "form-control common", id = "DATETYPE" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>From Date:<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.FromDate, new { @class = "form-control common", id = "FromDate" })
+                            <span id="errFromDate" style="display: none" class="alert-danger1">From Date is Required.</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>To Date:<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.ToDate, new { @class = "form-control common ", id = "ToDate" })
+                            <span id="errToDate" style="display: none" class="alert-danger1">To Date is Required.</span>
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Place:<span class="mandatory">*</span></label>
+
+                            @Html.DropDownListFor(model => model.Place, (IEnumerable<SelectListItem>)ViewBag.ddlPlace1, "--Select--", new { @class = "form-control common", id = "Place" })
+                            <div id="errPlace" style="display:none" class="alert-danger1">Place is Required.</div>
+
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Shift Type:<span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(model => model.SHIFT_TYPE, (IEnumerable<SelectListItem>)ViewBag.ddlShiftType1, "--Select--", new { @class = "form-control common", id = "SHIFT_TYPE" })
+                            <div id="errSHIFT_TYPE" style="display:none" class="alert-danger1">Shift Type is Required.</div>
+
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Status :<span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(model => model.TRNS_Status, (IEnumerable<SelectListItem>)ViewBag.ddlTRNS_Status1, new { @class = "form-control common", id = "SHIFT_TYPE" })
+                            
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Mode of Booking:<span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(model => model.ModeOfBooking, (IEnumerable<SelectListItem>)ViewBag.ddlModeOfBooking, "--Select--", new { @class = "form-control common", id = "BOOKING_TYPE" })
+                            <div id="errBOOKING_TYPE" style="display:none" class="alert-danger1">Mode of Booking is Required.</div>
+                        </div>
+                    </div>
+
+
+                    <div id="btn" class="col-lg-12">
+
+                        <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit1">
+                            <i class="fa fa-check"></i> Submit
+                        </button>
+                        <button type="button" class="btn btn-warning" id="btn_reset">
+                            <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                        </button>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-4 pull-right" id="place">
+                <a class="btn btn-success" title="Export to Excel" target="_blank" href='BookingDetailsExport'><i class="fa fa-download"></i> Export to Excel</a>
+            </div>
+            <br /><br /><br />
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="dataTable_wrapper">
+                        <div id="tbl" class="table-responsive">
+                            <b>  @ViewData["ListBoardingSummary"] </b>
+                            <table class="table table-striped table-bordered table-hover table-responsive gridtable">
+
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Booking Id</th>
+                                        <th>Date of Booking</th>
+                                        <th>Date of Visit</th>
+
+                                        <th>Name of Visitor</th>
+                                        <th>Nationality</th>
+
+                                        <th>Shift </th>
+                                        <th>Vehicle </th>
+                                        <th>Zone </th>
+                                        <th>Amount </th>
+                                        
+                                        <th>fees Per Person Amount </th>
+                                        <th>Transaction Status</th>
+                                        <th>Mode Of Booking</th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in ViewData["ListBoarding"] as IEnumerable<FMDSS.Models.OnlineBooking.CS_BoardingDetails>)
+                                    {
+                                        <tr>
+                                            <td>@Html.DisplayFor(model => item.Index)</td>
+                                            <td>@Html.DisplayFor(model => item.DisplayBookingId)</td>
+                                            <td>@Html.DisplayFor(model => item.DateofBooking)</td>
+                                            <td>@Html.DisplayFor(model => item.DateofVisit)</td>
+
+                                            <td>@Html.DisplayFor(model => item.NameOfVisitor)</td>
+                                            <td>@Html.DisplayFor(model => item.Nationality)</td>
+
+                                            <td>@Html.DisplayFor(model => item.Shift)</td>
+                                            <td>@Html.DisplayFor(model => item.Vehicle)</td>
+                                            <td>@Html.DisplayFor(model => item.ZoneAtTheTimeOfBooking)</td>
+                                            <td>@Html.DisplayFor(model => item.AmountTobePaid)</td>
+                                           
+                                            
+                                            <td>@Html.DisplayFor(model => item.FeesPerPerson)</td>
+                                            <td>@Html.DisplayFor(model => item.Trn_Status_Code)</td>
+                                            <td>@Html.DisplayFor(model => item.ModeOfBooking)</td>
+                                           
+                                        </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+
+
+            </div>
+    }
+</div>
+
+ 
+<script src="~/Scripts/jquery.blockUI.js"></script>
+<script>
+
+    $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
+</script>
+
+
+<script type="text/javascript">
+    $.noConflict(true);
+</script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+@*<script src="~/js/bootstrap.min.js"></script>*@
+@*<script src="~/js/Common.js"></script>*@
+@*<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />*@

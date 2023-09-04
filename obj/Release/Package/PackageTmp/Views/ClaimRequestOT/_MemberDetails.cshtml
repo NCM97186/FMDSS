@@ -1,0 +1,159 @@
+﻿@model FMDSS.Entity.FRAViewModel.ClaimRequestOTVM
+<div class="col-md-12">
+    <div class="panel panel-default">
+        <div class="panel-heading" style="font-size:14px;font-weight:700;">
+            Other Family Member Details
+        </div>
+        <div class="panel-body">
+            <div class="HideInfoForApprover">
+                <div id="divMemberDetails">
+                    <div class="col-lg-7">
+                        <div class="form-group">
+                            <label>Member Bhamashah:</label>
+                            @Html.TextBoxFor(m => m.MemberDetails.BhamashahID, new { id = "txtMemberBhamashahID", @class = "form-control", placeholder = "-- Enter Bhamashah ID --" })
+                        </div>
+                        <div class="form-group"><a style="width:auto;" class="btn btn-success" onclick="GetDetails('MD')">Get Details</a></div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Member Name:<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(x => x.MemberDetails.MemberName, new { id = "txtMemberName", @class = "form-control", maxlength = 50, onkeypress = "RestrictSpecialChar(event)" })
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="form-group">
+                            <label>Father Name:<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(x => x.MemberDetails.FatherName, new { id = "txtMFatherName", @class = "form-control", maxlength = 50, onkeypress = "RestrictSpecialChar(event)" })
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label>Gender:</label>
+                            @Html.DropDownListFor(x => x.MemberDetails.Gender, FMDSS.Entity.FRAViewModel.FRACommonList.Gender, new { id = "ddlMGender", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="col-lg-1">
+                        <div class="form-group">
+                            <label>Age:</label>
+                            @Html.TextBoxFor(x => x.MemberDetails.Age, new { id = "txtMAge", @class = "form-control", maxlength = 2, onkeypress = "AllowNumericOnly(event)" })
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label>Dependant:</label>
+                            @Html.DropDownListFor(x => x.MemberDetails.IsDependant, FMDSS.Entity.FRAViewModel.FRACommonList.DependantOption, new { id = "ddlMIsDependant", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="form-group">
+                            <label>Email:</label>
+                            @Html.TextBoxFor(x => x.MemberDetails.Email, new { id = "txtMEmail", @class = "form-control", maxlength = 50 })
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="form-group">
+                            <label>Mobile:<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(x => x.MemberDetails.Mobile, new { id = "txtMMobile", @class = "form-control", maxlength = 10, onkeypress = "AllowNumericOnly(event)" })
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="form-group" id="fields">
+                        <button type="button" class="btn btn-info" onclick="AddMemberDetails()">
+                            <i class="input-group-btn"></i>Add Member Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12">
+                <table class="table table-striped table-bordered table-hover gridtable" id="dtMemberDetails">
+                    <thead>
+                        <tr>
+                            <th>Bhamashah ID</th>
+                            <th>Member Name</th>
+                            <th>Father Name</th>
+                            <th>Gender</th>
+                            <th>Age</th>
+                            <th>Email</th>
+                            <th>Mobile</th>
+                            <th>Dependant</th>
+                            <th style="width:2px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.MemberDetailsList != null && Model.MemberDetailsList.Any())
+                        {
+                            for (int i = 0; i < Model.MemberDetailsList.Count; i++)
+                            {
+                                <tr>
+                                    <td>@Model.MemberDetailsList[i].BhamashahID</td>
+                                    <td>@Model.MemberDetailsList[i].MemberName</td>
+                                    <td>@Model.MemberDetailsList[i].FatherName</td>
+                                    <td>@Model.MemberDetailsList[i].Gender</td>
+                                    <td>@Model.MemberDetailsList[i].Age</td>
+                                    <td>@Model.MemberDetailsList[i].Email</td>
+                                    <td>@Model.MemberDetailsList[i].Mobile</td>
+                                    <td>@Model.MemberDetailsList[i].IsDependant</td>
+                                    <td style="width:10px;">
+                                        <a onclick="DeleteMemberDetails(this)" href="javascript:void(0)">Delete</a>
+                                        @Html.HiddenFor(m => Model.MemberDetailsList[i].BhamashahID, new { id = "hdnMDBhamashahID_" + i })
+                                        @Html.HiddenFor(m => Model.MemberDetailsList[i].MemberName, new { id = "hdnMDClaimantName_" + i })
+                                        @Html.HiddenFor(m => Model.MemberDetailsList[i].FatherName, new { id = "hdnMDFatherName_" + i })
+                                        @Html.HiddenFor(m => Model.MemberDetailsList[i].Gender, new { id = "hdnMDGender_" + i })
+                                        @Html.HiddenFor(m => Model.MemberDetailsList[i].Age, new { id = "hdnMDAge_" + i })
+                                        @Html.HiddenFor(m => Model.MemberDetailsList[i].Email, new { id = "hdnMDEmail_" + i })
+                                        @Html.HiddenFor(m => Model.MemberDetailsList[i].Mobile, new { id = "hdnMDMobile_" + i })
+                                        @Html.HiddenFor(m => Model.MemberDetailsList[i].IsDependant, new { id = "hdnMDIsDependant_" + i })
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr class="rowSkip"><td colspan="9">No record found.</td></tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Upload Member Details Evidence (aadhar, voter id, ration card, voter id etc.)</label>
+                    @Html.TextBox("UploadFile", "", new { @class = "form-control HideInfoForApprover", id = "fuMemberDetails", @type = "file", @multiple = "multiple", onchange = "UploadData(23)" })
+                    <div id="errordivUpload" class="alert-danger1"></div>
+                    <div class="tblmax">
+                        <table class="table table-striped table-bordered table-hover gridtable">
+                            <thead>
+                                <tr>
+                                    <th>SNo.</th>
+                                    <th>FileName</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblMemberDetailsFiles">
+                                @if (Session["UploadFile"] != null)
+                                {
+                                    var cntr = 1;
+                                    foreach (var item in ((List<FMDSS.Entity.ViewModel.CommonDocument>)Session["UploadFile"]).Where(x => x.DocumentTypeID == Convert.ToInt32(FMDSS.DocumentType.FamilyMember)))
+                                    {
+                                        <tr>
+                                            <td style=display:none;>@item.TempID</td>
+                                            <td>@Html.Raw(cntr++)</td>
+                                            <td><a href="@Url.Content("~/" + item.DocumentPath)" target="_blank"><img src="../images/jpeg.png" width="30" /></a>@item.DocumentName</td>
+                                            <td style="width:5%"><button type=button class='btn btn-danger btn-circle btnDeleteDocument' style=cursor:pointer><i class='fa fa-times'></i></button></td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr class="rowSkip"><td colspan="3">No file Uploaded</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

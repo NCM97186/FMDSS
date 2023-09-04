@@ -1,0 +1,303 @@
+﻿@{
+    ViewBag.Title = "BuyerRegister";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+
+        $(".datefield").datepicker({ minDate: new Date(), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        var currentDate = new Date();
+        $("#durationfrom").datepicker("setDate", currentDate);
+
+        $("#durationfrom").change(function () {
+            $("#durationto").val('');
+        });
+        $("#durationto").change(function () {
+            var str1 = $("#durationfrom").val();
+            var str2 = $("#durationto").val();
+
+            var L = 3, d1 = $("#durationfrom").val().split('/'), d2 = $("#durationto").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#durationto").val('');
+                alert('Date Must be GreaterThen From Date');
+            }
+        });
+
+        $('#durationfrom,#durationto').keydown(function (event)
+        { return cancelBackspace(event) });
+
+
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+
+
+        $('#divisionCode').change(function (e) {
+            $("#ddl_rangeCode").empty();
+
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'BuyerRegister/getRange', // we are calling json method
+                dataType: 'json',
+                data: { divisionCode: $("#divisionCode").val() },
+                success: function (produce) {
+
+                    $.each(produce, function (i, items) {
+                        $("#ddl_rangeCode").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+
+        });
+
+
+        $('#ddl_rangeCode').change(function (e) {
+            $("#depotId").empty();
+
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'BuyerRegister/getDepot', // we are calling json method
+                dataType: 'json',
+                data: {divisionCode: $("#divisionCode").val(),rangeCode: $("#ddl_rangeCode").val() },
+                success: function (produce) {
+
+                    $.each(produce, function (i, items) {
+                        $("#depotId").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+
+        });
+
+       
+
+        $('#producetype').change(function (e) {
+
+            $("#forestProductID").empty();
+
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageAucscheduler/getForesProduct', // we are calling json method
+                dataType: 'json',
+                data: { producetype: $("#producetype").val() },
+                success: function (produce) {
+                    $.each(produce, function (i, items) {
+                        $("#forestProductID").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+
+        });
+
+
+        $('#btnproced').click(function () {
+
+            if ($('#divisionCode option:selected').index() != 0) {
+                if ($('#idProof').val() != '') {
+                    if ($('#durationfrom').val() != '') {
+                        if ($('#durationto').val() != '') {
+
+                        }
+                        else{
+                            alert('Kindly select To Date!')
+                            $('#durationto').focus();
+                            return false;
+                        }
+                    }
+                    else {
+                        alert('Kindly select From Date!')
+                        $('#durationfrom').focus();
+                        return false;
+                    }
+                }
+                else {
+                    alert('Kindly select ID Proof!')
+                    $('#idProof').focus();
+                    return false;
+                }
+            }
+            else {
+                alert('Kindly select Division!')
+                $('#divisionCode').focus();
+                return false;
+            }
+
+           
+
+        });
+
+  
+
+    });
+
+</script>
+
+
+@using (Html.BeginForm("addBuyers", "BuyerRegister", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <div id="page-wrapper-inn">
+        <div class="col-lg-12 pad">
+          
+                <h1 class="page-header"><span>Buyer Registration </span> </h1>
+            @if (@TempData["Buyer_Status"] != null)
+            {
+                <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["Buyer_Status"]</div>
+            }
+           
+          
+
+        </div>
+        <!-- /.col-lg-12 -->
+        <!-- Row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+
+
+                    <div class="panel-body">
+
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <label>
+                                   Registration for:<span class="mandatory">*</span>
+                                </label>
+
+                                <input type="radio" name="IsTendupatta" id="rbl_Tendupatta" class="buyerclass" value="Tendupatta"  />Tendupatta. &nbsp;&nbsp;&nbsp;&nbsp;
+                                <input type="radio" name="IsTendupatta" id="rbl_TimberFuelwood" class="buyerclass" value="Timber and Fuelwood" checked />Timber and Fuelwood
+
+                            </div>
+                            <div id="errordivid" style="display:none" class="alert-danger1"></div>
+
+
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Forest Division: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("DivisionCode", (IEnumerable<SelectListItem>)ViewBag.DivisionCode,  new { @class = "form-control", id = "divisionCode" })
+                                <input type="hidden" id="hd_producetype" name="Hd_ForestProduceID" />
+
+
+                                <div id="produceerrordiv12" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Range Name: </label>
+                                @Html.DropDownList("RangeCode", new SelectList(string.Empty, "Value", "Text"),"--Select--", new { @class = "form-control", id = "ddl_rangeCode" })
+                                <input type="hidden" id="hd_rangeCode" name="Hd_RangeCode" />
+                                <div id="rangeerrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Place/Depot of Auction:</label>
+                                @Html.DropDownList("DepotId", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "depotId" })
+                                <input type="hidden" id="hd_depotId" name="Hd_DepotId" />
+                                <div id="depoterrordiv" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Upload ID Proof:<span class="mandatory">*</span></label>
+                                <input type="file" class="form-control" id="idProof" name="IDProof" />
+
+                                <div id="errordivUpload" style="display:none" class="alert-danger1"></div>
+                            </div>
+                            <div id="errorUploadMediv" style="display:none" class="alert-danger1"></div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Validity of Registration:</label>
+                                <label>From: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control datefield" id="durationfrom" name="Durationfrom" />
+                            </div>
+                            <div id="errordiv6" style="display:none" class="alert-danger1"></div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>To: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control datefield" id="durationto" name="Durationto" />
+                            </div>
+                            <div id="errordiv7" style="display:none" class="alert-danger1"></div>
+                        </div>
+
+                     
+                       
+                        <div class="col-lg-12"></div>
+
+                        <!-- Btn Groping -->
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <button type="submit" class="btn btn-success" name="command" value="Submit" id="btnproced">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+                                <button type="reset" class="btn btn-warning" id="btnReset">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+                                <button type="button" name="command" value="Cancel" class="btn btn-danger" onclick="reload(); return false;">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+
+
+
+
+
+                    </div>
+                    <!-- /.panel-body -->
+
+                </div>
+                <!-- /.panel -->
+
+            </div>
+            <!-- /.col-lg-12 -->
+
+        
+        </div>
+    </div>
+}
+
+
+
+

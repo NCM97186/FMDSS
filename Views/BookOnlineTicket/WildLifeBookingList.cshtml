@@ -1,0 +1,764 @@
+﻿@model FMDSS.Models.BookOnlineTicket.WildLifeBookingFilterModel
+@{
+    ViewBag.Title = "HeadWise Deposit Details";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //
+}
+@*@using CaptchaMvc.HtmlHelpers*@
+<style>
+    .capt {
+        background-color: #f8f8f8;
+        border-color: #e7e7e7;
+        border: 1px solid #e7e7e7;
+        width: 240px;
+        height: 110px;
+    }
+
+    #mainCaptcha {
+        position: relative;
+        padding-left: 15px;
+    }
+
+    #refresh {
+        width: 42px;
+        height: 26px;
+    }
+
+    #txtInput, #Button1 {
+        position: relative;
+        left: 15px;
+    }
+
+    .refrs {
+        left: 5px;
+        position: relative;
+    }
+
+    .capt h1 {
+        font-size: 14px;
+        padding: 10px 0 5px 15px;
+        margin: 0;
+    }
+
+    #mainCaptcha {
+        margin: 0;
+    }
+</style>
+@*<style>
+        #tbl {
+            overflow-x: auto;
+            overflow-y: auto;
+            padding: 15px;
+            width: 100%;
+            height: 400px;
+        }
+
+        .rc1 {
+            background-color: #94A6B1 !important;
+        }
+
+        .rc2 {
+            background-color: #EAA7A0 !important;
+        }
+
+        .rc3 {
+            background-color: #6E8682 !important;
+        }
+
+        .rc4 {
+            background-color: #4d99c1 !important;
+        }
+
+        .rc5 {
+            background-color: #9bc5ef !important;
+        }
+
+        .rc6 {
+            background-color: #a0b4e2 !important;
+        }
+
+        .rc7 {
+            background-color: #D1D1A7 !important;
+        }
+
+        .rc8 {
+            background-color: #5090FF !important;
+        }
+
+        .rc9 {
+            background-color: #8ecfc0 !important;
+        }
+
+        .overlay-box {
+            background: rgba(255,255,255, 0.7) none repeat scroll 0 0;
+            bottom: 0;
+            left: 0;
+            position: fixed;
+            right: 0;
+            top: 0;
+            z-index: 7;
+            text-align: center;
+        }
+
+            .overlay-box span {
+                background: #fff none repeat scroll 0 0 !important;
+                display: block;
+                left: 0;
+                margin: 0 auto;
+                padding: 2px;
+                position: absolute;
+                right: 0;
+                top: 50%;
+                font-size: 18px;
+                transform: translateY(-50%);
+                -moz-transform: translateY(-50%);
+                -webkit-transform: translateY(-50%);
+                width: 120px;
+            }
+    </style>*@
+<style>
+    #myModal .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModal .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModal .modal-footer {
+        background-color: #f9f9f9;
+    }
+
+    #myModal .btn-success {
+        width: 100%;
+        padding: 10px;
+    }
+
+    ul.a {
+        list-style-type: circle;
+    }
+    /*Create by sunny */
+    #myModal_TicketCancel .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModal_TicketCancel .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModal_TicketCancel .modal-footer {
+        background-color: #f9f9f9;
+    }
+
+    #myModal_TicketRefund .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModal_TicketRefund .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModal_TicketRefund .modal-footer {
+        background-color: #f9f9f9;
+    }
+    /*END*/
+</style>
+<script>
+    var RootUrl = '@Url.Content("~/")';
+    $(document).ready(function () {
+        Captcha();
+
+        // date validation ========================================================================
+        var currentYear = (new Date).getFullYear();
+        var Range = '2008:' + (currentYear + 1)
+        $("#FromDate,#ToDate").datepicker({ maxDate: new Date(), yearRange: Range, dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        var currentDate = new Date();
+        //$("#txt_fromdate").datepicker("setDate", currentDate);
+        //$("#txt_todate").datepicker("setDate", currentDate);
+
+    $("#FromDate").change(function () {
+           var date = $(this).datepicker('getDate');
+           var limit = $(this).datepicker('getDate');
+           date.setDate(date.getDate());
+           limit.setDate(limit.getDate() + 9);
+           //$("#FromDate").datepicker("option", "minDate", date);
+           $("#ToDate").datepicker("option", "minDate", date);
+           $("#ToDate").datepicker("option", "maxDate", limit);
+
+        });
+        $(document).on('keypress', '#FromDate,#ToDate', function (event) {
+            event.preventDefault();
+            return false;
+        });
+
+        $('#FromDate,#ToDate').keydown(function (event)
+        { return cancelBackspace(event) });
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+        $("#ToDate").change(function () {
+            var str1 = $("#FromDate").val();
+            var str2 = $("#ToDate").val();
+
+            var L = 3, d1 = $("#FromDate").val().split('/'), d2 = $("#ToDate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#ToDate").val('');
+                alert('Date Must be GreaterThen From Date');
+            }
+        });
+        // date validation ========================================================================
+        $('#Place').change(function (e) {
+            debugger;
+            var PlaceId = $("#Place option:selected").val();
+            if (PlaceId == "2" || PlaceId == "53" || PlaceId == "57") {
+                $('#ddl_TypeOfBooking').html('');
+                $('#ddl_TypeOfBooking').append('<option value="">--Select--</option><option value="ALL">ALL</option><option value = "1">Advance Booking</option ><option value="2">Current Booking</option>');
+            }
+            else if (PlaceId == "65") {
+                $('#ddl_TypeOfBooking').html('');
+                $('#ddl_TypeOfBooking').append('<option value="">--Select--</option><option value="ALL">ALL</option><option value = "3">Advance Half/Full Day Booking</option ><option value="4">Current Half/Full Day Booking</option>');
+            }
+            else if (PlaceId == "63") {
+                $('#ddl_TypeOfBooking').html('');
+                $('#ddl_TypeOfBooking').append('<option value="">--Select--</option><option value="ALL">ALL</option><option value="5">Tatkal Booking</option>');
+            }
+            else if (PlaceId == "68") {
+                $('#ddl_TypeOfBooking').html('');
+                $('#ddl_TypeOfBooking').append('<option value="">--Select--</option><option value="ALL">ALL</option><option value="2">Current Booking</option>');
+            }
+        @*$.ajax({
+            url: '@Url.Action("GetTypefbooking","BookOnlineTicket")',
+            method:'GET',
+            data: { PlaceId: PlaceId},
+            dataType: "",
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                $('#ddl_TypeOfBooking').append('<option value="ALL">ALL</option><option value = "1">Advance Booking</option ><option value="2">Current Booking</option>');
+            }
+        });*@
+       });
+
+        $('#SHIFT_TYPE').change(function (e) {
+            $('#SHIFTName').val($("#SHIFT_TYPE option:selected").text());
+
+        });
+
+        //Updated by NITIN JAIN 08/11/2017
+        $('#btn_submit1, #btnDownlaodExcel').click(function (e) {
+
+            $("#DownloadExcel").val($(this).attr("data-excel-value"));
+
+
+            if ($('#FromDate').val() == '') {
+                $("#errFromDate").css("display", "block");
+                $('#errFromDate').focus();
+                return false;
+            }
+            else {
+                $("#errFromDate").css("display", "none");
+            }
+
+            if ($('#ToDate').val() == '') {
+                $("#errToDate").css("display", "block");
+                $('#errToDate').focus();
+                return false;
+            }
+            else {
+                $("#errToDate").css("display", "none");
+            }
+
+
+
+            if ($('option:selected', $('#Place')).index() == 0) {
+                $("#errPlace").css("display", "block");
+                $('#errPlace').focus();
+                return false;
+            }
+            else {
+                $("#errPlace").css("display", "none");
+            }
+
+            if ($('option:selected', $('#BOOKING_TYPE')).index() == 0) {
+                $("#errBOOKING_TYPE").css("display", "block");
+                $('#errBOOKING_TYPE').focus();
+                return false;
+            }
+            else {
+
+                $("#errBOOKING_TYPE").css("display", "none");
+            }
+
+            if ($("#DownloadExcel").val() == "False")
+            {
+                //LoadReportContent();
+            }
+        });
+
+        $("#btn_reset").click(function () {
+            $("#FromDate").val('');
+            $("#ToDate").val('');
+            $("#Place").val('');
+            $("#BOOKING_TYPE").val('');
+        });
+
+        function LoadReportContent()
+        {
+            var startDate = new Date();
+            $("#loadingreg").show();
+            var mis = {
+                fromDate: $('#FromDate').val(),
+                toDate: $('#ToDate').val(),
+                place: $('#Place').val(),
+                modeOfBooking: $('#BOOKING_TYPE').val(),
+                downloadExcel: 'False',
+                DATETYPE: $('#DATETYPE').val()
+            }
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + "MIS/HeadWiseDepositDetails",
+                data: mis,
+                success: function (result) {
+
+                    $("#reportBody").html(result);
+                    var endDate = new Date();
+                    var diff = endDate.getTime() - startDate.getTime();
+                    var seconds = diff / 1000;
+                    $("#timeTaken").html("Time to generate the report: " + seconds + " second(s)");
+                    $("#loadingreg").hide();
+                },
+                error: function (result) {
+
+                    $("#loadingreg").hide();
+                }
+            });
+        }
+
+    });
+    //shaan 04-02-2021
+    function Captcha() {
+        var alpha = new Array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+        var i;
+        for (i = 0; i < 6; i++) {
+            var a = alpha[Math.floor(Math.random() * alpha.length)];
+            var b = alpha[Math.floor(Math.random() * alpha.length)];
+            var c = alpha[Math.floor(Math.random() * alpha.length)];
+            var d = alpha[Math.floor(Math.random() * alpha.length)];
+            var e = alpha[Math.floor(Math.random() * alpha.length)];
+            var f = alpha[Math.floor(Math.random() * alpha.length)];
+            var g = alpha[Math.floor(Math.random() * alpha.length)];
+        }
+        var code = a + ' ' + b + ' ' + ' ' + c + ' ' + d + ' ' + e + ' ' + f + ' ' + g;
+        //if ($("#hdnDeptKioskStatus").val() == "False") {
+
+            document.getElementById("mainCaptcha").innerHTML = code
+            document.getElementById("mainCaptcha").value = code
+        //}
+
+    }
+    function ValidCaptcha() {
+        var string1 = removeSpaces(document.getElementById('mainCaptcha').value);
+        var string2 = removeSpaces(document.getElementById('txtInput').value);
+        if (string1 == string2) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    function removeSpaces(string) {
+        return string.split(' ').join('');
+    }
+
+     function Submitdata()
+     {
+         if ($("#FromDate").val() == "") {
+             alert("Please select from date");
+             return false;
+         }
+         if ($("#ToDate").val() == "") {
+             alert("Please select to date");
+             return false;
+         }
+         if ($("#Place option:selected").index() == 0) {
+             alert("Please select place");
+             return false;
+         }
+         if ($("#ddl_TypeOfBooking option:selected").index() == 0) {
+             alert("Please select booking type");
+             return false;
+         }
+         if ($("#ddl_Status option:selected").index() == 0) {
+             alert("Please select status type");
+             return false;
+         }
+         if ($('#txtInput').val() != '') {
+             var status = ValidCaptcha();
+             if (status == false) {
+                 alert('Invalid captcha!');
+                 Captcha();
+                 $('#txtInput').val('');
+                 $('#txtInput').focus();
+                 return false;
+             }
+         }
+         else {
+             alert('Enter valid captcha');
+             $('#txtInput').focus();
+             return false;
+         }
+         GetWildLifeTicketList();
+         Captcha();
+    }
+    function DownloadTicket(TicketId) {
+        window.open('/BookOnlineTicket/PrintWildLifeTicket?ticketid=' + TicketId, '_blank');
+    }
+    function CovidBooking(TicketId) {
+        window.open('/BookOnlineTicket/CovidBooking?ticketid=' + TicketId, '_blank');
+    }
+        function TicketCancel(id) {
+        // alert(id);
+        $("#myModal_TicketCancel").modal('show');
+        var RootUrl = '@Url.Content("~/")';
+        $('#TicketID').val(id);
+        $('#btn_FullCancel').attr('href', RootUrl + 'BookOnlineTicket/RefundRequest?TicketId=' + id);
+        $('#btn_PartialCancel').attr('href', RootUrl + 'BookOnlineTicket/RefundRequestMemberWise?ticketid=' + id);
+    };
+     function TicketRefund(id) {
+        // alert(id);
+        $("#myModal_TicketRefund").modal('show');
+        var RootUrl = '@Url.Content("~/")';
+        $('#TicketID').val(id);
+        $('#btn_Refund').attr('href', RootUrl + 'BookOnlineTicket/Refund?TicketId=' + id);
+
+    };
+
+
+    function GetWildLifeTicketList() {
+           var DateType=$("#DATETYPE option:selected").val();
+           var FromDate=$("#FromDate").val();
+           var ToDate=$("#ToDate").val();
+           var Place=$("#Place option:selected").val();
+           var TypeOfBooking=$("#ddl_TypeOfBooking option:selected").val();
+        var Status = $("#ddl_Status option:selected").val();
+
+        //var modeldata = {
+
+        //            DateType:DateType,
+        //            FromDate:FromDate,
+        //            ToDate:ToDate,
+        //            Place:Place,
+        //            TypeOfBooking:TypeOfBooking,
+        //            Status: Status
+
+        //}
+        //alert(JSON.stringify(modeldata));
+            var spUrl = '@Url.Action("GetWildLifeTicketList", "BookOnlineTicket")';
+                $('#tblDetail').dataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "ordering": true,
+                    "filter": true,
+                    "orderMulti": false,
+                    "serverSide": true,
+                    "Processing": true,
+
+                    "columnDefs": [
+                        { "width": "5%", "targets": [0] }
+                    ],
+                    "ajax":
+                    {
+                        "url": spUrl,
+                        "type": "POST",
+                        "dataType": "JSON",
+                        "data": { DateType: DateType, FromDate: FromDate, ToDate: ToDate, Place: Place, TypeOfBooking: TypeOfBooking, Status: Status} //JSON.stringify(modeldata)
+
+                    },
+                    'processing': true,
+                    "aoColumns": [
+                        //{
+                        //    "mDataProp": "Id",
+                        //    "visible": false
+                        //},
+                        { "mDataProp": "RowID" },
+                        { "mDataProp": "RequestID" },
+                        { "mDataProp": "DateOfBooking" },
+                        { "mDataProp": "DateOfArrival" },
+                        { "mDataProp": "TotalMembers" },
+                        { "mDataProp": "TotalAmount" },
+                        { "mDataProp": "Place" },
+                        { "mDataProp": "TypeOfBooking" },
+                        { "mDataProp": "Status" },
+                        { "mDataProp": "Actions"}
+
+
+                    ],
+                    "columnDefs": [
+                        { "title": "S.No.", "targets": 0 },
+                        { "title": "Transaction Id", "targets": 1 },
+                        { "title": "Date Of Booking", "targets": 2 },
+                        { "title": "Date Of Visit", "targets": 3 },
+                        { "title": "Total Members", "targets": 4 },
+                        { "title": "Total Amount", "targets": 5 },
+                        { "title": "Place", "targets": 6 },
+                        { "title": "Type Of Booking", "targets": 7 },
+                        { "title": "Status", "targets": 8 },
+                        {"title" : "Actions", "targets": 9},
+                        {
+                            //"targets": [1],
+                            //"visible": false,
+                            //"searchable": false
+                        },
+                    ]
+        });
+        var table = $('#tblDetail').dataTable();
+        table.addClass("table table-bordered table-responsive");
+
+        //$('#tblDetail').dataTable().on('xhr', function (settings, json) {
+        //    if (json.aaData === null) {
+        //        alert("Data not found");
+        //    }
+        //});
+    }
+
+
+</script>
+
+<div class="modal fade" id="myModal_TicketCancel" role="dialog">
+
+    <div class="modal-dialog">
+
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header" style="padding:35px 50px;">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4><i class="fa-fw"></i>Permit Cancellation Policy</h4>
+            </div>
+            <div class="modal-body">
+                <ul class="a">
+                    @*<li> As per the policy, if you cancel the booking then 50% amount of charged fees excluding emitra & bank charges will be refunded.</li>*@
+                    <li> As per the policy, if you cancel the booking then below amount of charged fees excluding emitra & bank charges will be refunded.</li>
+                    <li>पॉलिसी के अनुसार, यदि आप बुकिंग निरस्त करते हैं, तो नीचे दी गई शुल्क राशि ई-मित्र और बैंक शुल्क को छोड़कर वापस कर दी जाएगी।</li>
+                    <table class="table table-striped table-bordered table-hover">
+                        <tr>
+                            <th style="color: black;">अवधि बुकिंग दिवस को शामिल करते हुए <br />(Including period bookings day) </th>
+                            <th style="color: black;">रिफंड टिकट राशि का प्रतिशत <br />(Percent of refund Permit amount)</th>
+                        </tr>
+                        <tr>
+                            <td>यदि भ्रमण दिवस की तारीख से पहले 90 दिनों के भीतर निरस्त कर दिया जाता है<br /> (If cancellation is made within 90 days before the date of visit)</td>
+                            <td>0</td>
+                        </tr>
+                        <tr>
+                            <td>यदि यात्रा की तारीख से पहले 91 से 180 दिनों के भीतर निरस्त कर दिया जाता है <br /> (If cancellation is made within 91-180 days before the date of visit)</td>
+                            <td>25</td>
+                        </tr>
+                        <tr>
+                            <td>यदि यात्रा की तारीख से पहले 181 से 270 दिनों के भीतर निरस्त कर दिया जाता है <br /> (If cancellation is made within 181-270 days before the date of visit)</td>
+                            <td>50</td>
+                        </tr>
+                        <tr>
+                            <td>यदि यात्रा की तारीख से पहले 271 से अधिक दिनों के भीतर निरस्त कर दिया जाता है <br /> (If cancellation is made 271 or more days before the date of visit)</td>
+                            <td>75</td>
+                        </tr>
+                    </table>
+                    <li>Before proceeding please keep ready the required bank details i.e. Bank Name, Branch Name, IFSC Code, Account Type (Saving) & Account No. etc.</li>
+                    <li>Note: Full or half day safari, current and tatkal safari bookings are non transferable and non refundable booking once made shall not be cancelled. .</li>
+                </ul>
+            </div>
+            <div class="modal-footer" style="clear:both; padding-left: 50px;">
+                <div id="btn" class="col-lg-6">
+                    <a class="btn btn-danger" target="_blank" id="btn_FullCancel" href='javascript:void(0)'>
+                        Full Cancel
+                    </a>
+                </div>
+                <div id="btn" class="col-lg-6">
+                    <a class="btn btn-info" target="_blank" id="btn_PartialCancel" href='javascript:void(0)'>
+                        Partial Cancel
+                    </a>
+                    @*<a class="btn btn-primary" href='@Url.Action("BookOnlineTicket", "BookOnlineTicket" )'>
+                            Exit
+                        </a>*@
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
+<div class="modal fade" id="myModal_TicketRefund" role="dialog">
+
+    <div class="modal-dialog">
+
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header" style="padding:35px 50px;">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4><i class="fa-fw"></i>Ticket Refund Policy(For 18th March to 30th June 2020 Visitors)</h4>
+            </div>
+            <div class="modal-body">
+                <ul class="a">
+                    <li>As per the policy, if the booking cancelled by the guest, then the full amount of charged fees excluding emitra & bank charges will be refunded.</li>
+                    <li>पॉलिसी के अनुसार, आगंतुक के द्वारा बुकिंग निरस्त करने पर पूरी जमा राशि ,ई-मित्र और बैंक शुल्क को छोड़कर वापस कर दी जाएगी।</li>
+                    <li>Before proceeding please keep ready the required bank details i.e. Bank Name, Branch Name, IFSC Code, Account Type (Saving) & Account No. etc.</li>
+                </ul>
+            </div>
+            <div class="modal-footer" style="clear:both; padding-left: 50px;">
+                <div id="btn" class="col-lg-12">
+                    <a class="btn btn-danger" target="_blank" id="btn_Refund" href='javascript:void(0)'>
+                        Refund
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<div class="row">
+    <div class="overlay-box" id="loadingreg" style="display:none"><span>Please wait...</span></div>
+    <div class="col-lg-9 pad">
+        <h1 class="page-header"><span>WildLife Ticket History</span></h1>
+    </div>
+
+
+    <div class="col-lg-9">
+        @*@using (Html.BeginForm("WildLifeBookingList", "BookOnlineTicket", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {*@
+        <div class="panel panel-default">
+            <div class="panel-body">
+                @*@Html.HiddenFor(model => model.DownloadExcel)*@
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Date Type:<span class="mandatory">*</span></label>
+                        @Html.DropDownListFor(model => model.DateType, (IEnumerable<SelectListItem>)ViewBag.ddlDateType, new { @class = "form-control common", id = "DATETYPE" })
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>From Date:<span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.FromDate, new { @class = "form-control common ", id = "FromDate", autocomplete = "Off" })
+                        <span id="errFromDate" style="display: none" class="alert-danger1">Visited From Date is Required.</span>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>To Date:<span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.ToDate, new { @class = "form-control common ", id = "ToDate", autocomplete = "Off" })
+                        <span id="errToDate" style="display: none" class="alert-danger1">To Date is Required.</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Place:<span class="mandatory">*</span></label>
+
+                        @Html.DropDownListFor(model => model.Place, (IEnumerable<SelectListItem>)ViewBag.ddlPlace, "--Select--", new { @class = "form-control common", id = "Place" })
+                        <div id="errPlace" style="display:none" class="alert-danger1">Place is Required.</div>
+
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Type Of Booking:<span class="mandatory">*</span></label>
+                        @Html.DropDownListFor(model => model.TypeOfBooking, (IEnumerable<SelectListItem>)ViewBag.ddlTypeOfBooking, "--Select--", new { @class = "form-control common", id = "ddl_TypeOfBooking" })
+                        <div id="errSHIFT_TYPE" style="display:none" class="alert-danger1">Shift Type is Required.</div>
+
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="form-group">
+
+                        <label>Status:<span class="mandatory">*</span></label>
+                        @Html.DropDownListFor(model => model.Status, (IEnumerable<SelectListItem>)ViewBag.ddlStatus, "--Select--", new { @class = "form-control common", id = "ddl_Status" })
+                        <div id="errBOOKING_TYPE" style="display:none" class="alert-danger1">Mode of Booking is Required.</div>
+
+                    </div>
+                </div>
+
+                <div id="btn" class="col-lg-12">
+                    <div class="capt">
+                        <h1>Captcha is case sensative</h1>
+                        <h2 id="mainCaptcha">Captcha is case sensative</h2>
+                        <p>
+                            <input type="text" id="txtInput" autocomplete="off" />
+                            <button type="button" id="refresh" onclick="Captcha();" /><i class="fa fa-refresh fa-spin fa-fw refrs"></i>
+                        </p>
+                    </div><br />
+                    <button type="button" class="btn btn-success" name="Command" data-excel-value="False" value="Save" id="btn_submit" onclick="Submitdata();">
+                        <i class="fa fa-check"></i> Submit
+                    </button>
+                    <button type="button" class="btn btn-warning" id="btn_reset">
+                        <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                    </button>
+
+
+
+
+                    @*<button type="submit" class="btn btn-success pull-right" name="Command" data-excel-value="True" value="Save" id="btnDownlaodExcel">
+                            <i class="fa fa-download"></i> Export to Excel
+                        </button>*@
+                </div>
+
+                <div class="col-lg-12" id="timeTaken" style="color:red;margin-top:10px;">
+                </div>
+
+            </div>
+        </div>
+        @*}*@
+        <div class="col-lg-4 pull-right" id="place">
+            @*<a class="btn btn-success" title="Export to Excel" target="_blank" href='HeadWiseDepositDetailsExport'><i class="fa fa-download"></i> Export to Excel</a>*@
+        </div>
+        <br /><br /><br />
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="dataTable_wrapper">
+                    <div id="tbl" class="table-responsive">
+                        <table class="table" style="width:100%" id="tblDetail"></table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script src="~/Scripts/jquery.blockUI.js"></script>
+<script>
+    $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
+</script>
+
+
+<script type="text/javascript">
+    $.noConflict(true);
+</script>
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+
+
+

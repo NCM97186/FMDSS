@@ -1,0 +1,360 @@
+﻿@model FMDSS.Models.FinanceManagement.LCAllocation
+@{
+    ViewBag.Title = "AllocationBudgetLOC";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<!-- Form design -->
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Letter of Credit Allocation</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+
+                @if (HttpContext.Current.Session["DesignationId"] != null)
+                {
+                    if (HttpContext.Current.Session["DesignationId"].ToString() == "1" || HttpContext.Current.Session["DesignationId"].ToString() == "2")
+                    {
+                        @Html.Hidden("hdDesigID", "1")
+                        using (Html.BeginForm("SaveHQBudgetData", "CreditLetter", FormMethod.Post, new { data_behavior = "confirm" }))
+                        {
+                            <div class="dataTable_wrapper">
+                                @*<div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="Proposed">
+                                            Financial Year:<span class="mandatory">*</span>
+                                        </label>
+                                        @Html.DropDownList("ddlFinancialYear", (IEnumerable<SelectListItem>)ViewBag.ddlFinancialYear, "--Select--", new { @class = "form-control input-width", @id = "ddlFinancialYear" })
+                                        <div id="errordiv01" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>*@
+
+                                <table class="table table-striped table-bordered table-hover table-responsive">
+                                    <thead>
+                                        <tr>
+                                            <th>Index</th>
+                                            <th>Circle Name</th>
+                                            <th>Estimated Amount</th>
+                                            <th>Allocated Amount</th>
+
+                                        </tr>
+                                    </thead>
+
+                                    <tbody id="tbody_Budget"></tbody>
+
+
+                                </table>
+                                <div class="col-lg-12"></div>
+
+                                <!-- Btn Groping -->
+                                <div class="btn-padd">
+                                    <div id="btn" class="col-lg-12">
+                                        <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_submit">
+                                            <i class="fa fa-check"></i> Allocate
+                                        </button>
+
+
+                                    </div>
+                                </div>
+
+                                <!-- /.Btn Groping -->
+                                <!-- /.panel-body -->
+                            </div>
+
+                <!-- /.panel -->
+                        }
+                    }
+
+                    else if (HttpContext.Current.Session["DesignationId"].ToString() == "4")
+                    {
+                        using (Html.BeginForm("SaveCCFBudgetData", "CreditLetter", FormMethod.Post, new { data_behavior = "confirm" }))
+                        {
+                            if (ViewData["Dist_Code"] != "")
+                            {
+                                @Html.Hidden("hdDist_Code", ViewData["Dist_Code"])
+                            }
+                            @Html.Hidden("hdDesigID", "4")
+                            @Html.Hidden("hdTotalAmt0", "0")
+
+                            <div class="dataTable_wrapper">
+                                
+
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="Proposed">
+                                            Circle Name:<span class="mandatory">*</span>
+                                        </label>
+                                        @Html.DropDownList("CircleCode", (IEnumerable<SelectListItem>)ViewBag.CircleCode, "--Select--", new { @class = "form-control", id = "ddl_circleCode" })
+                                        <div id="errordiv02" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6"/>
+                                    <div id="divAmount" style="display:none" class="col-lg-12">
+                                        <div class="form-group">
+                                            <label for="Proposed">
+                                                Total Allocated Amount:<span class="mandatory"></span>
+                                            </label>
+                                            <div id="divallocamt0"></div>
+                                        </div>
+                                    </div>
+
+
+                                    <table class="table table-striped table-bordered table-hover table-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th>Index</th>
+                                                <th>Division Name</th>
+                                                <th>Estimated Amount</th>
+                                                <th>Allocated Amount</th>
+
+                                            </tr>
+                                        </thead>
+
+                                        <tbody id="tbody_Budget1"></tbody>
+
+
+                                    </table>
+                                    <div class="col-lg-12"></div>
+
+                                    <!-- Btn Groping -->
+                                    <div class="btn-padd">
+                                        <div id="btn" class="col-lg-12">
+                                            <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_submit0">
+                                                <i class="fa fa-check"></i> Allocate
+                                            </button>
+                                            <button type="reset" class="btn btn-warning">
+                                                <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                            </button>
+
+                                        </div>
+                                    </div>
+
+                                    <!-- /.Btn Groping -->
+                                    <!-- /.panel-body -->
+                                </div>
+
+                <!-- /.panel -->
+                        }
+                    }
+                    }
+            </div>
+            @*<div class="modal fade" id="myModelManagement" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+                <div class="modal-dialog mdw">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                            <h4 class="modal-title" id="myModalLabel">Edit Budget Allocation</h4>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- From URL Get -->
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Division Name: </label>
+                                    <div id="divDivisionName" class="un-bold"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Allocated Amount: </label>
+                                    <input type="text" id="txt_Allocated" />
+                                </div>
+                            </div>
+
+
+
+                            <!-- /. From URL Get -->
+                        </div>
+
+                        <!-- /.modal-body -->
+
+                        <div class="modal-footer" style="clear:both">
+                            <button name="button" class="btn btn-success" id="btn_EditBudget" value="Update" data-dismiss="modal">
+                                <i class="fa fa-times fa-fw"></i> Update
+                            </button>
+                            <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal">
+                                <i class="fa fa-times fa-fw"></i> Close
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.modal-content -->
+                </div>
+                <!-- /.modal-dialog -->
+            </div>*@
+            <!-- /.col-lg-12 -->
+        </div>
+    </div>
+    <!-- /.Row -->
+</div>
+<script src="~/js/jquery.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function (e) {
+        var RootUrl = '@Url.Content("~/")';
+        
+            if ($("#hdDesigID").val() == "1") {
+                
+
+                
+                
+                    $.ajax({
+                        type: 'POST',
+                        url: RootUrl + 'CreditLetter/GetHQBudgetData', // we are calling json method
+                        
+                        success: function (data) {
+                            var bardata;
+
+                            for (var i = 0; i < data.length; i++) {
+                                bardata = "<tr class='rowid'><td>" + data[i].Index + "<input type='hidden' name='hdCircleCode' id='hd_CircleCode' value='" + data[i].CIRCLE_CODE + "' /></td>";
+                                bardata += "<td>" + data[i].CIRCLE_NAME + "</td><input type='hidden' name='hdestimatedAmt' id='hd_divCode' value='" + data[i].Estimated_Amount + "' /><td>" + data[i].Estimated_Amount + "</td>";
+                                bardata += "<td>";
+
+                                if (data[i].Edit_Mode == 1) {
+                                    bardata += "<input type='text' class='txt_clsBudget disabled' readonly name='txtAllocatedAmount'  value='" + data[i].Allocated_Amount + "' /></td>";
+                                }
+                                else {
+                                    bardata += "<input type='text' MaxLength='15' class='txt_clsBudget' name='txtAllocatedAmount'  value='" + data[i].Allocated_Amount + "' /></td>";
+                                }
+                                bardata += "<input type='hidden'  name='hdEditMode' value='" + data[i].Edit_Mode + "' /><input type='hidden' name='hdAllocatedAmount' value='" + data[i].Allocated_Amount + "' />" + "</td></tr>";
+
+                                $("#tbody_Budget").append(bardata);
+                            }
+                        }
+
+                    });
+                }
+            
+
+        
+
+        $("#ddl_circleCode").bind("change", function () {
+            if ($("#hdDesigID").val() == "4") {
+                
+                var ddlCircleCode = $("#ddl_circleCode option:selected").val();
+                var allocatedamt = "0";
+               
+                
+                    $.ajax({
+                        type: 'POST',
+                        url: RootUrl + 'CreditLetter/GetCCFBudgetData', // we are calling json method
+                        data: {Circle_Code: ddlCircleCode },
+                        success: function (data) {
+                            var bardata;
+
+                            for (var i = 0; i < data.length; i++) {
+                                bardata = "<tr class='rowid'><td>" + data[i].Index + "<input type='hidden' name='hdDivCode' id='hd_DivCode' value='" + data[i].DIV_CODE + "' /></td>";
+                                bardata += "<td>" + data[i].DIV_Name + "</td><td>" + data[i].Estimated_Amount;
+                                bardata += "<input type='hidden' name='hdestimatedAmt' value='" + data[i].Estimated_Amount + "' /></td>";
+                                bardata += "<td>";
+                                if (data[i].Edit_Mode == 1) {
+                                    bardata += "<input type='text' class='txt_clsBudget disabled' readonly name='txtAllocatedAmount'  value='" + data[i].Allocated_Amount + "' /></td>";
+                                }
+                                else {
+                                    bardata += "<input type='text' MaxLength='15' class='txt_clsBudget txt_CCFBudget' value = '" + data[i].Allocated_Amount + "' name='txtAllocatedAmount'/></td>";
+                                }
+
+                                bardata += "<input type='hidden' name='hdEditMode' value='" + data[i].Edit_Mode + "' /><input type='hidden' name='hdAllocatedAmount' value='" + data[i].Allocated_Amount + "' />" + "</td></tr>";
+                                $("#tbody_Budget1").append(bardata);
+                                allocatedamt = data[0].ApprovedTotalAmount;
+
+
+                            }
+                            $("#divAmount").show();
+                            $("#divallocamt0").html(allocatedamt);
+                        }
+
+                    });
+                }
+            
+
+        });
+
+        
+
+
+        $(document).on('keypress', '.txt_clsBudget', function (e) {
+       
+            var kc = e.which;
+            //alert(kc);
+            if (kc >= 46 && kc <= 57) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+
+        })
+
+        $(document).on('change', '.txt_CCFBudget', function (e) {
+
+            var ccftotalamt = parseFloat($("#divallocamt0").html());
+
+            if (ccftotalamt > 0) {
+
+                var val = 0;
+                $(".txt_CCFBudget").each(function () {
+
+                    val += parseInt($(this).val());
+
+                })
+
+                if (val > ccftotalamt) {
+                    $("#hdTotalAmt0").val(val);
+
+                    alert("Allocated Amount can not be greator than Total Allocated Amount!!");
+                    return false;
+                }
+                else {
+                    $("#hdTotalAmt0").val('0');
+                }
+            }
+
+
+        })
+        
+        
+
+        $(document).on('click', '#btn_submit1', function () {
+
+            if ($("#hdTotalAmt").val() != "0")
+            {
+                alert("Allocated Amount can not be greator than Total Allocated Amount!!");
+                return false;
+            }
+
+        })
+
+        $(document).on('click', '#btn_submit2', function () {
+
+            if ($("#hdTotalAmt1").val() != "0") {
+                alert("Allocated Amount can not be greator than Total Allocated Amount!!");
+                return false;
+            }
+
+        })
+
+
+    });
+
+    
+    function isNumber(evt, element) {
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+
+        if (
+             (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+            (charCode < 48 || charCode > 57))
+            return false;
+
+        
+    }
+
+
+   
+</script>

@@ -1,0 +1,65 @@
+﻿<label>Select Chart</label>
+
+<br />
+<div class="form-group">
+    <label class="radio-inline">
+        <input type="radio" value="pie" name="chart" id="piechart" checked="">Pie Chart
+    </label>
+    <label class="radio-inline">
+        <input type="radio" value="line" name="chart" id="linechart">Line Chart
+    </label>
+    <label class="radio-inline">
+        <input type="radio" value="bar" name="chart" id="barchart">Bar Chart
+    </label>
+    <label class="radio-inline">
+        <input type="radio" value="column" name="chart" id="columnchart">Column Chart
+    </label>
+</div>
+<div id="chartContainer" style="height: 500px; width: 100%;"></div>
+<div class="clearfix"></div>
+<script type="text/javascript">
+    var dataPoints = [];
+
+    var currentdate = new Date();
+    var data = '@Html.Raw(ViewBag.ReportList)';
+    data = JSON.parse(data);
+    for (var i = 0; i < data.length; i++) {
+        var obj = data[i];
+        dataPoints.push({ y: parseInt(obj.TotalCount), label: obj.CIRCLE_NAME.split('(')[0] });
+    }
+    LoadChart(dataPoints, 'pie');
+    $("input[name='chart']").change(function () {
+        var val = $(this).val();
+        LoadChart(dataPoints, val);
+    });
+    function LoadChart(datapoints, type) {
+        var options = {
+            title: {
+                text: "Offence Summary Report"
+            },
+            subtitles: [{
+                text: "As of " + currentdate.toLocaleString('en-us', { month: 'long' }) + ", " + currentdate.getFullYear() + ""
+            }],
+            animationEnabled: true,
+            data: [{
+                type: type,
+
+                toolTipContent: "<b>{label}</b>: {y}",
+                indexLabelFontSize: 10,
+                indexLabel: "{label} - {y}",
+                dataPoints: dataPoints
+                //dataPoints: [
+                //    { y: 48.36, label: "Windows 7" },
+                //    { y: 26.85, label: "Windows 10" },
+                //    { y: 1.49, label: "Windows 8" },
+                //    { y: 6.98, label: "Windows XP" },
+                //    { y: 6.53, label: "Windows 8.1" },
+                //    { y: 2.45, label: "Linux" },
+                //    { y: 3.32, label: "Mac OS X 10.12" },
+                //    { y: 4.03, label: "Others" }
+                //]
+            }]
+        };
+        $("#chartContainer").CanvasJSChart(options);
+    }
+</script>

@@ -1,0 +1,156 @@
+﻿@model FMDSS.Models.Master.VehicleEquipmentFee
+<link href="~/css/timepicki.css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+<script>
+    var $j = jQuery.noConflict();
+    $j('.timepicker').timepicki();
+
+</script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        $('#Fees').bind('keypress', function (evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode
+            // var charCode = evt.which;
+            if (charCode != 8) {
+
+                if ((charCode == 46) || (charCode >= 97 && charCode <= 122) || (charCode >= 65 && charCode <= 90)) {
+                    return false;
+                }
+                else {
+                    if (charCode >= 48 && charCode <= 57 || charCode == 46) {
+                        return true;
+                    }
+                    else {
+                        evt.preventDefault();
+                    }
+                }
+            }
+        });
+
+
+        $('#btn_submit1').click(function (e) {
+
+            if ($('option:selected', $('#CategoryID')).index() == 0) {
+                $("#errCategoryID").css("display", "block");
+                $('#errCategoryID').focus();
+                return false;
+            }
+            else {
+                $("#errCategoryID").css("display", "none");
+            }
+
+            if ($('#Name').val().trim() == "") {
+                $('#errName').css("display", "block");
+                $('#errName').focus();
+                return false;
+            }
+            else {
+                $('#errName').css("display", "none");
+            }
+
+            if ($('#Fees').val().trim() == "") {
+                $('#errFees').css("display", "block");
+                $('#errFees').focus();
+                return false;
+            }
+            else {
+                $('#errFees').css("display", "none");
+            }
+
+            if ($('option:selected', $('#Isactive')).index() == 0) {
+                 $("#errIsactive").css("display", "block");
+                 $('#errIsactive').focus();
+                return false;
+            }
+            else {
+                 $("#errIsactive").css("display", "none");
+            }
+
+        });
+
+    });
+
+</script>
+
+@using (Html.BeginForm("ADDUpdateVehicleEquipmentFee", "Master", FormMethod.Post))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @*<label id="lbl_dpt">Add/Edit Place</label>*@
+                @ViewBag.OpType
+            </h4>
+        </div>
+
+        <div class="modal-body">
+            @Html.HiddenFor(model => model.VehicleID)
+          
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Vehicle Equipment Category : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.CategoryID, (IEnumerable<SelectListItem>)ViewBag.CategoryIDLst, "--Select--", new { @class = "form-control common", id = "CategoryID" })
+                    <div id="errCategoryID" style="display:none" class="alert-danger1">Vehicle Equipment Category is Required.</div>
+                </div>
+            </div> 
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Vehicle Equipment Type: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Name, new { @class = "form-control common", @maxlength = "50" })
+                    <div id="errName" style="display:none" class="alert-danger1">Vehicle Equipment Type is Required.</div>
+                </div>
+            </div>
+
+
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Fees: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Fees, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errFees" style="display:none" class="alert-danger1">Fees is Required.</div>
+                </div>
+            </div>
+
+           
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Active / Deactive : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.Isactive, (IEnumerable<SelectListItem>)ViewBag.ISactivelst, "--Select--", new { @class = "form-control common", id = "Isactive" })
+                    <div id="errIsactive" style="display:none" class="alert-danger1">Active / Deactive  is Required.</div>
+
+                </div>
+            </div> 
+
+            <div class="col-lg-12"></div>
+
+
+            <!-- /.Btn Groping -->
+
+
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success"  value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+                
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+}

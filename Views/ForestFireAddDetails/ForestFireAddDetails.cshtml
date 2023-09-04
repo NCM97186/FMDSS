@@ -1,0 +1,189 @@
+﻿@model IEnumerable<FMDSS.Models.ForestFire.ForestFire_AddDetails>
+
+@{
+    ViewBag.Title = "Forest Fire Report";
+}
+@*<script src="~/js/jquery.min.js"></script>*@
+<script>
+    var RootURl = '@Url.Content("~/")';
+</script>
+
+<script type="text/javascript">
+    function AddData(ID) {
+        //debugger;
+        var ID = ID;
+        var txt_TA = $('#TA_' + ID).val();
+        var txt_QU = $('#QU_' + ID).val();
+        var txt_CF = $('#CF_' + ID).val();
+        var txt_R = $('#R_' + ID).val();
+
+        if (txt_CF === null || txt_CF == "" || typeof txt_CF === "undefined" || txt_QU === null || txt_QU == "" || typeof txt_QU === "undefined" || txt_TA === null || txt_TA == "" || typeof txt_TA === "undefined") {
+            if (txt_R === null || typeof txt_R === "undefined" || txt_R == "") {
+                alert('Please enter remarks.');
+                return;
+            }
+        }
+
+        $.ajax({
+            type: 'GET',
+            url: RootURl + 'ForestFireAddDetails/AddDataFireAlert',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            data: { ID: ID, TotalAreaAffected: txt_TA, QU: txt_QU, CF: txt_CF, Remarks: txt_R },
+            success: function (result) {
+                if (result.length > 0) {
+                    for (var i = 0; i < result.length; i++) {
+                        $("#SiteNameExpenditure" + Index).val(result[i].SiteNameExpenditure);
+                        $('#TA_' + ID).val(result[i].TotalAreaAffected);
+                        $('#QU_' + ID).val(result[i].QuantificationOfLoss);
+                        $('#CF_' + ID).val(result[i].CauseofFire);
+                        $('#R_' + ID).val(result[i].Remarks);
+                        $('#TA_' + ID).attr("disabled", "disabled");
+                        $('#QU_' + ID).attr("disabled", "disabled");
+                        $('#CF_' + ID).attr("disabled", "disabled");
+                        $('#R_' + ID).attr("disabled", "disabled");
+                        $('#sbumt_action_' + ID).attr("disabled", "disabled");
+                    }
+                }
+                else {
+                    $('#TA_' + ID).val('');
+                    $('#QU_' + ID).val('');
+                    $('#CF_' + ID).val('');
+                    $('#R_' + ID).val('');
+                    // $('#sbumt_action_' + ID).attr("Enable", "Enable");
+                }
+
+            },
+            error: function (data) { console.log(data) }
+        });
+    }
+</script>
+<script type="text/javascript">
+    function isNumberKey(evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode != 46 && charCode > 31
+          && (charCode < 48 || charCode > 57)) {
+            alert('Text box allows only numbers with decimal. ')
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+</script>
+
+<style>
+    #tempmsg {
+        color: green;
+    }
+
+    /*table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }*/
+
+    /*.form-inline .form-control {
+        display: inline-block;
+        width: 100%;
+        vertical-align: middle;
+    }*/
+</style>
+
+@using (Html.BeginForm("ForestFireAddDetails", "ForestFireAddDetails", FormMethod.Post, new { id = "myForm", enctype = "multipart/form-data" }))
+{
+    <div id="page-wrapper">
+        <div class="">
+            <div class="col-lg-12">
+                <h1 class="page-header">Forest Fire Report</h1>
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+        <div class="">
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Select District: <span class="mandatory">*</span></label>
+                    @Html.DropDownList("District", (IEnumerable<SelectListItem>)ViewBag.District, "--Select--", new { @class = "form-control previewMode", id = "ddlDistrict", onchange = "BindFireData(this)" })
+
+
+                </div>
+            </div>
+            <div class="col-lg-12">
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Forest Fire Report
+                    </div>
+
+                    <div class="panel-body">
+
+                        @Html.Partial("_ErrorMsg")
+                        <div id="loadData">
+                            @Html.Partial("_ForestFireList", Model)
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal fade in" id="myModal" role="dialog">
+                    <div class="modal-dialog modal-lg" id="modelPlace" style="background-color:#fff !important;">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+<div class="modal fade" id="ForestFirePopup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog mdw">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="myModalLabel">Fire Alert Details</h4>
+            </div>
+
+            <div class="modal-body" id="offenceData">
+
+            </div>
+
+            <!-- /.modal-body -->
+
+            <div class="modal-footer" style="clear:both">
+                <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width:auto">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+    function GetFireData(id) {
+        $.ajax({
+            type: 'GET',
+            url: RootUrl + "ForestFireAddDetails/_FireAlertDetail?Id=" + id,
+            dataType: 'html',
+            success: function (data) {
+                $('#offenceData').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+    }
+    function BindFireData(cntrl) {
+        $.ajax({
+            type: 'GET',
+            url: RootUrl + "ForestFireAddDetails/_ForestFireList?districtName=" + $(cntrl).val(),
+            dataType: 'html',
+            success: function (data) {
+                $('#loadData').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+    }
+</script>

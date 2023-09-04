@@ -1,0 +1,401 @@
+﻿@model FMDSS.Models.Master.OneClickAccessRights
+@{
+    ViewBag.Title = "OneClickAccessRights";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //
+
+}
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        $("#OffcLevel").change(function () {
+            $('#ForestBoundaries').empty();
+            if ($("#OffcLevel").val() == 'ST') {
+                $("#ForestBoundaries").append('<option value=0>--Select Boundary--</option>');
+                $("#ForestBoundaries").append('<option value=ST001>State HQ</option>');
+            }
+            else {
+                $("#ForestBoundaries").append('<option value=0>--Select Boundary--</option>');
+                $('#ForestOffices').empty();
+                $("#ForestOffices").append('<option value=0>--Select Office--</option>');
+
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'UserManagementMaster/GetForestBoundariesUserWise',
+                    dataType: 'json',
+                    data: { OfficeLevel: $("#OffcLevel").val() },
+                    success: function (states) {
+                        $.each(states, function (i, items) {
+                            $("#ForestBoundaries").append('<option value="' + items.Value + '">' +
+                             items.Text + '</option>');
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve states.' + ex);
+                    }
+                });
+            }
+            return false;
+        })
+
+        $("#ForestBoundaries").change(function () {
+            $('#ForestOffices').empty();
+            $("#ForestOffices").append('<option value=0 >--Select Office--</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'UserManagementMaster/GetForestOffices',
+                dataType: 'json',
+                data: { ForestCode: $("#ForestBoundaries").val() },
+                success: function (states) {
+                    $.each(states, function (i, items) {
+                        $("#ForestOffices").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+            return false;
+        });
+
+
+        $("#DESIGNATIONs").change(function () {
+
+            $('#ReportingTos').empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'UserManagementMaster/GetREPORTINGTOData',
+                dataType: 'json',
+                data: { DESIGNATION: $("#DESIGNATIONs").val() },
+                success: function (Designations) {
+                    $("#ReportingTos").append('<option value="0">--Select--</option>');
+
+                    $.each(Designations, function (i, items) {
+
+
+                        $("#ReportingTos").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+            return false;
+        });
+
+
+
+        $("dataTables-example").DataTable();
+
+        $('#dataTables-example').DataTable({
+            responsive: true
+        });
+
+
+        $('#btn_submit1').click(function (e) {
+
+
+
+
+            if ($('#OLDSSOID').val() == '') {
+                $("#errOLDSSOID").css("display", "block");
+                $('#errOLDSSOID').focus();
+                return false;
+            }
+            else {
+                $("#errOLDSSOID").css("display", "none");
+            }
+
+            if ($('#NEWSSOID').val() == '') {
+                $("#errNEWSSOID").css("display", "block");
+                $('#errNEWSSOID').focus();
+                return false;
+            }
+            else {
+                $("#errNEWSSOID").css("display", "none");
+            }
+
+
+            if ($('option:selected', $('#DESIGNATIONs')).index() == 0) {
+                $("#errDESIGNATIONs").css("display", "block");
+                $('#errDESIGNATIONs').focus();
+                return false;
+            }
+            else {
+                $("#errDESIGNATIONs").css("display", "none");
+            }
+
+
+            if ($('option:selected', $('#ReportingTos')).index() == 0) {
+                $("#errReportingTos").css("display", "block");
+                $('#errReportingTos').focus();
+                return false;
+            }
+            else {
+                $("#errReportingTos").css("display", "none");
+            }
+
+            if ($('option:selected', $('#ForestOffices')).index() == 0) {
+                $("#errForestOffices").css("display", "block");
+                $('#errForestOffices').focus();
+                return false;
+            }
+            else {
+                $("#errForestOffices").css("display", "none");
+            }
+
+
+
+
+
+
+        });
+
+
+        $('#btn_GetSSOID').click(function (e) {
+
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'UserManagementMaster/GetOldSSOID', // we are calling json method designation
+                dataType: 'json',
+                data: { OldSSOID: $('#OLDSSOID').val() },
+                success: function (result) { 
+                    if (result.ssoid == "0") {
+                        $("#main").css("display", "none");
+                    }
+                    else {
+                        $("#DESIGNATIONs").val(result.designation);
+                        $("#NEWSSOID").val($('#OLDSSOID').val());
+                        $('#ReportingTos').empty(); 
+                        $('#hdnReportingTo').val(result.ReportingTo == '' ? '0' : result.ReportingTo);
+
+                        $("#RoleIdIDlistbox>option:selected").removeProp('selected');
+
+                        $.each(result.RoleIDs.split(','), function (i, cntrlVal) {
+                            $("#RoleIdIDlistbox").find("option[value=" + cntrlVal + "]").prop("selected", "selected");
+                        }); 
+
+                        $.ajax({
+                            type: 'POST',
+                            url: RootUrl + 'UserManagementMaster/GetREPORTINGTOData',
+                            dataType: 'json',
+                            data: { DESIGNATION: $("#DESIGNATIONs").val() },
+                            success: function (Designations) { 
+                                $("#ReportingTos").append('<option value="0">--Select--</option>');
+
+                                $.each(Designations, function (i, items) {
+                                    $("#ReportingTos").append('<option value="' + items.Value + '">' +
+                                     items.Text + '</option>');
+                                });
+                                $("#ReportingTos").val($('#hdnReportingTo').val());
+                            },
+                            error: function (ex) {
+                                alert('Failed to retrieve details.' + ex);
+                            }
+                        });
+
+                        $('#main').css("display", "block");
+                    }
+
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+
+
+
+        });
+
+
+
+    });
+
+
+    function CallData() {
+
+        //alert($('#ForestBoundaries').val());
+        //alert($("#ForestBoundaries :selected").text());
+
+        $.ajax({
+            type: 'GET',
+            url: "../UserManagementMaster/AddNewOffice?Boundary=" + $('#ForestBoundaries').val() + "&BoundaryName=" + $("#ForestBoundaries :selected").text(),
+            dataType: 'html',
+            success: function (data) {
+                $('#modelPlace').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+
+    };
+
+
+
+</script>
+
+<div class="row">
+    <div class="col-lg-9 pad">
+        <h1 class="page-header"><span>One Click Access Rights</span></h1>
+        @if (ViewBag.RecordStatus != -1)
+        {
+            if (ViewBag.RecordStatus == 3)
+            {
+
+        <div id="divError" class="alert alert-danger"><i class="fa fa-exclamation-triangle fa-fw"></i>'DEPARTMENT KIOSK' and 'EMITRA KIOSK' Roles must be assigned separately And these role cannot be associated with other roles.</div>
+            }
+            else if (ViewBag.RecordStatus == 0)
+            {
+
+        <div id="divError" class="alert alert-danger"><i class="fa fa-exclamation-triangle fa-fw"></i>Error in transaction try again </div>
+            }
+            else if (ViewBag.RecordStatus == 2)
+            {
+
+        <div id="divError" class="alert alert-danger"><i class="fa fa-exclamation-triangle fa-fw"></i> SSOID / New SSOID Already Exists </div>
+            }
+
+            else if (ViewBag.RecordStatus == 1)
+            {  <div id="divSuccess" class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>Submit Successfully, Please Update User Profile if Required</div>}
+
+        }
+
+    </div>
+
+    @using (Html.BeginForm("OneClickAccessPermission", "UserManagementMaster", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <div class="col-lg-9">
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label>Old SSOID <span class="mandatory">*</span></label>
+                        </div>
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="form-group">
+                            @Html.TextBoxFor(model => model.OLDSSOID, new { @class = "form-control common ", id = "OLDSSOID" })
+                            <span id="errOLDSSOID" style="display: none" class="alert-danger1">Old SSO ID is Required.</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <input type="button" id="btn_GetSSOID" class="btn btn-success" value="Get SSO ID" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default" id="main" style="display: none">
+                <div class="panel-body">
+                    <div class="col-lg-12 hide">
+                        <div class="form-group">
+                            <label>SSOID / New SSOID :<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.NEWSSOID, new { @class = "form-control common ", id = "NEWSSOID" })
+                            <span id="errNEWSSOID" style="display: none" class="alert-danger1">New SSO ID is Required.</span>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Designation:<span class="mandatory">*</span></label>
+
+                            @Html.DropDownListFor(model => model.DESIGNATION, Model.ListDESIGNATIONs, "--Select--", new { @class = "form-control common", @readonly="readonly", id = "DESIGNATIONs" })
+                            <div id="errDESIGNATIONs" style="display:none" class="alert-danger1">Designation is Required.</div>
+
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Reporting To:<span class="mandatory">*</span></label>
+
+                            @Html.DropDownListFor(model => model.ReportingTo, (IEnumerable<SelectListItem>)ViewBag.lstOfficeID, "--Select--", new { @class = "form-control common", id = "ReportingTos" })
+                            <div id="errReportingTos" style="display:none" class="alert-danger1">ReportingTo is Required.</div>
+
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            @Html.DropDownListFor(model => Model.OffcLevel, (IEnumerable<SelectListItem>)ViewBag.lstOfficeID, "--Select Office Level--", new { @class = "form-control common", id = "OffcLevel" })
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            @Html.DropDownListFor(model => Model.ForestBoundaries, new SelectList(string.Empty, "Value", "Text"), "--Select Boundary--", new { @class = "form-control common", id = "ForestBoundaries" })
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            @Html.DropDownListFor(model => Model.OfficeID, new SelectList(string.Empty, "Value", "Text"), "--Select Office--", new { @class = "form-control common", id = "ForestOffices" })
+                            <div id="errForestOffices" style="display:none" class="alert-danger1">Office is Required.</div>
+                            <button type="button" style="float:right;" class="btn btn-warning btn-circle" id="btnEdit" title="Add New Office" data-target="#myModal" data-toggle="modal" onclick="return CallData();">
+                                <i class=" fa fa-plus-circle">
+                                </i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 hide">
+                        <div class="form-group">
+                            <label>Place Mapping with SSOID : <span class="mandatory">*</span></label>
+                            @Html.ListBoxFor(model => model.PLACEIDs, Model.ListPLACEIDs, new { @class = "form-control common", id = "PLCAEIDlistbox", @style = "height:500px;" })
+
+
+
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Mapping Role For Page Access : <span class="mandatory">*</span></label>
+                            @Html.ListBoxFor(model => model.RoleIds, Model.ListRoleIds, new { @class = "form-control common", id = "RoleIdIDlistbox", @style="height:500px;" })
+                            <div id="errRoleIdIDlistbox" style="display:none" class="alert-danger1">Role is Required.</div>
+                        </div>
+                    </div>
+
+                    <div id="btn" class="col-lg-12">
+
+                        <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit1">
+                            <i class="fa fa-check"></i> Submit
+                        </button>
+                        <button type="button" class="btn btn-warning" id="btn_reset">
+                            <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        @Html.Hidden("hdnReportingTo", "")
+    }
+</div>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog modal-lg" id="modelPlace">
+
+    </div>
+</div> 
+<script src="~/Scripts/jquery.blockUI.js"></script>
+<script>
+
+    $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
+</script>
+
+
+
+<script type="text/javascript">
+    $.noConflict(true);
+</script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script> 

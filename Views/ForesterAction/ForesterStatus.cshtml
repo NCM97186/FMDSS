@@ -1,0 +1,1587 @@
+﻿@{
+    ViewBag.Title = "ForesterStatus";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+@using FMDSS.Models
+@model FMDSS.Models.ForesterAction.ActionRequest
+
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+</script>
+<style>
+    #myModalDfo1 .modal-dialog {
+        width: 900px;
+        margin: 30px auto;
+    }
+
+    .align-center {
+        text-align: center;
+    }
+</style>
+<script type="text/javascript">
+
+    $(document).ready(function (e) {
+        $(".datefield").datepicker({ minDate: new Date(), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+
+        $("#durationfrom").change(function () {
+            $("#durationto").val('');
+        });
+        $("#durationto").change(function () {
+            var str1 = $("#durationfrom").val();
+            var str2 = $("#durationto").val();
+
+            var L = 3, d1 = $("#durationfrom").val().split('/'), d2 = $("#durationto").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#durationto").val('');
+                alert('Date Must be GreaterThen From Date');
+            }
+        });
+
+        $('#durationfrom,#durationto').keydown(function (event)
+        { return cancelBackspace(event) });
+
+
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+
+    });
+
+    $(document).on('click', '#viewNotice', function (e) {
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'Auction/GetAuctionDetail', // we are calling json method
+            dataType: 'json',
+            data: { noticeId: $("#aucNoticeId").val() },
+            success: function (data) {
+                $("#divPublish").html(data.list1.NoticeView);
+                if (data.list2.length > 0) { $("#Amendments").append(data.list2); }
+                else { $("#dvAmendments").hide(); }
+
+                $("#myViewNoticeModal2").modal();
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+
+        });
+        return false;
+    });
+</script>
+
+<script type="text/javascript">
+    $(function (e) {
+
+        if ($('#hd_TableName').val() == "tbl_FDM_BudgetEstimation") {
+            $('.FY').show();
+            $('.DF,.DT').hide();
+            if ($('#hd_IsReviewer').val() == 'True') {
+                $('#AA').hide();
+                $('#RA').show();
+            }
+            if ($('#hd_IsReviewer').val() == 'False') {
+                $('#RA').hide();
+                $('#AA').show();
+            }
+        }
+        if ($('#hd_TableName').val() == "tbl_FPM_ForesterSeizedTeam" || $('#hd_TableName').val() == "tbl_FPM_ForesterParivadCategory" || $('#hd_TableName').val() == "tbl_FPM_ForesterParivadCategory1" || $('#hd_TableName').val() == "tbl_FPM_Parivad_Details" || $('#hd_TableName').val() == "tbl_FDM_BudgetReviewApproval") {
+            $('.FY').hide();
+            $('.DF,.DT').hide();
+        }
+        if ($('#hd_TableName').val() == "tbl_FPM_ForesterWarrantDetails") {
+            $('.FY').hide();
+            $('.DF,.DT').hide();
+            if ($('#hd_IsReviewer').val() == 'False') {
+                $('.APDT').show();
+            }
+        }
+        if ($('#hd_IsReviewer').val() == 'True') {
+            $('#btn_submit').text('Forward');
+            $('#btn_submit').val(7);
+            $('#btn_submit1').attr('style', 'display:none');
+        }
+        else if ($('#hd_IsReviewer').val() == 'False') {
+            $('#btn_submit').text('Approve');
+            $('#btn_submit').val(2);
+            $('#btn_submit').attr('style', 'display:none');
+            $('#btn_submit1').attr('style', 'display:block');
+        }
+
+        if ($('#hd_TableName').val() == 'tbl_FixedPermissions') {
+            $('.DF,.DT').hide();
+            $('#btn_Reasign').show();
+        }
+        else {
+            $('#btn_Reasign').hide();
+        }
+
+
+        //Rajveer
+
+        //Step 1
+        function SendOTPEsignIntegration() {
+            //  $(".modal").css("z-index","0");
+            var RequestId = $('#hd_RequestId').val();
+            $.ajax({
+                type: 'GET',
+                url: "../E_Sign/SendOTPESign",
+                dataType: 'json',
+                data: { RequestId: RequestId },
+                success: function (result) {
+                    console.log(result);
+                    if (result.Status == 1) {
+                        $("#TransationID").val(result.TransactionId);
+
+                        $("#AadharCardModal").modal("show");
+                    }
+                    else {
+                        $("#modal-window").modal("hide");
+                        alert(result.ErrorMessage + "!! Some error has occurred please try again later!!!");
+                    }
+                },
+                error: function (ex) {
+                    alert(ex.error);
+                }
+            });
+
+        }
+
+        $("#btn_submit1").click(function () {
+
+            if ($('#txtAreaComment').val() == '') {
+                $('#txtAreaComment').attr('placeholder', 'Enter Comment');
+                $('#txtAreaComment').focus();
+                e.preventDefault();
+            }
+            else {
+                SendOTPEsignIntegration();
+            }
+        });
+        $("#clicks").click(function () {
+            $('#btn_submit').click();
+        });
+        //ENd
+
+        $('#btn_submit').click(function (e) {
+            $('#reason').hide();
+            $('#Reassignreason').hide();
+            if ($('#hd_TableName').val() == "tbl_FDM_BudgetEstimation" && $('#hd_IsReviewer').val() == 'True' && $('#ReviewedAmount').val() == '') {
+                $('#ReviewedAmount').attr('placeholder', 'Enter reviewed amount')
+                $('#ReviewedAmount').focus();
+                e.preventDefault();
+            }
+            else if ($('#hd_TableName').val() == "tbl_FDM_BudgetEstimation" && $('#hd_IsReviewer').val() == 'False' && $('#ApprovedAmount').val() == '') {
+                $('#ApprovedAmount').attr('placeholder', 'Enter approved amount')
+                $('#ApprovedAmount').focus();
+                e.preventDefault();
+            }
+            else if ($('#hd_TableName').val() == 'tbl_FPM_ForesterWarrantDetails' && $('#AppearanceDate').val() == '' && $('#hd_IsReviewer').val() == 'False') {
+                $('#AppearanceDate').focus();
+                e.preventDefault();
+            }
+            else if ($('#txtAreaComment').val() == '') {
+                $('#txtAreaComment').attr('placeholder', 'Enter Comment');
+                $('#txtAreaComment').focus();
+                e.preventDefault();
+            }
+            else if ($('#hd_TableName').val() == 'tbl_FixedPermissions' && $('#Survey_Doc').val().length != 0 && $('#Survey_Doc').val().split('.').pop() != 'pdf' && $('#Survey_Doc').val().split('.').pop() != 'PDF') {
+                alert('Upload Pdf file only!!!');
+                $('#Survey_Doc').focus();
+                e.preventDefault();
+            }
+            else if ($('#hd_TableName').val() == 'tbl_FixedPermissions' && $('#Survey_Doc').val().length != 0 && ($("#Survey_Doc")[0].files[0].size / 1048576) > 2) {
+                alert('File size cannot be more than 2 MB!!');
+                $('#Survey_Doc').focus();
+                e.preventDefault();
+            }
+            //else if ($('#hd_TableName').val() == 'tbl_FixedPermissions' && $('#Survey_Doc').val().length == 0 && $('#hd_IsReviewer').val() == "True") {
+            //    $('#SDoc').show();
+            //    $('#Survey_Doc').focus();
+            //    e.preventDefault();
+            //}
+            //else if ($('#hd_TableName').val() == 'tbl_FixedPermissions' && $('#Survey_Doc').val().length > 0 && $('#hd_IsReviewer').val() == "True") {
+            //    var fileext = $('#Survey_Doc').val().split('.').pop();
+            //    if (fileext != 'pdf') {
+            //        alert('Upload Pdf file only!!!');
+            //        $('#Survey_Doc').focus();
+            //        e.preventDefault();
+            //    }
+            //}
+            else { }
+        });
+
+
+        $('#btn_Reject').click(function (e) {
+            $('#reason').show();
+            $('#Reassignreason').hide();
+            if ($('#hd_TableName').val() == "tbl_FDM_BudgetEstimation" && $('#hd_IsReviewer').val() == 'True' && $('#ReviewedAmount').val() == '') {
+                $('#ReviewedAmount').attr('placeholder', 'Enter reviewed amount')
+                $('#ReviewedAmount').focus();
+                e.preventDefault();
+            }
+            else if ($('#hd_TableName').val() == "tbl_FDM_BudgetEstimation" && $('#hd_IsReviewer').val() == 'False' && $('#ApprovedAmount').val() == '') {
+                $('#ApprovedAmount').attr('placeholder', 'Enter approved amount')
+                $('#ApprovedAmount').focus();
+                e.preventDefault();
+            }
+            else if ($('#Dropreason option:selected').length == 0) {
+                $('#Dropreason').focus();
+                e.preventDefault();
+            }
+            else if ($('#hd_TableName').val() == 'tbl_FPM_ForesterWarrantDetails' && $('#AppearanceDate').val() == '' && $('#hd_IsReviewer').val() == 'False') {
+                $('#AppearanceDate').focus();
+                e.preventDefault();
+            }
+            else if ($('#txtAreaComment').val() == '') {
+                $('#txtAreaComment').attr('placeholder', 'Enter Comment');
+                $('#txtAreaComment').focus();
+                e.preventDefault();
+            }
+            else if ($('#hd_TableName').val() == 'tbl_FixedPermissions' && $('#Survey_Doc').val().length != 0 && $('#Survey_Doc').val().split('.').pop() != 'pdf' && $('#Survey_Doc').val().split('.').pop() != 'PDF') {
+                alert('Upload Pdf file only!!!');
+                $('#Survey_Doc').focus();
+                e.preventDefault();
+            }
+            else if ($('#hd_TableName').val() == 'tbl_FixedPermissions' && $('#Survey_Doc').val().length != 0 && ($("#Survey_Doc")[0].files[0].size / 1048576) > 2) {
+                alert('File size cannot be more than 2 MB!!');
+                $('#Survey_Doc').focus();
+                e.preventDefault();
+            }
+            //else if ($('#hd_TableName').val() == 'tbl_FixedPermissions' && $('#Survey_Doc').val().length == 0 && $('#hd_IsReviewer').val() == "True") {
+            //    $('#SDoc').show();
+            //    $('#Survey_Doc').focus();
+            //    e.preventDefault();
+            //}
+            //else if ($('#hd_TableName').val() == 'tbl_FixedPermissions' && $('#Survey_Doc').val().length > 0 && $('#hd_IsReviewer').val() == "True") {
+            //    var fileext = $('#Survey_Doc').val().split('.').pop();
+            //    if (fileext != 'pdf') {
+            //        alert('Upload Pdf file only!!!');
+            //        $('#Survey_Doc').focus();
+            //        e.preventDefault();
+            //    }
+            //}
+            else {
+
+            }
+        });
+        $('#btn_Reasign').click(function (e) {
+            $('#Reassignreason').show();
+            $('#reason').hide();
+            if ($('#hd_TableName').val() == "tbl_FDM_BudgetEstimation" && $('#hd_IsReviewer').val() == 'True' && $('#ReviewedAmount').val() == '') {
+                $('#ReviewedAmount').attr('placeholder', 'Enter reviewed amount')
+                $('#ReviewedAmount').focus();
+                e.preventDefault();
+            }
+            else if ($('#hd_TableName').val() == "tbl_FDM_BudgetEstimation" && $('#hd_IsReviewer').val() == 'False' && $('#ApprovedAmount').val() == '') {
+                $('#ApprovedAmount').attr('placeholder', 'Enter approved amount')
+                $('#ApprovedAmount').focus();
+                e.preventDefault();
+            }
+            else if ($('#DropReassignreason option:selected').length == 0) {
+                $('#DropReassignreason').focus();
+                e.preventDefault();
+            }
+            else if ($('#hd_TableName').val() == 'tbl_FPM_ForesterWarrantDetails' && $('#AppearanceDate').val() == '' && $('#hd_IsReviewer').val() == 'False') {
+                $('#AppearanceDate').focus();
+                e.preventDefault();
+            }
+            else if ($('#txtAreaComment').val() == '') {
+                $('#txtAreaComment').attr('placeholder', 'Enter Comment');
+                $('#txtAreaComment').focus();
+                e.preventDefault();
+            }
+            else if ($('#hd_TableName').val() == 'tbl_FixedPermissions' && $('#Survey_Doc').val().length != 0 && $('#Survey_Doc').val().split('.').pop() != 'pdf' && $('#Survey_Doc').val().split('.').pop() != 'PDF') {
+                alert('Upload Pdf file only!!!');
+                $('#Survey_Doc').focus();
+                e.preventDefault();
+            }
+            else if ($('#hd_TableName').val() == 'tbl_FixedPermissions' && $('#Survey_Doc').val().length != 0 && ($("#Survey_Doc")[0].files[0].size / 1048576) > 2) {
+                alert('File size cannot be more than 2 MB!!');
+                $('#Survey_Doc').focus();
+                e.preventDefault();
+            }
+            //else if ($('#hd_TableName').val() == 'tbl_FixedPermissions' && $('#Survey_Doc').val().length == 0 && $('#hd_IsReviewer').val() == "True") {
+            //    $('#SDoc').show();
+            //    $('#Survey_Doc').focus();
+            //    e.preventDefault();
+            //}
+            //else if ($('#hd_TableName').val() == 'tbl_FixedPermissions' && $('#Survey_Doc').val().length > 0 && $('#hd_IsReviewer').val() == "True") {
+            //    var fileext = $('#Survey_Doc').val().split('.').pop();
+            //    if (fileext != 'pdf') {
+            //        alert('Upload Pdf file only!!!');
+            //        $('#Survey_Doc').focus();
+            //        e.preventDefault();
+            //    }
+            //}
+            else { }
+        });
+
+        if ($('#hd_TableName').val().trim() == 'Tbl_Citizen_TransitPermit') {
+            $('#divDoc').show();
+        }
+        else if ($('#hd_TableName').val() == 'tbl_FixedPermissions' && $('#hd_IsReviewer').val() == "True") {
+            $('#divDoc').show();
+        }
+        else {
+            $('#divDoc').hide();
+        }
+
+        $('#Survey_Doc').blur(function (e) {
+            if ($('#hd_TableName').val() == 'tbl_FixedPermissions' && $('#Survey_Doc').val().length > 0 && $('#hd_IsReviewer').val() == "True") {
+                $('#SDoc').hide();
+                e.preventDefault();
+            }
+            else {
+                $('#SDoc').hide();
+            }
+        });
+
+        $('#txtAreaComment').keypress(function (e) {
+            var kc = e.which;
+
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95) || (kc >= 44 && kc <= 57) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        })
+    });
+
+</script>
+
+<script type="text/javascript">
+
+    function ViewFile() {
+        document.getElementById("portalid").value = 'rajcomp123';
+        document.getElementById("ssoid").value = '@Session["SSOID"]';
+        document.getElementById("requestFor").value = $("#NOCType").val();
+        document.getElementById("fileName").value = $("#NOCID").val();
+        document.getElementById("postData").action = "https://gis.rajasthan.gov.in/fmdssgis/gisview/viewongis.aspx";//'http://10.68.128.179/fmdssgis/gisview/viewongis.aspx';
+        document.getElementById("postData").submit();
+    }
+
+    $(function (e) {
+
+        if ($('#hd_OffenseCode').val() == '') {
+            $('#btnViewDetailProtection').hide();
+            $('#btnViewDetail').show();
+        }
+        else if ($('#hd_OffenseCode').val() != '') {
+            $('#btnViewDetail').hide();
+            $('#btnViewDetailProtection').show();
+        }
+        else {
+            $('#btnViewDetailProtection').hide();
+            $('#btnViewDetail').show();
+        }
+
+        $('#btnViewDetail').click(function (e) {
+            var RequestId = $('#hd_RequestId').val();
+            var TableName = $('#hd_TableName').val();
+            var tblinfo = {
+                RequestId: $.trim(RequestId),
+                TableName: $.trim(TableName)
+            }
+            $("#tbdyScart").empty();
+
+            if (tblinfo.TableName == 'tbl_mst_Notice') {
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'html',
+                    url: RootUrl + 'ForesterAction/ViewDetailsNew',
+                    data: tblinfo,
+                    success: function (response) {
+                        $("#tbdyScart").html(response);
+                    }
+                });
+            }
+            else {
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'ForesterAction/ViewDetails',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(tblinfo),
+                    success: function (data) {
+                        if (tblinfo.TableName == 'Tbl_Citizen_TransitPermit') {
+                            $(".divPrintone").attr("style", "display:none");
+                            $('#divTbl_Citizen_TransitPermit').attr("style", "display:block");
+                            $('#divTbl_Citizen_TransitPermit').append(data);
+                        }
+
+                        if (data.TableName == 'tbl_FilmShootingPermissions') {
+                            var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                                "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                                "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                                "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                                "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                                "</td></tr><tr><td>Requested On</td><td>" + data.RequestedOn +
+                                "</td></tr><tr><td>Requested By</td><td>" + data.RequestedBy +
+                                "</td></tr><tr><td>District</td><td>" + data.District +
+                                "</td></tr><tr><td>Place</td><td>" + data.Place +
+                                "</td></tr><tr><td>Duration</td><td>" + data.Duration +
+                                "</td></tr><tr><td>Number Of Person</td><td>" + data.NumberOfPerson +
+                                "</td></tr><tr><td>Indian Citizen</td><td>" + data.IndianCitizen +
+                                "</td></tr><tr><td>Non Indian Citizen</td><td>" + data.NonIndianCitizen +
+                                "</td></tr><tr><td>Students</td><td>" + data.Students +
+                                "</td></tr><tr><td>Application Type</td><td>" + data.ApplicationType +
+                                "</td></tr><tr><td>Film Title</td><td>" + data.FilmTitle +
+                                "</td></tr><tr><td>Shooting Purpose</td><td>" + data.ShootingPurpose +
+                                "</td></tr><tr><td>OCM Purpose</td><td>" + data.Purpose_OCM +
+                                "</td></tr><tr><td>Description</td><td>" + data.Description +
+                                "</td></tr><tr><td>Payment Done</td><td>" + data.PaymentDone +
+                                "</td></tr><tr><td>Paid Amount</td><td>" + data.PaidAmount +
+                                "</td></tr><tr><td>Identity Proof Number</td><td>" + data.IdProofNo +
+                                "</td></tr><tr><td>Identity Proof</td><td><a href='../PermissionDocument/" + data.IdProofUrl + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                                "<tr><td>Approver/Reviwer Status</td><td>" + data.StatusDesc +
+                                "</td></tr><tr><td>Approver/Reviwer Reason</td><td>" + data.Reason_Desc +
+                                "</td></tr><tr><td>Approver/Reviwer Remarks</td><td>" + data.Remarks +
+                                "</td></tr>";
+                            $("#tbdyScart").append(bardata);
+                        }
+                        if (data.TableName == 'tbl_OrganisingCamp') {
+                            var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                                "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                                "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                                "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                                "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                                "</td></tr><tr><td>Requested On</td><td>" + data.RequestedOn +
+                                "</td></tr><tr><td>Requested By</td><td>" + data.RequestedBy +
+                                "</td></tr><tr><td>District</td><td>" + data.District +
+                                "</td></tr><tr><td>Place</td><td>" + data.Place +
+                                "</td></tr><tr><td>Duration</td><td>" + data.Duration +
+                                "</td></tr><tr><td>Number Of Person</td><td>" + data.NumberOfPerson +
+                                "</td></tr><tr><td>Application Type</td><td>" + data.ApplicationType +
+                                "</td></tr><tr><td>OCM Purpose</td><td>" + data.Purpose_OCM +
+                                "</td></tr><tr><td>Payment Done</td><td>" + data.PaymentDone +
+                                "</td></tr><tr><td>Paid Amount</td><td>" + data.PaidAmount +
+                                "</td></tr><tr><td>Identity Proof Number</td><td>" + data.IdProofNo +
+                                "</td></tr><tr><td>Identity Proof</td><td><a href='../PermissionDocument/" + data.IdProofUrl + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                                "<tr><td>Approver/Reviwer Status</td><td>" + data.StatusDesc +
+                                "</td></tr><tr><td>Approver/Reviwer Reason</td><td>" + data.Reason_Desc +
+                                "</td></tr><tr><td>Approver/Reviwer Remarks</td><td>" + data.Remarks +
+                                "</td></tr>";
+                            $("#tbdyScart").append(bardata);
+                        }
+                        if (data.TableName == 'tbl_ResearchStudyPermissions') {
+                            var presentation = "", assistantIdProof = "";
+                            if (data.PresentationPath != 'N/A')
+                            { presentation = "</td></tr><tr><td>Prsentation Uploaded</td><td><a href='../PermissionDocument/" + data.PresentationPath + "'  target='_blank'><img src='../images/pptIcon.png' Width='30' /></a>"; }
+                            else
+                            { presentation = "</td></tr><tr><td>Prsentation Uploaded</td><td>N/A"; }
+
+                            if (data.AssistIdProofPath != 'N/A')
+                            { assistantIdProof = "</td></tr><tr><td>Assistant Identity Proof</td><td><a href='../PermissionDocument/" + data.AssistIdProofPath + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a>"; }
+                            else
+                            { assistantIdProof = "</td></tr><tr><td>Assistant Identity Proof</td><td>N/A"; }
+                            var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                                "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                                "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                                "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                                "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                                "</td></tr><tr><td>Requested On</td><td>" + data.RequestedOn +
+                                "</td></tr><tr><td>Requested By</td><td>" + data.RequestedBy +
+                                "</td></tr><tr><td>Duration</td><td>" + data.Duration +
+                                "</td></tr><tr><td>District</td><td>" + data.District +
+                                "</td></tr><tr><td>Place</td><td>" + data.Place +
+                                "</td></tr><tr><td>Qualification</td><td>" + data.Qualification +
+                                "</td></tr><tr><td>ApplicationType</td><td>" + data.ApplicationType +
+                                "</td></tr><tr><td>College</td><td>" + data.College +
+                                "</td></tr><tr><td>Research Subject</td><td>" + data.ResearchSubject +
+                                "</td></tr><tr><td>Research Procedure</td><td>" + data.ResearchProcedure +
+                                "</td></tr><tr><td>Animal Category</td><td>" + data.AnimalCategory +
+                                "</td></tr><tr><td>Animal Name</td><td>" + data.AnimalName +
+                                "</td></tr><tr><td>Animal Serial No</td><td>" + data.Animal_SerialNo +
+                                "</td></tr><tr><td>Species Category </td><td>" + data.SpeciesCategory +
+                                "</td></tr><tr><td>Species Name</td><td>" + data.SpeciesName +
+                                "</td></tr><tr><td>Species Serial No</td><td>" + data.Species_SerialNo +
+                                "</td></tr><tr><td>Benefits</td><td>" + data.Benefits +
+                                "</td></tr><tr><td>Synopsis Uploaded</td><td><a href='../PermissionDocument/" + data.SynopsisPath + "'  target='_blank'><img src='../images/pdfimg.png' Width='30' /></a>" +
+                                presentation +
+                                "</td></tr><tr><td>CoordinatorId</td><td>" + data.CoordinatorId +
+                                "</td></tr><tr><td>Assistant Name</td><td>" + data.AssistName +
+                                assistantIdProof +
+                                "</td></tr><tr><td>Vehicle Category</td><td>" + data.Vehiclecat +
+                                "</td></tr><tr><td>Vehicle Name</td><td>" + data.VehicleName +
+                                "</td></tr><tr><td>Approver/Reviwer Status</td><td>" + data.StatusDesc +
+                                "</td></tr><tr><td>Approver/Reviwer Reason</td><td>" + data.Reason_Desc +
+                                "</td></tr><tr><td>Approver/Reviwer Remarks</td><td>" + data.Remarks +
+                                "</td></tr>";
+                            $("#tbdyScart").append(bardata);
+                            $('#tbdyDfo').append(bardata);
+                        }
+
+                        if (data.TableName == 'tbl_EducationTourPermissions') {
+                            var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                                "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                                "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                                "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                                "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                                "</td></tr><tr><td>Requested On</td><td>" + data.RequestedOn +
+                                "</td></tr><tr><td>Requested By</td><td>" + data.RequestedBy +
+                                "</td></tr><tr><td>Duration</td><td>" + data.Duration +
+                                "</td></tr><tr><td>District</td><td>" + data.District +
+                                "</td></tr><tr><td>Place</td><td>" + data.Place +
+                                "</td></tr><tr><td>Institute Name</td><td>" + data.CollegeName +
+                                "</td></tr><tr><td>Institute Address</td><td>" + data.CollegeAddress +
+                                "</td></tr><tr><td>Institute Phone number</td><td>" + data.Phonenumber +
+                                "</td></tr><tr><td>Category</td><td>" + data.Category +
+                                "</td></tr><tr><td>Head of Institute</td><td>" + data.Princeple_Name +
+                                "</td></tr><tr><td>Phone Number</td><td>" + data.P_Address +
+                                "</td></tr><tr><td>No. of Members</td><td>" + data.P_NumberOfMember +
+                                "</td></tr><tr><td>List of members</td><td><a href='../PermissionDocument/" + data.MemberListPath + "'  target='_blank'><img src='../images/pdfIcon.jpg' Width='30' /></a></td></tr>" +
+                                "</td></tr><tr><td>Document for Educational Tour Request</td><td><a href='../PermissionDocument/" + data.DocEducationalToueReqPath + "'  target='_blank'><img src='../images/pdfIcon.jpg' Width='30' /></a></td></tr>" +
+                                "</td></tr><tr><td>Vehicle Name</td><td>" + data.Vehiclecat +
+                                "</td></tr><tr><td>Vehicle Category</td><td>" + data.ddl_vehicle +
+                                "</td></tr><tr><td>Approver/Reviwer Status</td><td>" + data.StatusDesc +
+                                "</td></tr><tr><td>Approver/Reviwer Reason</td><td>" + data.Reason_Desc +
+                                "</td></tr><tr><td>Approver/Reviwer Remarks</td><td>" + data.Remarks +
+                                "</td></tr>";
+                            $("#tbdyScart").append(bardata);
+                            $('#tbdyDfo').append(bardata);
+                        }
+                        if (data.TableName == 'tbl_TransitPermission') {
+                            var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                                "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                                "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                                "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                                "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                                "</td></tr><tr><td>Applicant Type On</td><td>" + data.RequestedOn +
+                                "</td></tr><tr><td>Transaction From</td><td>" + data.RequestedBy +
+                                "</td></tr><tr><td>Location</td><td>" + data.Location +
+                                "</td></tr><tr><td>Transport Mode</td><td>" + data.TransportMode +
+                                "</td></tr><tr><td>Vehicle Number</td><td>" + data.VehicleNo +
+                                "</td></tr><tr><td>Driver License</td><td>" + data.DriverLicense +
+                                "</td></tr><tr><td>Driver Name</td><td>" + data.DriverName +
+                                "</td></tr><tr><td>Driver Mobile</td><td>" + data.DriverMobileno +
+                                "</td></tr><tr><td>Duration</td><td>" + data.Durations +
+                                "</td></tr><tr><td>Paid Amount</td><td>" + data.PaidAMT +
+                                "<tr><td>Approver/Reviwer Status</td><td>" + data.StatusDesc +
+                                "</td></tr><tr><td>Approver/Reviwer Reason</td><td>" + data.Reason_Desc +
+                                "</td></tr><tr><td>Approver/Reviwer Remarks</td><td>" + data.Remarks +
+                                "</td></tr>";
+                            $("#tbdyScart").append(bardata);
+                            $('#tbdyDfo').append(bardata);
+                        }
+                        if (data.TableName == 'tbl_BuyerRegistration') {
+                            var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                                "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                                "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                                "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                                "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                                "</td></tr><tr><td>Applicant Type On</td><td>" + data.RequestedOn +
+                                "</td></tr><tr><td>Transaction From</td><td>" + data.RequestedBy +
+                                "<tr><td>Approver/Reviwer Status</td><td>" + data.StatusDesc +
+                                "</td></tr><tr><td>Approver/Reviwer Reason</td><td>" + data.Reason_Desc +
+                                "</td></tr><tr><td>Approver/Reviwer Remarks</td><td>" + data.Remarks +
+                                "</td></tr>";
+                            $("#tbdyScart").append(bardata);
+                            $('#tbdyDfo').append(bardata);
+                        }
+
+                        if (data.TableName == 'tbl_mst_Notice') {
+                            $('#aucNoticeId').val(data.Notice_Id);
+                            var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                                "</td></tr><tr><td>Request Name</td><td>" + data.PermissionName +
+                                "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                                "</td></tr><tr><td>Requested On</td><td>" + data.RequestedOn +
+                                "</td></tr><tr><td>Requested By</td><td>" + data.RequestedBy +
+                                "</td></tr><tr><td>Notice Number</td><td><a href='#' id='viewNotice' title='Please Click on link for View Notice'>" + data.Notice_No + "</a>" +
+                                "<tr><td>Region Name</td><td>" + data.Region_Name + "</td></tr>" +
+                                "<tr><td>Circle Name</td><td>" + data.Circle_Name + "</td></tr>" +
+                                "<tr><td>Division Name</td><td>" + data.Division_Name + "</td></tr>" +
+                                "<tr><td>Range Name</td><td>" + data.Range_Name + "</td></tr>" +
+                                "<tr><td>Place/Depot Name</td><td>" + data.Depot_Name + "</td></tr>" +
+                                "<tr><td>Produce Type</td><td>" + data.Produce_Name + "</td></tr>" +
+                                "<tr><td>Product Name</td><td>" + data.Product_Name + "</td></tr>" +
+                                "<tr><td>Unit</td><td>" + data.Produce_Unit + "</td></tr>" +
+                                "<tr><td>Quantity</td><td>" + data.Qty + "</td></tr>" +
+                                "<tr><td>Status</td><td>" + data.StatusDesc +
+                                "</td></tr><tr><td>Reason</td><td>" + data.Reason_Desc +
+                                "</td></tr><tr><td>Remarks</td><td>" + data.Remarks +
+                                "</td></tr>";
+                            $("#tbdyScart").append(bardata);
+                        }
+
+                        if (data.TableName == 'tbl_AuctionDetail') {
+
+                            var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                                "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                                "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                                "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                                "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                                "</td></tr><tr><td>Requested On</td><td>" + data.RequestedOn +
+                                "</td></tr><tr><td>Requested By</td><td>" + data.RequestedBy +
+                                "</td></tr><tr><td>Applicant Type</td><td>" + data.Applicant_Type +
+                                "<tr><td>Bidder Name</td><td>" + data.BidderName + "</td></tr>" +
+                                "<tr><td>Notice</td><td>" + data.Notice_No + "</td></tr>" +
+                                "<tr><td>Region Name</td><td>" + data.Region_Name + "</td></tr>" +
+                                "<tr><td>Circle Name</td><td>" + data.Circle_Name + "</td></tr>" +
+                                "<tr><td>Division Name</td><td>" + data.Division_Name + "</td></tr>" +
+                                "<tr><td>Range Name</td><td>" + data.Range_Name + "</td></tr>" +
+                                "<tr><td>Place/Depot Name</td><td>" + data.Depot_Name + "</td></tr>" +
+                                "<tr><td>Quantity</td><td>" + data.Qty + "</td></tr>" +
+                                "<tr><td>Bid Opening Date</td><td>" + data.DurationsFrom + "</td></tr>" +
+                                "<tr><td>Bid Closing Date</td><td>" + data.DurationsTo + "</td></tr>" +
+                                "<tr><td>Payment Mode</td><td>" + data.PaymentMode + "</td></tr>" +
+                                "<tr><td>Payment By</td><td>" + data.OfflinePaymentMode + "</td></tr>" +
+                                "<tr><td>Bank Name</td><td>" + data.BankName + "</td></tr>" +
+                                "<tr><td>Branch Name</td><td>" + data.BranchName + "</td></tr>" +
+                                "<tr><td>DD/Check Issues Date</td><td>" + data.DdchkIssuesDate + "</td></tr>" +
+                                "<tr><td>DD/Check Number</td><td>" + data.DdChkNumber + "</td></tr>" +
+                                "<tr><td>DD/Check</td><td><a href='../FixedLandDocument/" + data.DdchkFilepth + "' target='_blank'><img src='../images/globe.png' Width='30' /></a></td></tr>" +
+                                "<tr><td>EMD Amount</td><td>" + data.EmdPaybleAmount + "</td></tr>" +
+                                "<tr><td>Bidding Amount</td><td>" + data.BiddingAmount + "</td></tr>" +
+                                "<tr><td>Status</td><td>" + data.StatusDesc +
+                                "</td></tr><tr><td>Reason</td><td>" + data.Reason_Desc +
+                                "</td></tr><tr><td>Remarks</td><td>" + data.Remarks +
+                                "</td></tr>";
+                            $("#tbdyScart").append(bardata);
+                        }
+                        if (data.TableName == 'tbl_FDM_MicroPlan' || data.TableName == 'tbl_FDM_Workorder' || data.TableName == 'tbl_FDM_BudgetEstimation' || data.TableName == 'tbl_FDM_Project' || data.TableName == 'tbl_FDM_Workorder_Milestone' || data.TableName == 'tbl_FPM_ForesterSeizedTeam' || data.TableName == 'tbl_FPM_ForesterWarrantDetails' || data.TableName == 'tbl_FPM_ForesterParivadCategory' || data.TableName == 'tbl_FDM_BudgetReviewApproval') {
+
+                            var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                                "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                                "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                                "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                                "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                                "</td></tr><tr><td>Requested On</td><td>" + data.RequestedOn +
+                                "</td></tr><tr><td>Requested By</td><td>" + data.RequestedBy +
+                                "</td></tr><tr><td>District</td><td>" + data.District +
+                                "<tr><td>Block</td><td>" + data.Block + "</td></tr>" +
+                                "<tr><td>GramPanchayat</td><td>" + data.GramPanchayat + "</td></tr>" +
+                                "<tr><td>Village</td><td>" + data.Village + "</td></tr>" +
+                                "<tr><td>Duration</td><td>" + data.Duration + "</td></tr>";
+
+                            var Microdata = "<tr><td>MicroPlan Name</td><td>" + data.MicroPlanName + "</td></tr>" +
+                                "<tr><td>MicroPlan Code</td><td>" + data.MicroPlanCode + "</td></tr>" +
+                                "<tr><td>MicroPlan Project Name</td><td>" + data.MicroProjectName + "</td></tr>" +
+                                "<tr><td>Division Name</td><td>" + data.Division_Name + "</td></tr>" +
+                                "<tr><td>Date of Request</td><td>" + data.MicroDateOfRequest + "</td></tr>" +
+                                "<tr><td>NGO/SHO</td><td>" + data.NGO_SHG + "</td></tr>" +
+                                "<tr><td>NGO/SHO Name</td><td>" + data.NGO_SHGName + "</td></tr>" +
+                                "<tr><td>Revenue Village</td><td>" + data.RevenueVillage + "</td></tr>" +
+                                "<tr><td>Panchayat Comittee</td><td>" + data.PanchayatComittee + "</td></tr>" +
+                                "<tr><td>Forest Admin Unit</td><td>" + data.ForestAdminUnit + "</td></tr>" +
+                                "<tr><td>Range Office Unit</td><td>" + data.RangeOfficeUnit + "</td></tr>" +
+                                "<tr><td>Total Area</td><td>" + data.TotalArea + "</td></tr>" +
+                                "<tr><td>Total Land(sqkm)</td><td>" + data.TotalLandsqkm + "</td></tr>" +
+                                "<tr><td>Total Forest(sqkm)</td><td>" + data.TotalForestsqkm + "</td></tr>" +
+                                "<tr><td>Total Land(sqkm)</td><td>" + data.ReservedForestsqkm + "</td></tr>" +
+                                "<tr><td>Reserved Forest(sqkm)</td><td>" + data.ProtectForestsqkm + "</td></tr>" +
+                                "<tr><td>Unclassified Forest(sqkm)</td><td>" + data.UnclassifiedForestsqkm + "</td></tr>" +
+                                "<tr><td>Classified Forest(sqkm)</td><td>" + data.ClassifiedForestsqkm + "</td></tr>" +
+                                "<tr><td>Fully Cover(sqkm)</td><td>" + data.FullyCoversqkm + "</td></tr>" +
+                                "<tr><td>Without Plant(sqkm)</td><td>" + data.WithoutPlantsqkm + "</td></tr>" +
+                                "<tr><td>Allocate for Plant(sqkm)</td><td>" + data.AllocateforPlantsqkm + "</td></tr>" +
+                                "<tr><td>Panchayat Land(sqkm)</td><td>" + data.PanchayatLandsqkm + "</td></tr>" +
+                                "<tr><td>Revenue Land(sqkm)</td><td>" + data.RevenueLandsqkm + "</td></tr>" +
+                                "<tr><td>Agriculture Land</td><td>" + data.AgricultureLand + "</td></tr>" +
+                                "<tr><td>Irregated Land(sqkm)</td><td>" + data.IrregatedLandsqkm + "</td></tr>" +
+                                "<tr><td>NonIrregated Land(sqkm)</td><td>" + data.NonIrregatedLandsqkm + "</td></tr>" +
+                                "<tr><td>Residential Area(sqkm)</td><td>" + data.ResidentialAreasqkm + "</td></tr>" +
+                                "<tr><td>Remote Agriculture Land(sqkm)</td><td>" + data.RemAgricultureLandsqkm + "</td></tr>" +
+                                "<tr><td>Remote Non Agriculture Land(sqkm)</td><td>" + data.RemNonAgricultureLandsqkm + "</td></tr>" +
+                                "<tr><td>JFMC Name</td><td>" + data.JFMCName + "</td></tr>";
+
+                            var Budgetdata = "<tr><td>Estimated Amount</td><td>" + data.EstimatedAmount + "</td></tr>" +
+                                "<tr><td>Reviewed Amount</td><td>" + data.ReviewedAmount + "</td></tr>" +
+                                "<tr><td>Approved Amount</td><td>" + data.ApprovedAmount + "</td></tr>" +
+                                "<tr><td>Finance Year</td><td>" + data.FinanceYear + "</td></tr>";
+
+                            var WorkOrderdata = "<tr><td>WorkOrder Name</td><td>" + data.WorkOrderName + "</td></tr>" +
+                                "<tr><td>WorkOrder Type</td><td>" + data.WorkOrderType + "</td></tr>" +
+                                "<tr><td>Budget Head</td><td>" + data.BudgetHead + "</td></tr>" +
+                                "<tr><td>Financial Target</td><td>" + data.FinancialTarget + "</td></tr>" +
+                                "<tr><td>Admin Approval date</td><td>" + data.AdminApprovaldate + "</td></tr>" +
+                                "<tr><td>Finance Approval date</td><td>" + data.FinancialApprovaldate + "</td></tr>";
+                            var Projectdata = "<tr><td>Project Name</td><td>" + data.ProjectName + "</td></tr>" +
+                                "<tr><td>Program Name</td><td>" + data.ProgramName + "</td></tr>" +
+                                "<tr><td>Scheme Name</td><td>" + data.SchemeName + "</td></tr>" +
+                                "<tr><td>Reference Doccument</td><td><a href='../FixedLandDocument/" + data.ProjRefDoc + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                                "<tr><td>DPR Doccument</td><td> <a href='../FixedLandDocument/" + data.ProjDprDoc + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                                "<tr><td>Estimated Budget</td><td>" + data.ProjEstimatedBudget + "</td></tr>";
+
+                            var WorkOrderInvoice = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                                "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                                "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                                "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                                "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                                "</td></tr><tr><td>WorkOrder Requested On</td><td>" + data.RequestedOn +
+                                "</td></tr><tr><td>WorkOrder Requested By</td><td>" + data.RequestedBy +
+                                "<tr><td>WorkOrder Duration</td><td>" + data.Duration + "</td></tr>" +
+                                "<tr><td>WorkOrder Name</td><td>" + data.WorkOrderName + "</td></tr>" +
+                                "<tr><td>WorkOrder Code</td><td>" + data.workorderCode + "</td></tr>" +
+                                "<tr><td>MileStone Name</td><td>" + data.MileStoneName + "</td></tr>" +
+                                "<tr><td>MileStone Payment(%)</td><td>" + data.MileStonePaymentPercentage + "</td></tr>" +
+                                "<tr><td>Bill Raised</td><td>" + data.BillRaised + "</td></tr>" +
+                                "<tr><td>Bill Amount</td><td>" + data.BillAmount + "</td></tr>" +
+                                "<tr><td>Bill Date</td><td>" + data.BillDate + "</td></tr>" +
+                                "<tr><td>Bill No</td><td>" + data.BillNo + "</td></tr>";
+
+                            if (data.EvidenceDoc == '') {
+                                var offender = "<tr><td>OffenderName</td><td>" + data.OffenderName + "</td></tr>" +
+                                    "<tr><td>Father Name</td><td>" + data.FatherName + "</td></tr>" +
+                                    "<tr><td>Offender Caste</td><td>" + data.Caste + "</td></tr>" +
+                                    "<tr><td>Offender Address</td><td>" + data.Address + "</td></tr>" +
+                                    "<tr><td>Offender PhoneNo</td><td>" + data.PhoneNo + "</td></tr>" +
+                                    "<tr><td>Offender Age</td><td>" + data.OffenderAge + "</td></tr>" +
+                                    "<tr><td>Police Station</td><td>" + data.PoliceStation + "</td></tr>" +
+                                    "<tr><td>Offender ClothesWorn</td><td>" + data.ClothesWorn + "</td></tr>" +
+                                    "<tr><td>Offender ClothesColor</td><td>" + data.ClothesColor + "</td></tr>" +
+                                    "<tr><td>Offender PhysicalAppearance</td><td>" + data.PhysicalAppearance + "</td></tr>" +
+                                    "<tr><td>Offender Height</td><td>" + data.Height + "</td></tr>" +
+                                    "<tr><td>Offender EvidenceDoc</td><td>N/A</td></tr>";
+                            }
+                            else {
+                                var offender = "<tr><td>OffenderName</td><td>" + data.OffenderName + "</td></tr>" +
+                                    "<tr><td>Father Name</td><td>" + data.FatherName + "</td></tr>" +
+                                    "<tr><td>Offender Caste</td><td>" + data.Caste + "</td></tr>" +
+                                    "<tr><td>Offender Address</td><td>" + data.Address + "</td></tr>" +
+                                    "<tr><td>Offender PhoneNo</td><td>" + data.PhoneNo + "</td></tr>" +
+                                    "<tr><td>Offender Age</td><td>" + data.OffenderAge + "</td></tr>" +
+                                    "<tr><td>Police Station</td><td>" + data.PoliceStation + "</td></tr>" +
+                                    "<tr><td>Offender ClothesWorn</td><td>" + data.ClothesWorn + "</td></tr>" +
+                                    "<tr><td>Offender ClothesColor</td><td>" + data.ClothesColor + "</td></tr>" +
+                                    "<tr><td>Offender PhysicalAppearance</td><td>" + data.PhysicalAppearance + "</td></tr>" +
+                                    "<tr><td>Offender Height</td><td>" + data.Height + "</td></tr>" +
+                                    "<tr><td>Offender EvidenceDoc</td><td><a href='../ForestProtectionDocument/" + data.EvidenceDoc + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>";
+                            }
+
+                            var budgetApprover = "<tr><td>Module Name</td><td>" + data.ModuleName +
+                                "</td></tr><tr><td>Service Type</td><td>" + data.ServiceType +
+                                "</td></tr><tr><td>Permission Type</td><td>" + data.PermissionType +
+                                "</td></tr><tr><td>Permission Name</td><td>" + data.PermissionName +
+                                "</td></tr><tr><td>RequestId</td><td>" + data.RequestId +
+                                "</td></tr><tr><td>Requested On</td><td>" + data.RequestedOn +
+                                "</td></tr><tr><td>Requested By</td><td>" + data.RequestedBy +
+                                "</td></tr><tr><td>Division Name</td><td>" + data.Division_Name +
+                                "</td></tr><tr><td>Circle Name</td><td>" + data.Circle_Name +
+                                "<tr><td>Amount</td><td>" + data.EstimatedAmount + "</td></tr>" +
+                                "<tr><td>FinanceYear</td><td>" + data.FinanceYear + "</td></tr>";
+
+                            var status = "<tr><td>Status</td><td>" + data.StatusDesc +
+                                "</td></tr><tr><td>Reason</td><td>" + data.Reason_Desc +
+                                "</td></tr><tr><td>Remarks</td><td>" + data.Remarks + "</td></tr>";
+                            if (data.TableName == 'tbl_FDM_MicroPlan') {
+                                $("#tbdyScart").append(bardata + Microdata + status);
+                            }
+                            if (data.TableName == 'tbl_FDM_BudgetEstimation') {
+                                $("#tbdyScart").append(bardata + Budgetdata + status);
+                            }
+                            if (data.TableName == 'tbl_FDM_Workorder') {
+                                $("#tbdyScart").append(bardata + WorkOrderdata + status);
+                            }
+                            if (data.TableName == 'tbl_FDM_Project') {
+                                $("#tbdyScart").append(bardata + Projectdata + status);
+                            }
+                            if (data.TableName == 'tbl_FDM_Workorder_Milestone') {
+                                $("#tbdyScart").append(WorkOrderInvoice + status);
+                            }
+                            if (data.TableName == 'tbl_FPM_ForesterSeizedTeam' || data.TableName == 'tbl_FPM_ForesterWarrantDetails' || data.TableName == 'tbl_FPM_ForesterParivadCategory') {
+                                $("#tbdyScart").append(bardata + offender + status);
+                            }
+                            if (data.TableName == 'tbl_FDM_BudgetReviewApproval') {
+                                $("#tbdyScart").append(budgetApprover + status);
+                            }
+
+                        }
+                        if (data.TableName == 'tbl_FixedPermissions') {
+                            var bardata = "<tr><td>Module Name</td><td>" + data.ModuleName + "</td></tr>" +
+                                "<tr><td>Service Type</td><td>" + data.ServiceType + "</td></tr>" +
+                                "<tr><td>Permission Type</td><td>" + data.PermissionType + "</td></tr>" +
+                                "<tr><td>Permission Name</td><td>" + data.PermissionName + "</td></tr>" +
+                                "<tr><td>RequestId</td><td>" + data.RequestId + "</td></tr>" +
+                                "<tr><td>Requested On</td><td>" + data.RequestedOn + "</td></tr>" +
+                                "<tr><td>Requested By</td><td>" + data.RequestedBy + "</td></tr>" +
+                                //"<tr><td>Duration</td><td>" + data.Duration + "</td></tr>" +
+                                "<tr><td>Division Name</td><td>" + data.Division_Name + "</td></tr>" +
+                                "<tr><td>District</td><td>" + data.District + "</td></tr>" +
+                                "<tr><td>Place</td><td>" + data.Place + "</td></tr>" +
+                                "<tr><td>Panchayat Samiti</td><td>" + data.Block + "</td></tr>" +
+                                "<tr><td>GramPanchayat</td><td>" + data.GramPanchayat + "</td></tr>" +
+                                "<tr><td>Village</td><td>" + data.Village + "</td></tr>" +
+                                "<tr><td>KhasraNo</td><td>" + data.khasraNo + "</td></tr>" +
+                                "<tr><td>ApplicationType</td><td>" + data.ApplicationType + "</td></tr>" +
+                                "<tr><td>Permission Type</td><td>" + data.FixedPermissionName + "</td></tr>" +
+                                "<tr><td>Latitude</td><td>" + data.Latitude + "</td></tr>" +
+                                "<tr><td>Longitude</td><td>" + data.Longitude + "</td></tr>" +
+                                "<tr><td>Payment Done</td><td>" + data.PaymentDone + "</td></tr>" +
+                                "<tr><td>Paid Amount</td><td>" + data.PaidAmount + "</td></tr>" +
+                                "<tr><td>GT Sheet Avaliable</td><td>" + data.IsGTSheetAvaliable + "</td></tr>" +
+                                "<tr><td>Nearest Water Source</td><td>" + data.Nearest_WaterSource + "</td></tr>" +
+                                "<tr><td>Water Source Distance</td><td>" + data.WaterSource_Distance + "</td></tr>" +
+                                "<tr><td>Forest Distance</td><td>" + data.Forest_Distance + "</td></tr>" +
+                                "<tr><td>Wildlife/NP/ES/Zone Distance</td><td>" + data.Wildlife_Distance + "</td></tr>" +
+                                "<tr><td>Number of Trees</td><td>" + data.Tree_species + "</td></tr>" +
+                                "<tr><td>Aravalli Hills</td><td>" + data.AravalliHills + "</td></tr>" +
+                                "<tr><td>Forest Land</td><td>" + data.ForestLand + "</td></tr>" +
+                                "<tr><td>Plantation Area</td><td>" + data.Plantation_Area + "</td></tr>" +
+                                "<tr><td>Approver/Reviwer Status</td><td>" + data.StatusDesc + "</td></tr>" +
+                                "<tr><td>Approver/Reviwer Reason</td><td>" + data.Reason_Desc + "</td></tr>" +
+                                "<tr><td>Approver/Reviwer Remarks</td><td>" + data.Remarks + "</td></tr>" +
+                                "<tr><td>Kml File Download</td><td><a href='" + data.KmlPath + "' ><img src='../images/globe.png' Width='30' /></a> </td></tr>" +
+                                "<tr><td>Kml File View</td><td><input type='hidden' id='NOCType' value='" + data.NOCType + "'/><input type='hidden' id='NOCID' value='" + data.KmlView + "'/><button type='button'onclick='ViewFile();'>View KML</button> </td></tr>" +
+                                //"<tr><td>Kml File View</td><td><a href='" + data.KmlView + "'  target='_blank'><img src='../images/globe.png' Width='30' /></a> </td></tr>" +
+                                "<tr><td>Revenue Record</td><td><a href='../FixedLandDocument/" + data.Revenue_Record_Path + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                                "<tr><td>Revenue Map</td><td><a href='../FixedLandDocument/" + data.Revenue_Map_Path + "' target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>" +
+                                "<tr><td>Project Description</td><td>" + data.Citizen_Comment + "</td></tr>" +
+                                "<tr><td>Area Size(in Hectare)</td><td>" + data.Area_Size + "</td></tr>";
+                            var AdditionalDoc = "<tr><td>DPR</td><td><a href='../FixedLandDocument/" + data.Additional_Document + "' target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td></tr>";
+                            var Survey_Doc = "<tr><td>Inspection/Verification Report</td><td><a href='../FixedLandDocument/" + data.Survey_Document + "' target='_blank'><img src='../images/pdfimg.png' Width='30' /></a></td></tr>";
+                            var finalvar = bardata;
+                            kmlDataView = data.KmlView;
+                            if (data.Additional_Document != "" && data.Additional_Document != null) {
+                                finalvar = finalvar + AdditionalDoc;
+                            }
+                            if (data.Survey_Document != "" && data.Survey_Document != null) {
+                                finalvar = finalvar + Survey_Doc;
+                            }
+                            $("#tbdyScart").append(finalvar);
+                        }
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve states.' + ex);
+                    }
+                });
+            }
+        });
+
+        $('#btnViewDetailProtection').click(function (e) {
+
+            ViewDetails($.trim($('#hd_OffenseCode').val()));
+        });
+
+        //$('#btnViewDetailProtection').click(function (e) {
+        //    var tblinfo = {
+        //        OffenseCode: $.trim($('#hd_OffenseCode').val()),
+        //        UserRole: ""
+        //    }
+        //    $.ajax({
+        //        type: 'POST',
+        //        url: RootUrl + 'OffenseAssign/ViewDetailsOnClick',
+        //        contentType: 'application/json; charset=utf-8',
+        //        data: JSON.stringify(tblinfo),
+        //        success: function (data) {
+
+
+        //            $("#tbdyScart0").empty();
+        //            $("#tbdyScart1").empty();
+        //            $("#tbdyScart2").empty();
+        //            $("#tbdyScart3").empty();
+        //            $("#tbdyScart4").empty();
+        //            $("#tbdyScart5").empty();
+        //            $("#tbdyScart6").empty();
+        //            $("#tbdyScart7").empty();
+        //            $("#tbdyScart8").empty();
+        //            $("#tbdyScart9").empty();
+        //            $("#tbdyScart10").empty();
+        //            var bardata = "<tr><td>Offense Detail</td><td>" + data.list1.Description + "</td></tr>" +
+        //               "<tr><td>Date of offense</td><td>" + data.list1.OffenseDate +
+        //               "</td></tr><tr><td>Place of offense</td><td>" + data.list1.OffensePlace +
+        //               "</td></tr><tr><td>Time of offense</td><td>" + data.list1.OffenseTime +
+        //               "</td></tr><tr><td>District</td><td>" + data.list1.District_name +
+        //               "</td></tr><tr><td>Division</td><td>" + data.list1.DIV_NAME +
+        //               "</td></tr><tr><td>Circle</td><td>" + data.list1.CIRCLE_NAME +
+        //               "</td></tr><tr><td>Block</td><td>" + data.list1.Block +
+        //               "</td></tr><tr><td>Dfo Decision</td><td>" + data.list1.DfoDecision +
+        //               "</td></tr><tr><td>Case Status</td><td>" + data.list1.CaseStatus +
+        //               "</td></tr><tr><td>Fine Amount</td><td>" + data.list1.FineAmount +
+        //               "</td></tr><tr><td>Offender Present</td><td>" + data.list1.OffenderPresent +
+        //               "</td></tr><tr><td>Item Seized</td><td>" + data.list1.ItemSeized +
+        //               "</td></tr><tr><td>Compounding</td><td>" + data.list1.Compounding +
+        //                 "</td></tr><tr><td>Complainant Type</td><td>" + data.list1.UserRole +
+        //               "</td></tr><tr><td>Complainant Name</td><td>" + data.list1.ApplicantName +
+
+        //              "</td></tr>";
+        //            //var Photo1 = '', Photo2 = '', Photo3 = '';
+        //            //if (data.list1.CrimePhotoURL1 != '' && data.list1.CrimePhotoURL1 != null) {
+        //            //    Photo1 = "<tr><td>Photographs/Document 1</td><td> <a href='../" + data.list1.CrimePhotoURL1 + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a> </td></tr>";
+        //            //}
+        //            //if (data.list1.CrimePhotoURL2 != '' && data.list1.CrimePhotoURL2 != null) {
+        //            //    Photo2 = "<tr><td>Photographs/Document 2 </td><td> <a href='../ " + data.list1.CrimePhotoURL2 + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a> </td></tr>";
+        //            //}
+        //            //if (data.list1.CrimePhotoURL3 != '' && data.list1.CrimePhotoURL3 != null) {
+        //            //    Photo3 = "<tr><td>Photographs/Document 3</td><td> <a href='../" + data.list1.CrimePhotoURL3 + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a> </td></tr>";
+        //            //}
+        //            $("#tbdyScart0").append(bardata);
+
+
+        //            if (data.list4.length > 0) {
+        //                for (var i = 0; i < data.list4.length; i++) {
+        //                    var bardata = "<tr class='rowid'><td>" + data.list4[i].IsCompoundable + "</td><td>" + data.list4[i].SettlementAmount + "</td><td>" + data.list4[i].AmountPaid + "</td> <td>" + data.list4[i].CaseStatus + "</td><td>" + data.list4[i].FineAmount + "</td><td>" + data.list4[i].DfoDecision + "</td><td>" + data.list4[i].StatusDesc + "</td></tr>";
+        //                    $("#tbdyScart3").append(bardata);
+        //                }
+        //                $("#temp3").show();
+        //                $("#lbl3").show();
+        //            }
+        //            else {
+        //                $("#temp3").hide();
+        //                $("#lbl3").hide();
+        //            }
+
+
+        //            if (data.list3.length > 0) {
+        //                for (var i = 0; i < data.list3.length; i++) {
+        //                    var bardata = "<tr class='rowid'><td>" + data.list3[i].WitnessName + "</td><td>" + data.list3[i].FatherName + "</td><td>" + data.list3[i].Caste + "</td> <td>" + data.list3[i].Address1 + "</td><td>" + data.list3[i].PhoneNo + "</td><td>" + data.list3[i].EmailID + "</td><td>" + data.list3[i].IDType + "</td><td><a href='../" + data.list3[i].IDProofURL + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a> </td><td>" + data.list3[i].StatementDate + "</td><td><a href='../ " + data.list3[i].SignedStatementURL + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a>  </td><td>" + data.list3[i].WitnessStatement + "</td></tr>";
+        //                    $("#tbdyScart2").append(bardata);
+        //                }
+        //                $("#temp2").show();
+        //                $("#lbl2").show();
+        //            }
+        //            else {
+        //                $("#temp2").hide();
+        //                $("#lbl2").hide();
+        //            }
+
+        //            if (data.list2.length > 0) {
+        //                for (var i = 0; i < data.list2.length; i++) {
+        //                    var bardata = '';
+        //                    if (data.list2[i].EvidenceDocURL != '' && data.list2[i].UEvidenceDocURL != '') {
+        //                        bardata = "<tr class='rowid'><td>" + data.list2[i].OffenderType + "</td><td>" + data.list2[i].OffenderName + "</td><td>" + data.list2[i].FatherName + "</td> <td>" + data.list2[i].Address1 + "</td><td><a href='../" + data.list2[i].EvidenceDocURL + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td><td><a href='../" + data.list2[i].UEvidenceDocURL + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a> </td><td>" + data.list2[i].OffenderDescription + "</td><td>" + data.list2[i].PoliceStation + "</td><td>" + data.list2[i].WarrentIssued + "</td><td>" + data.list2[i].AppreanceDate + "</td></tr>";
+        //                    }
+        //                    if (data.list2[i].EvidenceDocURL == '' && data.list2[i].UEvidenceDocURL != '') {
+        //                        bardata = "<tr class='rowid'><td>" + data.list2[i].OffenderType + "</td><td>" + data.list2[i].OffenderName + "</td><td>" + data.list2[i].FatherName + "</td> <td>" + data.list2[i].Address1 + "</td><td> </td><td><a href='../" + data.list2[i].UEvidenceDocURL + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a> </td><td>" + data.list2[i].OffenderDescription + "</td><td>" + data.list2[i].PoliceStation + "</td><td>" + data.list2[i].WarrentIssued + "</td><td>" + data.list2[i].AppreanceDate + "</td></tr>";
+        //                    }
+        //                    if (data.list2[i].EvidenceDocURL == '' && data.list2[i].UEvidenceDocURL == '') {
+        //                        bardata = "<tr class='rowid'><td>" + data.list2[i].OffenderType + "</td><td>" + data.list2[i].OffenderName + "</td><td>" + data.list2[i].FatherName + "</td> <td>" + data.list2[i].Address1 + "</td><td> </td><td>  </td><td>" + data.list2[i].OffenderDescription + "</td><td>" + data.list2[i].PoliceStation + "</td><td>" + data.list2[i].WarrentIssued + "</td><td>" + data.list2[i].AppreanceDate + "</td></tr>";
+        //                    }
+        //                    if (data.list2[i].EvidenceDocURL != '' && data.list2[i].UEvidenceDocURL == '') {
+        //                        bardata = "<tr class='rowid'><td>" + data.list2[i].OffenderType + "</td><td>" + data.list2[i].OffenderName + "</td><td>" + data.list2[i].FatherName + "</td> <td>" + data.list2[i].Address1 + "</td><td><a href='../" + data.list2[i].EvidenceDocURL + "'  target='_blank'><img src='../images/jpeg.png' Width='30' /></a></td><td>  </td><td>" + data.list2[i].OffenderDescription + "</td><td>" + data.list2[i].PoliceStation + "</td><td>" + data.list2[i].WarrentIssued + "</td><td>" + data.list2[i].AppreanceDate + "</td></tr>";
+        //                    }
+        //                    $("#tbdyScart1").append(bardata);
+        //                }
+        //                $("#temp1").show();
+        //            }
+        //            else {
+        //                $("#temp1").hide();
+        //            }
+
+        //            /////////////////////////////////////////////////////////
+
+
+        //            if (data.list6.length > 0) {
+        //                for (var i = 0; i < data.list6.length; i++) {
+        //                    var bardata = "<tr class='rowid'><td>" + data.list6[i].EquipmentName + "</td><td>" + data.list6[i].Make + "</td><td>" + data.list6[i].Model + "</td><td>" + data.list6[i].Caliber + "</td><td>" + data.list6[i].IdentificationNo + "</td><td>" + data.list6[i].size + "</td> </tr>";
+        //                    $("#tbdyScart6").append(bardata);
+        //                }
+        //                $("#temp6").show();
+        //                $("#lbl6").show();
+        //            }
+        //            else {
+        //                $("#temp6").hide();
+        //                $("#lbl6").hide();
+        //            }
+
+        //            if (data.list7.length > 0) {
+        //                for (var i = 0; i < data.list7.length; i++) {
+        //                    var bardata = "<tr class='rowid'><td>" + data.list7[i].SpeciesName + "</td><td>" + data.list7[i].ProduceType + "</td><td>" + data.list7[i].Quantity + "</td> </tr>";
+        //                    $("#tbdyScart7").append(bardata);
+        //                }
+        //                $("#temp7").show();
+        //                $("#lbl7").show();
+        //            }
+        //            else {
+        //                $("#temp7").hide();
+        //                $("#lbl7").hide();
+
+        //            }
+
+
+        //            if (data.list8.length > 0) {
+        //                for (var i = 0; i < data.list8.length; i++) {
+        //                    var bardata = "<tr class='rowid'> <td>" + data.list8[i].CategoryName + "</td><td>" + data.list8[i].VehicleRegistrationNo + "</td><td>" + data.list8[i].OwnerName + "</td><td>" + data.list8[i].VehicleMake + "</td><td>" + data.list8[i].VehicleModel + "</td><td>" + data.list8[i].ChassisNo + "</td> <td>" + data.list8[i].EngineNo + "</td><td>" + data.list8[i].PastOffenses + "</td>   </tr>";
+        //                    $("#tbdyScart8").append(bardata);
+        //                }
+        //                $("#temp8").show();
+        //                $("#lbl8").show();
+        //            }
+        //            else {
+        //                $("#temp8").hide();
+        //                $("#lbl8").hide();
+        //            }
+
+
+
+        //            if (data.list9.length > 0) {
+
+        //                for (var i = 0; i < data.list9.length; i++) {
+        //                    var bardata = "<tr class='rowid'><td>" + data.list9[i].Name + "</td><td>" + data.list9[i].AnimalScientificName + "</td><td>" + data.list9[i].AnimalDescription + "</td><td>" + data.list9[i].AnimalWeight + "</td>   </tr>";
+        //                    $("#tbdyScart9").append(bardata);
+        //                }
+        //                $("#temp9").show();
+        //                $("#lbl9").show();
+        //            }
+        //            else {
+        //                $("#temp9").hide();
+        //                $("#lbl9").hide();
+        //            }
+
+        //            if (data.list10.length > 0) {
+
+        //                for (var i = 0; i < data.list10.length; i++) {
+        //                    var bardata = "<tr class='rowid'><td>" + data.list10[i].OffenseCode + "</td><td>" + data.list10[i].sDate_Of_Visit + "</td><td>" + data.list10[i].PlaceOfVisit + "</td><td>" + data.list10[i].Description_of_Crime + "</td><td>" + data.list10[i].Village_Name + "</td> <td>" + data.list10[i].Range_Name + "</td>    </tr>";
+
+
+
+        //                    $("#tbdyScart10").append(bardata);
+        //                }
+        //                $("#temp10").show();
+        //                $("#lbl10").show();
+        //            }
+        //            else {
+        //                $("#temp10").hide();
+        //                $("#lbl10").hide();
+        //            }
+
+        //            if (data.list5.length > 0) {
+
+        //                for (var i = 0; i < data.list5.length; i++) {
+        //                    var bardata = "<tr class='rowid'><td>" + data.list5[i].ScientificName + "</td><td>" + data.list5[i].CommanName + "</td><td>" + data.list5[i].AnimalArticleName + "</td> <td>" + data.list5[i].AnimalArticleDescription + "</td><td>" + data.list5[i].Quantity1 + "</td></tr>";
+        //                    $("#tbdyScart4").append(bardata);
+        //                }
+        //                $("#temp4").show();
+
+        //                $("#lbl5").show();
+
+        //            }
+        //            else {
+        //                $("#temp4").hide();
+        //                $("#lbl5").hide();
+        //            }
+
+        //        },
+        //        error: function (ex) {
+        //            alert('Failed to retrieve states.' + ex);
+        //        }
+        //    });
+        //});
+        $('#ReviewedAmount,#ApprovedAmount').keypress(function (e) {
+            var regex = new RegExp(/^[0-9]+$/);
+            var str = String.fromCharCode(!e.charCode ? e.which : e.charCode);
+            if (regex.test(str)) {
+                return true;
+            }
+            else {
+                e.preventDefault();
+                //  alert('Please Enter Alphabate');
+                return false;
+            }
+        });
+    });
+
+
+    function ViewDetails(OffenseCode) {
+        var tblinfo = {
+            OffenseCode: $.trim(OffenseCode)
+        }
+        $("#tbdyScart0").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'ForesterParivadRegistration/GetParivadeDetails',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(tblinfo),
+            success: function (data) {
+                $('#tbdyScart0').html(data.OffenderListPartialView);
+            }
+        });
+    };
+</script>
+
+
+<input type="hidden" id="hd_IsReviewer" value="@Session["IsReviewer"].ToString()" />
+<input type="hidden" id="hd_RequestId" value="@Model.RequestId.ToString()" />
+<input type="hidden" id="hd_TableName" value="@Model.TableName.ToString()" />
+@{string OffenseCode = Encryption.decrypt(Session["OffenseCode"].ToString());}
+<input type="hidden" id="hd_OffenseCode" value="@OffenseCode" />
+@*<input type="hidden" id="aucNoticeId" />*@
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header"><span>Action Request</span></h1>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!--<div class="panel-heading">Apply for auction based on the notice with encryption of field</div>-->
+                <!-- /.panel-heading -->
+                @using (Html.BeginForm("SubmitActionResult", "ForesterAction", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {
+                    <div class="panel-body">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Module Name:</label>
+                                <input type="text" class="form-control" id="txtModule" readonly="readonly" value="@Model.ModuleName" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                @if (@Model.TableName == "tbl_mst_Notice")
+                                {
+                                    <label>Request Name:</label>
+                                }
+                                else
+                                {
+                                    <label>Service Type:</label>
+                                }
+                                <input type="text" class="form-control" id="txtServiceType" readonly="readonly" value="@Model.ServiceType" />
+                            </div>
+                        </div>
+                        @if (@Model.TableName != "tbl_mst_Notice")
+                        {
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Permission Type:</label>
+                                    <input type="text" class="form-control" id="txtPermissionType" readonly="readonly" value="@Model.PermissionType" />
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Permission Name:</label>
+                                    <input type="text" class="form-control" id="txtPermissionName" readonly="readonly" value="@Model.PermissionName" />
+                                </div>
+                            </div>
+                        }
+                        @if (@Model.TableName.Trim() != "Tbl_Citizen_TransitPermit")
+                        {
+                            <div class="col-lg-6 DF">
+                                <div class="form-group">
+                                    @if (@Model.TableName == "tbl_mst_Notice")
+                                    {
+                                        <label>Duration of Notice:</label>
+                                    }
+                                    else
+                                    {
+                                        <label>Duration of Permission:</label>
+                                    }
+                                    <label>From:</label>
+                                    @if (@Model.TableName == "tbl_mst_Notice")
+                                    {
+                                        <input type="text" readonly="readonly" class="form-control datefield" id="durationfrom" name="Durationfrom" value="@Model.DurationsFrom" />
+                                    }
+                                    else
+                                    {
+                                        <input type="text" class="form-control datefield" id="durationfrom" name="Durationfrom" value="@Model.DurationsFrom" />
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-lg-6 DT">
+                                <div class="form-group">
+                                    <label>To:</label>
+                                    @if (@Model.TableName == "tbl_mst_Notice")
+                                    {
+                                        <input type="text" readonly="readonly" class="form-control datefield" id="durationto" name="Durationto" value="@Model.DurationsTo" />
+                                    }
+                                    else
+                                    {
+                                        <input type="text" class="form-control datefield" id="durationto" name="Durationto" value="@Model.DurationsTo" />
+                                    }
+                                </div>
+                            </div>
+                        }
+                        <div class="col-lg-6 APDT" style="display:none;">
+                            <div class="form-group">
+                                <label>Appearance date:</label>
+                                <input type="text" class="form-control datefield" id="AppearanceDate" name="AppearanceDate" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6 FY" style="display:none;">
+                            <div class="form-group">
+                                <label>Financial Year:</label>
+                                <input type="text" class="form-control" id="FinancialYear" name="FinancialYear" readonly="readonly" value="@Model.FinancialYear" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6 FY" style="display:none;">
+                            <div class="form-group">
+                                <label>Estimated Amount:</label>
+                                <input type="text" class="form-control" id="EstimatedAmount" name="EstimatedAmount" readonly="readonly" value="@Model.EstimatedAmount" />
+                            </div>
+                        </div>
+                        <div id="RA" class="col-lg-6 FY" style="display:none;">
+                            <div class="form-group">
+                                <label>Reviewed Amount:</label>
+                                <input type="text" class="form-control" id="ReviewedAmount" name="ReviewedAmount" maxlength="20" />
+                            </div>
+                        </div>
+                        <div id="AA" class="col-lg-6 FY" style="display:none;">
+                            <div class="form-group">
+                                <label>Approved Amount:</label>
+                                <input type="text" class="form-control" id="ApprovedAmount" name="ApprovedAmount" maxlength="20" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Requested By:</label>
+                                <input type="text" class="form-control" id="txtRequestedBy" readonly="readonly" value="@Model.RequestedBy" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6" style="display:none">
+                            <div class="form-group">
+                                <label>Amount To Be Paid:</label>
+                                <input type="text" class="form-control" id="txtAmtPaid" readonly="readonly" value="@Model.PaidAmount" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6" style="display:none">
+                            <div class="form-group">
+                                <label>Payment Done:</label>
+                                <input type="text" class="form-control" id="txtPaymentDone" readonly="readonly" value="@Model.Payment" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6" style="display:none">
+                            <div class="form-group">
+                                <label>Number Of Person:</label>
+                                <input type="text" class="form-control" id="txtNoOfperson" readonly="readonly" value="@Model.NumberOfPerson" />
+                            </div>
+                        </div>
+                        <div id="reason" style="display:none;" class="col-lg-6">
+                            <div class="form-group">
+                                <label>Rejected Reason:(You can select multiple by Ctrl+Select)</label>
+                                @Html.DropDownList("Dropreason", (IEnumerable<SelectListItem>)ViewBag.ReasonType, new { @class = "form-control", id = "Dropreason", name = "Dropreason", multiple = "multiple" })
+                            </div>
+                        </div>
+                        <div id="Reassignreason" style="display:none;" class="col-lg-6">
+                            <div class="form-group">
+                                <label>Reassign Reason:(You can select multiple by Ctrl+Select)</label>
+                                @Html.DropDownList("DropReassignreason", (IEnumerable<SelectListItem>)ViewBag.ReasonType1, new { @class = "form-control", id = "DropReassignreason", name = "DropReassignreason", multiple = "multiple" })
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Comment:<span class="mandatory">*</span></label>
+                                <textarea class="form-control" id="txtAreaComment" name="txtAreaComment"></textarea>
+                            </div>
+                        </div>
+                        <div id="divDoc" class="col-lg-6" style="display:none;">
+                            <div class="form-group">
+                                <label>Inspection/Verification Report:(pdf file 2 MB)<span class="mandatory">*</span><span id="SDoc" style="display:none;" class="mandatory">Inspection/Verification Report</span></label>
+                                <input class="form-control" id="Survey_Doc" name="Survey_Doc" type="file">
+                            </div>
+                        </div>
+                        <div class="col-lg-12"></div>
+                        <div class="col-lg-12">
+                            <div class="btn-padd">
+                                <div id="btn" class="col-lg-12">
+                                    <button type="submit" class="btn btn-success" name="Command" id="btn_submit">
+                                        <i class="fa fa-check"></i>Approve
+                                    </button>
+
+                                    <button type="button" class="btn btn-success" name="Command" id="btn_submit1" value="2">
+                                        <i class="fa fa-check"></i> Approve
+                                    </button>
+                                    <button type="submit" class="btn btn-warning" name="Command" value="4" id="btn_Reasign">
+                                        <i class="fa fa-circle-o-notch fa-fw"></i>Reasign
+                                    </button>
+                                    <button type="submit" class="btn btn-danger" name="Command" value="3" id="btn_Reject">
+                                        <i class="fa fa-circle-o-notch fa-fw"></i>Reject
+                                    </button>
+
+                                    <a href="#" id="btnViewDetail" class="btn btn-default btn-block dropdown-toggle vrd_btn" data-toggle="modal" data-target="#myModalDashboard"><i class="fa fa-check"></i> View Request Details</a>
+                                    <a href="#" id="btnViewDetailProtection" class="btn btn-default btn-block dropdown-toggle vrd_btn" data-toggle="modal" data-target="#myModalDfo1"><i class="fa fa-check"></i> View Request Details</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal fade in" id="myModalDashboard" tabindex="-1" role="dialog" aria-hidden="false">
+                            <div class="modal-dialog mdw">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h4 class="modal-title" id="myModalLabel">
+                                            View Request Details
+                                        </h4>
+                                    </div>
+
+                                    <div id="divPrint" class="modal-body tbl-scroll divPrintone">
+                                        <div class="align-center">  <img src='../images/logo.png' alt='Forest Department, Government of Rajasthan' title='Logo' class='logo'></div>
+                                        <!-- From URL Get -->
+                                        <table class="table table-striped table-bordered table-hover">
+
+                                            <tbody id="tbdyScart"></tbody>
+                                        </table>
+
+                                        <!-- /. From URL Get -->
+                                    </div>
+                                    <div id="divTbl_Citizen_TransitPermit" class="modal-body tbl-scroll" style="display:none">
+                                        <div class="align-center">
+                                            <img src='../images/logo.png' alt='Forest Department, Government of Rajasthan' title='Logo' class='logo'>
+                                        </div>
+                                        <!-- From URL Get -->
+                                        <!-- /. From URL Get -->
+
+                                    </div>
+                                    <!-- /.modal-body -->
+                                    <div class="modal-footer" id="fot-f">
+                                        <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                                            <i class="fa fa-times fa-fw"></i> Close
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- /.modal-content -->
+                            </div>
+                            <!-- /.modal-dialog -->
+                        </div>
+
+                        <div class="modal fade in" id="myModalDfo1" tabindex="-1" role="dialog" aria-hidden="false">
+                            <div class="modal-dialog mdw">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h4 class="modal-title" id="myModalLabel">
+                                            Offense Details
+                                        </h4>
+                                    </div>
+                                    <br />
+                                    <div class="modal-body tbl-scroll">
+                                        <!-- From URL Get -->
+                                        <table class="table table-striped table-bordered table-hover" id="temp0">
+                                            <tbody id="tbdyScart0"></tbody>
+                                        </table>
+                                        @*<label id="lbl1">Offender Detail :</label>
+                                            <table id="temp1" class="table table-striped table-bordered table-hover" style="display:none;">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Offender Type</th>
+                                                        <th>Name of Offender</th>
+                                                        <th>Father Name</th>
+                                                        <th>Address1</th>
+                                                        <th>Offender Statement</th>
+                                                        <th>Offender Complainant</th>
+                                                        <th>Offender Statement</th>
+                                                        <th>Police Station</th>
+                                                        <th>Warrent Issued</th>
+                                                        <th>Appreance Date</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tbdyScart1"></tbody>
+                                            </table>
+                                            <label id="lbl2">Witness Detail :</label>
+                                            <table id="temp2" class="table table-striped table-bordered table-hover" style="display:none;">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Name of Witness</th>
+                                                        <th>FatherName</th>
+                                                        <th>Caste</th>
+                                                        <th>Address1</th>
+                                                        <th>PhoneNo</th>
+                                                        <th>Email ID</th>
+                                                        <th>IDType</th>
+                                                        <th>ID Proof</th>
+                                                        <th>Statement Date</th>
+                                                        <th>Statement Document</th>
+                                                        <th>Statement</th>
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody id="tbdyScart2"></tbody>
+                                            </table>
+                                            <label id="lbl3">Compounding Detail :</label>
+                                            <table id="temp3" class="table table-striped table-bordered table-hover" style="display:none;">
+                                                <thead>
+                                                    <tr>
+
+                                                        <th>IsCompoundable</th>
+                                                        <th>Settlement Amount</th>
+                                                        <th>Amount Paid</th>
+                                                        <th>Case Status</th>
+                                                        <th>Fine Amount</th>
+                                                        <th>DFO Decision</th>
+                                                        <th>Status Desc</th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tbdyScart3"></tbody>
+                                            </table>
+                                            <label id="lbl4">Seized Item Detail :</label><br />
+                                            <label id="lbl5">Animal Article Details :</label>
+                                            <table id="temp4" class="table table-striped table-bordered table-hover" style="display:none; width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th width="15%">Scientific Name</th>
+                                                        <th width="15%">Comman Name</th>
+                                                        <th width="15%">Animal Article Name</th>
+                                                        <th width="15%">Description</th>
+                                                        <th width="15%">Quantity</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tbdyScart4"></tbody>
+                                            </table>
+
+                                            <label id="lbl6">Equipment Details :</label>
+                                            <table id="temp6" class="table table-striped table-bordered table-hover" style="display:none; width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th width="15%">Name</th>
+                                                        <th width="15%">Make</th>
+                                                        <th width="15%">Model</th>
+                                                        <th width="15%">Caliber</th>
+                                                        <th width="15%">IdentificationNo</th>
+                                                        <th width="15%">size</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tbdyScart6"></tbody>
+                                            </table>
+                                            <label id="lbl7">Product Detail :</label>
+                                            <table id="temp7" class="table table-striped table-bordered table-hover" style="display:none; width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th width="15%">Species Name</th>
+                                                        <th width="15%">Produce Type</th>
+                                                        <th width="15%">Quantity</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tbdyScart7"></tbody>
+                                            </table>
+                                            <label id="lbl8">Vechicle Details :</label>
+                                            <table id="temp8" class="table table-striped table-bordered table-hover" style="display:none; width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th width="15%">Category</th>
+                                                        <th width="15%">Registration No</th>
+                                                        <th width="15%">Owner Name</th>
+                                                        <th width="15%">Make</th>
+                                                        <th width="15%">Model</th>
+                                                        <th width="15%">Chassis No</th>
+                                                        <th width="15%">Engine No</th>
+                                                        <th width="15%">Past Offenses</th>
+
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tbdyScart8"></tbody>
+                                            </table>
+                                            <label id="lbl9">Animal Details :</label>
+                                            <table id="temp9" class="table table-striped table-bordered table-hover" style="display:none; width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th width="15%">Name</th>
+                                                        <th width="15%">Scientific Name</th>
+                                                        <th width="15%">Description</th>
+                                                        <th width="15%">Weight</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tbdyScart9"></tbody>
+                                            </table>
+                                            <label id="lbl10">survey Details :</label>
+                                            <table class="table table-striped table-bordered table-hover table-responsive" id="temp10">
+
+                                                <thead>
+                                                    <tr>
+
+                                                        <th style="width:14%;">Offense Code</th>
+                                                        <th style="width:14%;">Date of Visit</th>
+                                                        <th style="width:14%;">Place of Visit</th>
+                                                        <th style="width:20%;">Description</th>
+                                                        <th style="width:14%;">Village</th>
+                                                        <th style="width:14%;">Range</th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tbdyScart10"></tbody>
+                                            </table>*@
+                                    </div>
+                                    <div class="modal-footer" id="fot-f">
+                                        <div id="btn" class="col-lg-12">
+
+                                            <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                                                <i class="fa fa-times fa-fw"></i> Close
+                                            </button>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.modal-dialog -->
+                        </div>
+                        <div class="modal fade in" id="myViewNoticeModal2" tabindex="-1" role="dialog" aria-hidden="false">
+                            <div class="modal-dialog mdw">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                                        <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> </label></h4>
+                                    </div>
+
+                                    <div class="modal-body">
+                                        <!-- From URL Get -->
+                                        <input type="hidden" id="pHdn_No" name="PHdn_No" />
+                                        <div id="divPublish"></div>
+
+                                        <!-- /. From URL Get -->
+                                    </div>
+                                    <!-- /.modal-body -->
+                                    <div class="modal-footer" id="fot-f">
+                                        <div id="btn" class="col-lg-12">
+                                            <button onclick="PrintData('divPublish')" name="button" class="btn btn-info" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                                                <i class="fa fa-print"></i> Print
+                                            </button>
+                                            <button name="button" class="btn btn-danger" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                                                <i class="fa fa-times fa-fw"></i> Close
+                                            </button>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <!-- /.modal-content -->
+                            </div>
+                            <!-- /.modal-dialog -->
+                        </div>
+
+
+                        <div class="modal fade in" id="AadharCardModal" tabindex="-1" role="dialog" aria-hidden="false">
+                            <div class="modal-dialog mdw">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                                        <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> Please Enter Valid OTP on your Registered Mobile Number </label></h4>
+                                    </div>
+
+                                    <div class="modal-body">
+                                        <!-- From URL Get -->
+                                        @Html.TextBox("OTP", null, new { @class = "form-control" })
+                                        @Html.Hidden("TransationID", null, new { @class = "form-control", @id = "TransationID" })
+
+
+                                        <!-- /. From URL Get -->
+                                    </div>
+                                    <!-- /.modal-body -->
+                                    <div class="modal-footer" id="fot-f">
+                                        <div id="btn" class="col-lg-12">
+                                            <button name="button" id="clicks" class="btn btn-success" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                                                <i class="fa fa-times fa-fw"></i> Save
+                                            </button>
+                                            <button name="button" class="btn btn-danger" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                                                <i class="fa fa-times fa-fw"></i> Close
+                                            </button>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <!-- /.modal-content -->
+                            </div>
+                            <!-- /.modal-dialog -->
+                        </div>
+
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <form id="postData" name="postData" method="post" target="_blank">
+        <input type="hidden" id="portalid" name="portalid" value="rajcomp123" />
+        <input type="hidden" id="ssoid" name="ssoid" value="" />
+        <input type="hidden" id="requestFor" name="requestFor" value="" />
+        <input type="hidden" id="fileName" name="fileName" value="" />
+    </form>
+
+</div>

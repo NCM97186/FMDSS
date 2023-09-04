@@ -1,0 +1,463 @@
+﻿@model FMDSS.Models.MIS.MISCommonModel
+@{
+    ViewBag.Title = "OnlineVehicleWiseReport";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //
+}
+<script>
+    var RootURl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        // date validation ========================================================================
+        var currentYear = (new Date).getFullYear();
+
+        var Range = '2008:' + (currentYear + 1)
+
+        $("#FromDate,#ToDate").datepicker({ maxDate: new Date(), yearRange: Range, dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        var currentDate = new Date();
+        //$("#txt_fromdate").datepicker("setDate", currentDate);
+        //$("#txt_todate").datepicker("setDate", currentDate);
+
+        $("#FromDate").change(function () {
+            $("#ToDate").val('');
+        });
+
+        $(document).on('keypress', '#FromDate,#ToDate', function (event) {
+
+            event.preventDefault();
+            return false;
+
+        });
+
+        $('#FromDate,#ToDate').keydown(function (event)
+        { return cancelBackspace(event) });
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+        $("#ToDate").change(function () {
+            var str1 = $("#FromDate").val();
+            var str2 = $("#ToDate").val();
+
+            var L = 3, d1 = $("#FromDate").val().split('/'), d2 = $("#ToDate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#ToDate").val('');
+                alert('Date Must be GreaterThen From Date');
+            }
+        });
+
+        // date validation ========================================================================
+
+        $('#Place').change(function (e) {
+            var placeID = $("#Place").val();
+            //alert(placeID);
+            var values = {
+                PlaceId: placeID
+            };
+            $('#Zone').empty();
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootURl + 'MIS/getZone',
+                success: function (data) {
+
+                    if (data.length > 0) {
+                        $(".zone").show();
+                        $('#hdZone').val('F');
+                        $("#Zone").append('<option value="' + -1 + '">' + "--Select--" + '</option>');
+                        $("#Zone").append('<option value="' + 0 + '">' + "ALL" + '</option>');
+                        for (var i = 0; i < data.length; i++) {
+                            $("#Zone").append('<option value="' + data[i].Value + '">' + data[i].Text + '</option>');
+                        }
+                    }
+                    else {
+                        $(".zone").hide();
+                        $('#hdZone').val('NF');
+                        $("#Zone").append('<option value="' + -1 + '">' + "--Select--" + '</option>');
+
+
+                    }
+                }
+            });
+        });
+
+        $('#SHIFT_TYPE').change(function (e) {
+
+            $('#SHIFTName').val($("#SHIFT_TYPE option:selected").text());
+
+        });
+
+        $('#Zone').change(function (e) {
+            Vichelcategory();
+        });
+
+        $('#btn_submit1').click(function (e) {
+
+            if ($('#FromDate').val() == '') {
+                $("#errFromDate").css("display", "block");
+                $('#errFromDate').focus();
+                return false;
+            }
+            else {
+                $("#errFromDate").css("display", "none");
+            }
+
+            if ($('#ToDate').val() == '') {
+                $("#errToDate").css("display", "block");
+                $('#errToDate').focus();
+                return false;
+            }
+            else {
+                $("#errToDate").css("display", "none");
+            }
+
+
+
+            if ($('option:selected', $('#Place')).index() == 0) {
+                $("#errPlace").css("display", "block");
+                $('#errPlace').focus();
+                return false;
+            }
+            else {
+                $("#errPlace").css("display", "none");
+            }
+
+            if ($('option:selected', $('#Zone')).val() == "-1") {
+                $("#errZone").css("display", "block");
+                $('#errZone').focus();
+                return false;
+            }
+            else {
+                $("#errZone").css("display", "none");
+            }
+
+            if ($('option:selected', $('#SHIFT_TYPE')).val() == "") {
+                $("#errSHIFT_TYPE").css("display", "block");
+                $('#errSHIFT_TYPE').focus();
+                return false;
+            }
+            else {
+                $("#errSHIFT_TYPE").css("display", "none");
+            }
+
+
+            if ($('option:selected', $('#VehicleType')).val() == "-1") {
+                $("#errVehicleName").css("display", "block");
+                $('#errVehicleName').focus();
+                return false;
+            }
+            else {
+                $("#errVehicleName").css("display", "none");
+
+            }
+           
+
+            if ($('option:selected', $('#IndianForeigner')).val() == "-1") {
+                $("#errIndianForeigner").css("display", "block");
+                $('#errIndianForeigner').focus();
+                return false;
+            }
+            else {
+                $("#errIndianForeigner").css("display", "none");
+
+            }
+        });
+
+    });
+    function Vichelcategory() {
+
+        var placeID = $("#Place").val();
+        var Zone = $('#Zone').val();
+        if (!Zone) { Zone = 0; }
+        $('#VehicleType').empty();
+        var values = {
+            vehicleCatID: 1,
+            placeID: placeID,
+            Zone: Zone
+        };
+        $.ajax({
+            type: 'POST',
+            headers: {
+                __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+            },
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(values),
+            url: RootURl + 'BookOnlineTicket/vehicleByCategory',
+            success: function (data) {
+                $("#VehicleType").append('<option value="' + -1 + '">' + "--Select--" + '</option>');
+                $("#VehicleType").append('<option value="' + 0 + '">' + "ALL" + '</option>');
+                if (data.length > 0) {
+                    debugger;
+                    for (var i = 1; i < data.length; i++) {
+                        $("#VehicleType").append('<option value="' + data[i].Value + '">' + data[i].Text + '</option>');
+                    }
+                }
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+    }
+
+    function searchs() {
+        var val = $("#searchval").val();
+        $('#tbl_OnlineVechileReport tbody tr').each(function (i) {
+            if ($(this).find('td').text().toLowerCase().trim().indexOf(val) > -1) {
+                $(this).show();
+            }
+            else {
+                $(this).hide();
+            }
+            if (val == '') {
+                $(this).show();
+            }
+        });
+    }
+
+</script>
+<div class="row">
+    <div class="col-lg-9 pad">
+        <h1 class="page-header"><span>Report : Online Vehicle Wise Report</span></h1>
+    </div>
+
+
+    @using (Html.BeginForm("OnlineVechileWiseReport", "MIS", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    @Html.AntiForgeryToken()
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>From Date:<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.FromDate, new { @class = "form-control common", id = "FromDate" })
+                            <span id="errFromDate" style="display: none" class="alert-danger1">From Date is Required.</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>To Date:<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.ToDate, new { @class = "form-control common ", id = "ToDate" })
+                            <span id="errToDate" style="display: none" class="alert-danger1">To Date is Required.</span>
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Place:<span class="mandatory">*</span></label>
+
+                            @Html.DropDownListFor(model => model.PlaceID, (IEnumerable<SelectListItem>)ViewBag.ddlPlace1, "--Select--", new { @class = "form-control common", id = "Place" })
+                            <div id="errPlace" style="display:none" class="alert-danger1">Place is Required.</div>
+
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Zone:<span class="mandatory">*</span></label>
+
+                            @Html.DropDownListFor(model => model.Zone, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control common", id = "Zone" })
+                            <div id="errZone" style="display:none" class="alert-danger1">Zone is Required.</div>
+
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Shift Type:<span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(model => model.SHIFT_TYPE, (IEnumerable<SelectListItem>)ViewBag.ddlShiftType1, "--Select--", new { @class = "form-control common", id = "SHIFT_TYPE" })
+                            <div id="errSHIFT_TYPE" style="display:none" class="alert-danger1">Shift Type is Required.</div>
+
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Vehicle Type:<span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(model => model.VehicleName, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control common", id = "VehicleType" })
+                            <div id="errVehicleName" style="display:none" class="alert-danger1">Vehicle Type is Required.</div>
+
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Indian:<span class="mandatory">*</span></label>
+                            @Html.DropDownListFor(model => model.IndianForeigner,  new SelectList(
+                  new List<Object>{
+                       new { value = -1 , text = "--Select--"  },
+                       new { value = 0 , text = "ALL"  },
+                       new { value = 1 , text = "Indian" },
+                       new { value = 2 , text = "Foreigner"}
+                    }, "value", "text", -1), new { @class = "form-control common", id= "IndianForeigner" })
+
+                            <span id="errIndianForeigner" style="display: none" class="alert-danger1">Indian or Foreinger is Required.</span>
+                        </div>
+                    </div>
+
+                    <div id="btn" class="col-lg-12">
+
+                        <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit1">
+                            <i class="fa fa-check"></i> Submit
+                        </button>
+                        <button type="button" class="btn btn-warning" id="btn_reset">
+                            <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                        </button>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-4 pull-right" id="place">
+                <button class="btn btn-info pull-right" onclick="tablesToExcel(['tbl_OnlineVechileReport'], 'OnlineVechileReport', 'Excel')">Export to Excel</button>
+            </div>
+            <br /><br /><br />
+
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="dataTable_wrapper">
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Search" id="searchval" onblur="searchs();">
+                            </div>
+                        </div>
+                        <div id="tbl" class="table table-striped table-bordered table-hover table-responsive gridtable" style="height:500px!important;overflow:scroll!important;">
+                            <table class="table table-striped table-bordered table-hover table-responsive gridtable" id="tbl_OnlineVechileReport" >
+
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Date Of Arrival</th>
+                                        <th>Place Name</th>
+                                        <th>Zone Name</th>
+
+                                        <th>Shift Name</th>
+                                        <th>Vehicle Type</th>
+
+                                        <th>Vehicle Number </th>
+                                        <th>Indian Count </th>
+                                        <th>Non Indian Count </th>
+                                        <th>Indian Camera Count </th>
+                                        <th>NonIndian Camera Count </th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (ViewData["ListBoarding"] != null)
+                                    {
+                                        foreach (var item in ViewData["ListBoarding"] as IEnumerable<FMDSS.Models.MIS.MISCommonModel>)
+                                        {
+                                            <tr>
+                                                <td>@Html.DisplayFor(model => item.Index)</td>
+                                                <td>@Html.DisplayFor(model => item.DateOfArrival)</td>
+                                                <td>@Html.DisplayFor(model => item.PLACE_NAME)</td>
+                                                <td>@Html.DisplayFor(model => item.ZoneName)</td>
+                                                <td>@Html.DisplayFor(model => item.SHIFTName)</td>
+                                                <td>@Html.DisplayFor(model => item.VehicleName)</td>
+                                                <td>@Html.DisplayFor(model => item.VehicleNumber)</td>
+                                                <td>@Html.DisplayFor(model => item.IndianCount)</td>
+                                                <td>@Html.DisplayFor(model => item.NonIndianCount)</td>
+                                                <td>@Html.DisplayFor(model => item.IndianCameraCount)</td>
+                                                <td>@Html.DisplayFor(model => item.NonIndianCameraCount)</td>
+
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    }
+</div>
+<script src="~/Scripts/jquery.blockUI.js"></script>
+<script>
+
+    $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
+</script>
+
+<script type="text/javascript">
+    $.noConflict(true);
+    var tablesToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+        , tmplWorkbookXML = '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'
+          + '<DocumentProperties xmlns="urn:schemas-microsoft-com:office:office"><Author>Axel Richter</Author><Created>{created}</Created></DocumentProperties>'
+          + '<Styles>'
+          + '<Style ss:ID="Currency"><NumberFormat ss:Format="Currency"></NumberFormat></Style>'
+          + '<Style ss:ID="Date"><NumberFormat ss:Format="Medium Date"></NumberFormat></Style>'
+          + '</Styles>'
+          + '{worksheets}</Workbook>'
+        , tmplWorksheetXML = '<Worksheet ss:Name="{nameWS}"><Table>{rows}</Table></Worksheet>'
+        , tmplCellXML = '<Cell{attributeStyleID}{attributeFormula}><Data ss:Type="{nameType}">{data}</Data></Cell>'
+        , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+        , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (tables, wsnames, wbname, appname) {
+            var ctx = "";
+            var workbookXML = "";
+            var worksheetsXML = "";
+            var rowsXML = "";
+            var getFilterFromDate = document.getElementById('FromDate').value;
+            var getFilterToDate = document.getElementById('ToDate').value;
+            wbname = wbname + "FromDate:-" + getFilterFromDate + "- ToDate:-" + getFilterToDate + '.xls';
+            for (var i = 0; i < tables.length; i++) {
+                if (!tables[i].nodeType) tables[i] = document.getElementById(tables[i]);
+                for (var j = 0; j < tables[i].rows.length; j++) {
+                    rowsXML += '<Row>'
+                    for (var k = 0; k < tables[i].rows[j].cells.length; k++) {
+                        var dataType = tables[i].rows[j].cells[k].getAttribute("data-type");
+                        var dataStyle = tables[i].rows[j].cells[k].getAttribute("data-style");
+                        var dataValue = tables[i].rows[j].cells[k].getAttribute("data-value");
+                        dataValue = (dataValue) ? dataValue : tables[i].rows[j].cells[k].innerHTML.trim();
+                        if (dataValue.indexOf('button') == -1) {
+                            var dataFormula = tables[i].rows[j].cells[k].getAttribute("data-formula");
+                            dataFormula = (dataFormula) ? dataFormula : (appname == 'Calc' && dataType == 'DateTime') ? dataValue : null;
+                            ctx = {
+                                attributeStyleID: (dataStyle == 'Currency' || dataStyle == 'Date') ? ' ss:StyleID="' + dataStyle + '"' : ''
+                                   , nameType: (dataType == 'Number' || dataType == 'DateTime' || dataType == 'Boolean' || dataType == 'Error') ? dataType : 'String'
+                                   , data: (dataFormula) ? '' : dataValue
+                                   , attributeFormula: (dataFormula) ? ' ss:Formula="' + dataFormula + '"' : ''
+                            };
+                            rowsXML += format(tmplCellXML.trim(), ctx);
+                        }
+                    }
+                    rowsXML += '</Row>'
+
+                }
+                ctx = { rows: rowsXML, nameWS: wsnames[i] || 'Sheet' + i };
+                worksheetsXML += format(tmplWorksheetXML, ctx);
+                rowsXML = "";
+            }
+
+            ctx = { created: (new Date()).getTime(), worksheets: worksheetsXML };
+            workbookXML = format(tmplWorkbookXML, ctx);
+
+            console.log(workbookXML);
+
+            var link = document.createElement("A");
+            link.href = uri + base64(workbookXML);
+            link.download = wbname || 'Reconciliation.xls';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    })();
+</script>
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>

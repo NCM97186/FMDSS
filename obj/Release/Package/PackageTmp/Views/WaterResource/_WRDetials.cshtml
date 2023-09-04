@@ -1,0 +1,267 @@
+﻿@model FMDSS.Models.WaterFireModel
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/js/bootstrap.min.js"></script>
+<script src="~/js/Common.js"></script>
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        // date validation ========================================================================
+        var currentYear = (new Date).getFullYear();
+
+        var Range = '2008:' + (currentYear + 1)
+
+        $("#FromDate,#ToDate").datepicker({maxDate: new Date() , yearRange: Range, dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        var currentDate = new Date();
+        $("#FromDate").change(function () {
+            $("#ToDate").val('');
+        });
+
+        $(document).on('keypress', '#FromDate,#ToDate', function (event) {
+
+            event.preventDefault();
+            return false;
+
+        });
+
+        $('#FromDate,#ToDate').keydown(function (event)
+        { return cancelBackspace(event) });
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+        $("#ToDate").change(function () {
+            var str1 = $("#FromDate").val();
+            var str2 = $("#ToDate").val();
+
+            var L = 3, d1 = $("#FromDate").val().split('/'), d2 = $("#ToDate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#ToDate").val('');
+                alert('Date Must be GreaterThen From Date');
+            }
+        });
+
+        // date validation ========================================================================
+
+
+        $('#btn_submit1').click(function (e) {
+
+
+
+
+            if ($('#FromDate').val() == '') {
+                $("#errFromDate").css("display", "block");
+                $('#errFromDate').focus();
+                return false;
+            }
+            else {
+                $("#errFromDate").css("display", "none");
+            }
+
+            if ($('#ToDate').val() == '') {
+                $("#errToDate").css("display", "block");
+                $('#errToDate').focus();
+                return false;
+            }
+            else {
+                $("#errToDate").css("display", "none");
+            }
+
+
+
+            if ($('option:selected', $('#Place')).index() == 0) {
+                $("#errPlace").css("display", "block");
+                $('#errPlace').focus();
+                return false;
+            }
+            else {
+                $("#errPlace").css("display", "none");
+            }
+
+
+            if ($('option:selected', $('#SHIFT_TYPE')).index() == 0) {
+                $("#errSHIFT_TYPE").css("display", "block");
+                $('#errSHIFT_TYPE').focus();
+                return false;
+            }
+            else {
+                $("#errDuration").css("display", "none");
+            }
+
+        });
+
+    });
+
+</script>
+<div class="modal-dialog">
+
+
+    <div class="modal-content" style="overflow-y: scroll; height:550px; ">
+        <div class="modal-header">
+            <button id="btnClose" type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h4 class="modal-title" id="myModalLabel" style="text-align:center">
+                Water Resource Manager Line Details
+            </h4>
+        </div>
+        <div class="panel-body">
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>From Date:<span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.FromDate, new { @class = "form-control common", id = "FromDate", autocomplete = "off" })
+                    <span id="errFromDate" style="display: none" class="alert-danger1">From Date is Required.</span>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>To Date:<span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.ToDate, new { @class = "form-control common ", id = "ToDate", autocomplete = "off" })
+                    <span id="errToDate" style="display: none" class="alert-danger1">To Date is Required.</span>
+                </div>
+            </div>
+            <div id="btn" class="col-lg-12 right">
+
+                <button type="button" class="btn btn-success" name="Command" value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Submit
+                </button>
+                <button type="button" class="btn btn-warning" id="btn_reset">
+                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                </button>
+
+            </div>
+            <div class="clear"></div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                        <thead>
+                            <tr>
+                                <th>Sr. No.</th>
+                                <th>Division</th>
+                                <th>Range</th>
+                                <th>Naka</th>
+                                <th>Block</th>
+                                <th>Water Point Lat Long</th>
+                                <th>Water Source Lat Long</th>
+                                <th>Distance (km)</th>
+                                <th>Entered On</th>
+                                <th>Entered By</th>
+                                <th>View Images</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var WRList = ViewBag.WRList as IEnumerable<FMDSS.Models.WaterFireModel>;
+                                foreach (var item in WRList)
+                                {
+                                    <tr>
+                                        <td>
+                                            @item.SNO
+                                        </td>
+                                        <td>
+                                            @item.DivisionName
+                                        </td>
+                                        <td>
+                                            @item.RangeName
+                                        </td>
+                                        <td>
+                                            @item.NakaName
+                                        </td>
+                                        <td>
+                                            @item.BlockName
+                                        </td>
+                                        <td>
+                                            @item.WaterPoint_LatLong
+                                            <input type="hidden" id="latlong" value="@item.WaterPoint_LatLong" />
+                                        </td>
+                                        <td>
+                                            @item.WaterSource_LatLong
+                                        </td>
+                                        <td>
+                                            @item.Distance
+                                        </td>
+                                        <td>
+                                            @item.EnteredOn
+                                        </td>
+                                        <td>
+                                            @item.Enteredby
+                                        </td>
+                                        <td>
+                                            @{ var FirstImage = "";
+                                             if (item.WaterPointImagePath != null && string.IsNullOrEmpty(item.WaterPointImagePath) == false)
+                                             {
+                                                 FirstImage = UrlHelper.GenerateContentUrl(item.WaterPointImagePath, this.ViewContext.HttpContext);
+                                                <button type="button" class="btn btn-warning btn-circle EditDepot" title="Water Point Image">
+                                                    <a href="@Url.Content("/" + item.WaterPointImagePath)" title="Water Point Image" target="_blank">
+                                                        <i class="fa fa-eye"></i>
+                                                    </a>
+                                                </button> }
+                                            }
+                                            @{ var SecondImage = "";
+                                             if (item.WaterSourceImagePath != null && string.IsNullOrEmpty(item.WaterSourceImagePath) == false)
+                                             {
+                                                 SecondImage = UrlHelper.GenerateContentUrl(item.WaterSourceImagePath, this.ViewContext.HttpContext);
+                                                <button type="button" class="btn btn-warning btn-circle EditDepot" title="Water Source Image">
+                                                    <a href="@Url.Content("/"+item.WaterSourceImagePath)" title="Water Source Image" target="_blank">
+                                                        <i class="fa fa-eye"></i>
+                                                    </a>
+                                                </button>
+                                             }
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+    $("#btn_submit1").click(function () {
+        var WaterPoint_LatLong = $('#latlong').val();
+        var FromDate = $('#FromDate').val();
+        var ToDate = $('#ToDate').val();
+       // alert(WaterPoint_LatLong, FromDate, ToDate);
+        $.ajax({
+            type: 'GET',
+            url: RootUrl + 'WaterResource/WRDetials',
+            dataType: 'html',
+            data: { WaterPoint_LatLong, FromDate, ToDate },
+            success: function (data) {
+                $('#modalTPDetails').html(data);
+                $('#modalTPDetails').show();
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+    });
+
+</script>
+<script>
+
+    $("#btnClose").click(function () {
+        $('#modalTPDetails').hide();
+    });
+
+    $("#btnCancel").click(function () {
+        $('#modalTPDetails').hide();
+    });
+
+</script>

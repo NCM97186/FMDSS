@@ -1,0 +1,669 @@
+﻿@model FMDSS.Models.Rescue.RescueModel
+
+@{
+    ViewBag.Title = "Release";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-lg-9 pad">
+        <h2>Release Updation</h2>
+    </div>
+    @using (Html.BeginForm("Release", "Rescue", FormMethod.Post, new { enctype = "multipart/form-data", id = "main" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true)
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel-heading" style="font-size:14px;font-weight:700;">
+                    Applicant Details
+                </div>
+                <div class="panel-body">
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Citizen Name</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                @Html.HiddenFor(model => model.RegistrationID)
+                                @Html.TextBoxFor(model => model.CitizenName, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                            <div id="errCitizenName" style="display:none" class="alert-danger1">Citizen Name is Required.</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Citizen EmailID</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                @Html.TextBoxFor(model => model.CitizenEmailID, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                            <div id="errCitizenEmailID" style="display:none" class="alert-danger1">Citizen EmailID is Required.</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Citizen Mobile</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                @Html.TextBoxFor(model => model.CitizenMobileNo, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                            <div id="errCitizenMobileNo" style="display:none" class="alert-danger1">Citizen Mobile is Required.</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 Institutional">
+                        <label>Animal Details:</label>
+                        <div class="divider"></div>
+                    </div>
+                    @*<div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Address Type</label>
+                            <div class="radio">
+                                <span class=""></span>
+                                <label>
+                                    @Html.RadioButtonFor(model => model.Rural, true, new { id = "rbRural", @disabled = "disabled", @readonly = "readonly" })  Rural
+                                </label>
+                                <label>
+                                    @Html.RadioButtonFor(model => model.Rural, false, new { id = "rbUrban", @disabled = "disabled", @readonly = "readonly" }) Urban
+                                </label>
+                            </div>
+                        </div>
+                    </div>*@
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>District</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                @Html.DropDownListFor(model => model.DistrictID, (IEnumerable<SelectListItem>)ViewBag.Districts, "--Select--", new { @class = "form-control common", @disabled = "disabled", @readonly = "readonly" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 Institutional">
+                        <div class="divider"></div>
+                    </div>
+                    <div id="divUrban">
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>City</label>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                    @Html.DropDownListFor(model => model.CityID, (IEnumerable<SelectListItem>)ViewBag.City, new { @class = "form-control common", @disabled = "disabled", @readonly = "readonly" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Ward</label>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                    @Html.DropDownListFor(model => model.WardID, (IEnumerable<SelectListItem>)ViewBag.Ward, new { @class = "form-control common", @disabled = "disabled", @readonly = "readonly" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divRural">
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Block</label>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                    @Html.DropDownListFor(model => model.BlockID, (IEnumerable<SelectListItem>)ViewBag.Blocks, new { @class = "form-control common", @disabled = "disabled", @readonly = "readonly" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Gram Panchayat</label>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                    @Html.DropDownListFor(model => model.GPID, (IEnumerable<SelectListItem>)ViewBag.GPs, new { @class = "form-control common", @disabled = "disabled", @readonly = "readonly" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Village</label>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                    @Html.DropDownListFor(model => model.VillageID, (IEnumerable<SelectListItem>)ViewBag.Villages, new { @class = "form-control common", @disabled = "disabled", @readonly = "readonly" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Location</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                @Html.TextBoxFor(model => model.Location, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Animal Name</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                @Html.DropDownListFor(model => model.AnimalID, (IEnumerable<SelectListItem>)ViewBag.Animals, new { @class = "form-control common", @disabled = "disabled", @readonly = "readonly" })
+                            </div>
+                            <div id="errVillageID" style="display:none" class="alert-danger1">Animal Name is Required.</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Description</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                @Html.TextAreaFor(model => model.RegistrationDescription, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                    </div>
+                    @if (Model.RegistrationPhotoPath != null && Model.RegistrationPhotoPath != "")
+                    {
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Uploaded Picture</label>
+                                <div class="input-group">
+                                    @{ var imgPathRegistration = "";
+                                        string[] imgs = null;
+                                        imgs = Model.RegistrationPhotoPath.Split(',');
+                                        for (int i = 0; i < imgs.Length; i++)
+                                        {
+                                            imgPathRegistration = UrlHelper.GenerateContentUrl(imgs[i], this.ViewContext.HttpContext);
+                                            <text>
+                                                <a href="@Url.Content(imgs[i])" title="Click to view full Image" target="_blank"><img src="@Url.Content(imgs[i])" width="50" height="50" alt="" /></a>&nbsp;&nbsp;</text>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                                        }
+                    <div class="clearfix"></div>
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Capture Remarks</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                @Html.TextAreaFor(model => model.RescueRemarks, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                    </div>
+                    <!--Needs work Dipak-->
+                    <div class="col-lg-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading" style="font-size:14px;font-weight:700;">
+                                Animal Details[Identity Specifications]
+                            </div>
+                            <div class="panel-body">
+                                <div class="col-lg-6 un-bold">
+                                    <div class="form-group">
+                                        <label> Select Schedule As per wildlife act : </label>
+                                        <div class="input-group">
+                                            @Html.DropDownListFor(model => model.ScheduleWildlifeAct, (IEnumerable<SelectListItem>)ViewBag.WLSchedule_List, new { @class = "form-control common", id = "ddlWLSchedule", multiple = "multiple" })
+                                            @Html.HiddenFor(d => d.WLScheduleListCWLWApproval)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-2 un-bold">
+                                    <div class="form-group">
+                                        <label>Gender:</label>
+                                        @Html.DropDownListFor(model => model.Gender, FMDSS.Entity.FRAViewModel.FRACommonList.Gender, new { id = "ddlMGender", @class = "form-control" })
+                                    </div>
+                                </div>
+                                <div class="col-lg-2 un-bold">
+                                    <div class="form-group">
+                                        <label>Approax. Weight</label>
+                                        <div class="input-group">
+                                            <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                            @Html.TextBoxFor(model => model.Weight, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-2 un-bold">
+                                    <div class="form-group">
+
+                                        <label>Age:</label>
+                                        <div class="input-group">
+                                            <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                            @Html.TextBoxFor(model => model.Age, new { @class = "form-control", maxlength = 2, onkeypress = "AllowNumericOnly(event)" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 un-bold">
+                                    <div class="form-group">
+                                        <label>Health Status</label>
+                                        <div class="input-group">
+                                            <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                            @Html.TextBoxFor(model => model.HealthStatus, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading" style="font-size:14px;font-weight:700;">
+                                Animal Rescue Details
+                            </div>
+
+                            <div class="panel-body">
+                            <div class="row"></div>
+                                <div class="col-lg-12 Institutional">
+
+                                    <label>Animal Successfully Rescued ?:</label>
+                                    <div class="divider"></div>
+                                </div>
+                                <div class="col-lg-4 un-bold">
+                                    <div class="form-group">
+                                        <div class="radio">
+                                            <span class=""></span>
+                                            <label>
+                                                <input type="radio" class="reportedby_me" name="AnimalRescuedSuccessfully" value="true" id="rbRescuedYes" />Yes
+                                            </label>
+                                            <label>
+                                                <input type="radio" class="reportedby_me" name="AnimalRescuedSuccessfully" value="false" id="rbRescuedNo" />No
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="dvreleasedetail" style="display:none">
+                                    <div class="col-lg-12 Institutional">
+                                        <label>Release Details:</label>
+                                        <div class="divider"></div>
+                                    </div>
+                                    <div class="col-lg-6 un-bold">
+                                        <div class="form-group">
+                                            <div class="radio">
+                                                <span class=""></span>
+                                                <label>
+                                                    @Html.RadioButtonFor(model => model.AnimalNeedTreatment, false, new { id = "rbAnimalFit" })  Animal is fit to be translocated in wild
+                                                </label>
+                                                <label>
+                                                    @Html.RadioButtonFor(model => model.AnimalNeedTreatment, true, new { id = "rbAnimalTreatment" }) Animal needs treatment
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                <div id="divHospital" style="display:none;">
+                                    <div class="col-lg-6 un-bold">
+                                        <div class="form-group">
+                                            <label>Hospital Name</label>
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                @Html.TextBoxFor(model => model.HospitalName, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 un-bold">
+                                        <div class="form-group">
+                                            <label>Hospital Address</label>
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                @Html.TextBoxFor(model => model.HospitalAddress, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="dvAnimalRelesed" style="display:none;">
+                                    @*<div class="col-lg-6 Institutional">
+                    <label>Animal Released:</label>
+                    <div class="divider"></div>
+                </div>*@
+                                    <div class="col-lg-6 un-bold">
+                                        <div class="form-group">
+
+                                            <label>Animal Released:</label>
+                                            <div class="radio">
+                                                <span class=""></span>
+                                                <label>
+                                                    @Html.RadioButtonFor(model => model.AnimalReleasedInto, "AnimalReleasedintoWild", new { id = "rbRelesedIntoWild" })  Animal Released into Wild
+                                                </label>
+                                                <label>
+                                                    @Html.RadioButtonFor(model => model.AnimalReleasedInto, "AnimalReleasedintoZoo", new { id = "rbReleasedIntoZoo" }) Animal Released into Zoo
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="dvAnimalRelesedInWild" style="display:none">
+                                    <div class="col-lg-6 un-bold">
+                                        <div class="form-group">
+                                            <label>GPS Location</label>
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                @Html.TextBoxFor(model => model.GPSLocation, new { @class = "form-control", @maxlength = "200" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+
+                                <div id="dvAnimalDead" style="display:none;">
+                                    <div class="col-lg-12 Institutional">
+                                        <label>Animal Is Dead ?:</label>
+                                        <div class="divider"></div>
+                                    </div>
+                                    <div class="col-lg-6 un-bold">
+                                        <div class="form-group">
+                                            <div class="radio">
+                                                <span class=""></span>
+                                                <label>
+                                                    <input type="radio" class="animaldead_me" name="AnimalDead" value="true" id="rbRescuedYes" />Yes
+                                                </label>
+                                                <label>
+                                                    <input type="radio" class="animaldead_me" name="AnimalDead" value="false" id="rbRescuedNo" />No
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="dvPostmortem" style="display:none;">
+                                    <div class="col-lg-12 Institutional">
+                                        <label>Postmortem Status:</label>
+                                        <div class="divider"></div>
+                                    </div>
+                                    <div class="col-lg-6 un-bold">
+                                        <div class="form-group">
+                                            <div class="radio">
+
+                                                <span class=""></span>
+                                                <label>
+                                                    @Html.RadioButtonFor(model => model.PostmortemStatus, "PostmortemCompledted")  Postmortem compledted
+                                                </label>
+                                                <label>
+                                                    @Html.RadioButtonFor(model => model.PostmortemStatus, "PostmortemPending") Postmortem pending
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12 Institutional">
+                                    <div class="divider"></div>
+                                </div>
+
+                                <div class="col-lg-6 un-bold">
+                                    <div class="form-group">
+                                        <label>Upload Release Picture</label>
+                                        <div class="input-group">
+                                            <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                            <input type="file" multiple="" class="form-control common" name="ImageDataRelease" id="ImageDataRelease" readonly="readonly" />
+                                        </div>
+                                        <div class="alert-danger1">@Html.ValidationMessageFor(model => model.ReleasePhotoPath)</div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 un-bold">
+                                    <div class="form-group">
+                                        <label>Upload Staff Picture</label>
+                                        <div class="input-group">
+                                            <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                            <input type="file" multiple="" class="form-control common" name="ImageDataReleaseStaff" id="ImageDataReleaseStaff" readonly="readonly" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 un-bold">
+                                    <div class="form-group">
+                                        <label>Remarks</label>
+                                        <div class="input-group">
+                                            <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                            @Html.TextAreaFor(model => model.ReleaseRemarks, new { @class = "form-control" })
+                                        </div>
+                                        <div class="alert-danger1">@Html.ValidationMessageFor(model => model.ReleaseRemarks)</div>
+                                    </div>
+                                </div>
+                            </div></div></div>
+
+
+
+                            <div class="col-lg-12 Institutional">
+                                <div class="divider"></div>
+                            </div>
+
+                      
+
+                    <div class="col-lg-6 un-bold">
+                        <label></label>
+                        <div class="input-group">
+                            <div class="form-group">
+                                @*@if (ViewBag.Roles.ToString().Contains("Animal Rescue Reviewer"))
+                        {
+                            <input type="submit" class="btn btn-success" value="Submit" />
+                        }*@
+                                <input type="submit" class="btn btn-success" value="Submit" />
+                                @Html.ActionLink("Back to List", "Index", "Rescue", new { RoleName = ViewBag.CitizenRoles }, new { @class = "btn btn-default" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                    </div>
+                </div>
+                                        }
+</div>
+<script src="~/js/bootstrap-multiselect.js"></script>
+<link href="~/css/bootstrap-multiselect.css" rel="stylesheet" />
+<script type="text/javascript">
+    $('#ddlWLSchedule').multiselect({
+        includeSelectAllOption: true
+    });
+    var RootUrl = 'http://10.68.128.101/fmdsstest/';
+    var ddlVillage = 0;
+    var educount = 1;
+    var castcount = 1; 
+
+    $('#DistrictID').change(function (e) {
+        var ddldist = $("#DistrictID option:selected").val();
+        $("#BlockID").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'Rescue/GetBlockName',
+            dataType: 'json',
+            data: { District: ddldist },
+            success: function (range) {
+                $.each(range, function (i, items) {
+                    if (i == 1) {
+                        bindGP(ddldist, items.Value);
+                    }
+                    $("#BlockID").append('<option value="' + items.Value + '">  ' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    });
+
+    $('#BlockID').change(function (e) {
+        var ddldist = $("#DistrictID option:selected").val();
+        var ddlblockname = $("#BlockID option:selected").val();
+        bindGP(ddldist, ddlblockname);
+    });
+
+    $('#GPID').change(function (e) {
+        var ddldist = $("#DistrictID option:selected").val();
+        var ddlblockname = $("#BlockID option:selected").val();
+        var ddlGPName = $("#GPID option:selected").val();
+        bindVillage(ddldist, ddlblockname, ddlGPName);
+    });
+
+    function bindGP(ddldist, ddlblockname) {
+        $("#GPID").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'Rescue/GetGramPName',
+            dataType: 'json',
+            data: { District: ddldist, BlockName: ddlblockname },
+            success: function (range) {
+                $.each(range, function (i, items) {
+                    if (i == 1) {
+                        bindVillage(ddldist, ddlblockname, items.Value);
+                    }
+                    $("#GPID").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    }
+
+    function bindVillage(ddldist, ddlblockname, ddlGPName) {
+        $("#VillageID").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'Rescue/GetVillageName',
+            dataType: 'json',
+            data: { District: ddldist, BlockName: ddlblockname, GPName: ddlGPName },
+            success: function (range) {
+                $.each(range, function (i, items) {
+                    $("#VillageID").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    }
+    $('#rbCasualty').on('change', function () {
+        if ($(this.checked)) {
+            $('#divCasuality').show();
+        }
+    }).change();
+    $('#rbNoCasualty').on('change', function () {
+        if ($(this.checked)) {
+            $('#divCasuality').hide();
+        }
+    }).change();
+    $('#rbAssistRequired').on('change', function () {
+        if ($(this.checked)) {
+            $('#divAssistance').show();
+        }
+    }).change();
+    $('#rbNoAssistRequired').on('change', function () {
+        if ($(this.checked)) {
+            $('#divAssistance').hide();
+        }
+    }).change();
+    $('#rbRural').on('change', function () {
+        if ($(this.checked)) {
+            $('#divRural').show();
+            $('#divUrban').hide();
+        }
+    }).change();
+    $('#rbUrban').on('change', function () {
+        if ($(this.checked)) {
+            $('#divUrban').show();
+            $('#divRural').hide();
+        }
+    }).change();
+    $('#rbAnimalTreatment').on('change', function () {
+        if ($(this.checked)) {
+            $('#divHospital').show();
+            $('#dvAnimalRelesed').hide();
+            $('#GPSLocation').val('');
+            $('#dvAnimalRelesedInWild').hide();
+            $("input[type=radio][name=AnimalReleasedInto]").prop("checked", false);
+        }
+
+    }).change();
+    $('#rbAnimalFit').on('change', function () {
+        if ($(this.checked)) {
+            $('#divHospital').hide();
+            $('#dvAnimalRelesed').show();
+            //$('#dvAnimalRelesed').show();
+            $("input[type=radio][name=AnimalReleasedInto]").prop("checked", false);
+        }
+    });
+    if ($('#rbUrban').is(':checked')) {
+        $('#divUrban').show();
+        $('#divRural').hide();
+
+    } else {
+
+        $('#divRural').show();
+        $('#divUrban').hide();
+
+    }
+    if ($('#rbCasualty').is(':checked')) {
+        $('#divCasuality').show();
+    } else {
+        $('#divCasuality').hide();
+    }
+    if ($('#rbAssistRequired').is(':checked')) {
+        $('#divAssistance').show();
+    } else {
+        $('#divAssistance').hide();
+    }
+    if ($('#rbAnimalTreatment').is(':checked')) {
+        $('#divHospital').show();
+    } else {
+        $('#divHospital').hide();
+    }
+    $('input').on('keypress', function (event) {
+        var regex = new RegExp(/^[a-zA-Z0-9\s,._]*$/);
+        if (this.id == "CitizenEmailID") {
+            regex = new RegExp(/^[a-zA-Z0-9\s,._@@]*$/);
+        }
+        if (this.id == "CitizenMobileNo") {
+            regex = new RegExp(/^[0-9\s+\-]*$/);
+        }
+        var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+        if (!regex.test(key)) {
+            event.preventDefault();
+            return false;
+        }
+    });
+    $('.reportedby_me').on("click", function () {
+        var value = $(this).val();
+        if (value == "true") {
+            $('#dvAnimalDead').hide();
+            $("input[type=radio][name=AnimalDead]").prop("checked", false);
+            $('#dvreleasedetail').show();
+            $('#dvAnimalRelesed').show();
+
+            $('#dvPostmortem').hide();
+            $("input[type=radio][name=PostmortemStatus]").prop("checked", false);
+
+        }
+        else {
+            //$("input[type=radio][name=AnimalReleasedInto]").prop("checked", false);
+            //$('#dvAnimalRelesed').hide();
+            //$('#dvAnimalRelesedInWild').hide();
+            $('#dvreleasedetail').hide();
+            $('#dvAnimalRelesed').hide();
+            $('#dvAnimalDead').show();
+            $('#dvPostmortem').hide();
+            $("input[type=radio][name=PostmortemStatus]").prop("checked", false);
+
+        }
+    });
+    $("input[name='AnimalReleasedInto']").change(function () {
+        $('#dvAnimalRelesedInWild').show();
+        $('#dvPostmortem').hide();
+        $("input[type=radio][name=PostmortemStatus]").prop("checked", false);
+    });
+    $('.animaldead_me').on("click", function () {
+        var value = $(this).val();
+        $("input[type=radio][name=PostmortemStatus]").prop("checked", false);
+        if (value == "true") {
+            $('#dvPostmortem').show();
+        }
+        else {
+            $('#dvPostmortem').hide();
+        }
+    });
+    $("#ImageDataRelease, #ImageDataReleaseStaff").change(function () {
+        var fileExtension = ['jpeg', 'jpg', 'png', 'gif', 'bmp'];
+        if ($.inArray($(this).val().split('.').pop().toLowerCase(), fileExtension) == -1) {
+            alert("Only " + fileExtension.join(', ') + " formats are allowed : ");
+            $(this).val('');
+        }
+    });
+
+</script>
+
+ 

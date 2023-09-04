@@ -1,0 +1,256 @@
+﻿@model FMDSS.Models.Master.Zone
+
+
+<link href="~/css/timepicki.css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $('#TicketAllocatedPerShift').bind('keypress', function (evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode
+        // var charCode = evt.which;
+        
+        if (charCode != 8) {
+            if ((charCode == 46) || (charCode >= 97 && charCode <= 122) || (charCode >= 65 && charCode <= 90)) {
+                return false;
+            }
+            else {
+                if (charCode >= 48 && charCode <= 57 || charCode == 46) {
+                    return true;
+                }
+                else {
+                    evt.preventDefault();
+                }
+            }
+        }
+    });
+
+
+    $(document).ready(function () {
+
+        $('#btn_submit1').click(function (e) {
+
+
+            if ($('option:selected', $('#PlaceID')).index() == 0) {
+                $("#errPlaceID").css("display", "block");
+                $('#errPlaceID').focus();
+                return false;
+            }
+            else {
+                $("#errPlaceID").css("display", "none");
+            }
+           
+            
+
+            if ($('#ZoneName').val().trim() == "") {
+                $("#errZoneName").css("display", "block");
+                $('#errZoneName').focus();
+                return false;
+            }
+            else {
+                $("#errZoneName").css("display", "none");
+            }
+
+            if ($('#TicketAllocatedPerShift').val().trim() == "") {
+                $("#errTicketAllocatedPerShift").css("display", "block");
+                $('#errTicketAllocatedPerShift').focus();
+                return false;
+            }
+            else {
+                $("#errTicketAllocatedPerShift").css("display", "none");
+            }
+
+
+
+
+            if ($('option:selected', $('#isMorning')).index() == 0) {
+                $("#errisMorning").css("display", "block");
+                $('#errisMorning').focus();
+                return false;
+            }
+            else {
+                $("#errisMorning").css("display", "none");
+            }
+
+            if ($('option:selected', $('#isEvening')).index() == 0) {
+                $("#errisEvening").css("display", "block");
+                $('#errisEvening').focus();
+                return false;
+            }
+            else {
+                $("#errisEvening").css("display", "none");
+            }
+
+            if ($('option:selected', $('#isFullDay')).index() == 0) {
+                $("#errisFullDay").css("display", "block");
+                $('#errisFullDay').focus();
+                return false;
+            }
+            else {
+                $("#errisFullDay").css("display", "none");
+            }
+
+            if ($('option:selected', $('#isDptKiosk')).index() == 0) {
+                $("#errisDptKiosk").css("display", "block");
+                $('#errisDptKiosk').focus();
+                return false;
+            }
+            else {
+                $("#errisDptKiosk").css("display", "none");
+            }
+
+            if ($('option:selected', $('#isCitizen')).index() == 0) {
+                $("#errisCitizen").css("display", "block");
+                $('#errisCitizen').focus();
+                return false;
+            }
+            else {
+                $("#errisCitizen").css("display", "none");
+            }
+
+
+
+
+
+            if ($('option:selected', $('#Isactive')).index() == 0) {
+                $("#errIsactive").css("display", "block");
+                $('#errIsactive').focus();
+                return false;
+            }
+            else {
+                $("#errIsactive").css("display", "none");
+            }
+
+
+
+        });
+
+
+
+    });
+
+
+
+
+</script>
+
+
+@using (Html.BeginForm("ADDUpdateZone", "Master", FormMethod.Post))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @*<label id="lbl_dpt">Add/Edit Place</label>*@
+                @ViewBag.OpType
+            </h4>
+        </div>
+
+        <div class="modal-body">
+            @Html.HiddenFor(model => model.zoneID)
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Place Name: <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.PlaceID, (IEnumerable<SelectListItem>)ViewBag.ddlPlace1, "--Select--", new { @class = "form-control common", id = "PlaceID" })
+                    <div id="errPlaceID" style="display:none" class="alert-danger1">Place Name is Required.</div>
+
+                </div>
+            </div>
+
+          
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Zone Name: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.ZoneName, new { @class = "form-control common", @maxlength = "100" })
+                    <div id="errZoneName" style="display:none" class="alert-danger1">Zone Name is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Ticket Allocated Per Shift: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.TicketAllocatedPerShift, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errTicketAllocatedPerShift" style="display:none" class="alert-danger1">Ticket Allocated Per Shift is Required.</div>
+                </div>
+            </div>
+
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Morning Safari Status : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.isMorning, (IEnumerable<SelectListItem>)ViewBag.SafariAvailablelst, "--Select--", new { @class = "form-control common", id = "isMorning" })
+                    <div id="errisMorning" style="display:none" class="alert-danger1">Morning Safari Status is Required.</div>
+                </div>
+            </div>        
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Evening Safari Status : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.isEvening, (IEnumerable<SelectListItem>)ViewBag.SafariAvailablelst, "--Select--", new { @class = "form-control common", id = "isEvening" })
+                    <div id="errisEvening" style="display:none" class="alert-danger1">Evening Safari Status is Required.</div>
+                </div>
+            </div>    
+            
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Full Day Safari Status : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.isFullDay, (IEnumerable<SelectListItem>)ViewBag.SafariAvailablelst, "--Select--", new { @class = "form-control common", id = "isFullDay" })
+                    <div id="errisFullDay" style="display:none" class="alert-danger1">Full Day Safari Status is Required.</div>
+                </div>
+            </div>          
+
+
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Kiosk User Status : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.isDptKiosk, (IEnumerable<SelectListItem>)ViewBag.SafariAvailablelst, "--Select--", new { @class = "form-control common", id = "isDptKiosk" })
+                    <div id="errisDptKiosk" style="display:none" class="alert-danger1">Kiosk User Status is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Citizen User Status : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.isCitizen, (IEnumerable<SelectListItem>)ViewBag.SafariAvailablelst, "--Select--", new { @class = "form-control common", id = "isCitizen" })
+                    <div id="errisCitizen style=" display:none" class="alert-danger1">Citizen User Status is Required.</div>
+                </div>
+            </div>
+
+
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Active / Deactive : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.Isactive, (IEnumerable<SelectListItem>)ViewBag.ISactivelst, "--Select--", new { @class = "form-control common", id = "Isactive" })
+                    <div id="errIsactive" style="display:none" class="alert-danger1">Active / Deactive  is Required.</div>
+
+                </div>
+            </div>
+
+
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success" value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+}

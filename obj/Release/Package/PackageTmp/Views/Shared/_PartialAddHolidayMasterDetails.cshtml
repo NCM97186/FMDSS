@@ -1,0 +1,86 @@
+﻿@model FMDSS.Models.AddRuleDetails
+@*<script type="text/javascript" src="~/js/jquery.min.js"></script>*@
+
+
+@using (Html.BeginForm("AddRequest", "BoardingMaster", FormMethod.Post))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                Place Name :  @TempData["PlaceName"]
+            </h4>
+
+        </div>
+
+        <div class="modal-body">
+            @Html.HiddenFor(model => model.RuleId)
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>From Date : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(s => s.FromDate, new { @class = "form-control common upper datetime", @maxlength = "18", id = "FromDate", @readonly = "True" })
+                    @Html.ValidationMessageFor(s => s.FromDate)
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>To Date : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(s => s.ToDate, new { @class = "form-control common upper datetime", @maxlength = "18", id = "ToDate", @readonly = "True" })
+                    @Html.ValidationMessageFor(s => s.ToDate)
+                </div>
+            </div>
+
+            <div class="col-lg-12"></div>
+
+
+            <!-- /.Btn Groping -->
+
+
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success" value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+}
+
+
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script>
+
+    $("#ToDate").datepicker({
+        dateFormat: 'dd/mm/yy',
+        changeMonth: true,
+        changeYear: true,
+        minDate: 0
+    }).datepicker("setDate", new Date());
+    $("#FromDate").datepicker({
+        dateFormat: 'dd/mm/yy',
+        changeMonth: true,
+        changeYear: true,
+        minDate: 0,
+        onSelect: function () {
+            $('#ToDate').datepicker('option', 'minDate', $("#FromDate").datepicker("getDate"));
+        }
+    }).datepicker("setDate", new Date());
+
+    //$('.datetime').datepicker({  minDate: 0 , dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true });
+</script>
+ 
+

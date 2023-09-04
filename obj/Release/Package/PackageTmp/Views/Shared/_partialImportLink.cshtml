@@ -1,0 +1,140 @@
+﻿@model FMDSS.Models.Master.ImportLink
+<link href="~/css/timepicki.css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+<script>
+    var $j = jQuery.noConflict();
+    $j('.timepicker').timepicki();
+
+</script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+
+
+
+    $(document).ready(function () {
+
+        $('#btn_submit1').click(function (e) {
+
+           
+
+
+            
+
+            if ($('option:selected', $('#CategoryID')).index() == 0) {
+                $("#errCategoryID").css("display", "block");
+                $('#errCategoryID').focus();
+                return false;
+            }
+            else {
+                $("#errCategoryID").css("display", "none");
+            }
+            if ($('#Link').val().trim() == "") {
+                $('#errLink').css("display", "block");
+                $('#errLink').focus();
+                return false;
+            }
+            else {
+                $('#errLink').css("display", "none");
+            }
+
+            if ($('#TextString').val().trim() == "") {
+                $('#errTextString').css("display", "block");
+                $('#errTextString').focus();
+                return false;
+            }
+            else {
+                $('#errTextString').css("display", "none");
+            }
+
+            if ($('option:selected', $('#Isactive')).index() == 0) {
+                $("#errIsactive").css("display", "block");
+                $('#errIsactive').focus();
+                return false;
+            }
+            else {
+                $("#errIsactive").css("display", "none");
+            }
+
+
+        });
+
+    });
+
+</script>
+
+@using (Html.BeginForm("AddUpdateImportLink", "Master", FormMethod.Post))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @*<label id="lbl_dpt">Add/Edit Place</label>*@
+                @ViewBag.OpType
+            </h4>
+        </div>
+
+        <div class="modal-body">
+            @Html.HiddenFor(model => model.ImportID)
+          
+            
+
+              
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Import Link: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Link, new { @class = "form-control common", @maxlength = "50" })
+                    <div id="errLink" style="display:none" class="alert-danger1">Link is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Text String: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.TextString, new { @class = "form-control common", @maxlength = "50" })
+                    <div id="errTextString" style="display:none" class="alert-danger1">TextString is Required.</div>
+                </div>
+            </div>
+                       
+
+                
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Active / Deactive : <span class="mandatory">*</span></label>
+                        @Html.DropDownListFor(Model => Model.IsActive, (IEnumerable<SelectListItem>)ViewBag.ISactivelst, "--Select--", new { @class = "form-control common", id = "IsActive" })
+                        <div id="errIsactive" style="display:none" class="alert-danger1">Active / Deactive  is Required.</div>
+
+                    </div>
+                </div>
+
+                <div class="col-lg-12"></div>
+
+
+                <!-- /.Btn Groping -->
+
+
+            </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success"  value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+                
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+}

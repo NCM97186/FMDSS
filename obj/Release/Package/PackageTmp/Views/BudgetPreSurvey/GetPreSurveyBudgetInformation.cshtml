@@ -1,0 +1,529 @@
+﻿@model FMDSS.Models.ForesterDevelopment.BudgetAllocation.ViewModel.ViewBudgetPreSurveyModel
+@{
+    ViewBag.Title = "Pre Survey";
+    Layout = "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<style>
+    .hide {
+        display: none;
+    }
+
+    .center {
+        margin-top: 50%;
+    }
+</style>
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var RootURl = '@Url.Content("~/")';
+    function GetPreSurveyDetails(id) {
+        if (id != null && id != '' && id != 'undefined') {
+            $.ajax({
+                url: RootURl + 'BudgetPreSurvey/GetPreSurveyDetails?ID=' + id,
+                type: "GET",
+                contenttype: 'application/json; charset=utf-8',
+                async: true,
+                success: function (data) {
+                    console.log(data);
+                    $("#BudgetPerposalDetails").html(data);
+                    $("#modal-window").modal('show');
+                },
+                error: function (xhr) {
+                    alert('error');
+                }
+            });
+        }
+    }
+
+</script>
+<!--GIS Data Post 22-04-2016-->
+
+
+<div id="page-wrapper-inn">
+
+    @if (TempData["Message"] != null)
+    {
+
+        <script type="text/javascript" language="javascript">
+            alert('@TempData["Message"]');
+        </script>
+    }
+    <div class="col-lg-12 pad">
+        <div class="col-lg-10">
+            <h1 class="page-header"> Pre Survey Budget List (@Session["User"].ToString())</h1>
+        </div>
+
+    </div>
+    <div class="col-lg-12 pad">
+        @Html.Raw(TempData["Message"])
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("GetPreSurveyBudgetInformation", "BudgetPreSurvey", FormMethod.Post, new { enctype = "multipart/form-data", data_behavior = "confirm" }))
+            {
+                <div class="col-xs-12">
+
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label>Financial Year: <span class="mandatory"></span></label>
+                            @Html.DropDownListFor(x => x.FinancialYear, (IEnumerable<SelectListItem>)ViewBag.FinancialYear, "--Select--", new { @class = "form-control", @id = "FinancialYearId" })
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label>Scheme: <span class="mandatory"></span></label>
+                            @Html.DropDownListFor(x => x.SchemeName, (IEnumerable<SelectListItem>)ViewBag.SchemeList, "--Select--", new { @class = "form-control", @id = "SchemeID" })
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label>Budget Head: <span class="mandatory"></span></label>
+                            @Html.DropDownListFor(x => x.BudgetHead, (IEnumerable<SelectListItem>)ViewBag.BudgetHead, "--Select--", new { @class = "form-control", @id = "BudgetHeadList" })
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label>Budget Sub-Head: <span class="mandatory"></span></label>
+                            @Html.DropDownListFor(x => x.SubBudgetHead, (IEnumerable<SelectListItem>)ViewBag.SubBudgetHeadList, "--Select--", new { @class = "form-control", @id = "SubBudgetHeadList", name = "SubBudgetHeadId" })
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label>Activity: <span class="mandatory"></span></label>
+                            @Html.DropDownListFor(x => x.ActivityName, (IEnumerable<SelectListItem>)ViewBag.Activity, "--Select--", new { @class = "form-control", @id = "ActivityList" })
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label>Sub-Activity: <span class="mandatory"></span></label>
+                            @Html.DropDownListFor(x => x.SubActivityName, (IEnumerable<SelectListItem>)ViewBag.SubActivityList, "--Select--", new { @class = "form-control", @id = "SubActivityList" })
+                        </div>
+                    </div>
+                   
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label>Range: <span class="mandatory"></span></label>
+                            @Html.DropDownListFor(model => model.RangeCode, (IEnumerable<SelectListItem>)ViewBag.RangeList, "--Select--", new { @class = "form-control", @id = "RangeCode" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label><span class="mandatory"></span></label>
+                            <button type="submit" class="btn btn-success confirm-toggle" name="Save">
+                                <i class="fa fa-check"></i> Submit
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label><span class="mandatory"></span></label>
+                            <button type="reset" class="btn btn-danger" name="Cancel">
+                                <i class="fa fa-arrow-circle-right"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                    @*<div class="col-lg-2">
+                            <div class="form-group">
+                                <label><span class="mandatory"></span></label>
+                                <button class="btn btn-info pull-right" onclick="tablesToExcel(['dataTablesAllocation', 'dataTablesExpenditure'], ['dataTablesAllocation', 'dataTablesExpenditure'], 'Budget', 'Excel')">Export to Excel</button>
+                            </div>
+                        </div>*@
+
+                </div>
+
+
+            }
+            <div class="panel panel-default col-lg-12">
+
+                <div id="modal-window" style="display:none;" title="Transation" class="modal fade">
+                    <div class="modal-dialog modal-lg" id="BudgetPerposalDetails">
+
+                    </div><!-- /.modal-dialog -->
+                </div>
+
+                <div id="tbl" class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover gridtable" id="dataTables-example">
+                        <thead>
+                            <tr>
+                                <th>
+                                    S.NO
+                                </th>
+                                <th>
+                                    Financial Year
+                                </th>
+                                <th>
+                                    Scheme
+                                </th>
+                                <th>
+                                    Budget/Sub Budget Head
+                                </th>
+                                <th>
+                                    Activity
+                                </th>
+                               <th>
+                                   Sub Activity
+                               </th>
+                                <th>
+                                  Range Name
+                                </th>
+                                <th>
+                                    Total Amount (lakh)
+                                </th>
+                                
+                                <th>
+                                    Action
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{int i = 0;}
+                            @foreach (var item in ViewData["BudgetPreSurveyListInfo"] as IEnumerable<FMDSS.Models.ForesterDevelopment.BudgetAllocation.ViewModel.ViewBudgetPreSurveyModel>)
+                            {
+
+                                <tr>
+                                    <td>
+                                        @{i++;}
+                                        @i
+                                    </td>
+                                    <td>
+                                        @*BUDGETALLOCATION-@item.BudgetHeadAllocationID*@
+                                        @item.FinancialYear
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.SchemeName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.BudgetHead) / @item.SubBudgetHead
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.ActivityName) 
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.SubActivityName) 
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.RangeName) 
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.TotalAmount)
+                                    </td>
+                                   
+
+                                    <td>
+                                        <button type="button" class="btn btn-success btn-circle" title="View" onclick="GetPreSurveyDetails('@item.ID');">
+                                            <i class="fa fa-pencil"></i>
+                                        </button>
+                                        <button type=button class='btn btn-danger btn-circle' style=cursor:pointer onclick="DeleteCircle(@item.ID)"><i class='fa fa-times'></i></button>
+                                    </td>
+                                </tr>
+                                            }
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <!-- /.panel-body -->
+
+        </div>
+        <!-- /.panel -->
+
+    </div>
+
+
+</div>
+<script>
+    var RootURl = '@Url.Content("~/")';
+</script>
+<script>
+
+    $(function () {
+
+        $(document).ready(function () {
+            $('.gridtable').DataTable({
+                responsive: true,
+                "bSort": true
+            });
+        });
+
+        $('#SchemeID').change(function (e) {
+            var SchemeID = $('#SchemeID option:Selected').val();
+            if (SchemeID != '' && SchemeID != '0') {
+                SchemeID = $('#SchemeID').val();
+                GetMasterWithSchemeWise(SchemeID, 0, 0, "BudgetHead");
+            }
+
+        });
+
+        $('#BudgetHeadList').change(function (e) {
+            var SchemeID = $('#SchemeID option:Selected').val();
+            var BudgetHeadID = $('#BudgetHeadList option:Selected').val();
+            if (SchemeID != '' && SchemeID != '0' && BudgetHeadID != '' && BudgetHeadID != '0') {
+                GetMasterWithSchemeWise(SchemeID, BudgetHeadID, 0, "SubBudgetHead");
+                GetMasterWithSchemeWise(SchemeID, BudgetHeadID, 0, "Activity");
+            }
+
+        });
+
+        $('#ActivityList').change(function (e) {
+            var ActivityId = $('#ActivityList option:Selected').val();
+            var SchemeID = $('#SchemeID option:Selected').val();
+            var BudgetHeadID = $('#BudgetHeadList option:Selected').val();
+            if (SchemeID != '' && SchemeID != '0' && BudgetHeadID != '' && BudgetHeadID != '0' && ActivityId != '' && ActivityId != '0') {
+                GetMasterWithSchemeWise(SchemeID, BudgetHeadID, ActivityId, "SubActivity");
+            }
+
+        });
+
+    });
+    function GetMasterWithSchemeWise(SchemeID, BudgetHeadID, ActivityID, Action) {
+        $.ajax({
+            type: 'GET',
+            url: RootURl + "BudgetAllocationCircle/GetMasterSchemeWise?SchemeID=" + SchemeID + "&ActionName=" + Action + "&BudgetHeadId=" + BudgetHeadID + "&ActivityID=" + ActivityID,
+            success: function (data) {
+                console.log(Action);
+                if (Action == 'BudgetHead') {
+                    $("#BudgetHeadList").empty();
+                    $("#BudgetHeadList").append('<option value="">--Select--</option>');
+                    $.each(data, function (i, items) {
+                        $("#BudgetHeadList").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                }
+
+                else if (Action == 'Activity') {
+                    $("#ActivityList").empty();
+                    $("#ActivityList").append('<option value="">--Select--</option>');
+                    $.each(data, function (i, items) {
+                        $("#ActivityList").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                }
+
+
+                else if (Action == 'SubBudgetHead') {
+                    $("#SubBudgetHeadList").empty();
+                    $("#SubBudgetHeadList").append('<option value="">--Select--</option>');
+                    $.each(data, function (i, items) {
+                        $("#SubBudgetHeadList").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                }
+
+                else if (Action == 'SubActivity') {
+                    $("#SubActivityList").empty();
+                    $("#SubActivityList").append('<option value="">--Select--</option>');
+                    $.each(data, function (i, items) {
+                        $("#SubActivityList").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                }
+
+
+
+            },
+        });
+    }
+
+    function reload() {
+        location.reload(true);
+    }
+
+
+</script>
+<!--Filter Data from both Table-->
+<script type="text/javascript">
+    $(function () {
+
+
+        $('#Division_Code').change(function (e) {
+            $("#Sanctuary").empty();
+            $("#Sanctuary").append('<option value="">--Select--</option>');
+            if ($("#Division_Code").val() != "" && $("#Division_Code").val() != "0") {
+                var DIV_CODE = $("#Division_Code").val();
+                $.ajax({
+                    type: 'GET',
+                    url: RootURl + 'BudgetAllocationCircle/GetSanctuaryList',
+                    dataType: 'json',
+                    data: { Div_Code: DIV_CODE },
+                    success: function (result) {
+                        $.each(result, function (i, items) {
+                            $("#Sanctuary").append('<option value="' + items.Value + '">' +
+                             items.Text + '</option>');
+
+                        });
+                    },
+
+                });
+            }
+            else {
+                $("#Sanctuary").append('<option value="">--Select--</option>');
+
+            }
+
+        });
+
+        $('#Circle_Code').change(function (e) {
+            var Circle_Code = $('#Circle_Code option:Selected').val();
+            $("#Division_Code").empty();
+            var option = $("<option />");
+            option.attr("value", '').text('--Select--');
+            $('#Division_Code').append(option);
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("GetDivision","BudgetExpenditure")',
+                dataType: 'json',
+                data: { circleCode: Circle_Code },
+                success: function (circle) {
+                    $.each(circle, function (i, items) {
+                        $("#Division_Code").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+
+        });
+
+
+        $("#FilterSubmit").click(function () {
+            console.log($('.gridtable').DataTable());
+            //$('.gridtable').DataTable().clear().destroy();
+            var values = {
+                FinancialYear: $("#FinancialYearId option:Selected").val(),
+                SchemeName: $("#SchemeID option:Selected").val(),
+                BudgetHead: $("#BudgetHeadList option:Selected").val(),
+                SubBudgetHead: $("#SubBudgetHeadList option:Selected").val(),
+                ActivityName: $("#ActivityList option:Selected").val(),
+                SubActivityName: $("#SubActivityList option:Selected").val(),
+                CIRCLE_CODE: $("#Circle_Code option:Selected").val(),
+                Division: $("#Division_Code option:Selected").val(),
+                SanctuaryCode: $("#Sanctuary option:Selected").val()
+            };
+            $.ajax({
+                type: 'POST',
+                url: RootURl + 'BudgetExpenditure/FilterBudgetExpenditure',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    if (data.length > 0) {
+                        console.log(data[1]);
+
+                        $("#dataTablesAllocation tbody tr").empty();
+
+                        FilterDataHTML('dataTablesAllocation', data[0]);
+
+                        $("#dataTablesExpenditure tbody tr").empty();
+                        FilterDataHTML('dataTablesExpenditure', data[1]);
+
+                        ReinitializeDatatable();
+                    }
+                    else {
+                        alert("some error occur please try after some time!!!");
+                    }
+
+
+                }
+            });
+
+
+        });
+
+
+    });
+    function ReinitializeDatatable() {
+        // $('.gridtable').DataTable().clear().destroy();
+        //$('.gridtable').DataTable().clear().destroy();
+
+
+
+        $('.gridtable').DataTable({
+            responsive: true,
+            "lengthMenu": [10, 25, 50, 100, 200, 500],
+            "bSort": true,
+            dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+   "<'row'<'col-sm-12'tr>>" +
+   "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            "columnDefs": [
+       { "className": "dt-center", "targets": "_all" }
+            ]
+        });
+
+    }
+
+    function FilterDataHTML(TableName, Data) {
+
+        if (TableName == 'dataTablesAllocation') {
+            $.each(Data, function (i, v) {
+                var rowdata = "<tr>";
+                rowdata = rowdata + "<td>BUDGETALLOCATION-" + v.BudgetHeadAllocationID + "(" + v.FinancialYear + ")</td>";
+                rowdata = rowdata + "<td>" + v.SchemeName + "</td>";
+                rowdata = rowdata + "<td>" + v.BudgetHead + " / " + v.SubBudgetHead + "</td>";
+                rowdata = rowdata + "<td>" + v.ActivityName + " / " + v.SubActivityName + "</td>";
+                rowdata = rowdata + "<td>" + v.ISCircleDivision + "</td>";
+                rowdata = rowdata + "<td>" + v.CIRCLE_NAME + " / " + v.Division + " / " + v.SanctuaryName + "</td>";
+                rowdata = rowdata + "<td>" + v.AllocatedAmount + "</td>";
+                var Code = v.ISCircleDivision.toLowerCase() == "circle" ? v.CIRCLE_CODE : v.ISCircleDivision.toLowerCase() == "division" ? v.Div_Code : v.ISCircleDivision.toLowerCase() == "hq" ? v.CIRCLE_CODE : v.ISCircleDivision.toLowerCase() == "sanctuary" ? v.Div_Code : "";
+                rowdata = rowdata + "<td><a id='aViewKMLFile' target='_blank' onclick=ViewFile('" + v.ISCircleDivision.trim() + "','Wildlife','" + Code + "','Allocation'); href='javascript:void(0)'><img src='../images/globe.png' width='30'></a></td>";
+                rowdata = rowdata + "<td> <i style='cursor:pointer;color:blue' onclick=GetBudgetExpenditure('" + v.ID + "') class='fa'>Budget Expenditure</i></td>";
+                rowdata = rowdata + "</tr>";
+                $("#" + TableName).append(rowdata);
+            });
+        }
+
+        if (TableName == 'dataTablesExpenditure') {
+            $.each(Data, function (i, v) {
+                var rowdata = "<tr>";
+                rowdata = rowdata + "<td>BUDGETALLOCATION-" + v.BudgetHeadAllocationID + "(" + v.FinancialYear + ")</td>";
+                rowdata = rowdata + "<td>" + v.SchemeName + "</td>";
+                rowdata = rowdata + "<td>" + v.BudgetHead + " / " + v.SubBudgetHead + "</td>";
+                rowdata = rowdata + "<td>" + v.ActivityName + " / " + v.SubActivityName + "</td>";
+                rowdata = rowdata + "<td>" + v.ISCircleDivision + "</td>";
+                rowdata = rowdata + "<td>" + v.CIRCLE_NAME + " / " + v.Division + " / " + v.SanctuaryName + "</td>";
+                rowdata = rowdata + "<td>" + v.ExpenditureMonths + "</td>";
+                rowdata = rowdata + "<td>" + v.AllocatedAmount + "</td>";
+                rowdata = rowdata + "<td>" + v.ExpenditureTilldate + "</td>";
+                var Code = v.ISCircleDivision.toLowerCase() == "circle" ? v.CIRCLE_CODE : v.ISCircleDivision.toLowerCase() == "division" ? v.Div_Code : v.ISCircleDivision.toLowerCase() == "hq" ? v.CIRCLE_CODE : v.ISCircleDivision.toLowerCase() == "sanctuary" ? v.Div_Code : "";
+                rowdata = rowdata + "<td><a id='aViewKMLFile' target='_blank' onclick=ViewFile('" + v.ISCircleDivision.trim() + "','Wildlife','" + Code + "','Expenditure'); href='javascript:void(0)'><img src='../images/globe.png' width='30'></a></td>";
+                rowdata = rowdata + "<button type=button class='btn btn-danger btn-circle' onclick=DeleteBudgetExpenditure('" + v.rowid + "') style=cursor:pointer><i class='fa fa-times'></i></button>";
+                rowdata = rowdata + "</tr>";
+                $("#" + TableName).append(rowdata);
+            });
+        }
+    }
+
+
+    function DeleteCircle(ID) {
+        if (confirm("Are you sure you want to delete this?")) {
+
+            if (ID != null && ID > 0) {
+                $.ajax({
+                    type: 'POST',
+                    url: RootURl + 'BudgetPreSurvey/DeleteBudgetPreSurvey',
+                    dataType: 'json',
+                    data: { Id: ID },
+                    success: function (data) {
+                        if (data == '1') {
+                            alert('Data deleted successfully');
+                            reload();
+                        }
+                        else {
+                            alert('Data not deleted from table please check!!!!');
+                        }
+                    },
+                    traditional: true,
+                    error: function (data) { console.log(data) }
+                });
+            }
+        }
+        else {
+
+            return false;
+        }
+    }
+</script>

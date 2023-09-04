@@ -1,0 +1,224 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Other Noc Request";
+}
+<h2>List</h2>
+
+@*<input type="text" id="txtInput" />
+<input type="text" id="txtInputValue" />
+<input type="button" id="btnSub" value="submit" />
+
+<script type="text/javascript">
+    var origin = 'http://localhost:17105';
+    $('#btnSub').click(function () {
+        
+        var val = $('#txtInput').val();
+
+        $.ajax({
+            type: 'GET',
+            url: origin + '/ForesterAction/GetEncrypt',
+            dataType: 'json',
+            data: { text: val },
+            success: function (data) {
+                
+                $('#txtInputValue').val('');
+                $('#txtInputValue').val(data.msg);
+            },
+            error: function (ex) {
+                alert('Failed to retrieve Request Data. ' + ex);
+            }
+        });
+    });
+</script>*@
+
+
+
+<div class="container-fluid desh">
+    <!-- Page Content -->
+    <div id="page-wrapper">
+        <div class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <ul class="nav">
+                        <li style="font-size:20px">
+                            Received Applications
+                        </li>
+                        <li class="pull-right"><a href="@Url.Action("ForesterDashboard", "ForesterAction")"><i class="fa fa-exchange"></i> Back To DashBoard </a></li>
+                    </ul>
+                </div>
+                <div class="row">
+                    <div class="col-md-12" style="padding-right:0">
+                        <div class="panel with-nav-tabs panel-default">
+                            <div class="panel-heading">
+                                <ul class="nav nav-tabs">
+                                    <li class="active"><a href="#tab1pdefault" data-toggle="tab"><i class="fa fa-star fa-fw"></i> My Actions</a></li>
+                                    <li class=""><a href="#tab2pdefault" data-toggle="tab"><i class="fa fa-user fa-fw"></i> Pending Requests</a></li>
+                                </ul>
+                            </div>
+                            <div class="panel-body">
+                                <div class="tab-content">
+                                    <div class="tab-pane fade active in tbl-scroll" id="tab1pdefault">
+                                        <div class="panel-body">
+                                            <div class="table-responsive request-id">
+                                                <table class="table table-striped table-bordered table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Request Id</th>
+                                                            <th>Request Type</th>
+                                                            <th>Application Date</th>
+                                                            <th>Application Status</th>
+                                                            <th>Action Taken By</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if (ViewBag.NOCMyAction != null)
+                                                        {
+                                                            foreach (var item in ViewBag.NOCMyAction as IEnumerable<FMDSS.Models.CitizenService.PermissionServices.NocList>)
+                                                            {
+                                                                <tr>
+                                                                    <td onclick="reqdetail('@item.RequestId','@item.Level',false)" style="cursor:pointer;">
+                                                                        <a>@Html.DisplayFor(model => item.RequestId)</a>
+                                                                    </td>
+                                                                    <td>@Html.DisplayFor(model => item.NocType)</td>
+                                                                    <td>@Html.DisplayFor(model => item.ReqDate)</td>
+                                                                    <td>@Html.DisplayFor(model => item.Status)</td>
+                                                                    <td>@Html.DisplayFor(model => item.ActionTakenUser)</td>
+                                                                    <td><input type="button" class="btn btn-info" value="View Attachment" data-toggle="modal" data-target="#modalAEvidence" onclick="GetAttachedEvidence(@item.ResearchID,4)" /></td>
+                                                                </tr>
+                                                            }
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade tbl-scroll" id="tab2pdefault">
+                                        <div class="panel-body">
+                                            <div class="table-responsive">
+                                                @if (ViewBag.NOCPending != null)
+                                                {
+                                                    <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Transaction Id</th>
+                                                                <th>Service Type</th>
+                                                                <th>Application Date</th>
+                                                                <th>Application Status</th>
+                                                                <th>Action Taken By</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach (var item in ViewBag.NOCPending as IEnumerable<FMDSS.Models.CitizenService.PermissionServices.NocList>)
+                                                            {
+                                                                <tr>
+                                                                    <td onclick="reqdetail('@item.RequestId','@item.Level',true)" style="cursor:pointer;">
+                                                                        <a>@Html.DisplayFor(model => item.RequestId)</a>
+                                                                    </td>
+                                                                    <td>@Html.DisplayFor(model => item.NocType)</td>
+                                                                    <td>@Html.DisplayFor(model => item.ReqDate)</td>
+                                                                    <td>@Html.DisplayFor(model => item.Status)</td>
+                                                                    <td>@Html.DisplayFor(model => item.ActionTakenUser)</td>
+                                                                    <td><input type="button" class="btn btn-info" value="View Attachment" data-toggle="modal" data-target="#modalAEvidence" onclick="GetAttachedEvidence(@item.ResearchID,4)" /></td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    #myModalDfo .modal-dialog {
+        width: 900px;
+        margin: 30px auto;
+    }
+
+    .error {
+        border: 1px solid red;
+    }
+</style>
+<div class="modal" id="myModalDfo" tabindex="-1" role="dialog" aria-hidden="false" style="display:none;">
+    <div class="modal-dialog mdw">
+        <div class="modal-content tbl-scroll" style="height:680px;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="myModalLabel">
+                    Request Details
+                    <button type="button" name="btnprint" id="btnprint" onclick="Print();" class="btn btn-default pull-right">
+                        <i class="fa fa-print"></i> Print
+                    </button>
+                </h4>
+            </div>
+            <div id="divApprovalProcess"></div>
+        </div>
+    </div>
+</div>
+@Html.Hidden("hdnRootURL", Url.Content("~/"))
+<div class="modal fade in" data-backdrop="static" id="modalAEvidence" tabindex="1" role="dialog" aria-hidden="false"></div>
+<script src="~/Scripts/Controller/Common.js"></script>
+<script type="text/javascript">
+    //var origin = '@System.Configuration.ConfigurationManager.AppSettings["websiteUrl"].ToString()'; 'http://localhost:17105';
+
+    function reqdetail(reqId, level, IsShowAssign) {
+        $.ajax({
+            type: 'GET',
+            url: origin + '/ForesterAction/getNocDetail',
+            dataType: 'html',
+            data: { requestId: reqId },
+            success: function (data) {
+                $('#divApprovalProcess').html(data);
+                $("#myModalDfo").modal("show");
+                if (IsShowAssign) {
+                    $('.divAssign').show();
+                }
+                else {
+                    $('.divAssign').hide();
+                }
+            },
+            error: function (ex) {
+                alert('Failed to retrieve Request Data. ' + ex);
+            }
+        });
+    }
+    $(document).ready(function () {
+        $('.close').on('click', function () {
+            $('#myModalDfo').hide();
+        });
+        $('.btnCancel').on('click', function () {
+            $('#myModalDfo').hide();
+        });
+        $('#btnprint').click(function (e) {
+            var divContents = $("#divPrint").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            frameDoc.document.write('<html><head><link href="../css/bootstrap.min.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/mobile.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/main.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/dashboard.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/font-awesome.min.css" rel="stylesheet" />');
+            frameDoc.document.write('</head><body>');
+            frameDoc.document.write(divContents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        });
+    });
+</script>

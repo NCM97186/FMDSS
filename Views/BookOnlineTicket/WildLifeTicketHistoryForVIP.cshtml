@@ -1,0 +1,298 @@
+﻿@{
+    ViewBag.Title = "Wild Life Permit History";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+@model IEnumerable<FMDSS.Models.BookOnlineTicket.BookOnTicket>
+
+
+<style>
+    #myModal .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModal .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModal .modal-footer {
+        background-color: #f9f9f9;
+    }
+
+    #myModal .btn-success {
+        width: 100%;
+        padding: 10px;
+    }
+
+    ul.a {
+        list-style-type: circle;
+    }
+</style>
+
+
+<style>
+    #myModalRefund .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModalRefund .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModalRefund .modal-footer {
+        background-color: #f9f9f9;
+    }
+
+    #myModalRefund .btn-success {
+        width: 100%;
+        padding: 10px;
+    }
+
+    ul.a {
+        list-style-type: circle;
+    }
+
+    #myModal_TicketRefund .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModal_TicketRefund .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModal_TicketRefund .modal-footer {
+        background-color: #f9f9f9;
+    }
+</style>
+
+
+<script src="~/js/jquery.min.js"></script>
+
+
+
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        $('#tbltemp').DataTable({
+            responsive: true
+        });
+
+    });
+
+      function TicketRefund(id) {
+        // alert(id);
+        $("#myModal_TicketRefund").modal('show');
+        var RootUrl = '@Url.Content("~/")';
+        $('#TicketID').val(id);
+        $('#btn_Refund').attr('href', RootUrl + 'BookOnlineTicket/Refund?TicketId=' + id);
+        
+    };
+
+</script>
+
+<div class="modal fade" id="myModal_TicketRefund" role="dialog">
+
+    <div class="modal-dialog">
+
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header" style="padding:35px 50px;">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4><i class="fa-fw"></i>Permit Refund Policy(For 18th March to 30th June 2020 Visitors)</h4>
+            </div>
+            <div class="modal-body">
+                <ul class="a">
+                    <li>As per the policy, if the booking cancelled by the guest, then the full amount of charged fees excluding emitra & bank charges will be refunded.</li>
+                    <li>पॉलिसी के अनुसार, आगंतुक के द्वारा बुकिंग निरस्त करने पर पूरी जमा राशि ,ई-मित्र और बैंक शुल्क को छोड़कर वापस कर दी जाएगी।</li>
+                    <li>Before proceeding please keep ready the required bank details i.e. Bank Name, Branch Name, IFSC Code, Account Type (Saving) & Account No. etc.</li>
+                </ul>
+            </div>
+            <div class="modal-footer" style="clear:both; padding-left: 50px;">
+                <div id="btn" class="col-lg-12">
+                    <a class="btn btn-danger" target="_blank" id="btn_Refund" href='javascript:void(0)'>
+                        Refund
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<div id="page-wrapper-inn">
+
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">WildLife Permit History</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-2" style="padding:10px;">
+            <button n class="btn btn-info dropdown-toggle" type="button" onclick="AddBankDetail();">
+                Add Bank Detail
+            </button>
+        </div>
+        <div class="col-lg-10">
+        </div>
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="tbl" class="table-responsive">
+                        <table class="table table-striped table-bordered table-hover" id="tbl_allTicket">
+                            <thead>
+                                <tr>
+
+                                    <th>
+                                        Booking No.
+                                    </th>
+                                    <th>
+                                        Place Name
+                                    </th>
+                                    <th>
+                                        Total Member
+                                    </th>
+                                    <th>
+                                        Arrival Date
+                                    </th>
+                                    <th>
+                                        Paid Amount
+                                    </th>
+
+                                    <th>
+                                        Approval Status
+                                    </th>
+                                    <th>
+                                        Action
+                                    </th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in ViewData["ticketlist"] as IEnumerable<FMDSS.Models.BookOnlineTicket.BookOnTicket>)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(model => item.EmitraTransactionId)
+
+                                            @Html.HiddenFor(model => item.TicketID)
+
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.PlaceName)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.TotalMember)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.DateOfArrival)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.TotalAmount)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.CancleTicketStatusName)
+                                        </td>
+                                        <td>
+                                            @if (item.CancleTicketStatus == 2)
+                                            {
+
+                                                <a href='@Url.Action("PayHalfDayFullDay", "BookOnlineTicket", new { RequestID = Encryption.encrypt(Convert.ToString(item.EmitraTransactionId)), TotalAmount = Encryption.encrypt(Convert.ToString(item.TotalAmount)) })'>
+                                                    Payment
+                                                </a>
+                                                <br />
+
+                                            }
+
+                                            @if (item.CancleTicketStatus == 1)
+                                            {
+                                                <a href='@Url.Action("PrintWildLifeTicket", "BookOnlineTicket", new { ticketid = Encryption.encrypt(Convert.ToString(item.TicketID)) })' target="_blank">
+                                                    Download
+                                                </a>
+                                            }
+                                            @if (item.COVIDStatus == 1 && item.TicketMemberBordingStatus == 0)
+                                            {
+                                                item.Old_RequestId = (item.Old_RequestId == null ? "" : item.Old_RequestId);
+
+
+                                                if (item.isDFOApproved == 0)
+                                                {
+                                                    <span style="color: #337ab7">&nbsp; | &nbsp;  </span>
+                                                    <span style="color: #337ab7">Pending For Approval</span>
+                                                }
+                                                else
+                                                {
+
+                                                    if (item.RefundStatus == 0 && item.RequestedId.Contains("C19") == false && Convert.ToDateTime(item.DateOfArrival) < ViewBag.mileStoneFromDate)
+                                                    {
+                                                        if (item.PlaceId != 63)
+                                                        {
+                                                            <a href='@Url.Action("CovidBookingHDFD", "BookOnlineTicket", new { ticketid = Encryption.encrypt(Convert.ToString(item.TicketID)) })'>
+                                                                <span style="color: #337ab7">&nbsp; | &nbsp;  </span>
+                                                                <span style="color: #337ab7"> CovidBooking</span>
+                                                            </a>
+                                                        }
+
+                                                        <span style="color: #337ab7">&nbsp; | &nbsp;  </span>
+                                                        <a onclick="TicketRefund('@Encryption.encrypt(Convert.ToString(item.TicketID))')" style="cursor:pointer;">
+                                                            Refund
+                                                        </a>
+                                                    }
+
+                                                }
+                                            }
+                                            @{
+                                                item.Old_RequestId = (item.OldRequestID == null ? "" : item.OldRequestID);
+                                                if (item.RefundStatus == 0 && item.Old_RequestId.Length == 0 && item.PlaceId == 65 && Convert.ToDateTime(item.DateOfArrival) >= ViewBag.mileStoneFromDate)
+                                                {
+                                                    <a href='@Url.Action("RefundRequest", "RefundPayment", new { ticketid = Encryption.encrypt(Convert.ToString(item.TicketID)),TypeOfActions="1",xctz="Q2l0aXplbg==",fhdfdhddf="dHJ1ZQ==" })'>
+                                                        <span style="color: #337ab7"> Refund</span>
+                                                    </a>
+                                                    if (Convert.ToDateTime(item.DateOfArrival) > ViewBag.CurrentDate)
+                                                    {
+                                                        <span style="color: #337ab7">&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+                                                        <a href='@Url.Action("ReScheduleBookingHDFD", "BookOnlineTicket", new { ticketid = Encryption.encrypt(Convert.ToString(item.TicketID)) })'>
+                                                            <span style="color: #337ab7"> Re-Schedule</span>
+                                                        </a>
+                                                    }
+                                                }
+                                            }
+                                        </td>
+
+
+
+                                    </tr>
+
+                                }
+
+
+                            </tbody>
+                        </table>
+
+                        <table id="tbl_tkt">
+                            <tbody></tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function AddBankDetail() {
+        window.open('/RefundPayment/PartialRefundRequestList', '_self');
+    }
+</script>

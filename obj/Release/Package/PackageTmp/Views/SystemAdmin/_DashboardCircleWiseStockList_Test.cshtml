@@ -1,0 +1,680 @@
+﻿@model FMDSS.Models.Admin.NurseryStockSummary
+@*<link href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet" />*@
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+@*<link rel="stylesheet" href="/resources/demos/style.css">*@
+
+<style>
+    .a1 {
+        border: 2px solid #999999;
+    }
+
+    .accordion, .accordion1, .accordion2, .accordion3, .accordion4 :hover {
+        cursor: pointer;
+    }
+</style>
+
+
+<div class="panel panel-default" style="margin-top:2%">
+    <div class="panel-heading" style="height:150px;">
+        <div class="col-md-12">
+            <table class="table table-responsive">
+                <tr>
+                    <td colspan="3"><strong>Total Nurseries Count - @(Model.Nursery_Count == "" ? "0" : Model.Nursery_Count)</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>Plants Available For Distribution - @(Model.Citizen_Stock_GrandTotal == "" ? "0" : Model.Citizen_Stock_GrandTotal)</strong></td>
+                    <td><strong>Plants Available For Departmental Use - @(Model.Dept_Stock_GrandTotal == "" ? "0" : Model.Dept_Stock_GrandTotal)</strong></td>
+                    <td><strong>Total Available Plants - @(Model.GrandTotalStock == "" ? "0" : Model.GrandTotalStock)</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>Plants Used For Distribution - @(Model.Citizen_StockOut_GrandTotal == "" ? "0" : Model.Citizen_StockOut_GrandTotal)</strong></td>
+                    <td><strong>Plants Used For Departmental - @(Model.Dept_StockOut_GrandTotal == "" ? "0" : Model.Dept_StockOut_GrandTotal)</strong></td>
+                    <td><strong>Total Used Plants - @(Model.GrandTotalStockOut == "" ? "0" : Model.GrandTotalStockOut)</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>Remaining Plants For Distribution - @(Model.Citizen_RemainingQTY_GrandTotal == "" ? "0" : Model.Citizen_RemainingQTY_GrandTotal)</strong></td>
+                    <td><strong>Remaining Plants For Departmental Use - @(Model.Dept_RemainingQTY_GrandTotal == "" ? "0" : Model.Dept_RemainingQTY_GrandTotal)</strong></td>
+                    <td><strong>Total Remaining Plants - @(Model.GrandTotalRemainingQTY == "" ? "0" : Model.GrandTotalRemainingQTY)</strong></td>
+                </tr>
+            </table>
+            @*<div class="col-md-6"><strong>Total Nurseries Count - @Model.Nursery_Count</strong></div>
+                <div class="col-md-6"><strong>Total Citizen Stock - @Model.Citizen_Stock_GrandTotal</strong></div>
+                <div class="col-md-6"><strong>Total Department Stock - @Model.Dept_Stock_GrandTotal</strong></div>
+                <div class="col-md-6"><strong>Total Citizen Stock Out - @Model.Citizen_StockOut_GrandTotal</strong></div>
+                <div class="col-md-6"><strong>Total Department Stock Out - @Model.Dept_StockOut_GrandTotal</strong></div>*@
+
+        </div>
+    </div>
+    <div class="panel-body">
+        <div class="col-md-12" style="margin-top:2%;">
+            <p style="font-weight:bold;color:red!important;float:right; border:1px solid black;padding:5px;">
+                @*@Html.ActionLink("Export To Excel", "ExportToExcel")*@
+
+                @Html.ActionLink("Export To Excel", "ExportToExcelNurseryStockCircleList", new { Flag = "CircleWise", fromDate = Model.fromDate, toDate = Model.toDate, ModuleId = 8, FinacialYear = Model.FinacialYear }, new { @class = "excelExportCircleList" })
+
+                @*@Html.ActionLink("Export To PDF", "ExportReports", new { isPdfExport = true, Parameter1 = "_Parameter1", Parameter2 = "_Parameter2" }, new { @class = "pdfbtn" })*@
+
+                @*<button id="btnExportToExcel">Export To Excel</button>*@
+            </p>
+
+            <div>
+                <table class="table table-striped table-bordered table-hover table-responsive research" id="firstTbl">
+                    <thead>
+                        <tr>
+                            <th>Circle Name</th>
+                            <th>Total Nursery</th>
+                            <th>Plants Available For Distribution</th>
+                            <th>Plants Available For Departmental Use</th>
+                            <th>Total Available Plants</th>
+                            <th>Plants Used For Distribution</th>
+                            <th>Plants Used For Departmental</th>
+                            <th>Total Used Plants</th>
+                            @*<th>Plants Remaining For Distribution</th>
+                                <th>Plants Remaining For Departmental</th>
+                                <th>Total Remaining plants</th>*@
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.CircleWise != null)
+                        {
+                            var i = 0;
+                            //var Citizen_Stock_GrandTotal1 = 0;
+                            //var Dept_Stock_GrandTotal1 = 0;
+                            //var Citizen_StockOut_GrandTotal1 = 0;
+                            //var Dept_StockOut_GrandTotal1 = 0;
+                            foreach (var item in Model.CircleWise)
+                            {
+                                i++;
+                                <tr class="accordion" id="CIR_@i">
+                                    <td>@item.CIRCLE_NAME</td>
+                                    <th>@item.Nursery_Count</th>
+                                    <td>@item.Citizen_StockTotal</td>
+                                    <td>@item.Dept_StockTotal</td>
+                                    <td>@item.Total_StockTotal</td>
+                                    <td>@item.Citizen_StockOut</td>
+                                    <td>@item.Dept_StockOut</td>
+                                    <td>@item.Total_StockOut</td>
+                                    @*<td>@item.Citizen_RemainingQTY</td>
+                                        <td>@item.Dept_RemainingQTY</td>
+                                        <td>@item.Total_RemainingQty</td>*@
+                                </tr>
+                                i++;
+                                <tr class="fold_CIR" id="CIR_@i" hidden="hidden">
+                                    <td colspan="8" style="box-shadow:inset 0px 1px 5px 2px #c3c3c3">
+                                        <p style="padding:5px;background-color:#f1f1f1">@item.CIRCLE_NAME <span style="float:right;cursor:pointer" onclick="RemoveBlock('CIR_@i')"><i class="fa fa-remove fa-2x"></i></span></p>
+                                        <p style="font-weight:bold;color:red!important;float:right; border:1px solid black;padding:5px;">
+                                            @Html.ActionLink("Export To Excel", "ExportToExcelNurseryStockCircleList", new { Flag = "DivisionWise", Code = item.CIRCLE_CODE, fromDate = Model.fromDate, toDate = Model.toDate, ModuleId = 8, FinacialYear = Model.FinacialYear }, new { @class = "excelExportCircleList" })
+                                        </p>
+                                        <table class="table table-striped table-bordered table-hover table-responsive research1" id="secondTbl">
+                                            <thead>
+                                                <tr>
+                                                    <th>Division Name</th>
+                                                    <th>Total Nursery</th>
+                                                    <th>Plants Available For Distribution</th>
+                                                    <th>Plants Available For Departmental Use</th>
+                                                    <th>Total Available Plants</th>
+                                                    <th>Plants Used For Distribution</th>
+                                                    <th>Plants Used For Departmental</th>
+                                                    <th>Total Used Plants</th>
+                                                    @*<th>Plants Remaining For Distribution</th>
+                                                        <th>Plants Remaining For Departmental</th>
+                                                        <th>Total Remaining plants</th>*@
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @if (Model.DivWise != null)
+                                                {
+                                                    var j = 0;
+                                                    foreach (var item1 in Model.DivWise.AsEnumerable().Where(x => x.CIRCLE_CODE == item.CIRCLE_CODE).ToList())
+                                                    {
+                                                        j++;
+                                                        var strId = i + "_" + j;
+                                                        <tr class="accordion1" id="DIV_@strId">
+                                                            <td>@item1.DIV_NAME</td>
+                                                            <th>@item1.Nursery_Count</th>
+                                                            <td>@item1.Citizen_StockTotal</td>
+                                                            <td>@item1.Dept_StockTotal</td>
+                                                            <td>@item1.Total_StockTotal</td>
+                                                            <td>@item1.Citizen_StockOut</td>
+                                                            <td>@item1.Dept_StockOut</td>
+                                                            <td>@item1.Total_StockOut</td>
+                                                            @*<td>@item1.Citizen_RemainingQTY</td>
+                                                                <td>@item1.Dept_RemainingQTY</td>
+                                                                <td>@item1.Total_RemainingQty</td>*@
+                                                        </tr>
+                                                        j++;
+                                                        strId = i + "_" + j;
+                                                        <tr class="fold_DIV" id="DIV_@strId" hidden="hidden">
+                                                            <td colspan="8" style="box-shadow:inset 0px 1px 5px 2px #c3c3c3">
+                                                                <p style="padding:5px;background-color:#f1f1f1">@item1.DIV_NAME <span style="float:right;cursor:pointer" onclick="RemoveBlock('DIV_@strId')"><i class="fa fa-remove fa-2x"></i></span></p>
+                                                                <p style="font-weight:bold;color:red!important;float:right; border:1px solid black;padding:5px;">
+                                                                    @Html.ActionLink("Export To Excel", "ExportToExcelNurseryStockCircleList", new { Flag = "RangeWise", Code = item1.DIV_CODE, fromDate = Model.fromDate, toDate = Model.toDate, ModuleId = 8, FinacialYear = Model.FinacialYear }, new { @class = "excelExportCircleList" })
+                                                                </p>
+                                                                <table class="table table-striped table-bordered table-hover table-responsive research2" id="thirdTbl">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Range Name</th>
+                                                                            <th>Total Nursery</th>
+                                                                            <th>Plants Available For Distribution</th>
+                                                                            <th>Plants Available For Departmental Use</th>
+                                                                            <th>Total Available Plants</th>
+                                                                            <th>Plants Used For Distribution</th>
+                                                                            <th>Plants Used For Departmental</th>
+                                                                            <th>Total Used Plants</th>
+                                                                            @*<th>Plants Remaining For Distribution</th>
+                                                                                <th>Plants Remaining For Departmental</th>
+                                                                                <th>Total Remaining plants</th>*@
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        @if (Model.RangWise != null)
+                                                                        {
+                                                                            var k = 0;
+
+                                                                            foreach (var item2 in Model.RangWise.AsEnumerable().Where(x => x.DIV_CODE == item1.DIV_CODE).ToList())
+                                                                            {
+                                                                                k++;
+                                                                                var strIdNew = i + "_" + j + "_" + k;
+                                                                                <tr class="accordion2" id="RANG_@strIdNew">
+                                                                                    <td>@item2.RANG_NAME</td>
+                                                                                    <th>@item2.Nursery_Count</th>
+                                                                                    <td>@item2.Citizen_StockTotal</td>
+                                                                                    <td>@item2.Dept_StockTotal</td>
+                                                                                    <td>@item2.Total_StockTotal</td>
+                                                                                    <td>@item2.Citizen_StockOut</td>
+                                                                                    <td>@item2.Dept_StockOut</td>
+                                                                                    <td>@item2.Total_StockOut</td>
+                                                                                    @*<td>@item2.Citizen_RemainingQTY</td>
+                                                                                        <td>@item2.Dept_RemainingQTY</td>
+                                                                                        <td>@item2.Total_RemainingQty</td>*@
+                                                                                </tr>
+                                                                                k++;
+                                                                                strIdNew = i + "_" + j + "_" + k;
+                                                                                <tr class="fold_RANG" id="RANG_@strIdNew" hidden="hidden">
+                                                                                    <td colspan="8" style="box-shadow:inset 0px 1px 5px 2px #c3c3c3">
+                                                                                        <p style="padding:5px;background-color:#f1f1f1">@item2.RANG_NAME <span style="float:right;cursor:pointer" onclick="RemoveBlock('RANG_@strIdNew')"><i class="fa fa-remove fa-2x"></i></span></p>
+                                                                                        <p style="font-weight:bold;color:red!important;float:right; border:1px solid black;padding:5px;">
+                                                                                            @Html.ActionLink("Export To Excel", "ExportToExcelNurseryStockCircleList", new { Flag = "NurseryWise", Code = item2.RANG_CODE, fromDate = Model.fromDate, toDate = Model.toDate, ModuleId = 8, FinacialYear = Model.FinacialYear }, new { @class = "excelExportCircleList" })
+                                                                                        </p>
+
+                                                                                        <table class="table table-striped table-bordered table-hover table-responsive research3" id="fourthTbl">
+                                                                                            <thead>
+                                                                                                <tr>
+                                                                                                    <th>Nursery Name</th>
+                                                                                                    <th>Plants Available For Distribution</th>
+                                                                                                    <th>Plants Available For Departmental Use</th>
+                                                                                                    <th>Total Available Plants</th>
+                                                                                                    <th>Plants Used For Distribution</th>
+                                                                                                    <th>Plants Used For Departmental</th>
+                                                                                                    <th>Total Used Plants</th>
+                                                                                                    @*<th>Plants Remaining For Distribution</th>
+                                                                                                        <th>Plants Remaining For Departmental</th>
+                                                                                                        <th>Total Remaining plants</th>*@
+                                                                                                </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                                @if (Model.NurseryWise != null)
+                                                                                                {
+                                                                                                    var l = 0;
+                                                                                                    foreach (var item3 in Model.NurseryWise.AsEnumerable().Where(x => x.RANG_CODE == item2.RANG_CODE).ToList())
+                                                                                                    {
+                                                                                                        l++;
+                                                                                                        var strIdLast = i + "_" + j + "_" + k + "_" + l;
+                                                                                                        <tr class="accordion3" id="NUR_@strIdLast">
+                                                                                                            <td>@item3.NURSERY_NAME</td>
+                                                                                                            <td>@item3.Citizen_StockTotal</td>
+                                                                                                            <td>@item3.Dept_StockTotal</td>
+                                                                                                            <td>@item3.Total_StockTotal</td>
+                                                                                                            <td>@item3.Citizen_StockOut</td>
+                                                                                                            <td>@item3.Dept_StockOut</td>
+                                                                                                            <td>@item3.Total_StockOut</td>
+                                                                                                            @*<td>@item3.Citizen_RemainingQTY</td>
+                                                                                                                <td>@item3.Dept_RemainingQTY</td>
+                                                                                                                <td>@item3.Total_RemainingQty</td>*@
+                                                                                                        </tr>
+                                                                                                        l++;
+                                                                                                        strIdLast = i + "_" + j + "_" + k + "_" + l;
+                                                                                                        <tr class="fold_RANG" id="NUR_@strIdLast" hidden="hidden">
+                                                                                                            <td colspan="8" style="box-shadow:inset 0px 1px 5px 2px #c3c3c3">
+                                                                                                                <p style="padding:5px;background-color:#f1f1f1">@item3.NURSERY_NAME <span style="float:right;cursor:pointer" onclick="RemoveBlock('NUR_@strIdLast')"><i class="fa fa-remove fa-2x"></i></span></p>
+                                                                                                                <p style="font-weight:bold;color:red!important;float:right; border:1px solid black;padding:5px;">
+                                                                                                                    @Html.ActionLink("Export To Excel", "ExportToExcelNurseryStockCircleList", new { Flag = "ProductWise", Code = item3.NURSERY_CODE, fromDate = Model.fromDate, toDate = Model.toDate, ModuleId = 8, FinacialYear = Model.FinacialYear }, new { @class = "excelExportCircleList" })
+                                                                                                                </p>
+                                                                                                                <table class="table table-striped table-bordered table-hover table-responsive research4" id="fiveTbl">
+                                                                                                                    <thead>
+                                                                                                                        <tr>
+                                                                                                                            <th>Product Name</th>
+                                                                                                                            <th>Plants Available For Distribution</th>
+                                                                                                                            <th>Plants Available For Departmental Use</th>
+                                                                                                                            <th>Total Available Plants</th>
+                                                                                                                            <th>Plants Used For Distribution</th>
+                                                                                                                            <th>Plants Used For Departmental</th>
+                                                                                                                            <th>Total Used Plants</th>
+                                                                                                                            @*<th>Plants Remaining For Distribution</th>
+                                                                                                                                <th>Plants Remaining For Departmental</th>
+                                                                                                                                <th>Total Remaining plants</th>*@
+                                                                                                                        </tr>
+                                                                                                                    </thead>
+                                                                                                                    <tbody>
+                                                                                                                        @if (Model.ProductWise != null)
+                                                                                                                        {
+                                                                                                                            var m = 0;
+                                                                                                                            foreach (var item4 in Model.ProductWise.AsEnumerable().Where(x => x.NURSERY_CODE == item3.NURSERY_CODE).ToList())
+                                                                                                                            {
+                                                                                                                                m++;
+                                                                                                                                <tr class="accordion4" id="PRD_@m">
+                                                                                                                                    <td>@item4.ProductName</td>
+                                                                                                                                    <td>@item4.Citizen_StockTotal</td>
+                                                                                                                                    <td>@item4.Dept_StockTotal</td>
+                                                                                                                                    <td>@item4.Total_StockTotal</td>
+                                                                                                                                    <td>@item4.Citizen_StockOut</td>
+                                                                                                                                    <td>@item4.Dept_StockOut</td>
+                                                                                                                                    <td>@item4.Total_StockOut</td>
+                                                                                                                                    @*<td>@item4.Citizen_RemainingQTY</td>
+                                                                                                                                        <td>@item4.Dept_RemainingQTY</td>
+                                                                                                                                        <td>@item4.Total_RemainingQty</td>*@
+                                                                                                                                </tr>
+                                                                                                                                @*m++;
+                                                                                                                                    <tr class="fold_RANG" id="NUR_@l" hidden="hidden">
+                                                                                                                                        <td colspan="5">
+                                                                                                                                            Product Block
+                                                                                                                                        </td>
+                                                                                                                                    </tr>*@
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                    </tbody>
+                                                                                                                </table>
+
+                                                                                                            </td>
+                                                                                                        </tr>
+                                                                                                    }
+                                                                                                }
+                                                                                            </tbody>
+                                                                                        </table>
+
+                                                                                    </td>
+                                                                                </tr>
+                                                                            }
+                                                                        }
+                                                                    </tbody>
+                                                                </table>
+
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+
+                                    </td>
+                                </tr>
+
+                            }
+
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+            @*<div>
+                        Circle 1
+                        <h3>Div1</h3>
+                        <div>
+                            <p>
+                                dsfh sdjklfsdf sdjfsdf
+                            </p>
+                        </div>
+
+                    </div>
+                    <h3>Circle 2</h3>
+                    <div id="accordion-1">
+                        Circle 2
+                        <h3>Div1</h3>
+                        <div>
+                            <p>
+                                dsfh sdjklfsdf sdjfsdf
+                            </p>
+                        </div>
+                        <h3>Div2</h3>
+                        <div>
+                            <p>
+                                dsfh sdjklfsdf sdjfsdf
+                            </p>
+                        </div>
+                        <h3>Div3</h3>
+                        <div>
+                            <p>
+                                dsfh sdjklfsdf sdjfsdf
+                            </p>
+                        </div>
+
+                    </div>
+                </div>*@
+
+            @*<div class="dataTable_wrapper">
+                    <table id="tree2" name="tblCircleList" cellpadding="0" cellspacing="0" class="table table-striped table-bordered table-hover table-responsive">
+                        <thead>
+                            <tr>
+                                <th>CIRCLE NAME</th>
+                                <th>Citizen Total Stock</th>
+                                <th>Department Total Stock</th>
+                                <th>Citizen Total Stock Out</th>
+                                <th>Departmrnt Total Stock Out</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null)
+                            {
+                            foreach (var item in Model)
+                            {
+                            <tr>
+                                <td width="50%"><a href="#" class="parentanch" onclick="return showDashboardDetail('Offence', '@item.CIRCLE_CODE', 'OffenceDivisionList', this,'0,1,16,17', '@item.CIRCLE_NAME')">@item.CIRCLE_NAME-@item.TotalCount</a></td>
+                                <td width="15%"><a href="javascript:void(0)" style="cursor:pointer;" onclick="return showDashboardDetail('Offence', '@item.CIRCLE_CODE', 'OffenceDivisionList', this,'0,1','@item.CIRCLE_NAME')"> @item.Citizen_StockTotal</a></td>
+                                <td width="15%"><a href="javascript:void(0)" style="cursor:pointer;" onclick="return showDashboardDetail('Offence', '@item.CIRCLE_CODE', 'OffenceDivisionList', this,'16', '@item.CIRCLE_NAME')"> @item.Dept_StockTotal</a></td>
+                                <td width="10%"><a href="javascript:void(0)" style="cursor:pointer;" onclick="return showDashboardDetail('Offence', '@item.CIRCLE_CODE', 'OffenceDivisionList', this,'17', '@item.CIRCLE_NAME')"> @item.Citizen_StockOut</a></td>
+                                <td width="10%"><a href="javascript:void(0)" style="cursor:pointer;" onclick="return showDashboardDetail('Offence', '@item.CIRCLE_CODE', 'OffenceDivisionList', this,'0,1,16', '@item.CIRCLE_NAME')"> @item.Dept_StockOut</a></td>
+                            </tr>
+                            <tr id="@item.CIRCLE_CODE" style="display: none;" class="newboxes a1">
+                                <td colspan="5">
+                                    <div>
+                                        <div class="panel panel-default">
+                                            <button id="closeBtn_@item.CIRCLE_CODE" onclick="CloseChild(this)" ; style="float: right;border: 1px solid #444444; padding: 1px 5px;border-radius: 50%;margin: 8px 8px 0 0px;">X</button>
+                                            <div class="panel-heading" style="background-color:#dbdbdb;" id="dvHeading_@item.CIRCLE_CODE">
+                                                <strong>Circle Names</strong>
+                                            </div>
+                                            <div class="panel-body" id="dvContent_@item.CIRCLE_CODE">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            }
+                            }
+                        </tbody>
+                    </table>
+                </div>*@
+        </div>
+    </div>
+    @*<div class="panel-footer">
+            <a href="/MISProtection/OffenceReport" target="_blank" style="cursor:pointer;color:#337ab7;text-decoration:underline;">Click Here To View Offence Detail Report</a><br />
+            <a href="/MISProtection/OffenceSummaryQuarterReport" target="_blank" style="cursor:pointer;color:#337ab7;text-decoration:underline;">Click Here To View Offence Summary Quarter Report</a>
+        </div>*@
+</div>
+@*<link href="//cdn.datatables.net/1.10.9/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <script src="//cdn.datatables.net/1.10.9/js/jquery.dataTables.min.js"></script>*@
+
+
+<script src="~/js/bootstrap.min.js"></script>
+<script src="~/Content/dashboard.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+
+<script>
+
+    $(function () {
+        //$('#firstTbl').DataTable({
+        //    "pagingType": "full_numbers"
+        //});
+        //$('.dataTables_length').addClass('bs-select');
+        //$('#firstTbl').DataTable({
+        //    "paging": true,
+        //    "aLengthMenu": [[10, 25, 50, 75, 100, 500, -1], [10, 25, 50, 75, 100, 500, "All"]],
+        //    "iDisplayLength": 10,
+        //    "orderSequence": ["asc"],
+        //    "orderSequence": ["desc", "asc", "asc"],
+        //    "orderSequence": ["desc"]
+
+        //});
+
+        var $research = $('.research');
+        $research.find(".accordion").click(function () {
+            debugger;
+            var rowCountTbl1 = $('#firstTbl tr').length;
+            var id = $(this).attr("id");
+            var splitid = id.split('_');
+            var plusid = parseInt(splitid[1]) + 1;
+            for (var i = 0; i < rowCountTbl1; i++) {
+                if (i % 2 == 0) {
+                    $('#CIR_' + i).hide();
+
+                }
+            }
+            $('.fold_DIV').hide();
+            $('.fold_RANG').hide();
+            $('#CIR_' + plusid).show();
+        });
+        var $research1 = $('.research1');
+        $research1.find(".accordion1").click(function () {
+            debugger;
+            var rowCountTbl1 = $('#secondTbl tr').length;
+            var id = $(this).attr("id");
+            var splitid = id.split('_');
+            var plusid = parseInt(splitid[2]) + 1;
+            for (var i = 0; i < rowCountTbl1; i++) {
+                if (i % 2 == 0) {
+                    $('#' + splitid[0] + '_' + splitid[1] + '_' + i).hide();
+                }
+            }
+            $('#' + splitid[0] + '_' + splitid[1] + '_' + plusid).show();
+        });
+        var $research2 = $('.research2');
+        $research2.find(".accordion2").click(function () {
+            debugger;
+            var rowCountTbl1 = $('#thirdTbl tr').length;
+            var id = $(this).attr("id");
+            var splitid = id.split('_');
+            var plusid = parseInt(splitid[3]) + 1;
+            for (var i = 0; i < rowCountTbl1; i++) {
+                if (i % 2 == 0) {
+                    $('#' + splitid[0] + '_' + splitid[1] + '_' + splitid[2] + '_' + i).hide();
+                }
+            }
+            $('#' + splitid[0] + '_' + splitid[1] + '_' + splitid[2] + '_' + plusid).show();
+        });
+
+        var $research3 = $('.research3');
+        $research3.find(".accordion3").click(function () {
+            debugger;
+            var rowCountTbl1 = $('#fourthTbl tr').length;
+            var id = $(this).attr("id");
+            var splitid = id.split('_');
+            var plusid = parseInt(splitid[4]) + 1;
+            for (var i = 0; i < rowCountTbl1; i++) {
+                if (i % 2 == 0) {
+                    $('#' + splitid[0] + '_' + splitid[1] + '_' + splitid[2] + '_' + splitid[3] + '_' + i).hide();
+                }
+            }
+            $('#' + splitid[0] + '_' + splitid[1] + '_' + splitid[2] + '_' + splitid[3] + '_' + plusid).show();
+        });
+
+    });
+
+
+    function RemoveBlock(id) {
+        $('#' + id).hide();
+    }
+
+</script>
+
+<script type="text/javascript">
+        $.fn.extend({
+            treed: function (o) {
+
+                var openedClass = 'glyphicon-minus-sign';
+                var closedClass = 'glyphicon-plus-sign';
+
+                if (typeof o != 'undefined') {
+                    if (typeof o.openedClass != 'undefined') {
+                        openedClass = o.openedClass;
+                    }
+                    if (typeof o.closedClass != 'undefined') {
+                        closedClass = o.closedClass;
+                    }
+                };
+
+                //initialize each of the top levels
+                var tree = $(this);
+                // tree.addClass("tree");
+                tree.find('li').has("ul").each(function () {
+                    var branch = $(this); //li with children ul
+                    branch.prepend("<i class='indicator glyphicon " + closedClass + "'></i>");
+                    branch.addClass('branch');
+                    branch.on('click', function (e) {
+                        if (this == e.target) {
+                            var icon = $(this).children('i:first');
+                            icon.toggleClass(openedClass + " " + closedClass);
+                            $(this).children().children().toggle();
+                        }
+                    })
+                    branch.children().children().toggle();
+                });
+                //fire event from the dynamically added icon
+                tree.find('.branch .indicator').each(function () {
+                    $(this).on('click', function () {
+                        $(this).closest('li').click();
+                    });
+                });
+                //fire event to open branch if the li contains an anchor instead of text
+                tree.find('.branch>a').each(function () {
+                    $(this).on('click', function (e) {
+                        $(this).closest('li').click();
+                        e.preventDefault();
+                    });
+                });
+                //fire event to open branch if the li contains a button instead of text
+                tree.find('.branch>button').each(function () {
+                    $(this).on('click', function (e) {
+                        $(this).closest('li').click();
+                        e.preventDefault();
+                    });
+                });
+            }
+
+        });
+
+        //Initialization of treeviews
+
+        $('#tree2').treed({ openedClass: 'fa fa-minus-circle', closedClass: 'fa fa-plus-circle' });
+
+        var RootUrl = '@Url.Content("~/")';
+        function showDashboardDetail(moduleName, parentID, type, cntrlID, status, circlename) {
+            var divcontentname = '#dvContent_' + parentID;
+            var divheadingname = '#dvHeading_' + parentID;
+            var offenceId = $("#ddlOffence").val() | 0;
+            var name = circlename;// $(cntrlID).closest('li.branch').find('.parentanch').html(); //$(cntrlID).text();
+            $('#hfStatus').val('');
+            $('#hfStatus').val(status);
+            //var fromdate = $('#hfFromDate').val();
+            //var todate = $('#hfToDate').val();
+            var fromdate = $('#FromDate0').val();
+            var todate = $('#ToDate0').val();
+            $.ajax({
+                type: 'GET',
+                url: RootUrl + 'SystemAdmin/GetDashboardDetails', // we are calling json method
+                dataType: 'html',
+                data: { moduleName: moduleName, parentID: parentID, type: type, status: status, fromDate: fromdate, toDate: todate, OffenceId: offenceId },
+                success: function (data) {
+                    $('.newboxes').each(function (index) {
+                        if ($(this).attr("id") == parentID) {
+                            $(this).show();
+                        }
+                        else {
+                            $(this).hide();
+                        }
+                    });
+
+
+                    $(divcontentname).html(data);
+                    if ($(cntrlID).hasClass('parentanch')) {
+                        $(divheadingname).html('<strong>' + name + '</strong>')
+                    }
+                    else {
+                        var currentname = $(cntrlID).text();
+                        name = name + ' / ' + currentname;
+                        $(divheadingname).html('<strong>' + name + '</strong>')
+                    }
+
+                },
+                error: function (ex) {
+                    alert(ex.error);
+                }
+            });
+
+        }
+
+        function CloseChild(childId) {
+            var id = $(childId).attr('id');
+            var spl = id.split('_');
+
+            $('#' + spl[1] + '').hide();
+        }
+        $('.excelExportCircleList').attr('href', function () {
+
+            var fromdate = $('#FromDate0').val();
+            var todate = $('#ToDate0').val();
+            var ddlOffence = $('#ddlOffence').val() | 0;
+            return this.href.replace("_fromDate", fromdate).replace("_toDate", todate).replace("_ModuleId", 1).replace("_offence_category", ddlOffence);
+        });
+        $(document).ready(function () {
+
+            //$('.pdfbtn').attr('href', function () {
+            //    return this.href.replace('_Parameter1', Value1).replace('_Parameter2', Value2);
+            //});
+            //$('#btnExportCirclewise').click(function () {
+            //    var fromdate = $('#FromDate0').val();
+            //    var todate = $('#ToDate0').val();
+            //    var ddlOffence = $('#ddlOffence').val();
+            //    $('#hfFromDate').val(fromdate);
+            //    $('#hfToDate').val(todate);
+            //    $('#dvContent').html('');
+            //    var downloadUrl = RootUrl + 'SystemAdmin/ExportToExcel';
+            //    $.ajax({
+            //        type: 'POST',
+            //        url: RootUrl + 'SystemAdmin/ExportToExcel', // we are calling json method
+            //        contentType: 'application/json',
+            //        dataType: 'json',
+            //        data: { fromDate: fromdate, toDate: todate },
+            //        success: function (result) {
+            //            alert(result.d);
+            //            //should i do any thing here?
+            //        },
+            //        error: function (error) {
+            //            alert("error");
+            //        }
+            //    });
+            //});
+        })
+                //    $(".table-sortable").dataTable({
+                //        aaSorting: [[2, 'asc']],
+                //        bPaginate: false,
+                //        bFilter: false,
+                //        bInfo: false,
+                //        bSortable: true,
+                //        bRetrieve: true,
+                //        aoColumnDefs: [
+                //            { "aTargets": [0], "bSortable": true },
+                //            { "aTargets": [1], "bSortable": true },
+                //            { "aTargets": [2], "bSortable": true },
+                //            { "aTargets": [3], "bSortable": false }
+                //        ]
+                //    });
+
+</script>
+
+@*<script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#fiveTbl').DataTable({
+            "pagingType": "full_numbers"
+        });
+    });
+</script>*@
+
+
+
+
+

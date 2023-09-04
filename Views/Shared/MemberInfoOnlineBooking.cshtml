@@ -1,0 +1,490 @@
+﻿@model  List<FMDSS.Models.BookOnlineTicket.BookOnTicket>
+
+<style>
+    .MemberSLNo {
+        /*width: 80% !important;*/
+        width: 100% !important;
+        text-align: center;
+    }
+
+    .MemberTotalCamera {
+        width: 80% !important;
+        text-align: center;
+    }
+
+    .MemberFees {
+        width: 80% !important;
+        text-align: center;
+    }
+
+    .MemberCameraFees {
+        width: 80% !important;
+        text-align: center;
+    }
+
+    .TotalBoardingFee {
+        width: 85% !important;
+        text-align: center;
+    }
+    .BoardingVehicleFeeGSTPercentage {
+        width: 80% !important;
+        text-align: center;
+    }
+
+
+
+     .ad-scrolll {
+        height: 293px;
+        display: block;
+        overflow-y: auto !important;
+        overflow-x: hidden;
+        max-width: 100%;
+    }
+
+    #tblMemberInfo {
+        overflow-y: auto;
+        display: block;
+        width: 98%;
+    }
+
+        #tblMemberInfo > thead > tr > th {
+            width: auto !important;
+        }
+</style>
+<script type="text/javascript">
+
+
+
+    $(function (e) {
+        $('.MemberFees').text('0');
+        $('.MemberCameraFees').text('0');
+
+
+
+        //$('.MemberName').keypress(function (e) {
+        //    if (e.ctrlKey || e.altKey) {
+        //        e.preventDefault();
+        //    } else {
+        //        var key = (e.which) ? e.which : e.keyCode
+        //        if (e.shiftKey) {
+        //            if (key == 64 || key == 33 || key == 35 || key == 36 || key == 37 || key == 94 || key == 38 || key == 42 || key == 40 || key == 41) {
+        //                e.preventDefault();
+        //            }
+        //        }
+        //        if (!((key == 8) || (key == 32) || (key == 46) || (key >= 35 && key <= 40) || (key >= 65 && key <= 90) || (key >= 97 && key <= 122))) {
+        //            e.preventDefault();
+        //        }
+        //    }
+        //});
+
+    });
+</script>
+
+<div class="col-lg-12 pad">
+    <h4 id="hdMember" style="display:none;">Member Details</h4>
+    <span id="hdmessage" style="display:none;" class="mandatory">Please carry original photo ID at the time of entry. Any wrong Id will be treated as fake booking and will be prosecuted as per Law.</span>
+    <br /> <div id="hdGSTmessage" style=" color #337ab7;">  </div>
+
+
+</div>
+
+<div class="form-group un-bold">
+    <table id="tblMemberInfo" class="table table-striped table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>SL No</th>
+                <th>Name</th>
+                <th>Gender</th>
+                <th>Nationality</th>
+                <th>IDType</th>
+                <th>IDNo</th>
+                <th>Video Camera</th>
+                <th>Fees Per Member(INR)</th>
+                <th>Total Camera Fees(INR)</th>
+                <th>Total Guide & Vehicle Rent(INR)</th>
+                @if (Model.FirstOrDefault().Is_PNR_NO == 1)
+                {
+                    <th>PNR No.</th>
+                }
+                @if (Model.FirstOrDefault().Is_Seat_NO == 1)
+                {
+                    <th>Seat No.</th>
+                }
+                @if (Model.FirstOrDefault().Is_Room_No == 1)
+                {
+                    <th>Room No.</th>
+                }
+            </tr>
+        </thead>
+        <tbody id="tbdMemberInfo">
+
+            @if (Model != null)
+            {
+                for (var i = 0; i < Model.Count(); i++)
+                {
+                    var abc = "trRow" + @i;
+            <tr id="@abc">
+                <td>@Html.TextBoxFor(model => model[i].MemberSLNo, new { id = "MemberSLNo" + i, @class = "MemberSLNo", @Value = i + 1, @readonly = "readonly" })</td>
+                <td>@Html.TextBoxFor(model => model[i].MemberName, new { id = "MemberName" + i, @class = "MemberName", @maxlength = "100" })</td>
+                <td>
+                    @Html.DropDownListFor(model => model[i].MemberGender, new List<SelectListItem>
+                            {
+                                new SelectListItem { Text = "--Select--", Value = "0"},
+                                new SelectListItem { Text = "Male", Value = "1"},
+                                new SelectListItem { Text = "Female", Value = "2"},
+                                new SelectListItem { Text = "Transgender", Value = "3"},
+                            }, new { id = "MemberGender" + i, @class = "MemberGender" })
+                </td>
+
+                <td>
+                    @Html.DropDownListFor(model => model[i].MemberNationality, new List<SelectListItem>
+                            {
+                                new SelectListItem { Text = "--Select--", Value = "0"},
+                                new SelectListItem { Text = "Indian", Value = "1"},
+                                new SelectListItem { Text = "Foreigner", Value = "2"},
+                            }, new { id = "MemberNationality" + i, @class = "MemberNationality" })
+                </td>
+
+                <td>
+                    @Html.DropDownListFor(model => model[i].MemberIdType, new List<SelectListItem>
+                            {
+                                new SelectListItem { Text = "--Select--", Value = "0"},
+                                new SelectListItem { Text = "Passport", Value = "1"},
+                                new SelectListItem { Text = "Aadhar", Value = "2"},
+                                new SelectListItem { Text = "Driving Licence", Value = "3"},
+                                new SelectListItem { Text = "Voter ID", Value = "4"},
+                                new SelectListItem { Text = "PAN Card", Value = "5"},
+                                new SelectListItem { Text = "Office ID", Value = "6"},
+                                new SelectListItem { Text = "Student ID", Value = "7"},
+                            }, new { id = "MemberIdType" + i, @class = "MemberIdType" })
+                </td>
+                <td class="IdNo">@Html.TextBoxFor(model => model[i].MemberIdNo, new { id = "MemberIdNo" + i, @class = "MemberIdNo", @maxlength = "50" })</td>
+                <td>@Html.TextBoxFor(model => model[i].MemberTotalCamera, new { id = "MemberTotalCamera" + i, @class = "MemberTotalCamera", @maxlength = "1" })</td>
+
+                <td>@Html.TextBoxFor(model => model[i].TotalPerMemberFees, new { id = "MemberFees" + i, @class = "MemberFees", @readonly = "readonly" }) </td>
+
+                <td>@Html.TextBoxFor(model => model[i].TotalPerMemberCameraFees, new { id = "MemberCameraFees" + i, @class = "MemberCameraFees", @readonly = "readonly" })</td>
+
+
+                <td> @Html.TextBoxFor(model => model[i].TotalBoardingFee, new { id = "TotalBoardingFee" + i, @class = "TotalBoardingFee", @readonly = "readonly" }) </td>
+
+                <td style="display:none;">
+                    @Html.TextBoxFor(model => model[i].MemberFees_TigerProject, new { id = "MemberFees_TigerProject" + i, @class = "MemberFees_TigerProject" })
+                </td>
+
+                <td style="display:none;">
+                    @Html.TextBoxFor(model => model[i].MemberFees_Surcharge, new { id = "MemberFees_Surcharge" + i, @class = "MemberFees_Surcharge" })
+                </td>
+                <td style="display:none;">
+                    @Html.TextBoxFor(model => model[i].CameraFees_TigerProject, new { id = "CameraFees_TigerProject" + i, @class = "CameraFees_TigerProject" })
+                </td>
+                <td style="display:none;">
+                    @Html.TextBoxFor(model => model[i].CameraFees_Surcharge, new { id = "CameraFees_Surcharge" + i, @class = "CameraFees_Surcharge" })
+                </td>
+                <td style="display:none;">
+                    @Html.TextBoxFor(model => model[i].TRDF, new { id = "TRDF" + i, @class = "TRDF" })
+
+                    @Html.TextBoxFor(model => model[i].BoardingVehicleFee, new { id = "BoardingVehicleFee" + i, @class = "BoardingVehicleFee" })
+                    @Html.TextBoxFor(model => model[i].BoardingVehicleFeeGSTPercentage, new { id = "BoardingVehicleFeeGSTPercentage" + i, @class = "BoardingVehicleFeeGSTPercentage" })
+                    @Html.TextBoxFor(model => model[i].BoardingVehicleFeeGSTAmount, new { id = "BoardingVehicleFeeGSTAmount" + i, @class = "BoardingVehicleFeeGSTAmount" })
+                    @Html.TextBoxFor(model => model[i].BoardingGuideFee, new { id = "BoardingGuideFee" + i, @class = "BoardingGuideFee" })
+                    @Html.TextBoxFor(model => model[i].BoardingGuideFeeGSTPercentage, new { id = "BoardingGuideFeeGSTPercentage" + i, @class = "BoardingGuideFeeGSTPercentage" })
+                    @Html.TextBoxFor(model => model[i].BoardingGuideFeeGSTAmount, new { id = "BoardingGuideFeeGSTAmount" + i, @class = "BoardingGuideFeeGSTAmount" })
+                    @Html.TextBoxFor(model => model[i].Vehicle_TRDF, new { id = "Vehicle_TRDF" + i, @class = "Vehicle_TRDF" })
+                    @Html.TextBoxFor(model => model[i].GuidFee_TRDF, new { id = "GuidFee_TRDF" + i, @class = "GuidFee_TRDF" })
+
+                    @Html.Hidden("CemaraFeesPerRow" + i, new { @class = "CemaraFeesPerRow" })
+                </td>
+                @*Shaan added 30-03-2021*@
+                <td style="display:none;">
+                    @Html.TextBoxFor(model => model[i].Fees_TigerProjectHalfDayFullDayCharge, new { id = "Fees_TigerProjectHalfDayFullDayCharge" + i, @class = "Fees_TigerProjectHalfDayFullDayCharge" })
+                </td>
+                <td style="display:none;">
+                    @Html.TextBoxFor(model => model[i].Fee_SurchargeHalfDayFullDayCharge, new { id = "Fee_SurchargeHalfDayFullDayCharge" + i, @class = "Fee_SurchargeHalfDayFullDayCharge" })
+                </td>
+                @*End*@
+                @if (Model.FirstOrDefault().Is_PNR_NO == 1)
+                {
+                    <td>
+                        @Html.TextBoxFor(model => model[i].PNR_NO, new { id = "PNR_NO" + i, @class = "PNR_NO", @maxlength = "50" })
+                        @Html.HiddenFor(model => model[i].Is_PNR_NO, new { id = "Is_PNR_NO" + i, @class = "Is_PNR_NO" })
+                    </td>
+
+                }
+                @if (Model.FirstOrDefault().Is_Seat_NO == 1)
+                {
+                    <td>
+                        @Html.TextBoxFor(model => model[i].Seat_NO, new { id = "Seat_NO" + i, @class = "Seat_NO", @maxlength = "50" })
+                        @Html.HiddenFor(model => model[i].Is_Seat_NO, new { id = "Is_Seat_NO" + i, @class = "Is_Seat_NO" })
+                    </td>
+                }
+                @if (Model.FirstOrDefault().Is_Room_No == 1)
+                {
+                    <td>
+                        @Html.TextBoxFor(model => model[i].Room_No, new { id = "Room_No" + i, @class = "Room_No", @maxlength = "50" })
+                        @Html.HiddenFor(model => model[i].Is_Room_No, new { id = "Is_Room_No" + i, @class = "Is_Room_No" })
+                    </td>
+                }
+            </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+
+        $(".MemberNationality").on("change", function () {
+            var val = $(this).val();
+            var $currentevent = $(this);
+            var membertypeId = $(this).closest('tr').find('td').eq(4).find('select').attr('id');
+
+            if (val == '1') {
+                $('#' + membertypeId).empty();
+                $('#' + membertypeId).append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                $('#' + membertypeId).append('<option value="' + 1 + '">' + "Passport" + '</option>');
+                $('#' + membertypeId).append('<option value="' + 2 + '">' + "Aadhar" + '</option>');
+                $('#' + membertypeId).append('<option value="' + 3 + '">' + "Driving Licence" + '</option>');
+                $('#' + membertypeId).append('<option value="' + 4 + '">' + "Voter ID" + '</option>');
+                $('#' + membertypeId).append('<option value="' + 5 + '">' + "PAN Card" + '</option>');
+                $('#' + membertypeId).append('<option value="' + 6 + '">' + "Office ID" + '</option>');
+                $('#' + membertypeId).append('<option value="' + 7 + '">' + "Student ID" + '</option>');
+                $('#' + membertypeId).val('0');
+            }
+            else if (val == '2') {
+                $('#' + membertypeId).empty();
+                $('#' + membertypeId).append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                $('#' + membertypeId).append('<option value="' + 1 + '">' + "Passport" + '</option>');
+                $('#' + membertypeId).val('1');
+            }
+            FeePerMember($currentevent, val);
+        });
+
+        //$(".MemberNationality").bind('click focus', function () {
+        //    var id = $(this).attr('id');
+        //    //var idc= id.slice(-1);
+        //    var idc = id.substr(17, 2);
+        //    $('#' + id).bind("change", function () {
+        //        var val = $(this).val();
+        //        //$('#MemberCameraFees' + idc).val('');
+        //        //$('#MemberTotalCamera' + idc).val('');
+        //        $('#MemberCameraFees' + idc).val(0);
+        //        $('#MemberTotalCamera' + idc).val(0);
+        //        $('#MemberIdNo' + idc).val('');
+        //        if (val == '1') {
+        //            $('#MemberIdType' + idc).empty();
+        //            $('#MemberIdType' + idc).append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+        //            $('#MemberIdType' + idc).append('<option value="' + 1 + '">' + "Passport" + '</option>');
+        //            $('#MemberIdType' + idc).append('<option value="' + 2 + '">' + "Aadhar" + '</option>');
+        //            $('#MemberIdType' + idc).append('<option value="' + 3 + '">' + "Driving Licence" + '</option>');
+        //            $('#MemberIdType' + idc).append('<option value="' + 4 + '">' + "Voter ID" + '</option>');
+        //            $('#MemberIdType' + idc).append('<option value="' + 5 + '">' + "PAN Card" + '</option>');
+        //            $('#MemberIdType' + idc).append('<option value="' + 6 + '">' + "Office ID" + '</option>');
+        //            $('#MemberIdType' + idc).append('<option value="' + 7 + '">' + "Student ID" + '</option>');
+        //            $('#MemberIdType' + idc).val('0');
+        //        }
+        //        else if (val == '2') {
+        //            $('#MemberIdType' + idc).empty();
+        //            $('#MemberIdType' + idc).append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+        //            $('#MemberIdType' + idc).append('<option value="' + 1 + '">' + "Passport" + '</option>');
+        //            $('#MemberIdType' + idc).val('1');
+        //        }
+
+        //    });
+        //    FeePerMember(idc, val);
+        //});
+        $(".MemberIdNo").bind('change keyup', function (e) {
+            var id = $(this).attr('id');
+            // var idc = id.slice(-1);
+            var idc = id.substr(10, 2);
+            $('#' + id).bind("change", function () {
+                var val = $(this).val();
+                for (var i = idc; i >= 1; i--) {
+
+                    if (val == $('#MemberIdNo' + (i - 1)).val()) {
+                        // alert('Id cannot same with previous member');
+                        $('#' + id).val('');
+                        $('#' + id).focus();
+                        e.preventDefault();
+                        return false;
+                    }
+                    else {
+                    }
+                }
+            });
+        });
+        //$(".MemberTotalCamera").bind('change', function (e) {
+        //    var id = $(this).attr('id');
+        //    //var idc = id.slice(-1);
+        //    var idc = id.substr(17, 2);
+        //    FeePerCamera(idc, $('#MemberNationality' + idc).val());
+        //    $('#' + id).bind("change", function () {
+        //        var CamerafeesPerMember = $(this).val();
+        //        if (CamerafeesPerMember != '') {
+        //            var camfees = (parseInt($('#hdFeesCamera').val()) * parseInt(CamerafeesPerMember));
+        //            $('#MemberCameraFees' + idc).val(camfees);
+        //        }
+        //        else {
+        //            $('#MemberCameraFees' + idc).val(0);
+        //        }
+        //    });
+        //});
+        $('.MemberTotalCamera').on("change", function () {
+
+            var cameraperfees = $('#hdFeesCamera').val();
+            var cameracount = $(this).val();
+            var totalfees = cameraperfees * cameracount;
+            var membertypeId = $(this).closest('tr').find('td').eq(8).find('input[type="text"]').val(totalfees);
+
+        });
+    });
+    function FeePerCamera(id, Nationality) {
+        // $('#hdFeesCamera').val(0);
+        var placeID = $("#ddl_place").val();
+        var nationality = Nationality;
+
+        var vehicle = $("#ddl_vehicle").val();
+        var ShiftType = $("#ddl_Shift").val();
+        var values = {
+            PlaceID: placeID,
+            Nationality: nationality,
+            MemberType: 2,
+            ShiftType: ShiftType,
+            vehicleID: vehicle
+        };
+
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(values),
+            url: RootURl + 'BookOnlineTicket/SelectFeeOnlineBooking',
+            success: function (data) {
+                $.each(data, function (i, items) {
+                    $('#MemberFees' + id).val(items.TotalPerMemberFees);
+                    $('#hdFeesCamera').val(items.TotalPerMemberCameraFees);
+                    $('#MemberCameraFees' + id).val(0);
+                    $('#MemberFees_TigerProject' + id).val(items.MemberFees_TigerProject);
+                    $('#MemberFees_Surcharge' + id).val(items.MemberFees_Surcharge);
+                    $('#CameraFees_TigerProject' + id).val(items.CameraFees_TigerProject);
+                    $('#CameraFees_Surcharge' + id).val(items.CameraFees_Surcharge);
+                    $('#TRDF' + id).val(items.TRDF);
+
+                    $('#BoardingVehicleFee' + id).val(items.BoardingVehicleFee);
+                    $('#BoardingGuideFee' + id).val(items.BoardingGuideFee);
+                    $('#TotalBoardingFee' + id).val(items.TotalBoardingFee);
+
+                    $('#BoardingVehicleFeeGSTPercentage' + id).val(items.BoardingVehicleFeeGSTPercentage);
+                    $('#BoardingVehicleFeeGSTAmount' + id).val(items.BoardingVehicleFeeGSTAmount);
+                    $('#BoardingGuideFeeGSTPercentage' + id).val(items.BoardingGuideFeeGSTPercentage);
+                    $('#BoardingGuideFeeGSTAmount' + id).val(items.BoardingGuideFeeGSTAmount);
+
+                    $('#hdn_memberfee').val(items.TotalPerMemberFees);
+                    
+                    $('#hdn_camerafee').val(items.TotalPerMemberCameraFees);
+
+                    $('#hdGSTmessage').html(items.GSTMessage);
+                    $('#Vehicle_TRDF' + id).val(items.Vehicle_TRDF);
+                    $('#GuidFee_TRDF' + id).val(items.GuidFee_TRDF);
+                    //Added by shaan 30-03-2021
+                    $('#Fees_TigerProjectHalfDayFullDayCharge' + id).val(items.Fees_TigerProjectHalfDayFullDayCharge);
+                    $('#Fee_SurchargeHalfDayFullDayCharge' + id).val(items.Fee_SurchargeHalfDayFullDayCharge);
+                    //End
+
+                });
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+    }
+    function FeePerMember($currentevent, Nationality) {
+        $('#hdFeesCamera').val(0);
+        $('#hdFeesCamera').val(0);
+        // var districtID = $("#ddl_Districts").val();
+        var placeID = $("#ddl_place").val();
+        var nationality = Nationality;
+        var vehicle = $("#ddl_vehicle").val();
+        var ShiftType = $("#ddl_Shift").val();
+
+        var values = {
+            PlaceID: placeID,
+            Nationality: nationality,
+            MemberType: 2,
+            ShiftType: ShiftType,
+            vehicleID: vehicle
+        };
+        $.ajax({
+            type: 'POST',
+            headers: {
+                __RequestVerificationToken: $('[name= "__RequestVerificationToken"]').val(),
+            },
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(values),
+            url: RootURl + 'BookOnlineTicket/SelectFeeOnlineBooking',
+            success: function (data) {
+                $.each(data, function (i, items) {
+
+                    $currentevent.closest('tr').find('td').eq(7).find('input[type="text"]').val(items.TotalPerMemberFees);
+                    $('#hdFeesCamera').val(items.TotalPerMemberCameraFees);
+                    $currentevent.closest('tr').find('td').eq(8).find('input[type=text]').val(0);
+                    $currentevent.closest('tr').find('td').eq(9).find('input[type=text]').val(items.TotalBoardingFee);
+
+
+                    $currentevent.closest('tr').find('td').eq(10).find('input[type=text]').val(items.MemberFees_TigerProject);
+                    $currentevent.closest('tr').find('td').eq(11).find('input[type=text]').val(items.MemberFees_Surcharge);
+                    $currentevent.closest('tr').find('td').eq(12).find('input[type=text]').val(items.CameraFees_TigerProject);
+                    $currentevent.closest('tr').find('td').eq(13).find('input[type=text]').val(items.CameraFees_Surcharge);
+
+                    $currentevent.closest('tr').find('td').eq(14).find('input[type="text"].TRDF').val(items.TRDF);
+
+                    
+                    $currentevent.closest('tr').find('td').eq(14).find('input[type="text"].BoardingVehicleFee').val(items.BoardingVehicleFee);
+                    $currentevent.closest('tr').find('td').eq(14).find('input[type="text"].BoardingGuideFee').val(items.BoardingGuideFee);
+
+
+                    $currentevent.closest('tr').find('td').eq(14).find('input[type="text"].BoardingVehicleFeeGSTPercentage').val(items.BoardingVehicleFeeGSTPercentage);
+                    
+
+                    $currentevent.closest('tr').find('td').eq(14).find('input[type="text"].BoardingVehicleFeeGSTAmount').val(items.BoardingVehicleFeeGSTAmount);
+                    $currentevent.closest('tr').find('td').eq(14).find('input[type="text"].BoardingGuideFeeGSTPercentage').val(items.BoardingGuideFeeGSTPercentage);
+                    $currentevent.closest('tr').find('td').eq(14).find('input[type="text"].BoardingGuideFeeGSTAmount').val(items.BoardingGuideFeeGSTAmount);
+
+                    $('#hdn_memberfee').val(items.TotalPerMemberFees);
+                    $('#hdn_camerafee').val(items.TotalPerMemberCameraFees);
+                    $('#hdGSTmessage').html(items.GSTMessage);
+
+                    $currentevent.closest('tr').find('td').eq(14).find('input[type="text"].Vehicle_TRDF').val(items.Vehicle_TRDF);
+                    $currentevent.closest('tr').find('td').eq(14).find('input[type="text"].GuidFee_TRDF').val(items.GuidFee_TRDF);
+
+                    //Added by shaan 30-03-2021
+                    $currentevent.closest('tr').find('td').eq(15).find('input[type="text"].Fees_TigerProjectHalfDayFullDayCharge').val(items.Fees_TigerProjectHalfDayFullDayCharge);
+                    $currentevent.closest('tr').find('td').eq(16).find('input[type="text"].Fee_SurchargeHalfDayFullDayCharge').val(items.Fee_SurchargeHalfDayFullDayCharge);
+                    //END
+
+                    
+                    //$('#TRDF' + id).val(items.TRDF);
+
+                    //$('#BoardingVehicleFee' + id).val(items.BoardingVehicleFee);
+                    //$('#BoardingGuideFee' + id).val(items.BoardingGuideFee);
+                    //$('#TotalBoardingFee' + id).val(items.TotalBoardingFee);
+
+                    //$('#BoardingVehicleFeeGSTPercentage' + id).val(items.BoardingVehicleFeeGSTPercentage);
+                    //$('#BoardingVehicleFeeGSTAmount' + id).val(items.BoardingVehicleFeeGSTAmount);
+                    //$('#BoardingGuideFeeGSTPercentage' + id).val(items.BoardingGuideFeeGSTPercentage);
+                    //$('#BoardingGuideFeeGSTAmount' + id).val(items.BoardingGuideFeeGSTAmount);
+
+                    //$('#hdn_memberfee').val(items.TotalPerMemberFees);
+                    //$('#hdn_camerafee').val(items.TotalPerMemberCameraFees);
+
+                    //$('#hdGSTmessage').html(items.GSTMessage);
+                    //$('#Vehicle_TRDF' + id).val(items.Vehicle_TRDF);
+                    //$('#GuidFee_TRDF' + id).val(items.GuidFee_TRDF);
+
+                });
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+    }
+</script>

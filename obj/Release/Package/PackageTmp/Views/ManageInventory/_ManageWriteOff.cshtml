@@ -1,0 +1,67 @@
+﻿@model FMDSS.Models.ForestProduction.InventoryWriteOff
+ 
+@using (Ajax.BeginForm("UpdateWriteOff", "ManageInventory", new AjaxOptions { HttpMethod = "POST", Confirm = FMDSS.Globals.Constant.ConfirmMsg, OnSuccess = "UpdateItemToInventoryResponse", InsertionMode = InsertionMode.Replace, UpdateTargetId = "tab1default" }, new { id = "frmWriteOff" }))
+{
+            <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h4 class="modal-title" id="myModalLabel"><b>Manage Write Off</b></h4>
+        </div>
+        <div class="modal-body">
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Available Qty for Write Off:<span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(m=>m.AvailableQty,new { @class="form-control",@readonly= "readonly" }) 
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Write Off Qty:<span class="mandatory">*</span></label> 
+                    @Html.TextBoxFor(m => m.WriteOffQty, new { @class = "form-control",id="txtWriteOffQty",Value=Model.AvailableQty, data_AvailableQty = Model.AvailableQty, onchange="ValidateQty(this)", onkeypress = "AllowNumberOnly(event)" }) 
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Comment/Reason:<span class="mandatory">*</span></label>
+                    @Html.TextAreaFor(x => Model.Comment, new { @class = "form-control", placeholder = "Enter Comment", required = "required" })
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" style="clear: both">
+
+            <div id="btn" class="col-lg-12">
+                <button type="submit" class="btn btn-success" name="Command" value="UpdateItemToInventory" id="btn_Save">
+                    <i class="fa fa-check"></i>Submit
+                </button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i>  Close
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+        <!--/.model body--> 
+    
+    @Html.Hidden("InventoryID", Model.InventoryID)
+}
+
+<script>
+
+    function ValidateQty(cntrl) { 
+        var avalableQty = parseFloat($(cntrl).data("availableqty"));
+        var writeOffQty = $(cntrl).val() == '' ? 0 : parseFloat($(cntrl).val());
+
+        if (writeOffQty == 0) {
+            alert('Write Off Qty should be greater than 0.')
+            $(cntrl).focus();
+        }
+        else if (writeOffQty > avalableQty) {
+            alert('Write Off Qty should be less than Available Qty')
+            $(cntrl).val(avalableQty); 
+            $(cntrl).focus();
+        } 
+    } 
+</script>

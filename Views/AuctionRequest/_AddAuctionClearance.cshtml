@@ -1,0 +1,202 @@
+﻿@model FMDSS.Entity.DOD.ViewModel.AuctionClearanceVM
+@{
+    var headerTitle = "Manage Auction Clearance";
+}
+
+ 
+@using (Ajax.BeginForm("SaveAuctionClearance", "AuctionRequest", new AjaxOptions { HttpMethod = "POST", Confirm = FMDSS.Globals.Constant.ConfirmMsg, OnSuccess = "BackToList('ManageAuctionClearance')" }))
+{
+    if (ViewBag.LotList != null)
+    {
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div id="dvRevenueData" style="display:none" class="alert alert-success"><i class="fa fa-thumb-tack fa-fw"></i></div>
+                <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header">@headerTitle</label></h4> 
+            </div> 
+            <div class="modal-body">  
+                @*<div class="col-lg-12 well test">
+                    <div id="datetimepicker1" class="input-append date">
+                        <input data-format="dd/MM/yyyy hh:mm:ss" type="text" />
+                        <span class="add-on">
+                            <i data-time-icon="icon-time" data-date-icon="icon-calendar">
+                            </i>
+                        </span>
+                    </div>
+                </div>*@
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Father Name Of Buyer:</label>
+                        @Html.TextBoxFor(m => m.FatherName, new { @class = "form-control" }) 
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Destination Address:<span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(m => m.DestinationAddress, new { @class = "form-control" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.DestinationAddress)</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Inventory Lot Number:<span class="mandatory">*</span></label>
+                        @Html.DropDownListFor(m => m.InventoryID, (IEnumerable<SelectListItem>)ViewBag.LotList, "Select", new { @class = "form-control multi-ddl-height-102", id = "ddlLotNumber", onchange = "Onchange_LotNumber(this)" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.InventoryID)</div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Auction Notice Number:<span class="mandatory">*</span></label>
+                        @Html.DropDownListFor(m => m.AuctionID, new SelectList(string.Empty, "Value", "Text"), "Select", new { @class = "form-control multi-ddl-height-102", id = "ddlAuctionID", onchange = "Onchange_AuctionID(this)" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.InventoryID)</div>
+                    </div>
+                </div>
+                <div id="divProductDetails"></div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Validity of Pass From: <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(m => m.ClearanceFromDate, new { id = "durationfrom", @class = "form-control Calender", autocomplete = "off", @readonly = "readonly" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.ClearanceFromDate)</div>
+                    </div> 
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Validity of Pass To: <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(m => m.ClearanceToDate, new { id = "durationto", @class = "form-control Calender", autocomplete = "off", @readonly = "readonly" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.ClearanceToDate)</div>
+                    </div>
+                </div>
+                 
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Mode Of Transport: <span class="mandatory">*</span></label>
+                        @Html.DropDownListFor(x => x.ModeofTransport, (IEnumerable<SelectListItem>)ViewBag.TransportMode, "--Select--", new { @class = "form-control common", title = "Select Mode Of Transport", id = "ddlModeOfTransport" })
+                        <div class="alert-danger1">@Html.ValidationMessageFor(x => x.ModeofTransport)</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6" id="divVehicleNumber">
+                    <div class="form-group">
+                        <label>Vehicle Number:</label>
+                        @Html.TextBoxFor(x => x.VehicleNumber, new { @class = "form-control Alphanumeric", title = "Enter Vehicle Number eg: RJ14SD0223", placeholder = "Enter Vehicle Number", maxlength = 50, @id = "VehicleNumber" })  
+                    </div> 
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Driver License No:</label>
+                        @Html.TextBoxFor(x => x.Driver_License_No, new { @class = "form-control Alphanumeric", title = "Enter Driver Licence Number eg: RJ05jsde78945613", placeholder = "Enter Driver License No", maxlength = 50, id = "Driver_License_No" }) 
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Driver Name:</label>
+                        @Html.TextBoxFor(x => x.Driver_Name, new { @class = "form-control Alphanumeric", title = "Enter Driver Name eg: Narendra Singh", placeholder = "Enter Driver Name", maxlength = 50, id = "Driver_Name" }) 
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Driver Mobile No:</label>
+                        @Html.TextBoxFor(x => x.Driver_MobNo, new { @class = "form-control Alphanumeric", title = "Enter Driver Mobile Number eg: 9568985698", placeholder = "Enter Driver Mobile No", maxlength = 10, onkeypress = "AllowNumberOnly(event)" }) 
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Remarks:</label>
+                        @Html.TextAreaFor(m => m.Remarks, new { @class = "form-control", maxlength = "150", placeholder = "Enter Remarks" }) 
+                    </div>
+                </div>
+                <div class="col-lg-12"></div>
+            </div>
+
+            <!--/.model body-->
+
+            <div class="modal-footer" style="clear: both">
+
+                <div id="btn" class="col-lg-12">
+                    <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_Save">
+                        <i class="fa fa-check"></i>Submit
+                    </button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">
+                        <i class="fa fa-times fa-fw"></i>  Close
+                    </button>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+    } 
+}
+ 
+<script type="text/javascript" src="~/Scripts/Controller/Common.js"></script>
+<script src="~/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js" type="text/javascript"></script> 
+  
+
+<script type="text/javascript"> 
+    var RootUrl = '@Url.Content("~/")';
+    $(document).ready(function () {
+        $('.Calender').datepicker({
+            dateFormat: GetDatePickerFormat(),
+            yearRange: GetYearRange(),
+            changeMonth: true,
+            changeYear: true,
+        });  
+       // $('#durationfrom').appendDtpicker();
+        //$('#durationfrom').timepicker({
+        //    timeFormat: 'h:mm p',
+        //    interval: 60,
+        //    minTime: '10',
+        //    maxTime: '6:00pm',
+        //    defaultTime: '11',
+        //    startTime: '10:00',
+        //    dynamic: false,
+        //    dropdown: true,
+        //    scrollbar: true
+        //});
+    }) 
+
+    function Onchange_LotNumber(cntrl) {
+        $("#ddlAuctionID").empty().append("<option value=''>--Select--</option>");
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'AuctionRequest/BindAuctionNotice',
+            dataType: 'json',
+            data: { inventoryID: cntrl.value },
+            success: function (response) {
+                $.each(response.data, function (i, items) {
+                    $("#ddlAuctionID").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+            }
+
+        });
+    }
+
+    function Onchange_AuctionID(cntrl) {
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'AuctionRequest/GetDODProductDetails',
+            dataType: 'html',
+            //data: { parentID: cntrl.value, childID: $('#ddlAuctionID>option:selected').val() },
+            data: { parentID: $('#ddlLotNumber>option:selected').val(), childID: cntrl.value },
+            success: function (response) {
+                $('#divProductDetails').html(response);
+            },
+            error: function (ex) {
+            }
+        });
+    }
+
+</script> 
+ 
+<style>
+    .modal-dialog {
+        width: 950px;
+    } 
+</style>

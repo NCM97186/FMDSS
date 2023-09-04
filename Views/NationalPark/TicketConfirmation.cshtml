@@ -1,0 +1,232 @@
+﻿@{
+    ViewBag.Title = "Ticket Confirmation";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString());
+}
+
+@model FMDSS.Models.BookOnlineTicket.TicketPayment
+
+<style>    
+    #page-wrapper-inn .table > thead > tr > th {
+        width:auto;
+    }
+</style>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script type="text/javascript" language="javascript">
+
+    var RootURl = '@Url.Content("~/")';
+    $(document).ready(function () {
+
+        function disableBack() { window.history.forward() }
+
+        window.onload = disableBack();
+        window.onpageshow = function (evt) {
+            if (evt.persisted) disableBack()
+        }        
+    });
+
+   
+
+</script>
+
+<div style="display:none" id="dvContainer">
+
+</div>
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">
+            Transaction Status
+        </h1>
+    </div>
+    <!-- /.col-lg-12 -->
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <section class="payment">
+
+                        <!-- Table row -->
+                        <div class="row">
+                            <div class="col-xs-12 table-responsive">
+                                <div id="Print_table">
+                                    <b> Payment Details </b>
+                                    @if (Model.BookingType == FMDSS.BookingType.DepartmentBooking)
+                                    {
+                                        <table class="table table-striped table-bordered table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Transaction Status</th>
+                                                    <th>Request Id</th>
+                                                    <th>Payment Mode</th>                                                    
+                                                    <th>Cheque/Demand Draft Details</th>
+                                                    <th>Total Amount</th>
+                                                    <th>Date & Time</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+
+                                                <tr>
+                                                    @if (Model.TransactionStatus == FMDSS.TransactionStatus.Paid)
+                                                    {
+                                                        <td style="color:green; font-size:14px; font-weight:bold">SUCCESS</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td style="color: red; font-size: 14px; font-weight: bold">FAILED</td>
+                                                    }
+                                                    <td>@Model.RequestId</td>
+                                                    <td>@Model.PaymentMode</td>
+                                                    <td>@if (Model.PaymentMode == FMDSS.PaymentMode.Cash)
+                                                        { @Html.Raw("N.A") }
+                                                        else
+                                                        {
+                                                            <div>
+                                                                Bank Name: @Model.BankName <br />
+                                                                IFSC Code: @Model.IFSCCode <br />
+                                                                Cheque/DD No: @Model.ChequeNo <br />
+                                                                Issue Date: @(Model.ChequeIssueDate.HasValue ? Model.ChequeIssueDate.Value.ToString("dd-MMM-yyyy") : "-") <br />
+                                                            </div>
+                                                        }
+                                                    </td>
+                                                    <td>@Model.TotalAmountBePay</td>                                               
+                                                    <td>@DateTime.Now</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    }
+                                    else
+                                    {
+                                    <table class="table table-striped table-bordered table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Transaction Status</th>
+                                                <th>Request Id</th>
+                                                <th>Emitra Transaction Id</th>
+                                                <th>Booking Amount</th>
+                                                <th>Emitra Amount</th>
+                                                <th>Total Paid Amount</th>
+                                                <th>Date & Time</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            <tr>
+                                                @if (Model.TransactionStatus == FMDSS.TransactionStatus.Paid)
+                                                {
+                                                    <td style="color:green; font-size:12px; font-weight:bold">SUCCESS</td>
+                                                }
+                                                else
+                                                {
+                                                    <td style="color: red; font-size: 12px; font-weight: bold">FAILED</td>
+                                                }
+
+                                                <td>@Model.RequestId</td>
+                                                <td>@Model.EmitraTransactionID</td>
+                                                <td>@Model.TotalAmountBePay</td>
+                                                <td>@Model.EmitraAmount</td>
+                                                <td>@(Model.TransactionStatus == FMDSS.TransactionStatus.Paid ? Model.TotalPaidAmount : 0)</td>
+                                                <td>@DateTime.Now</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    }
+
+                                    @if (Model.TransactionStatus == FMDSS.TransactionStatus.Paid)
+                                    {
+                                        <b>
+                                            Ticket Summary -
+                                            @if (Model.bookingStatus == FMDSS.BookingStatus.Booked)
+                                            {
+                                                <span style="color:green; font-size:14px; font-weight:bold"> TICKET CONFIRMED</span>
+                                            }
+                                            else
+                                            {
+                                                <span style="color: red; font-size: 14px; font-weight: bold"> BOOKING FAILED</span>
+                                            }
+                                        </b>
+                                        <table class="table table-striped table-bordered table-hover font-size">
+                                            <tbody>
+                                                <tr>
+                                                    <th>Booking No:</th>
+                                                    <td>
+                                                        @Model.RequestId
+                                                        @*<input type="hidden" id="TRANSACTIONID" name="TRANSACTIONID" value='@item.PrintID'>
+                                                        <input type="hidden" id="BookingType" name="BookingType" value='@item.ModeOfBooking'>*@
+                                                    </td>
+
+                                                    @if (!string.IsNullOrEmpty(Model.Vehicle))
+                                                    {
+
+                                                        <th>Reserve :</th>
+                                                        <td>@Model.PlaceName</td>
+                                                        <th>Vehicle:</th>
+                                                        <td>@Model.Vehicle</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <th>Reserve :</th>
+                                                        <td colspan="3">@Model.PlaceName</td>
+                                                    }
+                                                </tr>
+                                                <tr>
+                                                    <th>Booked Seats :</th>
+                                                    <th>@Model.TotalMember</th>
+                                                    <th>Date/Time of Booking :</th>
+                                                    <td>@Model.BookingDate.ToString("dd-MMM-yyyy hh:mm:ss tt") </td>
+                                                    <th>Date of Visit :</th>
+                                                    <td>@Model.VisitingDate.ToString("dd-MMM-yyyy")</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Total Amount Incl. of Service Charges: Rs.</th>
+                                                    <th colspan="5"> @Model.TotalPaidAmount </th>
+
+                                                </tr>
+                                            </tbody>
+
+                                        </table>
+                                    }
+
+                                </div>
+                            </div><!-- /.col -->
+                        </div><!-- /.row -->
+                        <!-- this row will not appear when printing -->
+                        <div class="row no-print">
+                            <div class="col-xs-12">
+
+                                <span style="color:red;">Payment aggregator and bank charges will be extra as per their policy.</span>
+                                <br />
+                                <label>The Payment does not guarantee E-ticket. Confirmed Ticket would be available only as per seat availabilty</label>
+
+                            </div>
+                            <div class="col-xs-12">
+                                @*@if (HttpContext.Current.Session["MemberInfo"] != null)
+                                    {
+                                        <a id="btn_Previous" style="float:none" class="btn btn-warning" href='@Url.Action("BookTicket", "TicketBooking")'>
+                                            Book More
+                                        </a>
+                                    }*@
+                                <a id="btn_Previous" style="float:none" class="btn btn-warning" href='@Url.Action("Index", "NationalPark")'>
+                                    Book More
+                                </a>
+                               @if (Model.bookingStatus == FMDSS.BookingStatus.Booked)
+                               { 
+                                   @Html.ActionLink("Download Ticket", "PrintTicket", "NationalPark", new { @ticketId = Model.TicketId }, new { @class = "btn btn-success", @style = "float:none", @target="_blank" })                                    
+                               }
+                                @if (Model.bookingStatus == FMDSS.BookingStatus.Booked && (Model.BookingType == FMDSS.BookingType.DepartmentBooking))
+                                {
+                                    @Html.ActionLink("Print Boarding Pass", "PrintBoardingPaas", "NationalPark", new { @RequestId = Model.RequestId }, new { @class = "btn btn-success", @style = "float:none", @target = "_blank" })
+                                }
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>

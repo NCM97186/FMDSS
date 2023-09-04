@@ -1,0 +1,314 @@
+﻿@model FMDSS.Models.Master.AllEmailModuleDetails
+
+@{
+    ViewBag.Title = "AllEmailModuleList";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+<script src="~/Themes/ckeditor/ckeditor.js"></script>
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+<style>
+    .Aot {
+        margin: 0 0 10px;
+    }
+
+    .containingDiv {
+        overflow: hidden;
+        overflow-x: auto;
+    }
+</style>
+
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+
+
+    CKEDITOR.editorConfig = function (config) {
+        config.toolbar = 'MyToolbar';
+
+        config.toolbar_MyToolbar =
+        [
+
+            { name: 'clipboard', items: ['Undo', 'Redo'] },
+            { name: 'styles', items: ['FontSize'] },
+            { name: 'basicstyles', items: ['Bold', 'Italic'] },
+            { name: 'paragraph', items: ['Outdent', 'Indent'] },
+
+        ];
+
+        config.removePlugins = 'contextmenu';
+        config.forcePasteAsPlainText = true;
+        config.pasteFromWordRemoveFontStyles = true;
+        config.pasteFromWordRemoveStyles = true;
+        config.extraPlugins = 'cwjdsjcsconfineselection';
+        config.startupShowBorders = false;
+        config.disableObjectResizing = true;
+
+    };
+
+    function clearData()
+    {
+        $("#IDUpdate").val("");
+        $("#ModuleNameUpdate").val("");
+        $("#EmailIDUpdate").val("");
+        $("#SSOIdNameUpdate").val("");
+        $("#AdminMobileNumberNameUpdate").val("");
+        $('#StatusUpdate').prop('checked', false);
+        $('#IsSendMailStatusCitizenUpdate').prop('checked', false);
+       // CKEDITOR.instances['AdminTemplateUpdate'].updateElement();
+        //CKEDITOR.instances['AdminTemplateUpdate'].setData('');
+        CKEDITOR.instances['CitizenTemplateUpdate'].updateElement();
+        $("#AdminTemplateUpdate").val("");
+        $("#CitizenTemplateUpdate").val("");
+        $("#AdminTemplateSMSUpdate").val("");
+        $("#CitizenTemplateSMSUpdate").val("");
+    }
+
+    function UpdateEmailModule(ID)
+    {
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'Master/GetAllEmailDetails',
+            dataType: 'json',
+            data: { ID: ID },
+            success: function (result) {
+                clearData();
+                console.log(result);
+                if (result != null)
+                {
+                   
+                    $("#IDUpdate").val(result.ID);
+                    $("#ModuleNameUpdate").val(result.ModuleName);
+                    $("#EmailIDUpdate").val(result.EmailID);
+                    $("#SSOIdNameUpdate").val(result.SSOId);
+                    $("#AdminMobileNumberNameUpdate").val(result.AdminMobileNumber);
+
+                    if (result.Status == "1")
+                    {
+                        $('#StatusUpdate').prop('checked', true);
+                    }
+                    else
+                    {
+                        $('#StatusUpdate').prop('checked', false);
+                    }
+
+                    if (result.IsSendMailStatusCitizen == "1") {
+                        $('#IsSendMailStatusCitizenUpdate').prop('checked', true);
+                    }
+                    else {
+                        $('#IsSendMailStatusCitizenUpdate').prop('checked', false);
+                    }
+                    CKEDITOR.instances['AdminTemplateUpdate'].updateElement();
+                    CKEDITOR.instances['AdminTemplateUpdate'].setData(result.AdminTemplate);
+                   // CKEDITOR.instances['AdminTemplateUpdate'].insertHtml(result.AdminTemplate);
+                   
+                    CKEDITOR.instances['CitizenTemplateUpdate'].updateElement();
+                    CKEDITOR.instances['CitizenTemplateUpdate'].setData(result.CitizenTemplate);
+                    //CKEDITOR.instances['CitizenTemplateUpdate'].insertHtml(result.CitizenTemplate);
+                    //$("#AdminTemplateUpdate").val(result.AdminTemplate);
+                    //$("#CitizenTemplateUpdate").val(result.CitizenTemplate);
+                    $("#AdminTemplateSMSUpdate").val(result.AdminTemplateSMS);
+                    $("#CitizenTemplateSMSUpdate").val(result.CitizenTemplateSMS);
+                }
+            }
+        });
+    }
+
+</script>
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Email Module</h1>
+        <div class="panel-heading"> <span>@Html.Raw(TempData["Message"]) </span> </div>
+        <div></div>
+        <!--Add New Btn-->
+        <div class="col-lg-3 pull-right">
+            <button type="button" class="btn btn-success AddNewDepot Aot" id="btnAddNew" name="" value="" title="Add New Nursery" data-toggle="modal" data-target="#myDepotManagement">
+                <i class="fa fa-plus"></i> Add New Email
+            </button>
+        </div>
+        <!--./Add New Btn-->
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <!--Table-->
+                    <div id="tbl" class="table-responsive" style="height:100%; width:100%; overflow-x:scroll;">
+                        <table class="table table-striped table-bordered table-hover containingdiv" id="dataTableNursery">
+                            <thead>
+                                <tr>
+
+                                    <th style="width:15%;">Module Name</th>
+                                    <th style="width: 15%;">Email ID</th>
+                                    <th style="width:15%;">SSO Id</th>
+                                    <th style="width:8%;">Status</th>
+                                    <th style="width:15%;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.AddEmailList)
+                                {
+                                    <tr>
+                                        <td style="width:15%;">
+                                            @Html.DisplayFor(model => item.ModuleName)
+                                        </td>
+                                        <td style="width:15%;">
+                                            @if (item.EmailID.IndexOf(",") > 0)
+                                            {
+                                                @item.EmailID.Replace(",", " ")
+                                            }
+                                            else
+                                            {
+                                                @Html.DisplayFor(model => item.EmailID)
+                                            }
+                                        </td>
+
+                                        <td style="width:15%;">
+                                            @Html.DisplayFor(model => item.SSOId)
+                                        </td>
+                                        <td style="width:8%;">
+                                            @Html.DisplayFor(model => item.Status)
+                                        </td>
+
+                                        <td>
+                                            <button type="button" class="btn btn-success btn-circle" title="View" data-toggle="modal" data-target="#myDepotManagement" onclick="UpdateEmailModule('@item.ID')">
+                                                <i class="fa fa-edit"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!--./Table-->
+                    <!--Popup Model-->
+                    @using (Html.BeginForm("AddEmailModuleList", "Master", FormMethod.Post, new { id = "submitForm" }))
+                    {
+                        <div class="modal fade" id="myDepotManagement" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h4 class="modal-title" id="myModalTitle">Email Template Module</h4>
+                                    </div>
+                                    
+                                    <div class="modal-body">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Module Name:(Add Module Name With Space) <span class="mandatory">*</span></label>
+                                                @Html.HiddenFor(s => s.AddEmailmodel.ID, new { @class = "form-control", @id = "IDUpdate" })
+                                                @Html.TextBoxFor(s => s.AddEmailmodel.ModuleName, new { @class = "form-control",@id= "ModuleNameUpdate" })
+                                                @Html.ValidationMessageFor(s => s.AddEmailmodel.ModuleName)
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Email ID (If enter multiple emails to use Comma) <span class="mandatory">*</span> </label>
+                                                @Html.TextBoxFor(s => s.AddEmailmodel.EmailID, new { @class = "form-control", @id = "EmailIDUpdate" })
+                                                @Html.ValidationMessageFor(s => s.AddEmailmodel.EmailID)
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>SSO ID: <span class="mandatory">*</span></label>
+                                                @Html.TextBoxFor(s => s.AddEmailmodel.SSOId, new { @class = "form-control", @id = "SSOIdNameUpdate" })
+                                                @Html.ValidationMessageFor(s => s.AddEmailmodel.SSOId)
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Admin Mobile Number <span class="mandatory">*</span> </label>
+                                                @Html.TextBoxFor(s => s.AddEmailmodel.AdminMobileNumber, new { @class = "form-control", @id = "AdminMobileNumberNameUpdate" })
+                                                @Html.ValidationMessageFor(s => s.AddEmailmodel.AdminMobileNumber)
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Status </label>
+                                                @Html.CheckBoxFor(s => s.AddEmailmodel.Status,new {  @id = "StatusUpdate" })
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Is Send Mail Status Citizen </label>
+                                                @Html.CheckBoxFor(s => s.AddEmailmodel.IsSendMailStatusCitizen, new { @id = "IsSendMailStatusCitizenUpdate" })
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Admin Email Template</label>
+                                                @Html.TextAreaFor(s => s.AddEmailmodel.AdminTemplate, new { @id = "AdminTemplateUpdate", @class = "form-control", @rows = "200" })
+                                                <script>
+                                                    CKEDITOR.replace("AdminTemplateUpdate");
+                                                </script>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Citizen Email Template</label>
+                                                @Html.TextAreaFor(s => s.AddEmailmodel.CitizenTemplate, new { @id = "CitizenTemplateUpdate", @class = "form-control", @rows = "200" })
+                                                <script>
+                                                    CKEDITOR.replace("CitizenTemplateUpdate");
+                                                </script>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Admin SMS Template</label>
+                                                @Html.TextAreaFor(s => s.AddEmailmodel.AdminTemplateSMS, new { @id = "AdminTemplateSMSUpdate", @class = "form-control", @rows = "10" })
+
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Citizen SMS Template</label>
+                                                @Html.TextAreaFor(s => s.AddEmailmodel.CitizenTemplateSMS, new { @id = "CitizenTemplateSMSUpdate", @class = "form-control", @rows = "10" })
+
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-12"></div>
+                                    </div>
+                                    <!-- /.modal-body -->
+
+                                    <div id="btn" class="modal-footer" style="clear:both">
+                                        <button name="Command" class="btn btn-success" id="btn_submit" type="submit" >
+                                            <i class="fa fa-check"></i> Submit
+                                        </button>
+                                        <button type="reset" class="btn btn-warning" id="btn_reset">
+                                            <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                        </button>
+                                        <button name="Command" class="btn btn-danger" id="btn_cancel" type="submit" value="Cancel" data-dismiss="modal">
+                                            <i class="fa fa-times fa-fw"></i> Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- /.modal-content -->
+                            </div>
+                            <!-- /.modal-dialog -->
+                        </div>
+                    }
+                    <!--./Popup Model-->
+                    <!-- /.panel-body -->
+                </div>
+                <!-- /.panel -->
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+    </div>
+    <!-- /.Row -->
+
+</div>

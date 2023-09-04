@@ -1,0 +1,272 @@
+﻿@{
+    ViewBag.Title = "PaymentByDepartmentalKioskUserDetails";
+
+
+    if (HttpContext.Current.Session["User"] != null)
+    {
+        Layout = null;
+        if ((HttpContext.Current.Session["DesignationId"].ToString() != "10"))
+        {
+            Layout = "~/Views/Shared/Forestlayout.cshtml";
+        }
+        else
+        {
+            Layout = "~/Views/Shared/_Layout.cshtml";
+
+        }
+    }
+}
+
+@model FMDSS.Models.PaymentByDepartmentalKioskUserDetails
+
+
+<script src="~/js/jquery.min.js"></script>
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+        $("#ChequeDate").datepicker({ yearRange: '1947:', dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, maxDate: new Date(), onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+
+        var currentDate = new Date();
+
+        $(document).on('keypress', '#ChequeDate', function (event) {
+            event.preventDefault();
+            return false;
+
+        });
+
+        $('#ChequeDate').keydown(function (event)
+        { return cancelBackspace(event) });
+
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+
+
+
+        $('#PaymentMode').change(function () {
+
+            if ($('#PaymentMode').val() == 'CASH') {
+
+                $('#BankName').prop("disabled", true);
+                $('#IFSCCode').prop("disabled", true);
+                $('#ChequeNumber').prop("disabled", true);
+                $('#ChequeDate').prop("disabled", true);
+
+            }
+            else {
+
+                $('#BankName').prop("disabled", false);
+                $('#IFSCCode').prop("disabled", false);
+                $('#ChequeNumber').prop("disabled", false);
+                $('#ChequeDate').prop("disabled", false);
+
+            }
+        });
+
+
+
+        $('#btn_submit1').click(function (e) {
+
+            if ($('option:selected', $('#PaymentMode')).index() == 0) {
+                $("#errPaymentMode").css("display", "block");
+                $('#errPaymentMode').focus();
+                return false;
+            }
+            else {
+                $("#errPaymentMode").css("display", "none");
+            }
+
+            if ($('option:selected', $('#PaymentMode')).index() != 1) {
+
+                if ($('#BankName').val() == "") {
+                    $("#errBankName").css("display", "block");
+                    $('#errBankName').focus();
+                    return false;
+                }
+                else {
+                    $("#errBankName").css("display", "none");
+                }
+
+                if ($('#IFSCCode').val() == "") {
+                    $("#errIFSCCode").css("display", "block");
+                    $('#errIFSCCode').focus();
+                    return false;
+                }
+                else {
+                    $("#errIFSCCode").css("display", "none");
+                }
+
+                if ($('#ChequeNumber').val() == "") {
+                    $("#errChequeNumber").css("display", "block");
+                    $('#errChequeNumber').focus();
+                    return false;
+                }
+                else {
+                    $("#errChequeNumber").css("display", "none");
+                }
+
+                if ($('#ChequeDate').val() == "") {
+                    $("#errChequeDate").css("display", "block");
+                    $('#errChequeDate').focus();
+                    return false;
+                }
+                else {
+                    $("#errChequeDate").css("display", "none");
+                }
+
+            }
+
+
+
+            //var ObjData = {
+            //    RequestedId: $("#RequestedId").val(),
+            //    ModuleId: $("#ModuleId").val(),
+            //    ServiceTypeId: $("#ServiceTypeId").val(),
+            //    PermissionId: $("#PermissionId").val(),
+            //    SubPermissionId: $("#SubPermissionId").val(),
+            //    PaidBy: $("#PaidBy").val(),
+            //    PaidForCitizen: $("#PaidForCitizen").val(),
+            //    PaidAmount: $("#PaidAmount").val(),
+            //    PaymentMode: $("#PaymentMode").val(),
+            //    BankName: $("#BankName").val(),
+            //    IFSCCode: $("#IFSCCode").val(),
+            //    ChequeNumber: $("#ChequeNumber").val(),
+            //    ChequeDate: $("#ChequeDate").val()
+            //}
+
+
+
+            //$.ajax({
+            //    type: 'POST',
+            //    url: RootUrl + 'KioskPayment/ADDPaymentByDepartmentalKioskUserDetails', // we are calling json method
+            //    dataType: 'html',
+            //    data: JSON.stringify(ObjData),
+            //    success: function (data) {
+            //        $('#modelData').html(data);
+            //    },
+            //    error: function (ex) {
+            //        alert('Failed to retrieve states.' + ex);
+            //    }
+            //});
+
+
+            //$.ajax({
+            //    type: 'GET',
+            //    url: "../KioskPayment/ADDPaymentByDepartmentalKioskUserDetails",
+            //    dataType: 'html',
+            //    data: JSON.stringify(ObjData),
+            //    success: function (data) {
+            //        $('#modelData').html(data);
+            //    },
+            //    error: function (ex) {
+            //        alert(ex.error);
+            //    }
+            //});
+
+
+        });
+
+    });
+
+</script>
+
+@using (Html.BeginForm("ADDPaymentByDepartmentalKioskUserDetails", "KioskPayment", FormMethod.Post))
+{
+    <div id="page-wrapper-inn">
+
+        <div class="col-lg-12 pad">
+            <h1 class="page-header">Departmental Kiosk User Transaction </h1>
+        </div>
+
+        <div class="row">
+
+            <div class="modal-body">
+                @Html.HiddenFor(model => model.ModuleId)
+                @Html.HiddenFor(model => model.ServiceTypeId)
+                @Html.HiddenFor(model => model.PermissionId)
+                @Html.HiddenFor(model => model.SubPermissionId)
+
+                @Html.HiddenFor(model => model.PaidBy)
+                @Html.HiddenFor(model => model.PaidForCitizen)
+
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Request ID: <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.RequestedId, new { @class = "form-control common", @readonly = "True" })
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Paid Amount: <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.PaidAmount, new { @class = "form-control common", @readonly = "True" })
+                    </div>
+                </div>
+
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Payment Mode: <span class="mandatory">*</span></label>
+                        @Html.DropDownListFor(Model => Model.PaymentMode, new List<SelectListItem>
+                                                                           {
+                                                                             new SelectListItem { Text = "--Select--", Value = "0"},
+                                                                             new SelectListItem { Text = "CASH", Value = "CASH"},
+                                                                             new SelectListItem { Text = "CHEQUE", Value = "CHEQUE"},
+                                                                             new SelectListItem { Text = "DD", Value = "DD"},
+                                                                          }, new { @class = "form-control common", id = "PaymentMode" })
+                        <div id="errPaymentMode" style="display:none" class="alert-danger1">Payment Mode is Required.</div>
+
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Bank Name: <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.BankName, new { @class = "form-control common" })
+                        <div id="errBankName" style="display:none" class="alert-danger1">Bank Name is Required.</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>IFSC Code: <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.IFSCCode, new { @class = "form-control common" })
+                        <div id="errIFSCCode" style="display:none" class="alert-danger1">IFSC Code is Required.</div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Cheque Number : <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.ChequeNumber, new { @class = "form-control common" })
+                        <div id="errChequeNumber" style="display:none" class="alert-danger1">Cheque Number is Required.</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Cheque Date: <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.ChequeDate, new { @class = "form-control common" })
+                        <div id="errChequeDate" style="display:none" class="alert-danger1">Cheque Date is Required.</div>
+                    </div>
+                </div>
+                <div id="btn" class="col-lg-12">
+
+                    <button type="submit" class="btn btn-success" value="Save" id="btn_submit1">
+                        <i class="fa fa-check"></i> Save
+                    </button>
+
+                    <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                        <i class="fa fa-times fa-fw"></i> Close
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+}

@@ -1,0 +1,386 @@
+﻿@{
+    ViewBag.Title = "RefundRequest";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+@model FMDSS.Models.BookOnlineTicket.BookOnTicket
+<script src="~/js/jquery.min.js"></script>
+
+@*<script>
+        $(document).ready(function () {
+
+            $("#myModal").modal();
+
+        });
+    </script>*@
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+
+    $(document).ready(function () {
+
+        var isCitizen = '@ViewBag.IsCitizen';
+       
+        $('#btn_Submit').click(function (e) {
+          var bondAg=  $('input[name="bond_agreement"]:checked').val();
+            if (bondAg == 0 && isCitizen=='Citizen') {
+                alert('Select Confirmation radio button');
+                return false;
+            }
+            
+            var cancelliationReasionId = $('#ddCancellationReasonList').val() | 0;
+            if (isCitizen == "" || isCitizen == null || isCitizen == undefined) {
+                if (cancelliationReasionId == 0) {
+                    $('#errCancelliationReason').css("display", "block");
+                    $('#errCancelliationReason').focus();
+                    return false;
+                }
+                else {
+                    $('#errCancelliationReason').css("display", "none");
+                }
+            }
+            
+
+            var cancellationRemarks = $('#CancellationRemarks').val();
+            if (cancellationRemarks == null || cancellationRemarks == undefined || cancellationRemarks == '') {
+                $('#errCancelliationReasonRemark').css("display", "block");
+                $('#errCancelliationReasonRemark').focus();
+                return false;
+            }
+            else {
+                $('#errCancelliationReasonRemark').css("display", "none");
+            }
+            //if ($('#BankName').val().trim() == "") {
+            //    $('#errBankName').css("display", "block");
+            //    $('#errBankName').focus();
+            //    return false;
+            //}
+            //else {
+            //    $('#errBankName').css("display", "none");
+            //}
+
+            //if ($('#BranchName').val().trim() == "") {
+            //    $('#errBranchName').css("display", "block");
+            //    $('#errBranchName').focus();
+            //    return false;
+            //}
+            //else {
+            //    $('#errBranchName').css("display", "none");
+            //}
+
+            //if ($('#IFSCCode').val().trim() == "") {
+            //    $('#errIFSCCode').css("display", "block");
+            //    $('#errIFSCCode').focus();
+            //    return false;
+            //}
+            //else {
+            //    $('#errIFSCCode').css("display", "none");
+            //}
+
+            //if ($('#AccountHolderName').val().trim() == "") {
+            //    $('#errAccountHolderName').css("display", "block");
+            //    $('#errAccountHolderName').focus();
+            //    return false;
+            //}
+            //else {
+            //    $('#errAccountHolderName').css("display", "none");
+            //}
+
+
+            //if ($('option:selected', $('#AccountType')).index() == 0) {
+            //    $("#errAccountType").css("display", "block");
+            //    $('#errAccountType').focus();
+            //    return false;
+            //}
+            //else {
+            //    $("#errAccountType").css("display", "none");
+            //}
+
+            //if ($('#AccountNo').val().trim() == "") {
+            //    $('#errAccountNo').css("display", "block");
+            //    $('#errAccountNo').focus();
+            //    return false;
+            //}
+            //else {
+            //    $('#errAccountNo').css("display", "none");
+            //}
+            
+            //if (jQuery("#ConfirmRefundByCitizen").prop("checked")) {
+            //    $('#errConfirmRefundByCitizen').css("display", "none");
+            //}
+            //else {
+            //    $('#errConfirmRefundByCitizen').css("display", "block");
+            //    $('#errConfirmRefundByCitizen').focus();
+            //    return false;
+            //}
+
+        });
+
+
+
+    });
+
+
+</script>
+
+<script>
+    $(document).ready(function () {
+
+
+
+
+
+    });
+
+</script>
+
+<style>
+    #myModal .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModal .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModal .modal-footer {
+        background-color: #f9f9f9;
+    }
+</style>
+
+
+
+<div class="modal fade" id="myModal" role="dialog">
+
+    <div class="modal-dialog">
+
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header" style="padding:35px 50px;">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4><i class="fa-fw"></i>Permit Cancellation Policy</h4>
+            </div>
+            <div class="modal-body" style="padding:40px 50px;">
+
+                <ul class="a">
+                    @*<li> As per the policy, if you cancel the booking then 50% amount of charged fees excluding emitra & bank charges will be refunded.</li>*@
+                    <li> As per the policy, if you cancel the booking then below amount of charged fees excluding emitra & bank charges will be refunded.</li>
+                    <table class="table table-striped table-bordered table-hover">
+                        <tr>
+                            <th>अवधि बुकिंग दिवस को शामिल करते हुए <br />(Including period bookings day) </th>
+                            <th>रिफंड टिकट राशि का प्रतिशत <br />(Percent of refund permit amount)</th>
+                        </tr>
+                        <tr>
+                            <td>बुकिंग दिवस से 90 दिन तक<br /> (Up to 90 days from booking day)</td>
+                            <td>75</td>
+                        </tr>
+                        <tr>
+                            <td>91 से 180 दिवस तक <br /> (From 91 to 180 days)</td>
+                            <td>50</td>
+                        </tr>
+                        <tr>
+                            <td>181 से 270 दिवस तक <br /> (From 181 to 270 days)</td>
+                            <td>25</td>
+                        </tr>
+                        <tr>
+                            <td>270 दिवस अधिक <br /> (270 days more)</td>
+                            <td>0</td>
+                        </tr>
+                    </table>
+
+
+
+                    <li>Before proceeding please keep ready the required bank details i.e. Bank Name, Branch Name, IFSC Code, Account Type (Saving) & Account No. etc.</li>
+
+                </ul>
+            </div>
+            <div class="modal-footer" style="clear:both">
+                <div id="btn" class="col-lg-12">
+
+                    <button type="button" id="btn_cancel" class="btn btn-success" data-dismiss="modal">
+                        Confirm
+                    </button>
+
+                    <a class="btn btn-danger" href='@Url.Action("BookOnlineTicket", "BookOnlineTicket" )'>
+                        Exit
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<div class="row">
+    <div class="col-lg-9 pad">
+        <h1 class="page-header"><span>WildLife Permit Booking : Refund Process </span></h1>
+    </div>
+    @using (Html.BeginForm("RefundRequest", "RefundPayment", FormMethod.Post))
+    {
+
+        <div class="col-lg-9 table-responsive">
+            <table class="table table-striped table-bordered table-hover">
+                <thead>
+                    <tr>
+
+                        <th>Member Fee</th>
+                        <th>Camera Fees</th>
+                        <th>Safari Fees</th>
+                        <th>Vehicle Rent Fees</th>
+                        <th>GST on Vehicle Rent Fees</th>
+                        <th>Guide Fees</th>
+                        <th>GST on Guide Fees</th>
+                        <th>Total Amount</th>
+                        <th>Emitra Charges</th>
+                        <th>Grand Total</th>
+                        <th>Refund Amount</th>
+                        <th>Enter By</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="color:Black">
+
+                        <td>@Html.DisplayFor(model => model.TotalMemberFees)  </td>
+                        <td>@Html.DisplayFor(model => model.TotalCameraFees)  </td>
+                        <td>@Html.DisplayFor(model => model.TotalSafariFees)  </td>
+                        <td>@Html.DisplayFor(model => model.VehicleRent)  </td>
+                        <td>@Html.DisplayFor(model => model.GSTonVehicleRent)  </td>
+                        <td>@Html.DisplayFor(model => model.GuideFee)  </td>
+                        <td>@Html.DisplayFor(model => model.GSTGuideFee)  </td>
+
+                        <td>@Html.DisplayFor(model => model.TicketAmount)  </td>
+                        <td>@Html.DisplayFor(model => model.EmitraCharges)  </td>
+
+                        <td>@Html.DisplayFor(model => model.GrandTotal)  </td>
+                        <td>@Html.DisplayFor(model => model.RefundAmount)  </td>
+                        <td>
+                            @Html.DisplayFor(model => model.SSOID)
+                            @Html.HiddenFor(model => model.TicketID)
+                            @Html.HiddenFor(model => model.TypeOfActions)
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+
+                            <label>Request Id:</label>
+                            @Html.TextBoxFor(model => model.RequestId, new { @class = "form-control common datefield", id = "RequestId", @readonly = "readonly" })
+                            @Html.HiddenFor(model => model.RequestId)
+                            @Html.HiddenFor(model => model.IsFullRefund)
+
+                            @{
+                                if (Model.IsFullRefund == true)
+                                {
+                                    <input checked="checked"
+                                           id="IsFullRefund"
+                                           name="IsFullRefund"
+                                           type="radio"
+                                           value="1" style="display:none" />
+                                }
+                                else
+                                {
+                                    <input id="IsFullRefund"
+                                           name="IsFullRefund"
+                                           type="radio"
+                                           value="0" style="display:none" />
+                                }
+                            }
+
+
+                            <div id="errPermission" style="display:none" class="alert-danger1">Permission is Required.</div>
+                        </div>
+                    </div>
+                    @{
+                        if (ViewBag.IsCitizen == "Citizen")
+                        {
+
+                            <div class="col-lg-6" style="display:none">
+                                <div class="form-group">
+                                    <label>Select Cancelliation Reason<span style="color:red">*</span>:</label>
+                                    @Html.DropDownListFor(model => model.CancellationReason, new SelectList(ViewBag.CancellationReasonList, "Value", "Text", "1"), htmlAttributes: new { @class = "form-control", @id = "ddCancellationReasonList", @name = "CancellationReason" })
+                                    <div id="errCancelliationReason" style="display:none" class="alert-danger1">Cancelliation Reason Required.</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6" style="display:none">
+                                <div class="form-group">
+                                    <label>Cancelliation Reason Remarks<span style="color:red">*</span>:</label>
+                                    @Html.TextBoxFor(model => model.CancellationRemarks, new { @class = "form-control", id = "CancellationRemarks", name = "CancellationRemarks" })
+                                    <div id="errCancelliationReasonRemark" style="display:none" class="alert-danger1">Cancelliation Reason remarks Required.</div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Select Cancelliation Reason<span style="color:red">*</span>:</label>
+                                    @Html.DropDownListFor(model => model.CancellationReason, new SelectList(ViewBag.CancellationReasonList, "Value", "Text"), htmlAttributes: new { @class = "form-control", @id = "ddCancellationReasonList", @name = "CancellationReason" })
+                                    <div id="errCancelliationReason" style="display:none" class="alert-danger1">Cancelliation Reason Required.</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Cancelliation Reason Remarks<span style="color:red">*</span>:</label>
+                                    @Html.TextBoxFor(model => model.CancellationRemarks, new { @class = "form-control", id = "CancellationRemarks", name = "CancellationRemarks" })
+                                    <div id="errCancelliationReasonRemark" style="display:none" class="alert-danger1">Cancelliation Reason remarks Required.</div>
+                                </div>
+                            </div>
+                        }
+                    }
+
+
+
+
+
+                            <div id="btn" class="col-lg-12">
+                                @if (@ViewBag.IsCitizen == "Citizen")
+                                {
+                                    <div id="divIndemnityBond">
+                                        <div class="col-lg-12" style="border:1px dashed black;">
+                                            <div style="padding:5px">
+
+                                                <p style="text-align:justify">I hereby confirm my request of cancellation of the ticket and i want my refundable amount in my Bank/Credit Account.</p>
+
+                                                <input type="radio" name="bond_agreement" value="1"> Agree
+                                                <input type="radio" name="bond_agreement" value="0" checked> Disagree
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <br /><br />
+                                }
+
+                                <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_Submit">
+                                    Process To Refund
+                                </button>
+                                <a id="btn_Previous" style="float:none" class="btn btn-warning" href='@Url.Action("WildlifeBookingFD", "BookOnlineTicket",new { CT = "QWR2YW5jZQ =="})'>
+                                    Back
+                                </a>
+
+                            </div>
+                </div>
+            </div>
+
+
+
+        </div>
+    }
+
+</div>

@@ -1,0 +1,1162 @@
+﻿@{
+    ViewBag.Title = "SurveyReport";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+@model  IEnumerable<FMDSS.Models.ForesterDevelopment.SurveyReport>
+
+<style>
+    #page-wrapper-inn .table > thead > tr > th {
+        width: 20%;
+    }
+</style>
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+    $(function () {
+        $(".datefield").datepicker({ maxDate: new Date(), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+    });
+    $(document).ready(function (e) {
+
+        $("#txt_year").on("keypress keyup", function () {
+            if ($(this).val() == '0') {
+                $(this).val('');
+            }
+        });
+
+        $("#ddl_Range").bind("change", function () {
+           
+            $('#ddl_Village').empty();
+            $('#ddl_MicroPlan').empty();
+            $("#ddl_WorkOrder").empty();
+            //$('#ddl_WorkOrder').empty();
+            $("#ddl_WorkOrder").val($("#ddl_WorkOrder option:first").val());
+            $('#ddl_activity').empty();
+            $("#txt_ActivityPer").val('');
+            $("#ddl_Village").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            var values = {
+                RangeCode: $("#ddl_Range").val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'SurveyReport/Bind_Village',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddl_Village").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+        //$("#ddl_Village").bind("change", function () {
+        //    $('#ddl_MicroPlan').empty();
+        //    //$('#ddl_WorkOrder').empty();
+        //    $("#ddl_WorkOrder").val($("#ddl_WorkOrder option:first").val());
+        //    $('#ddl_activity').empty();
+        //    $("#txt_ActivityPer").val('');
+        //    $("#ddl_MicroPlan").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+        //    var values = {
+        //        VillageID: $("#ddl_Village").val()
+        //    };
+
+        //    $.ajax({
+        //        type: 'POST',
+        //        contentType: 'application/json; charset=utf-8',
+        //        url: RootUrl + 'SurveyReport/Bind_Plan',
+        //        data: JSON.stringify(values),
+        //        success: function (data) {
+        //            $.each(data, function (i, items) {
+        //                $("#ddl_MicroPlan").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+        //            });
+        //        },
+        //        traditional: true,
+        //        error: function (data) { console.log(data) }
+        //    });
+        //});
+
+        $("#ddl_Village").bind("change", function () {
+            $("#ddl_WorkOrder").empty();
+            var values = {
+                VillageID: $("#ddl_Village").val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'SurveyReport/Bind_WorkOrder',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    // alert(data.list1.length);
+                    //$.each(data, function (i, items) {
+                    //$('#ddl_WorkOrder').empty();
+                    $("#ddl_WorkOrder").val($("#ddl_WorkOrder option:first").val());
+                    $('#ddl_activity').empty();
+                    $("#txt_ActivityPer").val('');
+                    $("#ddl_WorkOrder").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                    //for (var i = 0; i < data.list1.length; i++) {
+                    //    $("#ddl_project").append('<option value="' + data.list1[i].Value + '">' + data.list1[i].Text + '</option>');
+                    //    // });
+                    //}
+                    $.each(data, function (i, items) {
+                        $("#ddl_WorkOrder").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                        // });
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+        $("#ddl_project").bind("change", function () {
+            $('#ddl_Scheme').empty();
+            $("#ddl_Scheme").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            var values = {
+                ProjectID: $("#ddl_project").val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'SurveyReport/Bind_Scheme',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddl_Scheme").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+        $("#ddl_Scheme").bind("change", function () {
+            $('#ddl_activity').empty();
+            $("#ddl_activity").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            var values = {
+                SchemeID: $("#ddl_Scheme").val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'SurveyReport/Bind_Activity',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        // $("#ddl_activity").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+ 
+        $("#ddl_WorkOrder").bind("change", function () {
+            $('#ddl_activity').empty();
+            $("#txt_ActivityPer").val('');
+            $("#ddl_activity").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            var values = {
+                WorkOrderID: $("#ddl_WorkOrder").val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'SurveyReport/Bind_Activity',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddl_activity").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+
+
+
+        $("#ddl_activity").bind("change", function () {
+ 
+            $("#txt_ActivityPer").val('');
+            $("#txt_Quantity").val('');
+            $('#ddl_SubActivity').empty();
+            $("#ddl_SubActivity").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            var values = {
+                ActivityID: $("#ddl_activity").val(),
+                WorkOrderID: $("#ddl_WorkOrder").val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'SurveyReport/Bind_SubActivity',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddl_SubActivity").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                        //$('#lbl_RemQuantity').text("Remaining Quantity of Select Activity: " + data.list1);
+                        //$('#HD_RemQuantity').val(data.list1) ;
+                        ////$("#ddl_activity").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+
+
+
+        $("#ddl_SubActivity").bind("change", function () {
+
+            $("#txt_ActivityPer").val('');
+            $("#txt_Quantity").val('');
+            var values = {
+                ActivityID: $("#ddl_activity").val(),
+                WorkOrderID: $("#ddl_WorkOrder").val(),
+                SubActivityID: $("#ddl_SubActivity").val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'SurveyReport/Get_Quantity',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $('#lbl_RemQuantity').text("Remaining Quantity of Select Activity: " + data.list1);
+                        $('#HD_RemQuantity').val(data.list1);
+                        //$("#ddl_activity").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+
+        $("#ddl_WorkOrder").bind("change", function () {
+
+        });
+
+        $('#btn_addActivity').click(function () {
+
+            var AvailableQuantity = parseInt($('#HD_RemQuantity').val());
+            var EnteredQuantity = parseInt($('#txt_Quantity').val());
+        
+            if (EnteredQuantity > AvailableQuantity)
+            {
+                document.getElementById("errorQuantity").style.display = 'block';
+                $("#txt_Quantity").focus();
+                return false;
+            }
+            else
+            {
+                document.getElementById("errorQuantity").style.display = 'none';
+            }
+            if ($('#ddl_activity').val() == '' || $('#ddl_activity').val() == '0') {
+                document.getElementById("erroractivity").style.display = 'block';
+                $("#ddl_activity").focus();
+                return false;
+            }
+            else { document.getElementById("erroractivity").style.display = 'none'; }
+
+            if (parseInt($('#txt_ActivityPer').val()) == 0 || (parseInt($('#txt_ActivityPer').val()) > 100)) {
+                document.getElementById("erroractivityper").style.display = 'block';
+                $("#txt_ActivityPer").focus();
+                return false;
+            }
+            else { document.getElementById("erroractivityper").style.display = 'none'; }
+
+
+
+            SurveyDetails();
+            $('#temp').css("display", "block");
+
+        });
+
+        $('#btn_addActi').click(function () {
+
+            $('#div_add').css("display", "block");
+            $('#btn_addActi').css("display", "none");
+            $('#btnViewActi').css("display", "block");
+            $('#div_view').css("display", "none");
+        });
+
+        $('#btnViewActi').click(function () {
+            $('#div_add').css("display", "none");
+            $('#btnViewActi').css("display", "none");
+            $('#btn_addActi').css("display", "block");
+            $('#div_view').css("display", "block");
+        });
+
+        $('#btn_submit1').click(function () {
+            var rowCount = $('#temp tr').not('thead tr').length;
+            if (rowCount == '0') {
+                alert('Please add atleast one activity.');
+                return false;
+            }
+
+            if ($('#txt_SurveyDate').val() == '') {
+                document.getElementById("errorSurveyDate").style.display = 'block';
+                $("#txt_SurveyDate").focus();
+                return false;
+            }
+            else { document.getElementById("errorSurveyDate").style.display = 'none'; }
+
+
+            if ($('#PhotoURL').val() == '') {
+                document.getElementById("errorPhoto").style.display = 'block';
+                $("#PhotoURL").focus();
+                return false;
+            }
+            else { document.getElementById("errorPhoto").style.display = 'none'; }
+
+            if ($('#txt_year').val() == '') {
+                document.getElementById("errorCompYear").style.display = 'block';
+                $("#txt_year").focus();
+                return false;
+            }
+            else { document.getElementById("errorCompYear").style.display = 'none'; }
+
+
+            if ($('#txt_latitude').val() == '') {
+                $('#errorLat').show();
+                $('#errorLat').html("Please enter the Latitude!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txt_latitude').focus();
+                return false;
+            }
+            else { $('#errorLat').hide(); }
+
+            if (($('#txt_latitude').val().substr(0, 1) == '.') && ($('#txt_latitude').val().length <= 1)) {
+                $('#errorLat').show();
+                $('#errorLat').html("Please enter the Latitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txt_latitude').focus();
+                return false;
+            }
+            else { $('#errorLat').hide(); }
+
+            if ((parseFloat($('#txt_latitude').val())) <= 0) {
+                $('#errorLat').show();
+                $('#errorLat').html("Please enter the Latitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txt_latitude').focus();
+                return false;
+            }
+            else { $('#errorLat').hide(); }
+
+            if ($('#txt_longitude').val() == '') {
+                $('#errorLong').show();
+                $('#errorLong').html("Please enter the Longitude !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txt_longitude').focus();
+                return false;
+            }
+            else { $('#errorLong').hide(); }
+
+            if (($('#txt_longitude').val().substr(0, 1) == '.') && ($('#txt_longitude').val().length <= 1)) {
+                $('#errorLong').show();
+                $('#errorLong').html("Please enter the Longitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txt_longitude').focus();
+                return false;
+            }
+            else { $('#errorLong').hide(); }
+
+            if ((parseFloat($('#txt_longitude').val())) <= 0) {
+                $('#errorLong').show();
+                $('#errorLong').html("Please enter the Longitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txt_longitude').focus();
+                return false;
+            }
+            else { $('#errorLong').hide(); }
+
+            if ((parseFloat($('#txt_longitude').val())) <= 0) {
+                $('#errorLong').show();
+                $('#errorLong').html("Please enter the Longitude greator than 0!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txt_longitude').focus();
+                return false;
+            }
+            else { $('#errorLong').hide(); }
+
+            //if ($('#ddl_FileType').val() == '' || $('#ddl_FileType').val() == null || $('#ddl_FileType').val() == '0') {
+            //    $('#errorFileType').show();
+            //    $('#errorFileType').html("Please Select File Type!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            //    $("#ddl_FileType").focus();
+            //    return false;
+            //}
+
+            //else { $('#errorFileType').hide(); }
+
+            if ($('#FileURL').val() == '') {
+
+                $('#errorFile').show();
+                $("#FileURL").focus();
+                return false;
+            }
+
+            else { $('#errorFile').hide(); }
+
+            if ($('#ShapeFileURL').val() == '') {
+
+                $('#errorShapeFile').show();
+                $("#ShapeFileURL").focus();
+                return false;
+            }
+
+            else { $('#errorShapeFile').hide(); }
+
+
+        });
+
+        $('#txt_latitude').keypress(function (event) {
+            return isNumber(event, this)
+        });
+
+        $('#txt_longitude').keypress(function (event) {
+            return isNumber(event, this)
+        });
+
+        $('#txt_area').keypress(function (event) {
+
+            return isNumber(event, this)
+
+        });
+
+        $('#txt_year').keypress(function (event) {
+
+            return isNumber(event, this)
+
+        });
+
+        $('#txt_ActivityPer,#txt_Quantity').keypress(function (event) {
+
+            return isOnlyNumber(event, this)
+
+        });
+
+        $('#txt_Quantity').focusout(function () {
+
+            if ($('#txt_Quantity').val() != '') {
+
+                var APercentage = (parseInt($('#txt_Quantity').val()) / parseInt($('#HD_RemQuantity').val())) * 100;
+                $('#txt_ActivityPer').val(APercentage);
+                $('#txt_ActivityPer').attr('readonly', 'readonly');
+            }
+
+
+        });
+
+
+        $(document).on('change', '#txt_latitude', function (event) {
+            var str = $('#txt_latitude').val();
+
+            var lastChar = str.slice(-1);
+            if (lastChar == '.') {
+                str = str.slice(0, -1);
+            }
+            var FirstChar = str.slice(1);
+            if (FirstChar == '.') {
+                str = str.slice(0, -1);
+            }
+            $('#txt_latitude').val(str);
+
+            var str1 = str.match(/.{3}/g);
+
+            var length = str1.length;
+            for (var i = 0; i < 1; i++) {
+
+                if (str1[i].indexOf(".") == -1) {
+
+                    $('#errorLat').show();
+                    $('#errorLat').html("Please enter the valid Latitude!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#txt_latitude').focus();
+                    $('#txt_latitude').val('');
+                    return false;
+                    //}
+                }
+                else {
+                    $('#errorLat').hide();
+                }
+
+                if (str.indexOf(".") == 1 && str.length < 2) {
+                    $('#errorLat').show();
+                    $('#errorLat').html("Please enter the valid Latitude!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#txt_latitude').focus();
+                    $('#txt_latitude').val('');
+                    return false;
+                    //}
+                }
+                else {
+                    $('#errorLat').hide();
+                }
+
+            }
+
+        })
+
+        $(document).on('change', '#txt_longitude', function (event) {
+            var str = $('#txt_longitude').val();
+            var FirstChar = str.slice(0);
+            // alert(FirstChar);
+            if (FirstChar == '.') {
+                str = str.slice(0, -1);
+            }
+            var lastChar = str.slice(-1);
+
+            if (lastChar == '.') {
+                str = str.slice(0, -1);
+
+            }
+
+            $('#txt_longitude').val(str);
+            var str1 = str.match(/.{3}/g);
+
+            var length = str1.length;
+
+            for (var i = 0; i < 1; i++) {
+                if (str1[i].indexOf(".") == -1) {
+                    $('#errorLong').show();
+                    $('#errorLong').html("Please enter the valid Longitude!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#txt_longitude').focus();
+                    $('#txt_longitude').val('');
+                    return false;
+                }
+                else {
+                    $('#errorLong').hide();
+                }
+                if (str.indexOf(".") == 1 && str.length < 2) {
+                    $('#errorLong').show();
+                    $('#txt_longitude').focus();
+                    $('#txt_longitude').val('');
+                    $('#errorLong').html("Please enter the valid Longitude!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    return false;
+                }
+                else {
+                    $('#errorLong').hide();
+                }
+            }
+
+        })
+
+        $(document).on('change', '#txt_areaName', function (e) {
+            var str = $('#txt_areaName').val();
+            if (str.match(/[a-z]/i)) {
+                $('#errorAreaName').hide();
+            }
+            else {
+                $('#errorAreaName').show();
+                $('#errorAreaName').html("Please enter the Valid Area Name!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txt_areaName').focus();
+                return false;
+            }
+        })
+
+        $('#txt_SurveyDate').keydown(function (event)
+        { return cancelBackspace(event) });
+
+        $("#PhotoURL").change(function (e) {
+
+            var iSize = ($("#PhotoURL")[0].files[0].size / 1048576);
+
+            if (iSize > 2) {
+                $('#PhotoURL').val('');
+                $('#errorPhoto').show();
+                $('#errorPhoto').html("File should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#PhotoURL').focus();
+                return false;
+
+
+            }
+
+            var file = $("#PhotoURL").val();
+
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#PhotoURL').val('');
+                    $('#errorPhoto').show();
+                    $('#errorPhoto').html("Please upload only jpeg or jpg or pdf or png or gif file format!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#PhotoURL').focus();
+                    return false;
+                } else {
+                    $('#errorPhoto').hide();
+                }
+            }
+            else { $('#errorPhoto').hide(); }
+
+        });
+
+        $("#ShapeFileURL").change(function (e) {
+
+            var iSize = ($("#ShapeFileURL")[0].files[0].size / 1048576);
+
+            if (iSize > 2) {
+                $('#ShapeFileURL').val('');
+                $('#errorShapeFile').show();
+                $('#errorShapeFile').html("File should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#ShapeFileURL').focus();
+                return false;
+
+
+            }
+
+            var file = $("#ShapeFileURL").val();
+
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif','shp'];
+
+            if (file) {
+                var get_ext = file.split('.');
+                get_ext = get_ext.reverse();
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#ShapeFileURL').val('');
+                    $('#errorShapeFile').show();
+                    $('#errorShapeFile').html("Please upload only shp file format!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#ShapeFileURL').focus();
+                    return false;
+                } else {
+                    $('#errorShapeFile').hide();
+                }
+            }
+            else { $('#errorShapeFile').hide(); }
+
+        });
+
+        $("#FileURL").change(function (e) {
+
+            var iSize = ($("#FileURL")[0].files[0].size / 1048576);
+
+            if (iSize > 2) {
+                $('#FileURL').val('');
+                $('#errorFile').show();
+                $('#errorFile').html("File should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#FileURL').focus();
+                return false;
+
+
+            }
+
+            var file = $("#FileURL").val();
+
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+
+            if (file) {
+                var get_ext = file.split('.');
+                get_ext = get_ext.reverse();
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#FileURL').val('');
+                    $('#errorFile').show();
+                    $('#errorFile').html("Please upload only jpeg or jpg or pdf or png or gif file format!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#FileURL').focus();
+                    return false;
+                } else {
+                    $('#errorFile').hide();
+                }
+            }
+            else { $('#errorFile').hide(); }
+
+        });
+    });
+
+
+
+    function cancelBackspace(event) {
+        if (event.keyCode == 8 || event.keyCode == 46) {
+            return false;
+        }
+    }
+    function SurveyDetails() {
+
+
+
+
+        var SurveyInfo = {
+            VillageCode: $("#ddl_Village").val(),
+            Village: $("#ddl_Village  option:selected").text(),
+            //MicroPlanID:'0',// $("#ddl_MicroPlan").val(),
+            //MicroPlan:'0',// $("#ddl_MicroPlan  option:selected").text(),
+            //SchemeID: $("#ddl_Scheme").val(),
+            //Scheme: $("#ddl_Scheme  option:selected").text(),
+            //ProjectID: $("#ddl_project").val(),
+            //Project:'0',// $("#ddl_project  option:selected").text(),
+
+            ActivityID: $("#ddl_activity").val(),
+            Activity: $("#ddl_activity  option:selected").text(),
+            SubActivty: $("#ddl_SubActivity").val(),
+            SubActivtyName: $("#ddl_SubActivity  option:selected").text(),
+            WorkOrderID: $("#ddl_WorkOrder").val(),
+            WorkOrder: $("#ddl_WorkOrder  option:selected").text(),
+            ActivityPercentage: $("#txt_ActivityPer").val(),
+            Quantity: $("#txt_Quantity").val()
+        }
+
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(SurveyInfo),
+            url: RootUrl + 'SurveyReport/activityData',
+            success: function (data) {
+
+               // alert('nahi aaa reha hi');
+                if (data.Village != "") {
+                    var amt;
+                    var value = {
+                        ActivityID: $("#ddl_activity").val(),
+                        SubActivty: $("#ddl_SubActivity").val(),
+                        RangeCode: $("#ddl_Range").val(),
+                    };
+                    $.ajax({
+                        type: 'POST',
+                        contentType: 'application/json; charset=utf-8',
+                        url: RootUrl + 'SurveyReport/Get_ActivityAmount',
+                        data: JSON.stringify(value),
+                        success: function (data1) {
+                            var amount = $("#txt_Amount").val();
+                            if (!amount) { amount = 0; }
+                            $.each(data1, function (i, items) {
+                                amt = items.TotalAmount;
+                                var totalcamfee = (parseInt(amount, 10) + parseFloat(amt));
+                                $('#txt_Amount').val(totalcamfee);
+                            });
+                            var bardata = "<tr class='rowid'><td>" + data.Village + "</td>" +
+                            "<td>" + data.Activity + "</td>" + "<td>" + data.SubActivtyName + "</td>" + "<td>" + data.Quantity + "</td>" + "<td>" + data.WorkOrder + "</td>" +
+                            "<td style='display:none'>" + data.VillageCode + "</td><td style='display:none'>" + data.ActivityID + "</td><td style='display:none'>" + data.SubActivty + "</td><td style='display:none'>" + amt + "</td>" +
+                            "<td style='display:none'>" + data.WorkOrderID + "</td><td>" + "<button class=deleteRow>Delete</button>" + "</td></tr>";
+                            $("#activityTable").append(bardata);
+
+                            $("#ddl_Range").val($("#ddl_Range option:first").val());
+                            $('#ddl_Village').empty();
+                        
+                            $('#ddl_WorkOrder').val(0);
+                            $('#ddl_activity').val(0);
+                            $('#ddl_SubActivity').val(0);
+                            $("#txt_ActivityPer").val('');
+                            $("#txt_Quantity").val('');
+                            $("ddl_SubActivity").val('');
+
+                        },
+                        traditional: true,
+                        error: function (data) { console.log(data) }
+
+                    });
+                }
+                else {
+
+                    alert('Not Allowed Duplicate entry!!');
+                }
+
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+    }
+    function isNumber(evt, element) {
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+
+        if (
+             (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+            (charCode < 48 || charCode > 57))
+            return false;
+    }
+    function isOnlyNumber(evt, element) {
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+
+        if (charCode < 48 || charCode > 57)
+            return false;
+    }
+    $(document).on('click', '.deleteRow', function (e) {
+        var $row = jQuery(this).closest('tr');
+        var $columns = $row.find('td');
+        var VID = $.trim($columns[5].innerHTML);
+        var aID = $.trim($columns[6].innerHTML);
+        var wID = $.trim($columns[9].innerHTML);
+        var SubActID = $.trim($columns[7].innerHTML);
+        var amt = $.trim($columns[8].innerHTML);
+        jQuery(this).closest('tr').remove();
+        var i = 0;
+        var RowInfo = {
+            WId: wID,
+            Aid: aID,
+            SubActID: SubActID
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(RowInfo),
+            url: RootUrl + 'SurveyReport/deleteactivityData',
+            success: function (data) {
+                alert('Deleted Successfully!!!');
+                var amount = $("#txt_Amount").val();
+                var totalcamfee = (parseInt(amount, 10) - parseFloat(amt))
+                $('#txt_Amount').val(totalcamfee);
+                var rowCount = $('#temp tr').not('thead tr').length;
+                if (rowCount == '0') {
+                    $('#temp').css("display", "none");
+                }
+            },
+            error: function (ex) { alert(ex); }
+
+        });
+        e.preventDefault();
+    });
+</script>
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Survey Report</h1>
+        @if (@Session["Status"] != null)
+        {
+            <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@Session["Status"]</div>
+            //Session["Status"] = null;
+        }
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!--<div class="panel-heading">Processing Fees</div>-->
+                <!-- /.panel-heading -->
+                @using (Html.BeginForm("SubmitDetails", "SurveyReport", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data" }))
+                {
+
+                    <button type="button" class="btn btn-success" id="btn_addActi" style="width:100px; margin-left:20px"> Add Report</button>
+                    <button type="button" id="btnViewActi" class="btn btn-success" style="display: none; width: 50px; margin-left: 20px;">View</button>
+
+
+                    <div class="panel-body">
+
+                        <div id="div_add" style="display:none">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="Village">
+                                        Range:
+                                    </label>
+                                    @Html.DropDownList("RangeCode", (IEnumerable<SelectListItem>)ViewBag.Range, "--Select--", new { @class = "form-control", id = "ddl_Range" })
+
+                                    <div id="errordiv4" style="display:none" class="alert-danger1"></div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="Village">
+                                        Village Name:
+                                    </label>
+                                    @*@Html.DropDownList("VillageCode", (IEnumerable<SelectListItem>)ViewBag.ddlVillName, "--Select--", new { @class = "form-control", id = "ddl_Village" })*@
+                                    @Html.DropDownList("VillageCode", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddl_Village" })
+                                    <div id="errordiv4" style="display:none" class="alert-danger1"></div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6" style="display:none">
+                                <div class="form-group">
+                                    <label>Micro Plan: </label>
+                                    @Html.DropDownList("MicroPlanID", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddl_MicroPlan" })
+                                    <div id="errordiv5" style="display:none" class="alert-danger1"></div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Work Order: </label>
+                                    @Html.DropDownList("WorkOrderID", new SelectList(string.Empty, "Value", "Text"),"--Select--", new { @class = "form-control", id = "ddl_WorkOrder" })
+                                    <div id="errordiv5" style="display:none" class="alert-danger1"></div>
+
+                                </div>
+                            </div>
+
+                            @*<div class="col-lg-6" style="display:none">
+                                <div class="form-group">
+                                    <label>Project Name: <span class="mandatory">*</span></label>
+                                    @Html.DropDownList("ProjectID", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "ddl_project" })
+                                    <div id="errordivProj" style="display:none" class="alert-danger1">Please Select Project</div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6" style="display:none">
+                                <div class="form-group">
+                                    <label>Scheme Name: <span class="mandatory">*</span></label>
+                                    @Html.DropDownList("SchemeID", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "ddl_Scheme" })
+                                    <div id="errordivScheme" style="display:none" class="alert-danger1">Please Select Scheme</div>
+
+                                </div>
+                            </div>*@
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Activity: <span class="mandatory">*</span></label>
+                                    @Html.DropDownList("ActivityID", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddl_activity" })
+                                    <div id="erroractivity" style="display:none" class="alert-danger1">Please Select Activity.</div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Sub Activity: <span class="mandatory">*</span></label>
+                                    @Html.DropDownList("SubActivityID", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "ddl_SubActivity" })
+                                    <div id="erroractivity" style="display:none" class="alert-danger1">Please Select Activity.</div>
+
+                                </div>
+                            </div>
+                   
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label> Quantity: </label>
+                                    <input class="form-control" id="txt_Quantity" name="Quantity" maxlength="3"  />
+                                    <label id="lbl_RemQuantity" for="email"></label>
+                                    <input type="hidden" id="HD_RemQuantity" name="HD_RemQuantity"/>
+                                    <div id="errorQuantity" style="display:none" class="alert-danger1">Please Enter the Quantity less than or equal to Available Quantity.</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Activity Percentage: </label>
+                                    <input class="form-control" id="txt_ActivityPer" name="ActivityPercentage" maxlength="3" />
+                                    <div id="erroractivityper" style="display:none" class="alert-danger1">Please Enter the Activity Percentage between 1 to 100.</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 un-bold">
+                                <div class="form-group" id="btn-cont1">
+                                    <label> &nbsp;</label>
+                                    <button type="button" class="btn btn-success" id="btn_addActivity"> Add</button>
+                                    @*<button type="button" id="btnView" class="btn btn-success" data-toggle="modal" data-target="#MemberModal">View</button>*@
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <table id="temp" class="table table-bordered" style="display:none; width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th width="12%">Village</th>
+                                           
+                                                <th width="12%">Activity</th>
+                                                <th width="12%">SubActivity</th>
+                                                <th width="12%">Quantity</th>
+                                                <th width="12%">Work Order</th>
+                                               
+                                                <th style="display:none">VillageID</th>
+                                        
+                                                <th style="display:none">ActivityID</th>
+                                                <th style="display:none">SubActivityID</th>
+                                                <th style="display:none">Amount</th>
+                                                <th style="display:none">WorkOrderID</th>
+
+                                                <th width="12%">Action</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody id="activityTable"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Total Amount: </label>
+                                    <input class="form-control" id="txt_Amount" name="TotalAmount" readonly />
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Survey Date: <span class="mandatory">*</span></label>
+                                    <input class="form-control datefield" id="txt_SurveyDate" name="SurveyDate" />
+                                    <div id="errorSurveyDate" style="display:none" class="alert-danger1">Please Enter Date.</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Upload Photo: <span class="mandatory">*</span></label>
+                                    <input type="file" class="form-control" id="PhotoURL" name="PhotoURL" />
+                                    * Only .jpg /.pdf /.png /.gif file formats are allowed with max size: 2Mb.
+                                    <div id="errorPhoto" style="display:none" class="alert-danger1">Please Upload Photo.</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label> Completion Year: <span class="mandatory">*</span></label>
+                                    <input class="form-control" id="txt_year" name="ComplitionYear" maxlength="4" />
+                                    <div id="errorCompYear" style="display:none" class="alert-danger1">Please Enter Complition Year.</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-group">
+
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label> Area Name:</label>
+                                    <input class="form-control" id="txt_areaName" name="AreaName" maxlength="50" />
+                                    <div id="errorAreaName" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label> Area(In sqKm.):</label>
+                                    <input class="form-control" id="txt_area" name="Area" maxlength="4" />
+                                    <div id="errorArea" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label> Latitude: <span class="mandatory">*</span></label>
+                                    <input class="form-control" id="txt_latitude" name="Latitude" maxlength="6" />
+                                    <div id="errorLat" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label> Longitude:  <span class="mandatory">*</span></label>
+                                    <input class="form-control" id="txt_longitude" name="Longitude" maxlength="6" />
+                                    <div id="errorLong" style="display:none" class="alert-danger1"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                @*<div class="form-group">
+                                        <label>File Type: <span class="mandatory">*</span></label>
+                                        @Html.DropDownList("FileTypeID", (IEnumerable<SelectListItem>)ViewBag.FileTypes, "--Select--", new { @class = "form-control", id = "ddl_FileType" })
+                                        <div id="errorFileType" style="display:none" class="alert-danger1"></div>
+                                    </div>*@
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Upload File: <span class="mandatory">*</span></label>
+                                    <input type="file" class="form-control" id="FileURL" name="FileURL" />
+                                    * Only .jpg /.pdf /.png /.gif file formats are allowed with max size: 2Mb.
+                                    <div id="errorFile" style="display:none" class="alert-danger1">Please Upload File.</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12"></div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Upload Shape File: <span class="mandatory">*</span></label>
+                                    <input type="file" class="form-control" id="ShapeFileURL" name="ShapeFileURL" />
+                                    * Only .jpg /.pdf /.png /.gif file formats are allowed with max size: 2Mb.
+                                    <div id="errorShapeFile" style="display:none" class="alert-danger1">Please Upload File.</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label> Description: </label>
+                                    <input class="form-control" id="txt_desc" name="Description" />
+                                </div>
+                            </div>
+                            <div class="col-lg-12"></div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label> Name: </label>
+                                    <input class="form-control" id="txt_name" name="Name" type="text" value="@ViewBag.UserName" readonly />
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label> Designation: </label>
+                                    <input class="form-control" id="txt_designation" name="Designation" type="text" value="@ViewBag.Designation" readonly />
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12"></div>
+
+                            <!-- Btn Groping -->
+                            <div class="btn-padd">
+                                <div class="col-lg-12" id="btn">
+                                    <button id="btn_submit1" value="Submit" name="Command" class="btn btn-success" type="submit">
+                                        <i class="fa fa-check"></i> Submit
+                                    </button>
+                                    <button class="btn btn-warning" type="reset">
+                                        <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                    </button>
+                                    <button class="btn btn-danger" value="Cancel" name="Command" type="button">
+                                        <i class="fa fa-times fa-fw"></i> Cancel
+                                    </button>
+
+                                </div>
+                            </div>
+                            <!-- /.Btn Groping -->
+                        </div>
+                        <div class="panel-body" id="div_view">
+                            <div class="col-lg-12">
+                                <div class="panel panel-default">
+                                    <div class="dataTable_wrapper">
+                                        <div id="tbl" class="table-responsive">
+                                            <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+
+                                                <thead>
+                                                    <tr>
+
+                                                        <th>Village Name</th>
+                                                        <th>Description</th>
+                                                        <th>Area Name</th>
+                                                        <th>Complition Year</th>
+                                                        <th>Survey Date</th>
+                                                  
+                                                        <th>surveyor</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var item in Model)
+                                                    {
+                                                        if (item.Village!="")
+                                                        { 
+                                                        <tr>
+                                                            <td>
+                                                                @Html.DisplayFor(model => item.Village)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(model => item.Description)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(model => item.AreaName)
+                                                            </td>
+                                                            <td>
+                                                                @Html.DisplayFor(model => item.ComplitionYear)
+                                                            </td>
+                                                           <td>
+                                                                @Html.DisplayFor(model => item.SDate)
+                                                            </td>
+                                                      
+                                                            <td>
+                                                                @Html.DisplayFor(model => item.SurveyorName)
+                                                            </td>
+
+                                                        </tr>
+                                                        }
+
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <!-- /.panel-body -->
+            </div>
+
+            <!-- /.panel -->
+
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>

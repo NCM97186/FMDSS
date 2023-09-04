@@ -1,0 +1,839 @@
+﻿@{
+    ViewBag.Title = "OnlineTicketBooking";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+@model IEnumerable<FMDSS.Models.OnlineBooking.TicketBooking>
+
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var RootURl = '@Url.Content("~/")';
+    $(function () {
+        $(".datefield").datepicker({ minDate: new Date(), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+    });
+
+    $(document).ready(function (e) {
+        
+        $("#ddl_Category").bind("change", function () {
+            var category = $("#ddl_Category").val();
+            document.getElementById("errorType").style.display = 'none';
+             
+            $('#ddl_Districts').empty();
+            var values = {
+                Category: category
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootURl + 'OnlineTicketBooking/DistrictbyCategory',
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddl_Districts").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+
+        $("#ddl_Districts").bind("change", function () {
+
+            var districtID = $("#ddl_Districts").val();
+            $('#ddl_place').empty();
+            var values = {
+                DistrictID: districtID
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootURl + 'OnlineTicketBooking/PlaceByDistrict',
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddl_place").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+            document.getElementById("errorDis").style.display = 'none';
+        });
+
+        $("#ddl_place").bind("change", function () {
+            $('#ddl_Shift').empty();
+
+            $('#lbl_IndAdult').html('');
+            $('#lbl_IndChild').html('');
+            $('#lbl_ForAdultfee').html('');
+            $('#lbl_ForChildfee').html('');
+            $('#lbl_Student').html('');
+            $('#lbl_guidefee').html('');
+            $('#lbl_camerafee').html('');
+            $('#lbl_singleOccupancyfee').html('');
+            $('#lbl_doubleOccupancy').html('');
+            $('#lbl_safarifee').html('');
+            $('#txt_discount').val('');
+            $('#txt_taxRate').val('');
+
+            var districtID = $("#ddl_Districts").val();
+            var placeID = $("#ddl_place").val();
+            var values = {
+                DistrictID: districtID,
+                PlaceID: placeID
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootURl + 'OnlineTicketBooking/feesByDistrictPlace',
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $('#lbl_IndAdult').text("Fees per Adult: " + items.IndianAdultFees);
+                        $('#lbl_IndChild').text("Fees per child: " + items.IndianChildFees);
+                        $('#lbl_ForAdultfee').text("Fees per adult: " + items.ForeignerAdultFees);
+                        $('#lbl_ForChildfee').text("Fees per child: " + items.ForeignerChildFees);
+                        $('#lbl_Student').text("Fees per Student: " + items.StudentFees);
+                        $('#lbl_guidefee').text("Fees per guide: " + items.GuideFees);
+                        $('#lbl_camerafee').text("Fees per camera: " + items.CameraFees);
+                        $('#lbl_singleOccupancyfee').text("Fees per room: " + items.SingleOccupancyFees);
+                        $('#lbl_doubleOccupancy').text("Fees per room: " + items.DoubleOccupancyFees);
+                        $('#lbl_safarifee').text("Fees per member: " + items.SafariFees);
+                        $('#txt_discount').val(items.DiscountPercentage);
+                        $('#txt_taxRate').val(items.TaxRate);
+                       
+                        if (items.FullDayShift == '1')
+                        {
+                            $("#ddl_Shift").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                            $("#ddl_Shift").append('<option value="' + 3 + '">' + "Full Day" + '</option>');
+                        }
+                        else if(items.FullDayShift == '0')
+                        {
+                            $("#ddl_Shift").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                            $("#ddl_Shift").append('<option value="' + 1 + '">' + "Morning" + '</option>');
+                            $("#ddl_Shift").append('<option value="' + 2 + '">' + "Evening" + '</option>');
+                        }
+                        else
+                        {                           
+                            $("#ddl_Shift").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                        }
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+            document.getElementById("errorPlace").style.display = 'none';
+        });
+     
+      
+
+        $("#ddl_Shift").change(function () {
+            var arrivalDate = $("#txt_dateofarrival").val();
+            if (arrivalDate) {
+                var placeID = $("#ddl_place").val();
+                var shiftTime = $("#ddl_Shift").val();
+                //  alert(placeID + ' ' + arrivalDate + ' ' + shiftTime)
+                var values = {
+                    PlaceID: placeID,
+                    ArrivalDate: arrivalDate,
+                    ShiftTime: shiftTime
+                };
+
+                $.ajax({
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(values),
+                    url: RootURl + 'OnlineTicketBooking/CheckTicketAvailability',
+                    success: function (data) {
+                        $('#lbl_NumberofMembersavailable').text("Currently available seats: " + data);
+                    },
+                    traditional: true,
+                    error: function (data) { console.log(data) }
+                });
+            }
+            document.getElementById("errorShift").style.display = 'none';
+        });
+        $("#txt_dateofarrival").change(function () {
+            var shiftTime = $("#ddl_Shift").val();
+            if (shiftTime) {
+                var arrivalDate = $("#txt_dateofarrival").val();
+                var placeID = $("#ddl_place").val();
+                var values = {
+                    PlaceID: placeID,
+                    ArrivalDate: arrivalDate,
+                    ShiftTime: shiftTime
+                };
+
+                $.ajax({
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(values),
+                    url: RootURl + 'OnlineTicketBooking/CheckTicketAvailability',
+                    success: function (data) {
+                        $('#lbl_NumberofMembersavailable').text("Currently available seats: " + data);
+                    },
+                    traditional: true,
+                    error: function (data) { console.log(data) }
+                });
+            }
+            else { $('#lbl_NumberofMembersavailable').text(""); }
+            document.getElementById("errorDate").style.display = 'none';
+            
+        });
+        $("#txt_NumberofMembers").change(function () {
+            document.getElementById("errortotMember").style.display = 'none';
+        });
+        $(document).on('keypress', '#txt_dateofarrival', function (event) {
+          
+            event.preventDefault();
+            return false;
+
+        });
+       
+
+        $("#txt_IndAdult").bind("change", function () { return checkMemberCount(this); });
+
+        $("#txt_IndChild").bind("change", function () { return checkMemberCount(this); });
+
+        $("#txt_forAdult").bind("change", function () { return checkMemberCount(this); });
+
+        $("#txt_forChild").bind("change", function () { return checkMemberCount(this); });
+
+        $("#txt_Student").bind("change", function () { return checkMemberCount(this); });
+
+        function checkMemberCount(object) {
+            var allmembers = $("#txt_NumberofMembers").val();
+            if (!allmembers) { allmembers = 0; }
+            var IndianAdultmembers = $("#txt_IndAdult").val();
+            if (!IndianAdultmembers) { IndianAdultmembers = 0; }
+            var totalIndChild = $("#txt_IndChild").val();
+            if (!totalIndChild) { totalIndChild = 0; }
+            var ForAdultmembers = $("#txt_forAdult").val();
+            if (!ForAdultmembers) { ForAdultmembers = 0; }
+            var totalForChild = $("#txt_forChild").val();
+            if (!totalForChild) { totalForChild = 0; }
+            var totalStudent = $("#txt_Student").val();
+            if (!totalStudent) { totalStudent = 0; }
+            var members = (parseInt(totalIndChild, 10) + parseInt(IndianAdultmembers, 10) + parseInt(totalForChild, 10) + parseInt(ForAdultmembers, 10) + parseInt(totalStudent, 10));
+
+            if (parseInt(members, 10) <= parseInt(allmembers, 10)) {
+            }
+            else {
+                alert('Value must be less then total members');
+                $('#' + object.id).val('');
+            }
+        }
+
+
+        $('#btn_done').click(function () {
+            if ($('#ddl_Category').val() == '' || $('#ddl_Category').val() == '0') {
+                document.getElementById("errorType").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#ddl_Category").offset().top}, 600);
+                return false;
+            }
+            if ($('#ddl_Districts').val() == '' || $('#ddl_Districts').val() == '0') {
+                document.getElementById("errorDis").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#ddl_Districts").offset().top }, 600);
+                return false;
+            }
+             
+            if ($('#ddl_place').val() == '' || $('#ddl_place').val() == '0') {
+                document.getElementById("errorPlace").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#ddl_place").offset().top }, 600);
+                return false;
+            }
+
+            if ($('#ddl_Shift').val() == '' || $('#ddl_Shift').val() == '0') {
+                document.getElementById("errorShift").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#ddl_Shift").offset().top }, 600);
+                return false;
+            }
+              
+            if ($('#txt_dateofarrival').val() == '' || $('#txt_dateofarrival').val() == '0') {
+                document.getElementById("errorDate").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#txt_dateofarrival").offset().top }, 600);
+                return false;
+            }
+            if ($('#txt_dateofarrival').val() == '' || $('#txt_dateofarrival').val() == '0') {
+                document.getElementById("errorDate").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#txt_dateofarrival").offset().top }, 600);
+                return false;
+            }
+
+                var allmembers = $("#txt_NumberofMembers").val();
+                if (allmembers != '') {
+                    var IndAdult = $("#txt_IndAdult").val();
+                    if (!IndAdult) { IndAdult = 0; }
+                    var IndAdultFees = document.getElementById("lbl_IndAdult").textContent;
+                    var IndPerAdultFees = IndAdultFees.split(":");
+                    var IndianAdultTotalFees = (parseInt(IndAdult, 10) * parseInt(IndPerAdultFees[1], 10));
+
+                    var IndChild = $("#txt_IndChild").val();
+                    if (!IndChild) { IndChild = 0; }
+                    var IndChildFees = document.getElementById("lbl_IndChild").textContent;
+                    var IndPerChildFees = IndChildFees.split(":");
+                    var IndianChildTotalFees = (parseInt(IndChild, 10) * parseInt(IndPerChildFees[1], 10));
+
+                    var Student = $("#txt_Student").val();
+                    if (!Student) { Student = 0; }
+                    var StudentFees = document.getElementById("lbl_Student").textContent;
+                    var StudentFees = StudentFees.split(":");
+                    var StudentTotalFees = (parseInt(Student, 10) * parseInt(StudentFees[1], 10));
+
+                    var ForAdult = $("#txt_forAdult").val();
+                    if (!ForAdult) { ForAdult = 0; }
+                    var ForAdultFees = document.getElementById("lbl_ForAdultfee").textContent;
+                    var ForPerAdultFees = ForAdultFees.split(":");
+                    var ForAdultTotalFees = (parseInt(ForAdult, 10) * parseInt(ForPerAdultFees[1], 10));
+
+                    var ForChild = $("#txt_forChild").val();
+                    if (!ForChild) { ForChild = 0; }
+                    var ForChildFees = document.getElementById("lbl_ForChildfee").textContent;
+                    var ForPerChildFees = ForChildFees.split(":");
+                    var ForChildTotalFees = (parseInt(ForChild, 10) * parseInt(ForPerChildFees[1], 10));
+
+                    var tot_members = (parseInt(IndAdult, 10) + parseInt(IndChild, 10) + parseInt(Student, 10) + parseInt(ForAdult, 10) + parseInt(ForChild, 10));
+                    if (tot_members == allmembers) {
+                        var Guide = $("#txt_guideFee").val();
+                        if (!Guide) { Guide = 0; }
+                        var GuideFees = document.getElementById("lbl_guidefee").textContent;
+                        var PerGuideFees = GuideFees.split(":");
+                        var GuideTotalFees = (parseInt(Guide, 10) * parseInt(PerGuideFees[1], 10));
+
+                        var Camera = $("#txt_cameraFees").val();
+                        if (!Camera) { Camera = 0; }
+                        var CameraFees = document.getElementById("lbl_camerafee").textContent;
+                        var PerCameraFees = CameraFees.split(":");
+                        var CameraTotalFees = (parseInt(Camera, 10) * parseInt(PerCameraFees[1], 10));
+
+                        var SingleRoom = $("#txt_singleOccupancy").val();
+                        if (!SingleRoom) { SingleRoom = 0; }
+                        var SingleRoomFees = document.getElementById("lbl_singleOccupancyfee").textContent;
+                        var PerSingleRoomFees = SingleRoomFees.split(":");
+                        var SingleRoomTotalFees = (parseInt(SingleRoom, 10) * parseInt(PerSingleRoomFees[1], 10));
+
+                        var DoubleRoom = $("#txt_doubleOccupancy").val();
+                        if (!DoubleRoom) { DoubleRoom = 0; }
+                        var DoubleRoomFees = document.getElementById("lbl_doubleOccupancy").textContent;
+                        var PerDoubleRoomFees = DoubleRoomFees.split(":");
+                        var DoubleRoomTotalFees = (parseInt(DoubleRoom, 10) * parseInt(PerDoubleRoomFees[1], 10));
+
+                        var Safari = $("#txt_safariMember").val();
+                        if (!Safari) { Safari = 0; }
+                        var SafariFees = document.getElementById("lbl_safarifee").textContent;
+                        var PerSafariFees = SafariFees.split(":");
+                        var SafariTotalFees = (parseInt(Safari, 10) * parseInt(PerSafariFees[1], 10));
+
+                        var totalfeesAmount = (parseInt(IndianAdultTotalFees, 10) + parseInt(IndianChildTotalFees, 10) + parseInt(StudentTotalFees, 10)
+                            + parseInt(ForAdultTotalFees, 10) + parseInt(ForChildTotalFees, 10) + parseInt(GuideTotalFees, 10) + parseInt(CameraTotalFees, 10)
+                             + parseInt(SingleRoomTotalFees, 10) + parseInt(DoubleRoomTotalFees, 10) + parseInt(SafariTotalFees, 10));
+
+                        document.getElementById("txt_finalfees").value = totalfeesAmount;
+
+                        var discount = $("#txt_discount").val();
+                        if (!discount) { discount = 0; }
+                        var discountedAmount = parseFloat((totalfeesAmount * discount) / 100).toFixed(2);
+                        var taxrate = $("#txt_taxRate").val();
+                        if (!taxrate) { taxrate = 0; }
+                        var taxableAmount = (parseFloat(totalfeesAmount).toFixed(2));
+                        var TaxAmount = parseFloat((taxableAmount * taxrate) / 100).toFixed(2);
+                        var finalAmount = (parseFloat(taxableAmount) + parseFloat(TaxAmount)) - parseFloat(discountedAmount);
+                        document.getElementById("txt_amountTobePaid").value = finalAmount.toFixed(2);
+                        $("#div_payment").css("display", "block");
+                    }
+                    else {
+                        alert('Please enter values equal to total members!!');
+                    }
+                }
+                else {
+                    document.getElementById("errortotMember").style.display = 'block';
+                    $('html, body').animate({ scrollTop: $("#txt_NumberofMembers").offset().top }, 600);
+                }
+        });
+
+           $("#btn_submit").bind("click", function (e) {
+          
+            var DistrictsID = $("#ddl_Districts").val();
+            var placeID = $("#ddl_place").val();
+            var shiftTime = $("#ddl_Shift").val();
+            var arrivalDate = $("#txt_dateofarrival").val();
+            var totalperson = $("#txt_NumberofMembers").val();
+            var IndAdult = $('#txt_IndAdult').val();
+            var IndChild = $('#txt_IndChild').val();
+            var student = $('#txt_Student').val();
+            var FAdult = $('#txt_forAdult').val();
+            var FChild = $('#txt_forChild').val();
+            var guide = $('#txt_guideFee').val();
+            var camera = $('#txt_cameraFees').val();
+            var singleOccupancy = $('#txt_singleOccupancy').val();
+            var doubleOccupancy = $('#txt_doubleOccupancy').val();
+            var safari = $('#txt_safariMember').val();
+            var TotalFee = $('#txt_finalfees').val();
+            var discount = $('#txt_discount').val();
+            var taxRate = $('#txt_taxRate').val();
+            var amount = $('#txt_amountTobePaid').val();
+
+
+            var feesInfo = {
+                DistrictID: DistrictsID,
+                PlaceID: placeID,
+                ShiftTime: shiftTime,
+                ArrivalDate: arrivalDate,
+                TotalPerson: totalperson,
+                IndianAdult: IndAdult,
+                IndianChild: IndChild,
+                Student: student,
+                ForeignerAdult: FAdult,
+                ForeignerChild: FChild,
+                Guide: guide,
+                Camera: camera,
+                SingleRoom: singleOccupancy,
+                DoubleRoom: doubleOccupancy,
+                Safari: safari,
+                TotalFees: TotalFee,
+                DiscountPercentage: discount,
+                TaxRate: taxRate,
+                Amount: amount,
+                Command: 'Payment',
+                Message: ''
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(feesInfo),
+                url: RootURl + 'OnlineTicketBooking/SubmitticketDetails',
+                success: function (data) {
+                    window.location.href = ""
+
+                },
+                traditional: true,
+            });
+        });
+    });
+</script>
+<script language="Javascript">
+       <!--
+       function isNumberKey(evt)
+       {
+           var id = $(evt.target).attr("id");
+           if (id == 'txt_NumberofMembers') {
+               document.getElementById("error").style.display = 'none';
+           }
+           else if (id == 'txt_IndAdult') {
+               document.getElementById("error1").style.display = 'none';
+           }
+           else if (id == 'txt_IndChild') {
+               document.getElementById("error2").style.display = 'none';
+           }
+           else if (id == 'txt_forAdult') {
+               document.getElementById("error3").style.display = 'none';
+           }
+           else if (id == 'txt_forChild') {
+               document.getElementById("error4").style.display = 'none';
+           }
+           else if (id == 'txt_guideFee') {
+               document.getElementById("error5").style.display = 'none';
+           }
+           else if (id == 'txt_cameraFees') {
+               document.getElementById("error6").style.display = 'none';
+           }
+           else if (id == 'txt_singleOccupancy') {
+               document.getElementById("error7").style.display = 'none';
+           }
+           else if (id == 'txt_doubleOccupancy') {
+               document.getElementById("error8").style.display = 'none';
+           } else if (id == 'txt_safariMember') {
+               document.getElementById("error9").style.display = 'none';
+           } else if (id == 'txt_Student') {
+               document.getElementById("error10").style.display = 'none';
+           }
+
+           var charCode = (evt.which) ? evt.which : event.keyCode
+           if (charCode == 46 || charCode > 31 && (charCode < 48 || charCode > 57))
+           {
+               if (id == 'txt_NumberofMembers')
+                   {
+                   document.getElementById("error").style.display = 'block';
+               }
+               else if (id == 'txt_IndAdult')
+               {
+                   document.getElementById("error1").style.display = 'block';
+               }
+               else if (id == 'txt_IndChild') {
+                   document.getElementById("error2").style.display = 'block';
+               }
+               else if (id == 'txt_forAdult') {
+                   document.getElementById("error3").style.display = 'block';
+               }
+               else if (id == 'txt_forChild') {
+                   document.getElementById("error4").style.display = 'block';
+               }
+               else if (id == 'txt_guideFee') {
+                   document.getElementById("error5").style.display = 'block';
+               }
+               else if (id == 'txt_cameraFees') {
+                   document.getElementById("error6").style.display = 'block';
+               }
+               else if (id == 'txt_singleOccupancy') {
+                   document.getElementById("error7").style.display = 'block';
+               }
+               else if (id == 'txt_doubleOccupancy') {
+                   document.getElementById("error8").style.display = 'block';
+               } else if (id == 'txt_safariMember') {
+                   document.getElementById("error9").style.display = 'block';
+               } else if (id == 'txt_Student') {
+                   document.getElementById("error10").style.display = 'block';
+               }
+               return false;
+           }
+           else
+           return true;
+       }
+</script>
+
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Online Ticket Booking</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">Processing Fees</div>
+                <!-- /.panel-heading -->
+                @using (Html.BeginForm("SubmitticketDetails", "OnlineTicketBooking", FormMethod.Post))
+                {
+                    <div class="panel-body">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Select Category: <span class="mandatory">*</span></label>
+                                <select class="form-control" id="ddl_Category" name="ddl_Category">
+                                    <option value="0">---Select---</option>
+                                    <option value="Conservation Reserve">Conservation Reserve</option>
+                                    <option value="National Park">National Park</option>
+                                    <option value="Wildlife Santuaries">Wildlife Sanctuaries</option>
+                                </select>
+                                <span id="errorType" style="color: Red; display: none" class="alert-danger1">* Please Select Category.</span>
+                            </div>
+                           
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Select District: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("ddl_Districts", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control" })
+                                <span id="errorDis" style="color: Red; display: none" class="alert-danger1">* Please Select District.</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Select Place: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("ddl_place", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control" })
+                                <span id="errorPlace" style="color: Red; display: none" class="alert-danger1">* Please Select Place.</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Choose Shift: <span class="mandatory">*</span></label>
+                                <select class="form-control" id="ddl_Shift" name="ddl_Shift"> 
+                                    <option value="0">---Select---</option>
+                                    @*<option value="1">Morning</option>
+                                    <option value="2">Evening</option>
+                                    <option value="3">Full Day</option>*@
+                                </select>
+                                <span id="errorShift" style="color: Red; display: none" class="alert-danger1">* Please Select Shift.</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Date of Arrival: <span class="mandatory">*</span></label>  
+                                <input type="text" class="form-control datefield" id="txt_dateofarrival" name="ArrivalDate" />
+                                <span id="errorDate" style="color: Red; display: none" class="alert-danger1">* Please Select Date.</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Total No. of Members: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" name="TotalPerson" id="txt_NumberofMembers" onkeypress="return isNumberKey(event);" />
+                                <span id="error" style="color: Red; display: none" class="alert-danger1">* Input digits (0 - 9)</span>
+                                <span id="errortotMember" style="color: Red; display: none" class="alert-danger1">* Please Enter Total Member.</span>
+                                <label id="lbl_NumberofMembersavailable" for="email"></label>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12"> </div>
+
+                        <!-- Indian Member -->
+                        <div class="col-lg-12">
+                            <label>Indian Member:</label>
+                            <div class="divider"></div>
+                        </div>
+
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>No. of Adult:</label>
+                                <input type="text" class="form-control" id="txt_IndAdult" name="txt_IndAdult" onkeypress="return isNumberKey(event);" />
+                                <span id="error1" style="color: Red; display: none" class="alert-danger1">* Input digits (0 - 9)</span>
+                                <label id="lbl_IndAdult" for="email"></label>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>No. of Child:</label>
+                                <input type="text" class="form-control" id="txt_IndChild" name="txt_IndChild" onkeypress="return isNumberKey(event);" />
+                                <span id="error2" style="color: Red; display: none" class="alert-danger1">* Input digits (0 - 9)</span>
+                                <label id="lbl_IndChild" for="email"></label>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>No. of Student:</label>
+                                <input type="text" class="form-control" id="txt_Student" name="txt_Student" onkeypress="return isNumberKey(event);" />
+                                <span id="error10" style="color: Red; display: none" class="alert-danger1">* Input digits (0 - 9)</span>
+                                <label id="lbl_Student" for="email"></label>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>&nbsp;</label>                               
+                                <label for="email"></label>
+                            </div>
+                        </div>
+                        <!-- /.Indian Member -->
+                        <!-- Foreigner Member: -->
+                        <div class="col-lg-12">
+                            <label>Foreigner Member:</label>
+                            <div class="divider"></div>
+                        </div>
+
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>No. of Adult:</label>
+                                <input type="text" class="form-control" id="txt_forAdult" name="txt_forAdult" onkeypress="return isNumberKey(event);" />
+                                <span id="error3" style="color: Red; display: none" class="alert-danger1">* Input digits (0 - 9)</span>
+                                <label id="lbl_ForAdultfee" for="email"></label>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>No. of Child:</label>
+                                <input type="text" class="form-control" id="txt_forChild" name="txt_forChild" onkeypress="return isNumberKey(event);" />
+                                <span id="error4" style="color: Red; display: none" class="alert-danger1">* Input digits (0 - 9)</span>
+                                <label id="lbl_ForChildfee" for="email"></label>
+                            </div>
+                        </div>
+                        <!-- /.Foreigner Member -->
+                        <!-- Facilities -->
+                        <div class="col-lg-12">
+                            <label>Facilities:</label>
+                            <div class="divider"></div>
+                        </div>
+
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>No. of Guide:</label>
+                                <input type="text" class="form-control" id="txt_guideFee" name="txt_guideFee" onkeypress="return isNumberKey(event);" />
+                                <span id="error5" style="color: Red; display: none" class="alert-danger1">* Input digits (0 - 9)</span>
+                                <label id="lbl_guidefee" for="email"></label>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>No. of Camera:</label>
+                                <input type="text" class="form-control" id="txt_cameraFees" name="txt_cameraFees" onkeypress="return isNumberKey(event);" />
+                                <span id="error6" style="color: Red; display: none" class="alert-danger1">* Input digits (0 - 9)</span>
+                                <label id="lbl_camerafee" for="email"></label>
+                            </div>
+                        </div>
+                        <!-- /.Facilities -->
+                        <!-- Accommodation -->
+                        <div class="col-lg-12">
+                            <label>Accommodation:</label>
+                            <div class="divider"></div>
+                        </div>
+
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>No. 0f Single Occupancy:</label>
+                                <input type="text" class="form-control" id="txt_singleOccupancy" name="txt_singleOccupancy" onkeypress="return isNumberKey(event);" />
+                                <span id="error7" style="color: Red; display: none" class="alert-danger1">* Input digits (0 - 9)</span>
+                                <label id="lbl_singleOccupancyfee" for="email"></label>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>No. of Double Occupancy:</label>
+                                <input type="text" class="form-control" id="txt_doubleOccupancy" name="txt_doubleOccupancy" onkeypress="return isNumberKey(event);" />
+                                <span id="error8" style="color: Red; display: none" class="alert-danger1">* Input digits (0 - 9)</span>
+                                <label id="lbl_doubleOccupancy" for="email"></label>
+                            </div>
+                        </div>
+                        <!-- /.Accomodation -->
+                        <!-- Safari -->
+                        <div class="col-lg-12">
+                            <label>Safari:</label>
+                            <div class="divider"></div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>No. of Member:</label>
+                                <input type="text" class="form-control" id="txt_safariMember" name="txt_safariMember" onkeypress="return isNumberKey(event);" />
+                                <span id="error9" style="color: Red; display: none" class="alert-danger1">* Input digits (0 - 9)</span>
+                                <label id="lbl_safarifee" for="email"></label>
+                            </div>
+                        </div>
+                        <!-- /.Safari -->
+                        <!-- Check If All Ticket Entries Done -->
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <label>&nbsp;</label>
+                                <button type="button" class="btn btn-success" id="btn_done"><i class="fa fa-check"></i> Done</button>
+                            </div>
+                        </div>
+                        <div id="div_payment" style="display:none">
+                            <div class="col-lg-12">
+                                @*<label class="checkbox-inline">
+                    <input type="checkbox" id="chk_allFinish">
+                    Check If All Ticket Entries Done
+                </label>*@
+
+                                <div class="divider"></div>
+                            </div>
+
+
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Total Fees(In Rs):</label>
+                                    <input type="text" class="form-control" id="txt_finalfees" name="txt_finalfees" readonly="readonly" />
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Discount:</label>
+                                    <input type="text" class="form-control" id="txt_discount" name="DiscountPercentage" readonly="readonly" />
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Tax rate(in %):</label>
+                                    <input type="text" class="form-control" id="txt_taxRate" name="TaxRate" readonly="readonly" />
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Amount to be Paid(In Rs):</label>
+                                    <input type="text" class="form-control" id="txt_amountTobePaid" name="FinalAmount" readonly="readonly" />
+                                </div>
+                            </div>
+
+                            <!-- Btn Groping -->
+                            <div class="btn-padd">
+                                <div id="btn" class="col-lg-12">
+                                    <button type="submit" class="btn btn-success" name="Command" value="Payment" id="btn_submit1">
+                                        <i class="fa fa-check"></i> Payment
+                                    </button>
+                                    <button type="reset" class="btn btn-warning">
+                                        <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                    </button>
+                                    <button type="submit" name="Command" value="Cancel" class="btn btn-danger">
+                                        <i class="fa fa-times fa-fw"></i> Cancel
+                                    </button>
+                                    <button type="button" class="btn btn-primary" style="display:none"><i class="fa fa-check"></i> Pay Now</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.Btn Groping -->
+                        <!-- Table -->
+                         @*Commented by Durgesh as told by manoj to not to show grid below the page content.*@
+                        <div id="tbl" class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover">                                
+                                    <thead>
+                                        <tr>
+                                           
+                                            <th>
+                                                Transaction ID
+                                            </th>
+                                            <th>
+                                                Total Tickets
+                                            </th>
+                                            <th>
+                                                Arrival Date
+                                            </th>    
+                                            <th>
+                                                Paid Amount
+                                            </th>                                           
+                                            <th>
+                                                Action
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                           
+                                                <tr>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.TransactionId)
+                                                        
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.TotalTickets)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.ArrivalDate)
+                                                    </td>   
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Amount)
+                                                    </td>                                                    
+                                                    <td>
+                                                        <a href="#">Print Ticket</a>
+                                                        @*@Html.ActionLink("Print Ticket", "", new { id = item.PlaceID }, new { @Class = "Edit" })*@                                                       
+                                                    </td>
+
+                                                </tr>
+                                          
+                                        }
+
+
+                                    </tbody>
+                                </table>
+
+                          
+                        </div>
+                        
+                        <!-- /.table-responsive -->
+                        <!-- /.Table -->
+
+                    </div>
+                <!-- /.panel-body -->
+                }
+
+
+            </div>
+            <!-- /.panel -->
+
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>
+<div id='previewDiv' style="width:500px;">
+    &nbsp;
+</div>

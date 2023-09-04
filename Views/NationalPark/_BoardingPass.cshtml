@@ -1,0 +1,149 @@
+﻿@model List<FMDSS.Models.BookOnlineTicket.BoardingPassDetails>
+@{
+    var cntr = 0;
+}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Booking History</strong>
+    </div>
+    <div class="panel-body">
+        <div id="tbl" class="table-responsive">
+            <table class="table table-striped table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>
+                            Booking No.
+                        </th>
+                        <th>
+                            Booking Date & Time
+                        </th>
+                        <th>
+                            Place Name
+                        </th>
+                        <th>
+                            Visit Date
+                        </th>
+                        <th>
+                            Total Tickets
+                        </th>
+                        <th>
+                            Paid Amount
+                        </th>
+                        <th>
+                            Guide Name
+                        </th>
+                        <th>
+                            Vehicle Number
+                        </th>
+                        <th>
+                            Action
+                        </th>
+                    </tr>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @item.RequestId
+                            </td>
+                            <td>
+                                @item.BookingDate.ToString("dd-MMM-yyyy hh:mm:ss tt")
+                            </td>
+                            <td>
+                                @item.PlaceName
+                            </td>
+                            <td>
+                                @item.VisitDate.ToString("dd-MMM-yyyy")
+                            </td>
+                            <td>
+                                @item.TotalMember
+                            </td>
+                            <td>
+                                @item.TotalPaidAmount
+                            </td>
+                            @if (!item.BoardingPassStatus)
+                            {
+                                <td>
+                                    @Html.TextBoxFor(x => x[cntr].GuideName, new { @class = "onlyletters", id = "txtGuideName_" + cntr })
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(x => x[cntr].VehicleNumber, new { @class = "onlyletters", id = "txtVehicleNumber_" + cntr })
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                    @Html.TextBoxFor(x => x[cntr].GuideName, new { @class= "onlyletters", disabled = "disabled", id = "txtGuideName_" + cntr, Value=item.GuideName ,  })
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(x => x[cntr].VehicleNumber, new { @class = "onlyletters", disabled = "disabled", id = "txtVehicleNumber_" + cntr, Value = item.VehicleNumber })
+                                </td>
+                            }
+                            <td>
+                                @if (!item.BoardingPassStatus)
+                                {
+                                    if (item.BookingStatus == FMDSS.BookingStatus.Booked)
+                                    {
+                                       <a id="lnkGenerateBoarding_@cntr" data-boardingpassstatus='false' href="javascript:void(0)" data-cntr="@cntr" data-tktid="@item.TicketId" onclick="GenerateBoarding(this)">Generate Boarding Pass</a>
+                                    }
+                                }
+                                else
+                                {
+                                    <a id="lnkGenerateBoarding_@cntr" data-boardingpassstatus='true' href="javascript:void(0)" data-cntr="@cntr" data-tktid="@item.TicketId" onclick="GenerateBoarding(this)">Download</a>
+                                }
+                            </td>
+                        </tr>
+                                cntr++;
+                    }
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function GenerateBoarding(cntrl) { 
+        var url = RootUrl + 'NationalPark/SaveAndDownloadTicket';
+        var cntr = $(cntrl).data("cntr");
+        var guide = $("#txtGuideName_" + cntr).val();
+        var vehileNo = $("#txtVehicleNumber_" + cntr).val();
+        if (guide == null || guide.trim() == '' || guide == undefined) {
+            alert('Enter Guide Name');
+            return false;
+        }
+        if (vehileNo == null || vehileNo.trim() == '' || vehileNo == undefined) {
+            alert('Enter Vehicle Number');
+            return false;
+        }
+        var data = {
+            guideName: $("#txtGuideName_" + cntr).val(),
+            vehicleNumber: $("#txtVehicleNumber_" + cntr).val() 
+        }
+        var prms = { "ticketId": $(cntrl).data("tktid"), "boardingPassStatus": $(cntrl).data("boardingpassstatus"), "guideName": data.guideName, "vehicleNumber": data.vehicleNumber, controlIndex: cntr };
+        $.ajax({
+            url: url,
+            type: 'post',
+            dataType: 'json',
+            data: prms, 
+            success: function (res) { 
+                if (!res.isError && res.pageURL != '') {
+                    $('#lnkGenerateBoarding_' + res.controlIndex).closest('tr').find('input').attr('disabled', 'disabled');
+                    $('#lnkGenerateBoarding_' + res.controlIndex).html('Download');
+                    
+                    window.open(RootUrl + res.pageURL, "_blank"); 
+                }
+            }
+        });
+        
+    }
+    $('.onlyletters').keypress(function (e) { 
+        //alert(e.keyCode);
+        if (e.shiftKey || e.ctrlKey || e.altKey) {
+            e.preventDefault();
+        } else {
+            var key = e.keyCode;
+            if (((key == 8) || (key == 96)  || (key == 61)  || (key == 46) || (key >= 35 && key <= 40) || (key >= 65 && key <= 90))) {
+                e.preventDefault();
+            }
+        }
+    });
+</script>

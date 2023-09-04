@@ -1,0 +1,332 @@
+﻿@model FMDSS.Models.ElephantMovement
+
+@{
+    ViewBag.Title = "ElephantIndex";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+
+<script type="text/javascript">
+    function SetElephantAppReviewApprover(id) {
+
+        $.ajax({
+            type: 'GET',
+            url: "../Elephant/GetElephantRevApprvDetails?ID=" + id,
+            dataType: 'html',
+            success: function (data) {
+                $('#modelDetails').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+
+    };
+
+
+    function SetElephantAppAssigner(id) {
+
+        $.ajax({
+            type: 'GET',
+            url: "../Elephant/GetElephantAppAssignerDetails?ID=" + id,
+            dataType: 'html',
+            success: function (data) {
+                $('#modelDetailsAssigner').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+
+    };
+
+</script>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog modal-lg" id="modelDetails">
+    </div>
+</div>
+
+<div class="modal fade" id="myModalAssigner" role="dialog">
+    <div class="modal-dialog modal-lg" id="modelDetailsAssigner">
+    </div>
+</div>
+
+<div class="col-lg-9 pad">
+    <h1 class="page-header">Elephant Review Approver</h1>
+
+</div>
+
+<div class="row">
+
+    <div class="col-md-9">
+        <div class="panel with-nav-tabs panel-default">
+            <div class="panel-heading">
+                <ul class="nav nav-tabs" id="myTab">
+                    <li class=""><a href="#tab1default" data-toggle="tab"><i class="fa fa-star fa-fw"></i> My Actions</a></li>
+                    <li class=""><a href="#tab2default" data-toggle="tab"><i class="fa fa-user fa-fw"></i>Pending Requests</a></li>
+                    <li class="active"><a href="#tab3default " data-toggle="tab"><i class="fa fa-comment fa-fw"></i>To Be Assigned</a></li>
+                </ul>
+            </div>
+            <div class="panel-body">
+                <div class="tab-content">
+                    <div class="tab-pane fade  in tbl-scroll" id="tab1default">
+                        <div class="panel-body">
+                            <div class="table-responsive request-id">
+                                <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                #
+                                            </th>
+                                            <th>
+                                                Request ID
+                                            </th>
+                                            <th>
+                                                Travel Duration
+                                            </th>
+                                            <th>
+                                                Return Duration
+                                            </th>
+                                            <th>
+                                                Movement  From
+                                            </th>
+                                            <th>
+                                                Movement To
+                                            </th>
+                                            <th>
+                                                Action Taken By
+                                            </th>
+                                            <th>
+                                                Action Taken On
+                                            </th>
+                                            <th>
+                                                Status
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                       
+                                            @foreach (var item in ViewData["MyActions"] as IEnumerable<FMDSS.Models.ElephantMovement>)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.Index)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.RequestID)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.ReturnFromDate)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.ReturnToDate)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.MovementFrom)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.MovementTo)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.ActionTakenBy)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.ActionTakenOn)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.MovementStatus)
+                                                    </td>
+                                                </tr>
+                                            }
+                                        
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+                            <!-- /.table-responsive -->
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade  in tbl-scroll" id="tab2default">
+                        <div class="panel-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                #
+                                            </th>
+                                            <th>
+                                                Request ID
+                                            </th>
+                                            <th>
+                                                Travel Duration
+                                            </th>
+                                            <th>
+                                                Return Duration
+                                            </th>
+                                            <th>
+                                                Movement  From
+                                            </th>
+                                            <th>
+                                                Movement To
+                                            </th>
+
+                                            <th colspan="2" style="text-align:center;" >
+                                                Action
+
+                                            </th>
+                                            
+                                            <th>
+                                                Action Taken By
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                            @foreach (var item in ViewData["PendingRequests"] as IEnumerable<FMDSS.Models.ElephantMovement>)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.Index)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.RequestID)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.ReturnFromDate)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.ReturnToDate)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.MovementFrom)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.MovementTo)
+                                                    </td>
+                                                    <td>
+
+                                                        @if (item.ActionTakenBy == Convert.ToString(Session["SSOID"]))
+                                                        {
+
+                                                            <a title='Update Status' id="lnk_UpdateStatus" data-toggle="modal" data-target="#myModal" href='javascript:void(0)' onclick=SetElephantAppReviewApprover('@item.RequestID')>@item.MovementStatus</a>
+                                                            
+                                                        }
+                                                        else
+                                                        {
+                                                            @Html.DisplayFor(modelItem => item.MovementStatus)
+
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                         @if (item.MovementStatus == "Pending")
+                                                        {
+
+                                                        @*<a title='Generate Other State NOC Request DOC' id="lnk_GenerateOtherStateNocRequestDOC " data-toggle="modal1" data-target="#myModal1" href='javascript:void(0)' onclick=GenerateOtherStateNocRequestDOC('@item.RequestID')>Generate DOC</a>*@
+                                                              <a href='@Url.Action("ElephantRajasthanToOtherStateNOCDoc", "Elephant", new { ID =  item.RequestID })' target="_blank">Generate DOC</a>
+                                                        }
+
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.ActionTakenBy)
+                                                    </td>
+                                                </tr>
+                                            }
+                                       
+
+                                    </tbody>
+
+                                </table>
+
+
+                            </div>
+                            <!-- /.table-responsive -->
+                        </div>
+
+                    </div>
+
+
+                    <div class="tab-pane fade in tbl-scroll active" id="tab3default">
+
+                        <div class="panel-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover table-responsive" id="dataTables-example">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                #
+                                            </th>
+                                            <th>
+                                                Request ID
+                                            </th>
+                                            <th>
+                                                Travel Duration
+                                            </th>
+                                            <th>
+                                                Return Duration
+                                            </th>
+                                            <th>
+                                                Movement  From
+                                            </th>
+                                            <th>
+                                                Movement To
+                                            </th>
+
+
+                                            <th>
+                                                Action
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                       
+                                            @foreach (var item in ViewData["ToBeAssigned"] as IEnumerable<FMDSS.Models.ElephantMovement>)
+                                            {
+                                                    <tr>
+                                                        <td>
+                                                            @Html.DisplayFor(modelItem => item.Index)
+                                                        </td>
+                                                        <td>
+                                                            @Html.DisplayFor(modelItem => item.RequestID)
+                                                        </td>
+                                                        <td>
+                                                            @Html.DisplayFor(modelItem => item.ReturnFromDate)
+                                                        </td>
+                                                        <td>
+                                                            @Html.DisplayFor(modelItem => item.ReturnToDate)
+                                                        </td>
+                                                        <td>
+                                                            @Html.DisplayFor(modelItem => item.MovementFrom)
+                                                        </td>
+                                                        <td>
+                                                            @Html.DisplayFor(modelItem => item.MovementTo)
+                                                        </td>
+                                                        <td>                                                            
+                                                            <a title='Update Assigner' id="lnk_UpdateAssigner" data-toggle="modal" data-target="#myModalAssigner" href='javascript:void(0)' onclick=SetElephantAppAssigner('@item.RequestID')>Assign</a>
+                                                        </td>
+                                                    </tr>
+                                            }
+                                </tbody>
+
+                            </table>
+
+                        </div>
+                        <!-- /.table-responsive -->
+                    </div>
+                </div>
+                <!-- /.Tab3 -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.Tab1 -->
+
+
+
+
+</div>
+
+
+

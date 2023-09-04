@@ -1,0 +1,287 @@
+﻿@{
+    ViewBag.Title = "OffenceReport";
+    var TotalCircle = ViewBag.CircleList == null ? 0 : ((IEnumerable<SelectListItem>)ViewBag.CircleList).Count();
+    var TotalDiv = ViewBag.DivList == null ? 0 : ((IEnumerable<SelectListItem>)ViewBag.DivList).Count();
+    var TotalRange = ViewBag.RangeList == null ? 0 : ((IEnumerable<SelectListItem>)ViewBag.RangeList).Count();
+    var TotalNaka = ViewBag.NakaList == null ? 0 : ((IEnumerable<SelectListItem>)ViewBag.NakaList).Count();
+}
+@model FMDSS.Entity.Protection.ViewModel.OffenceReportVM
+
+<script>var RootUrl = '@Url.Content("~/")';</script>
+<style>
+    .hide {
+        display: none;
+    }
+
+    #myModal .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModal .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModal .modal-footer {
+        background-color: #f9f9f9;
+    }
+
+    #myModal .btn-success {
+        width: 100%;
+        padding: 10px;
+    }
+
+    ul.a {
+        list-style-type: circle;
+    }
+
+    #myModalRefund .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModalRefund .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModalRefund .modal-footer {
+        background-color: #f9f9f9;
+    }
+
+    #myModalRefund .btn-success {
+        width: 100%;
+        padding: 10px;
+    }
+
+    ul.a {
+        list-style-type: circle;
+    }
+
+    .capt {
+        background-color: #f8f8f8;
+        border-color: #e7e7e7;
+        border: 1px solid #e7e7e7;
+        width: 202px;
+        float: left;
+    }
+
+        .capt p {
+            margin: 10px;
+        }
+
+    #refresh {
+        width: 28px;
+        height: 26px;
+        padding: 0px;
+    }
+
+    #txtInput {
+        width: 150px;
+    }
+
+    #page-wrapper-inn .table > thead > tr > th {
+        width: auto;
+    }
+</style>
+<script>
+    function Success(data) {
+        if (data.status != undefined && data.status == false) {
+            if (data.error == "")
+                data.error = "We are facing some technical issue, please contact FMDSS if you are facing this issue on regular basis.";
+            if (data.error.indexOf("captcha") > -1) {
+                $("#txtInput").addClass("error");
+                $("#captchaError").html(data.error);
+            }
+            else {
+                $("#captchaError").html('');
+                $("#txtInput").removeClass("error");
+                alert(data.error);
+                $("html, body").animate({ scrollTop: 0 }, "slow");
+            }
+        }
+        else {
+            $("#page-wrapper-inn").html(data);
+            $("html, body").animate({ scrollTop: 0 }, "slow");
+        }
+
+    }
+</script>
+
+<div id="page-wrapper-inn">
+    <div class="row">
+        <div class="col-lg-9 pad">
+            <h1 class="page-header"><span>Report : MIS Producation Inventory</span></h1>
+        </div>
+        @using (Ajax.BeginForm("DODInventoryReport", "MISDOD", new AjaxOptions { HttpMethod = "Post", InsertionMode = InsertionMode.Replace, UpdateTargetId = "divReportDetails" }))
+        {
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="col-lg-3">
+                            <div class="form-group un-bold">
+                                <label>From Date:<span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(model => model.FromDate, new { @class = "form-control common ", id = "txtFromDate", @readonly = true })
+                                <span id="errFromDate" style="display: none" class="alert-danger1">From Date is Required.</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group un-bold">
+                                <label>To Date:<span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(model => model.ToDate, new { @class = "form-control common ", id = "txtToDate", @readonly = true })
+                                <span id="errToDate" style="display: none" class="alert-danger1"></span>
+                            </div>
+                        </div>
+                        @if (TotalCircle == 0)
+                        {
+                            <div class="col-lg-3">
+                                <div class="form-group un-bold">
+                                    <label>Circle:<span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(model => model.CircleCode,
+                                            new List<SelectListItem> {
+                                                new SelectListItem { Value = "0" , Text = "All" }
+                                            }, new { @class = "form-control", id = "ddlCircle", onchange = "BindDivision(this,'ddlDivision')" })
+                                    <div id="errPlace" style="display:none" class="alert-danger1">@Html.ValidationMessageFor(m => m.CircleCode)</div>
+                                </div>
+                            </div>
+                        }
+                        else if (TotalCircle == 1)
+                        {
+                            <div class="col-lg-3">
+                                <div class="form-group un-bold">
+                                    <label>Circle:<span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(model => model.CircleCode, (IEnumerable<SelectListItem>)ViewBag.CircleList, new { @class = "form-control", id = "ddlCircle", onchange = "BindDivision(this,'ddlDivision')" })
+                                    <div id="errPlace" style="display:none" class="alert-danger1">@Html.ValidationMessageFor(m => m.CircleCode)</div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-lg-3">
+                                <div class="form-group un-bold">
+                                    <label>Circle:<span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(model => model.CircleCode, (IEnumerable<SelectListItem>)ViewBag.CircleList, "All", new { @class = "form-control", id = "ddlCircle", onchange = "BindDivision(this,'ddlDivision')" })
+                                    <div id="errPlace" style="display:none" class="alert-danger1">@Html.ValidationMessageFor(m => m.CircleCode)</div>
+                                </div>
+                            </div>
+                        }
+
+                        @if (TotalDiv == 0)
+                        {
+                            <div class="col-lg-3">
+                                <div class="form-group un-bold">
+                                    <label>Division:<span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(model => model.DivisionCode, new SelectList(string.Empty, "Value", "Text"), "All", new { @class = "form-control", id = "ddlDivision", onchange = "BindRange(this,'ddlRange')" })
+                                    <div id="errPlace" style="display:none" class="alert-danger1">@Html.ValidationMessageFor(m => m.DivisionCode)</div>
+                                </div>
+                            </div>
+                        }
+                        else if (TotalDiv == 1)
+                        {
+                            <div class="col-lg-3">
+                                <div class="form-group un-bold">
+                                    <label>Division:<span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(model => model.DivisionCode, (IEnumerable<SelectListItem>)ViewBag.DivList, new { @class = "form-control", id = "ddlDivision", onchange = "BindRange(this,'ddlRange')" })
+                                    <div id="errPlace" style="display:none" class="alert-danger1">@Html.ValidationMessageFor(m => m.DivisionCode)</div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-lg-3">
+                                <div class="form-group un-bold">
+                                    <label>Division:<span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(model => model.DivisionCode, (IEnumerable<SelectListItem>)ViewBag.DivList, "All", new { @class = "form-control", id = "ddlDivision", onchange = "BindRange(this,'ddlRange')" })
+                                    <div id="errPlace" style="display:none" class="alert-danger1">@Html.ValidationMessageFor(m => m.DivisionCode)</div>
+                                </div>
+                            </div>
+                        }
+                        @if (TotalRange == 0)
+                        {
+                            <div class="col-lg-3">
+                                <div class="form-group un-bold">
+                                    <label>Range:<span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(model => model.RangeCode, new SelectList(string.Empty, "Value", "Text"), "All", new { @class = "form-control", id = "ddlRange" })
+                                    <div id="errPlace" style="display:none" class="alert-danger1">@Html.ValidationMessageFor(m => m.RangeCode)</div>
+                                </div>
+                            </div>
+                        }
+                        else if (TotalRange == 1)
+                        {
+                            <div class="col-lg-3">
+                                <div class="form-group un-bold">
+                                    <label>Range:<span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(model => model.RangeCode, (IEnumerable<SelectListItem>)ViewBag.RangeList, new { @class = "form-control", id = "ddlRange" })
+                                    <div id="errPlace" style="display:none" class="alert-danger1">@Html.ValidationMessageFor(m => m.RangeCode)</div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-lg-3">
+                                <div class="form-group un-bold">
+                                    <label>Range:<span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(model => model.RangeCode, (IEnumerable<SelectListItem>)ViewBag.RangeList, "All", new { @class = "form-control", id = "ddlRange" })
+                                    <div id="errPlace" style="display:none" class="alert-danger1">@Html.ValidationMessageFor(m => m.RangeCode)</div>
+                                </div>
+                            </div>
+                        }
+                        @*@if (TotalNaka == 0)
+                        {
+                            <div class="col-lg-3">
+                                <div class="form-group un-bold">
+                                    <label>Naka:<span class="mandatory">*</span></label>
+                                    @Html.DropDownListFor(model => model.NakaID, new SelectList(string.Empty, "Value", "Text"), "All", new { @class = "form-control", id = "ddlNaka" })
+                                    <div id="errPlace" style="display:none" class="alert-danger1">@Html.ValidationMessageFor(m => m.NakaID)</div>
+                                </div>
+                            </div>
+                        }*@ 
+                        @*<div class="col-lg-3">
+                            <div class="form-group un-bold">
+                                <label>Status:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.StatusID, new List<SelectListItem>
+                            {
+                                new SelectListItem { Text = "All", Value = ""},
+                               new SelectListItem { Text = "Pending", Value = "1"},
+                                new SelectListItem { Text = "Case In Court", Value = "16"},
+                                new SelectListItem { Text = "Closed", Value = "17"}
+                            }, new { @class = "form-control" })
+                                <div id="errPlace" style="display:none" class="alert-danger1">@Html.ValidationMessageFor(m => m.StatusID)</div>
+                            </div>
+                        </div>*@
+                        <div id="btn" class="col-lg-12">
+                            <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit1">
+                                <i class="fa fa-check"></i> Submit
+                            </button>
+                            <button type="button" class="btn btn-warning" id="btn_reset">
+                                <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12" id="divReportDetails"></div>
+            </div>
+            @Html.Hidden("hdnRootURL", Url.Content("~/"))
+        }
+    </div>
+
+</div>
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script src="~/Scripts/Controller/Common.js"></script>
+<script>
+
+    $(document).ready(function () {
+        $('#txtFromDate,#txtToDate').datepicker({
+            dateFormat: GetDatePickerFormat(),
+            yearRange: GetYearRange(),
+            changeMonth: true,
+            changeYear: true,
+        });
+        $('#txtFromDate,#txtToDate').datepicker('setDate', new Date());
+    })
+
+
+</script>

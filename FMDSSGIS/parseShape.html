@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+<head>
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #mapDiv {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <link rel="shortcut icon" href="//esri.github.io/quickstart-map-js/images/favicon.ico">
+    <!-- ArcGIS API for JavaScript CSS-->
+    <link rel="stylesheet" href="//js.arcgis.com/3.10/js/esri/css/esri.css">
+    <!-- Web Framework CSS - Bootstrap (getbootstrap.com) and Bootstrap-map-js (github.com/esri/bootstrap-map-js) -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="//esri.github.io/bootstrap-map-js/src/css/bootstrapmap.css" />
+
+    <script src="https://js.arcgis.com/3.15/"></script>
+    <script src="/scripts/shapefile.js" type="text/javascript"></script>
+    <script src="/scripts/terraformer.min.js"></script>
+    <script src="/scripts/terraformer-arcgis-parser.min.js"></script>
+
+
+    <script type="text/javascript">
+        var map;
+
+        var qs = (function (a) {
+            if (a == "") return {};
+            var b = {};
+            for (var i = 0; i < a.length; ++i) {
+                var p = a[i].split('=', 2);
+                if (p.length == 1)
+                    b[p[0]] = "";
+                else
+                    b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+            }
+            return b;
+        })(window.location.search.substr(1).split('&'));
+
+        require([
+            "esri/map",
+            "esri/layers/ArcGISDynamicMapServiceLayer",
+            "./scripts/geojsonlayer.js",
+            "esri/renderers/SimpleRenderer",
+            "dojo/on",
+            "dojo/query",
+            "dojo/dom",
+            "dojo/domReady!"
+        ],
+        function (Map, ArcGISDynamicMapServiceLayer, GeoJsonLayer, SimpleRenderer, on, query, dom) {
+
+            map = new Map("mapDiv", {
+                sliderOrientation: "vertical",
+                zoom: 3
+            });
+
+            map.infoWindow.domNode.className += "light";
+
+            //Takes a URL to a non cached map service.
+            var dynamichotspot = new ArcGISDynamicMapServiceLayer("http://gistest1.rajasthan.gov.in/rajasthan/rest/services/CMVisits/CMVisits/MapServer", {
+                "opacity": 1.0
+            });
+            map.addLayer(dynamichotspot);
+
+            var shpfile = qs["shpfile"];
+            debugger;
+            shapefile = new Shapefile({
+                shp: "" + shpfile + ""
+            }, function (data) {
+                debugger;
+                addGeoJsonLayer(data.geojson);
+            }, function (error) { console.log("Error Found : " + error); });
+
+            function addGeoJsonLayer(ShapeJson) {
+                // Create the layer
+                var geoJsonLayer = new GeoJsonLayer({
+                    ShapeJson: ShapeJson
+                });
+                // Zoom to layer
+                geoJsonLayer.on("update-end", function (e) {
+                    map.setExtent(e.target.extent.expand(1.0));
+                });
+                // Add to map
+                map.addLayer(geoJsonLayer);
+            }
+        });
+    </script>
+</head>
+<body>
+    <div id="mapDiv"></div>
+</body>
+</html>

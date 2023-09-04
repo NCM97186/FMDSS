@@ -1,0 +1,80 @@
+﻿@model IEnumerable<FMDSS.Models.Admin.DashboardNaka>
+<div class="panel panel-default">
+    <div class="panel-heading" style="background-color:#dbdbdb;">
+        <strong>Naka List</strong>
+    </div>
+    <div class="panel-body">
+        <table id="tbl_@ViewBag.ParentID" name="tblNaka" cellpadding="0" cellspacing="0" class="table table-striped table-bordered table-hover table-responsive">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Naka</th>
+                    <th>Range</th>
+                    @*<th>Division</th>*@
+                    <th>Pending at Department</th>
+                    <th>Pending in Court</th>
+                    <th>Closed</th>
+                    <th>Total Pending</th>
+</thead>
+            <tbody>
+                @if (Model != null)
+                {
+                    foreach (var item in Model)
+                    {
+                        int total = item.CaseInCourt + item.Pending;
+                <tr>
+                    <td>@item.SNo</td>
+                    <td>@item.NakaName</td>
+                    <td>@item.RANGE_NAME</td>
+                    @*<td>@item.DIV_NAME</td>*@
+                    <td><a href="javascript:void(0);" onclick="ShowOffenceList('Offence', '@item.NakaID', 'OffenceListByDivision', this)">@item.Pending</a></td>
+                    <td><a href="javascript:void(0);" onclick="ShowOffenceList('Offence', '@item.NakaID', 'OffenceListByDivision', this)">@item.CaseInCourt</a></td>
+                    <td><a href="javascript:void(0);" onclick="ShowOffenceList('Offence', '@item.NakaID', 'OffenceListByDivision', this)">@item.Closed</a></td>
+                    <td><a href="javascript:void(0);" onclick="ShowOffenceList('Offence', '@item.NakaID', 'OffenceListByDivision', this)">@total</a></td>
+                </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#tbl_@ViewBag.ParentID').DataTable({
+            "responsive": true,
+            "bSort": true,
+            "aLengthMenu": [[5, 25, 50, 75, -1], [5, 25, 50, 75, "All"]],
+            "iDisplayLength": 5,
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'excelHtml5',
+                    title: 'Naka Summary Report',
+                    text: 'Export to excel'
+                },
+            ],
+        });
+    });
+
+    function ShowOffenceList(moduleName, parentID, type, cntrlID) {
+        var status = $('#hfStatus').val();
+        //var fromdate = $('#hfFromDate').val();
+        //var todate = $('#hfToDate').val();
+        var fromdate = $('#FromDate0').val();
+        var todate = $('#ToDate0').val();
+        var offenceId = $("#ddlOffence").val() | 0;
+        if ($(cntrlID).closest('div').find('table[name="tblOffenceList"]').length == 0) {
+            $.ajax({
+                type: 'GET',
+                url: RootUrl + 'SystemAdmin/GetDashboardDetails',
+                dataType: 'html',
+                data: { moduleName: moduleName, parentID: parentID, type: type, status: status, fromDate: fromdate, toDate: todate, OffenceId: offenceId},
+                success: function (data) {
+                    $(cntrlID).closest('div.panel').nextAll('div').remove();
+                    $(cntrlID).closest('div.panel').after(data);
+                }
+            })
+        }
+    }
+</script>

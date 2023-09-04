@@ -1,0 +1,669 @@
+﻿@model FMDSS.Models.ElephantInfo
+@*<link href="~/css/timepicki.css" rel="stylesheet" />
+    <script src="~/js/timepicki.js"></script>*@
+
+@*<script>
+        var $j = jQuery.noConflict();
+        $j('.timepicker').timepicki();
+
+    </script>*@
+
+
+
+
+<script src="~/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/js/Common.js"></script>
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/Scripts/jquery.validate.js"></script>
+
+<script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+
+@*<script type="text/javascript" src="~/js/jquery.min.js"></script>*@
+
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+    $(function () {
+        $(document).ready(function () {
+
+            if ($("#PurchasedIllegalFile1").val() != "" && $("#PurchasedIllegalFile1").val() != "undefined") {
+                $("#PurchasedIllegalFileIcon").attr("href", $("#PurchasedIllegalFile1").val());
+                $("#PurchasedIllegalFileIcon").css("display", "block");
+            }
+        });
+        
+        $("#OwnershipCertificateFile").change(function (e) {
+            var iSize = parseFloat($("#VerterinaryFile")[0].files[0].size / 1024).toFixed(2);
+            if (iSize > 2048) {
+                $('#OwnershipCertificateFile').val('');
+                $('#errOwnershipCertificateFile').show();
+                $('#errOwnershipCertificateFile').html("</br>Upload ID should not be larger than 2 MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#VerterinaryFile').focus();
+                return false;
+            }
+            var file = $("#OwnershipCertificateFile").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif','pdf'];
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#OwnershipCertificateFile').val('');
+                    $('#errOwnershipCertificateFile').show();
+                    $('#errOwnershipCertificateFile').html("Please upload only jpeg or jpg or pdf or png or gif file format in MedicalCertificate DOC Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#OwnershipCertificateFile').focus();
+                    return false;
+                } else {
+                    $('#errOwnershipCertificateFile').hide();
+                }
+            }
+            else { $('#errOwnershipCertificateFile').hide(); }
+
+        });
+    
+        
+        $("#VerterinaryFile").change(function (e) {
+            var iSize = parseFloat($("#VerterinaryFile")[0].files[0].size / 1024).toFixed(2);
+            if (iSize > 2048) {
+                $('#PurchasedIllegalFile').val('');
+                $('#errVerterinaryFile').show();
+                $('#errVerterinaryFile').html("</br>Upload ID should not be larger than 2 MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#VerterinaryFile').focus();
+                return false;
+            }
+            var file = $("#VerterinaryFile").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif','pdf'];
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#VerterinaryFile').val('');
+                    $('#errVerterinaryFile').show();
+                    $('#errVerterinaryFile').html("Please upload only jpeg or jpg or pdf or png or gif file format in MedicalCertificate DOC Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#VerterinaryFile').focus();
+                    return false;
+                } else {
+                    $('#errVerterinaryFile').hide();
+                }
+            }
+            else { $('#errVerterinaryFile').hide(); }
+
+        });
+    
+        $("#PurchasedIllegalFile").change(function (e) {
+            var iSize = parseFloat($("#PurchasedIllegalFile")[0].files[0].size / 1024).toFixed(2);
+            if (iSize > 2048) {
+                $('#PurchasedIllegalFile').val('');
+                $('#errPurchasedIllegalFile').show();
+                $('#errPurchasedIllegalFile').html("</br>Upload ID should not be larger than 2 MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#PurchasedIllegalFile').focus();
+                return false;
+            }
+            var file = $("#PurchasedIllegalFile").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif','pdf'];
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#PurchasedIllegalFile').val('');
+                    $('#errPurchasedIllegalFile').show();
+                    $('#errPurchasedIllegalFile').html("Please upload only jpeg or jpg or pdf or png or gif file format in MedicalCertificate DOC Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#PurchasedIllegalFile').focus();
+                    return false;
+                } else {
+                    $('#errPurchasedIllegalFile').hide();
+                }
+            }
+            else { $('#errPurchasedIllegalFile').hide(); }
+
+        });
+    });
+
+
+    $('#Age').bind('keypress', function (evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode
+        // var charCode = evt.which;
+        if (charCode != 8) {
+
+            if ((charCode == 46) || (charCode >= 97 && charCode <= 122) || (charCode >= 65 && charCode <= 90)) {
+                return false;
+            }
+            else {
+                if (charCode >= 48 && charCode <= 57 || charCode == 46) {
+                    return true;
+                }
+                else {
+                    evt.preventDefault();
+                }
+            }
+        }
+    });
+
+
+    $(document).ready(function () {
+        $(".digit").val(0);
+        $(".digit").keypress(function (e) {
+            if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+                return false;
+            }
+        });
+    });
+
+
+    $(document).ready(function () {
+
+        $('#btn_submit1').click(function (e) {
+
+            if ($('#ElephantName').val().trim() == "") {
+                $('#errElephantName').css("display", "block");
+                $('#errElephantName').focus();
+                return false;
+            }
+            else {
+                $('#errElephantName').css("display", "none");
+            }
+
+            if ($('#ssoid').val().trim() == "") {
+                $('#errssoid').css("display", "block");
+                $('#errssoid').focus();
+                return false;
+            }
+            else {
+                $('#errssoid').css("display", "none");
+            }
+            if ($('#LicenceNumber').val().trim() == "") {
+                $('#errLicenceNumber').css("display", "block");
+                $('#errLicenceNumber').focus();
+                return false;
+            }
+            else {
+                $('#errLicenceNumber').css("display", "none");
+            }
+            if ($('#RegNumber').val().trim() == "") {
+                $('#errRegNumber').css("display", "block");
+                $('#errRegNumber').focus();
+                return false;
+            }
+            else {
+                $('#errRegNumber').css("display", "none");
+            }
+            if ($('#Age').val().trim() == "") {
+                $('#errAge').css("display", "block");
+                $('#errAge').focus();
+                return false;
+            }
+            else {
+                $('#errAge').css("display", "none");
+            }
+            if ($('#Colour').val().trim() == "") {
+                $('#errColour').css("display", "block");
+                $('#errColour').focus();
+                return false;
+            }
+            else {
+                $('#errColour').css("display", "none");
+            }
+            if ($('#ColourofEye').val().trim() == "") {
+                $('#errColourofEye').css("display", "block");
+                $('#errColourofEye').focus();
+                return false;
+            }
+            else {
+                $('#errColourofEye').css("display", "none");
+            }
+
+
+            if ($('#Height').val().trim() == "") {
+                $('#errHeight').css("display", "block");
+                $('#errHeight').focus();
+                return false;
+            }
+            else {
+                $('#errHeight').css("display", "none");
+            }
+
+            if ($('#Length').val().trim() == "") {
+                $('#errLength').css("display", "block");
+                $('#errLength').focus();
+                return false;
+            }
+            else {
+                $('#errLength').css("display", "none");
+            }
+
+            if ($('#Weight').val().trim() == "") {
+                $('#errWeight').css("display", "block");
+                $('#errWeight').focus();
+                return false;
+            }
+            else {
+                $('#errWeight').css("display", "none");
+            }
+
+            if ($('#NeekGirth').val().trim() == "") {
+                $('#errNeekGirth').css("display", "block");
+                $('#errNeekGirth').focus();
+                return false;
+            }
+            else {
+                $('#errNeekGirth').css("display", "none");
+            }
+
+            if ($('#NoofNail').val().trim() == "") {
+                $('#errNoofNail').css("display", "block");
+                $('#errNoofNail').focus();
+                return false;
+            }
+            else {
+                $('#errNoofNail').css("display", "none");
+            }
+
+            if ($('#LengthofTusk').val().trim() == "") {
+                $('#errLengthofTusk').css("display", "block");
+                $('#errLengthofTusk').focus();
+                return false;
+            }
+            else {
+                $('#errLengthofTusk').css("display", "none");
+            }
+
+            if ($('#IdentificationMarks').val().trim() == "") {
+                $('#errIdentificationMarks').css("display", "block");
+                $('#errIdentificationMarks').focus();
+                return false;
+            }
+            else {
+                $('#errIdentificationMarks').css("display", "none");
+            }
+            if ($('#NoofInsuranceMarks').val().trim() == "") {
+                $('#errNoofInsuranceMarks').css("display", "block");
+                $('#errNoofInsuranceMarks').focus();
+                return false;
+            }
+            else {
+                $('#errNoofInsuranceMarks').css("display", "none");
+            }
+            if ($('#PresentMarketValue').val().trim() == "") {
+                $('#errPresentMarketValue').css("display", "block");
+                $('#errPresentMarketValue').focus();
+                return false;
+            }
+            else {
+                $('#errPresentMarketValue').css("display", "none");
+            }
+            if ($('#SourceofPurchase').val().trim() == "") {
+                $('#errSourceofPurchase').css("display", "block");
+                $('#errSourceofPurchase').focus();
+                return false;
+            }
+            else {
+                $('#errSourceofPurchase').css("display", "none");
+            }
+
+
+            if ($('option:selected', $('#Isactive')).index() == 0) {
+                $("#errIsactive").css("display", "block");
+                $('#errIsactive').focus();
+                return false;
+            }
+            else {
+                $("#errIsactive").css("display", "none");
+            }
+
+        });
+
+
+
+    });
+
+
+
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#VerterinaryCertificatedDate,#InsuranceDate").datepicker({ dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+
+
+        $(document).on('keypress', '#VerterinaryCertificatedDate,#InsuranceDate', function (event) {
+
+            event.preventDefault();
+            return false;
+
+        });
+
+
+    });
+
+
+</script>
+
+@*<script>
+        $(function () {
+            $("#VerterinaryCertificatedDate").datepicker();
+        });
+    </script>*@
+
+@using (Html.BeginForm("ADDUpdateElephantInfo", "Elephant", FormMethod.Post, new { enctype = "multipart/form-data", data_behavior = "confirm" }))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @*<label id="lbl_dpt">Add/Edit Place</label>*@
+                @ViewBag.OpType
+            </h4>
+        </div>
+
+        <div class="modal-body">
+            @Html.HiddenFor(model => model.ElephantId)
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Elephant Name: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(x => x.ElephantName, new { @class = "form-control common", @maxlength = "50" })
+                    @Html.ValidationMessageFor(x => x.ElephantName, "", new { @class = "alert-danger1" })
+                    @*<div id="errElephantName" style="display:none" class="alert-danger1">Elephant Name is Required.</div>*@
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Owner SSOID: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(x => x.ssoid, new { @class = "form-control common", @maxlength = "50" })
+                    @Html.ValidationMessageFor(x => x.ssoid, "", new { @class = "alert-danger1" })
+                    @* <div id="errssoid" style="display:none" class="alert-danger1">Owner Name is Required.</div>*@
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Micro Chip Number: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(x => x.LicenceNumber, new { @class = "form-control common", @maxlength = "20" })
+                    @Html.ValidationMessageFor(x => x.LicenceNumber, "", new { @class = "alert-danger1" })
+
+                    @* <div id="errLicenceNumber" style="display:none" class="alert-danger1">Licence Number is Required.</div>*@
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Ownership Certificate Number: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(x => x.RegNumber, new { @class = "form-control common", @maxlength = "20" })
+                    @Html.ValidationMessageFor(x => x.RegNumber, "", new { @class = "alert-danger1" })
+                    @* <div id="errRegNumber" style="display:none" class="alert-danger1">Registration Number is Required.</div>*@
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Age of Elephant: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(x => x.Age, new { @class = "form-control common", @maxlength = "3" })
+                    @Html.ValidationMessageFor(x => x.Age, "", new { @class = "alert-danger1" })
+
+                    @* <div id="errAge" style="display:none" class="alert-danger1">Age is Required.</div>*@
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Gender: <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(x => x.Gender, (IEnumerable<SelectListItem>)ViewBag.ListGender, "--Select--", new { @class = "form-control common", id = "Gender" })
+                    @Html.ValidationMessageFor(x => x.Gender, "", new { @class = "alert-danger1" })
+
+                    @* <div id="errAge" style="display:none" class="alert-danger1">Age is Required.</div>*@
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Colour: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(x => x.Colour, new { @class = "form-control common", @maxlength = "15" })
+                    @Html.ValidationMessageFor(x => x.Colour, "", new { @class = "alert-danger1" })
+                    @*<div id="errColour" style="display:none" class="alert-danger1">Colour is Required.</div>*@
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Colour of Eye <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(x => x.ColourofEye, new { @class = "form-control common", @maxlength = "15" })
+                    @Html.ValidationMessageFor(x => x.ColourofEye, "", new { @class = "alert-danger1" })
+                    @* <div id="errColourofEye" style="display:none" class="alert-danger1">Colour of Eye is Required.</div>*@
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Height (Mt.) : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(x => x.Height, new { @class = "form-control common", @maxlength = "5" })
+                    @Html.ValidationMessageFor(x => x.Height, "", new { @class = "alert-danger1" })
+
+
+                    @*<div id="errHeight" style="display:none" class="alert-danger1">Height is Required.</div>*@
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Length: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(x => x.Length, new { @class = "form-control common", @maxlength = "5" })
+                    @Html.ValidationMessageFor(x => x.Length, "", new { @class = "alert-danger1" })
+                    @*  <div id="errLength" style="display:none" class="alert-danger1">Length is Required.</div>*@
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Weight: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(x => x.Weight, new { @class = "form-control common", @maxlength = "5" })
+                    @Html.ValidationMessageFor(x => x.Weight, "", new { @class = "alert-danger1" })
+                    @* <div id="errWeight" style="display:none" class="alert-danger1">Weight is Required.</div>*@
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Neek Girth: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(x => x.NeekGirth, new { @class = "form-control common", @maxlength = "5" })
+                    @Html.ValidationMessageFor(x => x.NeekGirth, "", new { @class = "alert-danger1" })
+                    @*<div id="errNeekGirth" style="display:none" class="alert-danger1">Neek Girth is Required.</div>*@
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>No of Nail: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(x => x.NoofNail, new { @class = "form-control common", @maxlength = "2" })
+                    @Html.ValidationMessageFor(x => x.NoofNail, "", new { @class = "alert-danger1" })
+                    @* <div id="errNoofNail" style="display:none" class="alert-danger1">No of Nail is Required.</div>*@
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Length of Tusk: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(x => x.LengthofTusk, new { @class = "form-control common ", @maxlength = "5" })
+                    @Html.ValidationMessageFor(x => x.LengthofTusk, "", new { @class = "alert-danger1" })
+                    @*  <div id="errLengthofTusk" style="display:none" class="alert-danger1">Length of Tusk is Required.</div>*@
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Identification Marks: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(x => x.IdentificationMarks, new { @class = "form-control common", @maxlength = "25" })
+                    @Html.ValidationMessageFor(x => x.IdentificationMarks, "", new { @class = "alert-danger1" })
+                    @* <div id="errIdentificationMarks" style="display:none" class="alert-danger1">Identification Marks is Required.</div>*@
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>No of Insurance Marks: <span class="mandatory"></span></label>
+                    @Html.TextBoxFor(x => x.NoofInsuranceMarks, new { @class = "form-control common", @maxlength = "3" })
+                    @*@Html.ValidationMessageFor(model => model.NoofInsuranceMarks, "", new { @class = "alert-danger1" })*@
+                    @*<div id="errNoofInsuranceMarks" style="display:none" class="alert-danger1">No of Insurance Marks is Required.</div>*@
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Insurance Date: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(x => x.InsuranceDate, new { @class = "form-control common", @maxlength = "50" })
+                    <div id="errMicroChipNumber" style="display:none" class="alert-danger1">Micro-Chip Number is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Verterinary Certificated Date: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(x => x.VerterinaryCertificatedDate, new { @class = "form-control common", @maxlength = "50", id = "VerterinaryCertificatedDate" })
+
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Present Market Value: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(x => x.PresentMarketValue, new { @class = "form-control common", @maxlength = "16" })
+                    @Html.ValidationMessageFor(x => x.PresentMarketValue, "", new { @class = "alert-danger1" })
+                    @*<div id="errPresentMarketValue" style="display:none" class="alert-danger1">Present Market Value is Required.</div>*@
+                </div>
+            </div>
+
+            <div class="col-lg-6 form-inline">
+                <div class="form-group">
+                    <label>Whether Owenership with state of rajasthan : <span class="mandatory">*</span></label>
+                    
+                    <div class="form-check">
+                        @Html.RadioButtonFor(x => x.SourceofPurchase, "YES", new { @class = "form-check-input", @checked = "checked" })
+                        <label class="form-check-label" for="radio120">YES</label>
+
+                        @Html.RadioButtonFor(x => x.SourceofPurchase, "NO", new { @class = "form-check-input" })
+                        <label class="form-check-label" for="radio120">NO</label>
+                    </div>
+                        @* YES
+            @Html.RadioButtonFor(model => model.SourceofPurchase, "NO", new { @class = "form-control" }) NO*@
+                        @*@Html.TextBoxFor(model => model.SourceofPurchase, new { @class = "form-control common", @maxlength = "50" })
+            @Html.ValidationMessageFor(model => model.SourceofPurchase, "", new { @class = "alert-danger1" })*@
+                        @*<div id="errSourceofPurchase" style="display:none" class="alert-danger1">Source of Purchase is Required.</div>*@
+                    </div>
+            </div>
+            <div class="col-lg-12">
+                <div class="form-group">
+                   
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Purchased by 2003 are treated as illegal File: <span class="mandatory"></span></label>
+                    @Html.HiddenFor(x => x.PurchasedIllegalFile, new { id = "PurchasedIllegalFile11" })
+                    <input type="file" class="form-control common" id="PurchasedIllegalFile" name="fileUpload" />
+                    <div id="errPurchasedIllegalFile" style="display:none" class="alert-danger1"></div>
+                    @*<a href="#" target="_blank" style="display:none" id="PurchasedIllegalFileIcon"><img src="../images/jpeg.png" width="30"></a>*@
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Verterinary Certificate Uploader: <span class="mandatory"></span></label>
+                    @Html.HiddenFor(x => x.VerterinaryFile, new { id = "VerterinaryFile" })
+                    <input type="file" class="form-control common" id="VerterinaryFile" name="fileUpload1" />
+                    <div id="errVerterinaryFile" style="display:none" class="alert-danger1"></div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Ownership Certificate Uploader: <span class="mandatory"></span></label>
+                    @Html.HiddenFor(x => x.OwnershipCertificateFile, new { id = "OwnershipCertificateFile" })
+                    <input type="file" class="form-control common" id="OwnershipCertificateFile" name="fileUpload2" />
+                    <div id="errOwnershipCertificateFile" style="display:none" class="alert-danger1"></div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Active / Deactive : <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(x => x.isActive, (IEnumerable<SelectListItem>)ViewBag.ISactivelst, "--Select--", new { @class = "form-control common", id = "isActive" })
+                    <div id="errIsactive" style="display:none" class="alert-danger1">Active / Deactive  is Required.</div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-12"></div>
+
+            <div class="col-lg-12">
+                <table class="table table-striped table-bordered table-hover table-responsive dataTable no-footer">
+                    <tr>
+                        <th>
+                            Purchased by 2003 are treated as illegal File
+                        </th>
+                        <th>
+                           @if (Model!=null &&!string.IsNullOrEmpty(Model.PurchasedIllegalFile))
+                           {
+                            <a href="@Model.PurchasedIllegalFile" target="_blank" id="PurchasedIllegalFileIcon"><img src="../images/jpeg.png" width="30"></a>
+                           }
+                        </th>
+                        <th>
+                            Verterinary Certificate Uploader
+                        </th>
+                        <th>
+                            @if (!string.IsNullOrEmpty(Model.VerterinaryFile))
+                            {
+                                <a href="@Model.VerterinaryFile" target="_blank"  id="VerterinaryFile"><img src="../images/jpeg.png" width="30"></a>
+                            }
+                        </th>
+                        <th>
+                            Ownership Certificate Uploader
+                        </th>
+                        <th>
+                            @if (!string.IsNullOrEmpty(Model.OwnershipCertificateFile))
+                            {
+                                <a href="@Model.OwnershipCertificateFile" target="_blank" id="OwnershipCertificateFile"><img src="../images/jpeg.png" width="30"></a>
+                            }
+                        </th>
+                    </tr>
+                </table>
+
+            </div>
+
+            <!-- /.Btn Groping -->
+
+
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success" value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+}

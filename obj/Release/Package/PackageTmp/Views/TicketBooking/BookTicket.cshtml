@@ -1,0 +1,1974 @@
+﻿@{
+    ViewBag.Title = "BookTicket";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+@model IEnumerable<FMDSS.Models.OnlineBooking.CS_Ticket>
+@*<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>*@
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var RootURl = '@Url.Content("~/")';
+    $(function () {
+        
+        if ($('#hdnDeptKiosk').val() != '') {
+            $(".datefield").datepicker({ minDate: new Date(),maxDate:"89", dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        }
+        else {
+         // $(".datefield").datepicker({ minDate: "01/10/2016", maxDate: "90", dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        }
+
+        $("input:text,textarea").on("keypress", function (e) {
+            if (e.which === 32 && !this.value.length)
+                e.preventDefault();
+        });
+        
+    });
+
+    $(document).ready(function (e) {
+        Captcha();
+       // SessionMemberInfo();
+        $("#ddl_Shift").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+        $("#ddl_MemberType").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+
+        $("#ddl_Category").bind("change", function () {
+            var category = $("#ddl_Category").val();
+            document.getElementById("errorType").style.display = 'none';
+            $('#ddl_Districts').empty();
+            var values = {
+                Category: category
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootURl + 'TicketBooking/DistrictbyCategory',
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddl_Districts").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+        $("#ddl_Districts").bind("change", function () {
+
+            var districtID = $("#ddl_Districts").val();
+            $('#ddl_place').empty();
+            var values = {
+                DistrictID: districtID
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootURl + 'TicketBooking/PlaceByDistrict',
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddl_place").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+            document.getElementById("errorDis").style.display = 'none';
+        });
+
+        //$("#ddl_place").bind("change", function () {
+        var placeChange;
+        $("#ddl_place").bind("click", function (e) {
+            placeChange = $(this).val();
+        }).bind("change", function (e) {
+            var rowCount = $('#vtemp tr').not('thead tr').length;
+            if (!rowCount) { rowCount == 0; }
+            if (parseInt(rowCount, 10) == 0) {
+
+            $('#txt_dateofarrival').val('');
+            $('#ddl_Shift').val(0);
+            $('#ddl_Vehiclecat').val(0);
+            $('#ddl_vehicle').val(0);
+            $('#txt_Totalseat').val('');
+            $('#txt_NoOfTicket').val('');
+            $('#hdn_availTicket,#hdn_vehiclefee,#hdn_vehicleSeatAvailable').val('');
+            $('#lbl_NumberofMembersavailable,#lbl_feePerVehicle,#lbl_vehicleSeatAvailable').text('');
+            $("#ddl_Zone").empty();
+
+            var placeID = $("#ddl_place").val();
+            var values = {
+                PlaceID: placeID
+            };
+            if ($("#ddl_place option:selected").text() != '--Select--') {
+                $.ajax({
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(values),
+                    url: RootURl + 'TicketBooking/CheckSafariAccomoAvailability',
+                    success: function (data) {
+
+                        if (data.list1 == "1") {
+                            $('#divSafariHead').css("display", "block");
+                            $('#IsSafari').css("display", "block");
+                            $('#hdnSafari').val('F');
+                        }
+                        else {
+                            $('#divSafariHead').css("display", "none");
+                            $('#IsSafari').css("display", "none");
+                            $('#hdnSafari').val('NF');
+                        }
+                        if (data.list2 == "1") {
+                            $('#divAccomoHead').css("display", "block");
+                            $('#IsAccommodation').css("display", "block");
+                        }
+                        else {
+                            $('#divAccomoHead').css("display", "none");
+                            $('#IsAccommodation').css("display", "none");
+                        }
+                        if (data.list3.length > 0) {
+                            $(".zone").show();
+                            $("#ddl_Zone").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                            for (var i = 0; i < data.list3.length; i++) {
+                                $("#ddl_Zone").append('<option value="' + data.list3[i].Value + '">' + data.list3[i].Text + '</option>');
+                            }
+                        }
+                        else {
+                            $(".zone").hide();
+                            $("#ddl_Zone").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                            $(".datefield").datepicker({ minDate: "01/10/2016", maxDate: "89", dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+                            $("#ddl_Vehiclecat").val(1);
+                            Vichelcategory();
+                        }
+
+                    },
+                    traditional: true,
+                    error: function (data) { console.log(data) }
+                });
+            }
+           
+            }
+            else {
+                $(this).val(placeChange);
+                alert('You can not change the place. Please delete your safari entry.');
+                return false;
+            }
+        });
+
+        //  $("#ddl_Zone").bind("change", function () {     
+        var zoneChange;
+        $("#ddl_Zone").bind("click", function (e) {
+            zoneChange = $(this).val();
+        }).bind("change", function (e) {
+            var rowCount = $('#vtemp tr').not('thead tr').length;
+            if (!rowCount) { rowCount == 0; }
+            if (parseInt(rowCount, 10) == 0) {
+
+            var placeID = $("#ddl_place").val();
+            var Zone = $('#ddl_Zone').val();
+            if (!Zone) { Zone = 0; }
+            var values = {
+                PlaceID: placeID,
+                Zone: Zone
+            };
+            if ($("#ddl_Zone option:selected").text() != '--Select--') {
+             
+                    $.ajax({
+                        type: 'POST',
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify(values),
+                        url: RootURl + 'TicketBooking/VistDate',
+                        success: function (data) {
+                            $("#txt_dateofarrival").datepicker("destroy");
+
+                            if (data.list1 != 'NF' && data.list2 != 'NF') {
+                                $(".datefield").datepicker({ minDate: data.list1, maxDate: "89", dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+                                //$(".datefield").datepicker({ minDate: data.list1, maxDate: data.list2, dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+                                if ($('#hdnDeptKiosk').val() != '') {
+                                    $("#txt_dateofarrival").datepicker("setDate", new Date());
+                                    CurrentShift();
+
+                                }
+                            }
+                            else {
+                                $(".datefield").datepicker({ minDate: new Date(), maxDate: new Date(), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+                                if ($('#hdnDeptKiosk').val() != '') {
+                                    $("#txt_dateofarrival").datepicker("setDate", new Date());
+                                    CurrentShift();
+
+                                }
+                            }
+                        }
+                    });
+               
+            }
+            $('#ddl_Vehiclecat').empty();
+            $('#ddl_Vehiclecat').append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            $('#ddl_Vehiclecat').append('<option value="' + 1 + '">' + "Govt. Specified Vehicle" + '</option>');
+            $("#ddl_Vehiclecat").val(1);
+            Vichelcategory();
+            }
+            else {
+                $(this).val(zoneChange);
+                alert('You can not change the zone. Please delete your safari entry.');
+                return false;
+            }
+        });
+
+
+        $("#ddl_Nation").bind("change", function () {
+            var val = $("#ddl_Nation").val();
+            $('#ddl_MemberType').empty();
+            if (val == '1') {
+                $("#ddl_MemberType").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                //$("#ddl_MemberType").append('<option value="' + 1 + '">' + "Child" + '</option>');
+                $("#ddl_MemberType").append('<option value="' + 2 + '">' + "Adult" + '</option>');
+                //$("#ddl_MemberType").append('<option value="' + 3 + '">' + "Student" + '</option>');
+                $("#ddl_IDType").prop("disabled", false);
+                $("#ddl_IDType").val('0');
+            }
+            else if (val == '2') {
+                $("#ddl_MemberType").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                // $("#ddl_MemberType").append('<option value="' + 1 + '">' + "Child" + '</option>');
+                $("#ddl_MemberType").append('<option value="' + 2 + '">' + "Adult" + '</option>');
+
+                $("#ddl_IDType").val('1');
+                $("#ddl_IDType").prop("disabled", true);
+            }
+            else {
+                $("#ddl_MemberType").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            }
+            $("#ddl_MemberType").val(2);
+            FeePerMember();
+           
+        });
+
+        //$("#txt_dateofarrival").change(function () {
+        var datechange;
+        $("#txt_dateofarrival").bind("click", function (e) {
+            datechange = $(this).val();
+        }).bind("change", function (e) {
+            //var shiftTime = $("#ddl_Shift").val();
+            //if (shiftTime) {
+            //    var arrivalDate = $("#txt_dateofarrival").val();
+            //    var placeID = $("#ddl_place").val();
+            //    var values = {
+            //        PlaceID: placeID,
+            //        ArrivalDate: arrivalDate,
+            //        ShiftTime: shiftTime
+            //    };
+
+            //    $.ajax({
+            //        type: 'POST',
+            //        contentType: 'application/json; charset=utf-8',
+            //        data: JSON.stringify(values),
+            //        url: RootURl + 'TicketBooking/CheckTicketAvailability',
+            //        success: function (data) {
+            //            $('#lbl_NumberofMembersavailable').text("Available Ticket: " + data);
+            //            $('#hdn_availTicket').val(data);
+            //        },
+            //        traditional: true,
+            //        error: function (data) { console.log(data) }
+            //    });
+            //}
+            //else { $('#lbl_NumberofMembersavailable').text(""); }
+            //document.getElementById("errorDate").style.display = 'none';
+            var rowCount = $('#vtemp tr').not('thead tr').length;
+            if (!rowCount) { rowCount == 0; }
+            if (parseInt(rowCount, 10) == 0) {
+
+            $('#lbl_NumberofMembersavailable').text('');
+            $('#ddl_Shift').empty();
+            //var districtID = $("#ddl_Districts").val();
+            var placeID = $("#ddl_place").val();
+            var Zone = $('#ddl_Zone').val();
+            if (!Zone) { Zone = 0; }
+            var values = {
+                //DistrictID: districtID,
+                PlaceID: placeID,
+                Zone:Zone
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootURl + 'TicketBooking/BindShiftByDistrictPlace',
+                success: function (data) {
+                    // $.each(data, function (i, items) {
+                    // alert(data.list1.length);
+
+                    var hours = new Date().getHours();
+                    var minutes = new Date().getMinutes();
+                    var ampm = hours >= 12 ? 'pm' : 'am';
+                    hours = hours % 12;
+                    hours = hours ? hours : 12; // the hour '0' should be '12'
+                    minutes = minutes < 1 ? '0' + minutes : minutes;
+                    $('#ddl_Shift').empty();
+                    $("#ddl_Shift").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                    for (var x = 0; x < data.list1.length; x++) {                       
+                        if (data.list1[x].isFullDay == 'True') {                         
+                            $("#ddl_Shift").append('<option value="' + 3 + '">' + "Full Day" + '</option>');
+                        }
+                        if (data.list1[x].isMorning == 'True') {
+                            $("#ddl_Shift").append('<option value="' + 1 + '">' + "Morning" + '</option>');
+                        }
+                        if (data.list1[x].isEvening == 'True') {
+                            $("#ddl_Shift").append('<option value="' + 2 + '">' + "Evening" + '</option>');
+                        }
+                        //else {
+                        //    $("#ddl_Shift").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                        //}
+                        //if (data.list1[x].FullDayShift == '1') {
+                        //    $('#ddl_Shift').empty();
+                        //    $("#ddl_Shift").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                        //    $("#ddl_Shift").append('<option value="' + 3 + '">' + "Full Day" + '</option>');
+                        //}
+                        //else if (data.list1[x].FullDayShift == '0') {
+                        //    if (ampm == 'am') {
+                        //        $('#ddl_Shift').empty();
+                        //        $("#ddl_Shift").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                        //        $("#ddl_Shift").append('<option value="' + 1 + '">' + "Morning" + '</option>');
+                        //        $("#ddl_Shift").append('<option value="' + 2 + '">' + "Evening" + '</option>');
+                        //    }
+                        //    else {
+                        //        var today = new Date();
+                        //        var dd = today.getDate();
+                        //        var mm = today.getMonth() + 1; //January is 0!
+
+                        //        var yyyy = today.getFullYear();
+                        //        if (dd < 10) {
+                        //            dd = '0' + dd
+                        //        }
+                        //        if (mm < 10) {
+                        //            mm = '0' + mm
+                        //        }
+                        //        var today = dd + '/' + mm + '/' + yyyy;
+
+                        //        var L = 3, d1 = $("#txt_dateofarrival").val().split('/'), d2 = today.split('/');
+                        //        d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+                        //        d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+                        //        if (d1 > d2) {
+                        //            $('#ddl_Shift').empty();
+                        //            $("#ddl_Shift").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                        //            $("#ddl_Shift").append('<option value="' + 1 + '">' + "Morning" + '</option>');
+                        //            $("#ddl_Shift").append('<option value="' + 2 + '">' + "Evening" + '</option>');
+                        //        }
+                        //        else {
+                        //            $('#ddl_Shift').empty();
+                        //            $("#ddl_Shift").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                        //            $("#ddl_Shift").append('<option value="' + 2 + '">' + "Evening" + '</option>');
+                        //        }
+                        //    }
+                        //}
+                       
+                    }
+                    $('#ddl_Accomo').empty();
+                    $("#ddl_Accomo").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                    for (var i = 0; i < data.list2.length; i++) {
+                        $("#ddl_Accomo").append('<option value="' + data.list2[i].Value + '">' + data.list2[i].Text + '</option>');
+                    }
+                    // });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+            document.getElementById("errorPlace").style.display = 'none';
+            }
+            else {
+                $(this).val(datechange);
+                alert('You can not change the date. Please delete your safari entry.');
+                return false;
+            }
+        });
+
+        $("#txt_NoOfTicket").change(function () {
+            var noOfTkt = $("#txt_NoOfTicket").val();
+            var availTkt = $('#hdn_availTicket').val();
+            if (!noOfTkt) { noOfTkt = 0; }
+            if (!availTkt) { availTkt = 0; }
+            $('#txt_Totalseat').val(noOfTkt);
+            if (parseInt(noOfTkt) > 6) {
+                alert('only 6 seat can be booked at a time!');
+                $("#txt_NoOfTicket,#txt_Totalseat").val('');
+            }
+            if (parseInt(noOfTkt) > parseInt(availTkt)) {
+                alert('only ' + availTkt + ' seat available.')
+                $("#txt_NoOfTicket,#txt_Totalseat").val('');
+            }
+
+        });
+
+        //$("#ddl_Shift").change(function () {
+        var shift;
+
+        $("#ddl_Shift").bind("click", function (e) {
+            shift = $(this).val();
+        }).bind("change", function (e) {
+            //var shift = $("#ddl_Shift").val();
+            var rowCount = $('#vtemp tr').not('thead tr').length;
+            if (!rowCount) { rowCount == 0; }
+            if (parseInt(rowCount, 10) == 0) {
+
+            var arrivalDate = $("#txt_dateofarrival").val();
+            if (arrivalDate) {
+                var placeID = $("#ddl_place").val();
+                var shiftTime = $("#ddl_Shift").val();
+                var Zone = $('#ddl_Zone').val();
+                if (!Zone) { Zone = 0; }
+                var values = {
+                    PlaceID: placeID,
+                    ArrivalDate: arrivalDate,
+                    ShiftTime: shiftTime,
+                    Zone: Zone
+                };
+                if ($("#ddl_Shift option:selected").text() != '--Select--') {
+                    $.ajax({
+                        type: 'POST',
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify(values),
+                        url: RootURl + 'TicketBooking/CheckTicketAvailability',
+                        success: function (data) {
+                            $('#lbl_NumberofMembersavailable').text("Currently available tickets: " + data);
+                            $('#hdn_availTicket').val(data);
+                        },
+                        traditional: true,
+                        error: function (data) { console.log(data) }
+                    });
+                }
+               
+            }
+            document.getElementById("errorShift").style.display = 'none';
+            }
+            else {
+                $(this).val(shift);
+                alert('You can not change the shift. Please delete your safari entry.');
+                return false;
+            }
+        });
+
+        $("#ddl_MemberType").change(function () {
+
+            var districtID = $("#ddl_Districts").val();
+            var placeID = $("#ddl_place").val();
+            var nationality = $("#ddl_Nation").val();
+            var memberType = $("#ddl_MemberType").val();
+            var values = {
+                PlaceID: placeID,
+                DistrictID: districtID,
+                Nationality: nationality,
+                MemberType: memberType
+            };
+            if ($("#ddl_MemberType option:selected").text() != '--Select--') {
+
+                $.ajax({
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(values),
+                    url: RootURl + 'TicketBooking/SelectFee',
+                    success: function (data) {
+                        $.each(data, function (i, items) {
+                            $('#lbl_feePerMember').text("Fees Per Member: " + items.FeePerMember + " (in INR.)");
+                            $('#lbl_feePerCamera').text("Fees Per Camera: " + items.CameraFee + " (in INR.)");
+                            $('#hdn_memberfee').val(items.FeePerMember);
+                            $('#hdn_camerafee').val(items.CameraFee);
+                        });
+                    },
+                    traditional: true,
+                    error: function (data) { console.log(data) }
+                });
+            }
+          
+        });
+
+        $("#btn_addMembers").bind("click", function () {
+            if ($('#txt_memberName').val() == '') {
+                document.getElementById("errorName").style.display = 'block';
+                $("#txt_memberName").focus();
+                return false;
+            }
+            else { document.getElementById("errorName").style.display = 'none'; }
+
+            if ($('#ddl_Gender').val() == '' || $('#ddl_Gender').val() == '0') {
+                document.getElementById("errorGender").style.display = 'block';
+                $("#ddl_Gender").focus();
+                return false;
+            }
+            else { document.getElementById("errorGender").style.display = 'none'; }
+
+            if ($('#ddl_Nation').val() == '' || $('#ddl_Nation').val() == '0') {
+                document.getElementById("errorNationality").style.display = 'block';
+                $("#ddl_Nation").focus();
+                return false;
+            }
+            else { document.getElementById("errorNationality").style.display = 'none'; }
+
+            if ($('#ddl_MemberType').val() == '' || $('#ddl_MemberType').val() == '0') {
+                document.getElementById("errorMemberType").style.display = 'block';
+                $("#ddl_MemberType").focus();
+                return false;
+            }
+            else { document.getElementById("errorMemberType").style.display = 'none'; }
+
+            if ($('#ddl_IDType').val() == '' || $('#ddl_IDType').val() == '0') {
+                document.getElementById("errorIDtype").style.display = 'block';
+                $("#ddl_IDType").focus();
+                return false;
+            }
+            else { document.getElementById("errorIDtype").style.display = 'none'; }
+
+            if ($('#txt_IDno').val() == '' && $('#hdnDeptKiosk').val()=='') {
+                document.getElementById("errorIDNo").style.display = 'block';
+                $("#txt_IDno").focus();
+                return false;
+            }
+            else { document.getElementById("errorIDNo").style.display = 'none'; }
+
+            //if ($('#txtUploadId').val() == '' && $('#hdnDeptKiosk').val() == '') {
+            //    document.getElementById("errordivUpload").style.display = 'block';
+            //    $("#txtUploadId").focus();
+            //    return false;
+            //}
+            //else { document.getElementById("errordivUpload").style.display = 'none'; }
+
+            var rowCount = $('#tblSession tr').not('thead tr').length;
+            var existRow = $('#txt_NoOfTicket').val();
+            if (!existRow)
+            { existRow = 0 }
+            if (rowCount < existRow) {
+                PostMemberInfo();
+            }
+            else {
+                alert('You can not add more members');
+            }
+
+        });
+
+        //$("#ddl_Vehiclecat").bind("change", function () {
+        //    var catID = $("#ddl_Vehiclecat").val();
+        //    var placeID = $("#ddl_place").val();
+        //    var Zone = $('#ddl_Zone').val();
+        //    if (!Zone) { Zone = 0; }
+        //    $('#ddl_vehicle').empty();
+        //    var values = {
+        //        VehicleCatID: catID,
+        //        PlaceID: placeID,
+        //        Zone: Zone
+        //    };
+        //    if ($("#ddl_Vehiclecat option:selected").text() != '--Select--') {
+        //        $.ajax({
+        //            type: 'POST',
+        //            contentType: 'application/json; charset=utf-8',
+        //            data: JSON.stringify(values),
+        //            url: RootURl + 'TicketBooking/vehicleByCategory',
+        //            success: function (data) {
+        //                $.each(data, function (i, items) {
+        //                    $("#ddl_vehicle").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+        //                });
+        //            },
+        //            traditional: true,
+        //            error: function (data) { console.log(data) }
+        //        });
+        //    }
+           
+        //});
+
+        $("#ddl_vehicle").bind("change", function () {
+            var vichel = $("#ddl_vehicle option:selected").text();
+            $("#hdn_vehicleID").val($("#ddl_vehicle option:selected").val());
+            var Zone = $('#ddl_Zone').val();
+            if (!Zone) { Zone = 0; }
+            var shift = $("#ddl_Shift").val();
+            if (!shift) { shift = 0; }
+            var values = {
+                VehicleCatID: $("#ddl_Vehiclecat").val(),
+                VehicleID: $("#ddl_vehicle").val(),
+                ArrivalDate: $("#txt_dateofarrival").val(),
+                PlaceID: $("#ddl_place").val(),
+                Zone: Zone,
+                shift: shift,
+            };
+            if ($("#ddl_vehicle option:selected").text() != '--Select--') {
+
+                $.ajax({
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(values),
+                    url: RootURl + 'TicketBooking/SelectVehicleFee',
+                    success: function (data) {
+                        $.each(data, function (i, items) {
+                            if (parseInt(items.AvailableSeat, 10) > parseInt($('#txt_NoOfTicket').val(), 10)) {
+                                $('#lbl_feePerVehicle').text("Fees per seat: " + items.FeePerVehicle + " (in INR.)");
+                            $('#hdn_vehiclefee').val(items.FeePerVehicle);
+                            $('#lbl_vehicleSeatAvailable').text("Currently available seats in " + vichel + ": " + items.AvailableSeat);
+                            $('#hdn_vehicleSeatAvailable').val(items.AvailableSeat);
+                            }
+                            else {
+                                alert('No seat avaliable');
+                                $("#ddl_vehicle").val(0);
+                                $('#lbl_feePerVehicle').text('');
+                                $('#hdn_vehiclefee').val('');
+                                $('#lbl_vehicleSeatAvailable').text('');
+                                $('#hdn_vehicleSeatAvailable').val('');
+                                return false;
+                            }
+                        });
+                    },
+                    traditional: true,
+                    error: function (data) { console.log(data) }
+                });
+
+            }
+           
+        });
+
+        $("#btn_addSafari").bind("click", function () {
+
+            if ($('#ddl_Vehiclecat').val() == '' || $('#ddl_Vehiclecat').val() == '0') {
+                document.getElementById("errorVehicleType").style.display = 'block';
+                $("#ddl_Vehiclecat").focus();
+                return false;
+            }
+            else { document.getElementById("errorVehicleType").style.display = 'none'; }
+
+            if ($('#ddl_vehicle').val() == '' || $('#ddl_vehicle').val() == '0') {
+                document.getElementById("errorVehicle").style.display = 'block';
+                $("#ddl_vehicle").focus();
+                return false;
+            }
+            else { document.getElementById("errorVehicle").style.display = 'none'; }
+
+            if ($('#txt_Totalseat').val() == '') {
+                document.getElementById("errorSeat").style.display = 'block';
+                $("#txt_Totalseat").focus();
+                return false;
+            }
+            else { document.getElementById("errorSeat").style.display = 'none'; }
+            var qty = 0;
+            $('#vtemp tr').each(function (i) {
+                var $tds = $(this).find('td');
+                var number = $tds.eq(2).text();
+                if (!number) { number = 0; }
+                qty = parseInt(qty) + parseInt(number);
+            });
+            // alert(noOfSafari);
+            var noOfSafari = $("#txt_Totalseat").val();
+            var Seattotal = parseInt(noOfSafari, 10) + parseInt(qty, 10);
+            var vehicle = $('#ddl_vehicle option:selected').text();
+            var availSafari = $('#hdn_vehicleSeatAvailable').val();
+            var tktToBook = $("#txt_NoOfTicket").val();
+
+            if (vehicle == 'Gypsy' && parseInt(Seattotal) > 6) {
+                alert('You can book only 6 seat for gypsy.');
+                $("#txt_Totalseat").val('');
+                return false;
+            }
+            //if (vehicle == 'Canter' && parseInt(Seattotal) <=6) {
+            //    alert('You have to book more than 6 seat for canter.');
+            //   // $("#txt_Totalseat").val('');
+            //    return false;
+            //}
+            if (vehicle == 'Canter' && parseInt(Seattotal) > 20) {
+                alert('You can book only 20 seat for canter.');
+                 $("#txt_Totalseat").val('');
+                return false;
+            }
+            if (parseInt(Seattotal) > parseInt(tktToBook)) {
+                alert('You can book only ' + tktToBook + ' seat.');
+                 $("#txt_Totalseat").val('');
+                return false;
+            }
+            if (parseInt(Seattotal) > parseInt(availSafari)) {
+                alert('You can not add more seats.');
+                return false;
+            }
+            vehicleInfo();
+        });
+
+        $("#ddl_Accomo").bind("change", function () {
+            var values = {
+                PlaceID: $("#ddl_place").val(),
+                ArrivalDate: $("#txt_dateofarrival").val(),
+                AccomoID: $("#ddl_Accomo").val()
+            };
+            if ($("#ddl_Accomo option:selected").text() != '--Select--') {
+
+                $.ajax({
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(values),
+                    url: RootURl + 'TicketBooking/SelectAccomoFee',
+                    success: function (data) {
+                        $.each(data, function (i, items) {
+                            $('#lbl_PerroomCharge').text("Fees per room: " + items.RoomCharge + " (in INR.)");
+                            $('#lbl_roomAvail').text("No of rooms available: " + items.RoomAvailability);
+                            $('#hdn_perRoomRate').val(items.RoomCharge);
+                            $('#hdn_roomAvail').val(items.RoomAvailability);
+                        });
+                    },
+                    traditional: true,
+                    error: function (data) { console.log(data) }
+                });
+            }
+          
+        });
+        $("#txt_Totalseat").change(function () {
+            var tktToBook = $("#txt_NoOfTicket").val();
+            var noOfSafari = $("#txt_Totalseat").val();
+            var availSafari = $('#hdn_vehicleSeatAvailable').val();
+            if (!noOfSafari) { noOfSafari = 0; }
+            if (!availSafari) { availSafari = 0; }
+
+            if (parseInt(noOfSafari) > parseInt(tktToBook)) {
+                alert('You can book only ' + tktToBook + ' seat.')
+                $("#txt_Totalseat").val(tktToBook);
+                return false;
+            }
+            if (parseInt(availSafari) < parseInt(noOfSafari)) {
+                alert('only ' + availSafari + ' seat available.')
+                $("#txt_Totalseat").val('');
+                return false;
+            }
+        });
+        $("#txt_Totalroom").change(function () {
+            var room = $("#txt_Totalroom").val();
+            var availRoom = $('#hdn_roomAvail').val();
+            if (!room) { room = 0; }
+            if (!availRoom) { availRoom = 0; }
+            if (availRoom < room) {
+                alert('only ' + availRoom + ' room available.')
+                $("#txt_Totalroom").val('');
+            }
+        });
+
+        $('#txt_memberName').keypress(function (e) {
+            var kc = e.which;
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+        $('#txt_IDno').keypress(function (e) {
+
+            var kc = e.which;
+
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95) || (kc >= 44 && kc <= 57) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+        $('#txt_IDno').change(function () {
+            var idNo;
+            var newid = $('#txt_IDno').val();
+            $('#tblSession tr').each(function (i) {
+                var $tds = $(this).find('td');
+                idNo = $tds.eq(3).text();
+                if (newid != '') {
+                    if (idNo == newid) {
+                        alert('This ID number already exist. Please enter another ID number.');
+                        $('#txt_IDno').val('');
+                    }
+                }
+            });
+
+        });
+
+        $("#txtUploadId").change(function (e) {
+            //var iSize = ($("#UploadId")[0].files[0].size / 1048576);
+            var iSize = parseFloat($("#txtUploadId")[0].files[0].size / 1024).toFixed(2);
+            if (iSize > 100) {
+                $('#txtUploadId').val('');
+                $('#errordivUpload').show();
+                $('#errordivUpload').html("Upload ID should not be larger than 100kb!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#txtUploadId').focus();
+                return false;
+            }
+            var file = $("#txtUploadId").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+            if (file) {
+                var get_ext = file.split('.');
+                get_ext = get_ext.reverse();
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#txtUploadId').val('');
+                    $('#errordivUpload').show();
+                    $('#errordivUpload').html("Please upload only jpeg or jpg or pdf or png or gif file format in Upload ID Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#txtUploadId').focus();
+                    return false;
+                } else {
+                    $('#errordivUpload').hide();
+                }
+            }
+            else { $('#errordivUpload').hide(); }
+        });
+
+        $('#btnUploadId').click(function () {
+
+            //Checking whether FormData is available in browser
+            if (window.FormData !== undefined) {
+
+                var fileUpload = $("#txtUploadId").get(0);
+                var files = fileUpload.files;
+
+                // Create FormData object
+                var fileData = new FormData();
+
+                // Looping over all files and add it to FormData object
+                for (var i = 0; i < files.length; i++) {
+                    fileData.append(files[i].name, files[i]);
+                }
+
+                //    // Adding one more key to FormData object
+                //    //fileData.append('username', ‘Manas’);
+                if ($('#txtUploadId').val() != '') {
+                    $.ajax({
+                        url: RootURl + 'OffenseRegistrationfinal/UploadFiles',
+                        type: "POST",
+                        contentType: false, // Not to set any content header
+                        processData: false, // Not to process data
+                        data: fileData,
+                        success: function (result) {
+                            alert(result.list1);
+
+                            $("#hdUploadDoc").val(result.list2);
+                           // $('#txtUploadId').val('');
+                        },
+                        error: function (err) {
+                            alert(err.statusText);
+                        }
+                    });
+                }
+                else {
+                    alert("Select file to upload");
+                }
+
+            } else {
+                alert("FormData is not supported.");
+            }
+        });
+
+
+        $(document).on('keypress', '#txt_dateofarrival', function (event) {
+
+            event.preventDefault();
+            return false;
+
+        });
+
+        $('#txt_dateofarrival').keydown(function (event)
+        { return cancelBackspace(event) });
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+        $('#btn_Submit').click(function () {
+            //if ($('#ddl_Category').val() == '' || $('#ddl_Category').val() == '0') {
+            //    document.getElementById("errorType").style.display = 'block';
+            //    $('html, body').animate({ scrollTop: $("#ddl_Category").offset().top}, 600);
+            //    return false;
+            //}
+            //if ($('#ddl_Districts').val() == '' || $('#ddl_Districts').val() == '0') {
+            //    document.getElementById("errorDis").style.display = 'block';
+            //    $('html, body').animate({ scrollTop: $("#ddl_Districts").offset().top }, 600);
+            //    return false;
+            //}
+
+            if ($('#ddl_place').val() == '' || $('#ddl_place').val() == '0') {
+                document.getElementById("errorPlace").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#ddl_place").offset().top }, 600);
+                return false;
+            }
+            if ($('#txt_dateofarrival').val() == '' || $('#txt_dateofarrival').val() == '0') {
+                document.getElementById("errorDate").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#txt_dateofarrival").offset().top }, 600);
+                return false;
+            }
+
+            if ($('#ddl_Shift').val() == '' || $('#ddl_Shift').val() == '0') {
+                document.getElementById("errorShift").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#ddl_Shift").offset().top }, 600);
+                return false;
+            }
+
+
+            if ($('#txt_NoOfTicket').val() == '' || $('#txt_NoOfTicket').val() == '0') {
+                document.getElementById("errortotMember").style.display = 'block';
+                $('html, body').animate({ scrollTop: $("#txt_Totalseat").offset().top }, 600);
+                return false;
+            }
+            else { document.getElementById("errortotMember").style.display = 'none'; }
+
+            if ($('#hdnSafari').val() == 'F') {
+                var qty = 0;
+                $('#vtemp tr').each(function (i) {
+                    var $tds = $(this).find('td');
+                    var number = $tds.eq(2).text();
+                    if (!number) { number = 0; }
+                    qty = parseInt(qty) + parseInt(number);
+                });
+                var noOfTicket = $("#txt_NoOfTicket").val();
+                if (qty != noOfTicket) {
+                    alert('Please fill all safari details.');
+                    return false;
+                }
+            }
+
+            var rowCount = $('#tblSession tr').not('thead tr').length;
+            var existRow = $('#txt_NoOfTicket').val();
+            if (!existRow)
+            { existRow = 0 }
+            if (rowCount != existRow) {
+                alert('Please fill all members details.');
+                return false;
+            }
+            if ($('#txtInput').val() != '') {
+                var status = ValidCaptcha();
+                if (status == false) {
+                    alert('Invalid captcha');
+                    Captcha();
+                    $('#txtInput').val('');
+                    $('#txtInput').focus();
+                    return false;
+                }
+            }
+            else {
+                alert('Enter valid captcha');
+                $('#txtInput').focus();
+                return false;
+            }
+
+        });
+        $('.Print').click(function () {
+
+            var $row = jQuery(this).closest('tr');
+            var $columns = $row.find('td');
+            var id = $(this).parents('tr').find('input[type="hidden"]').val();
+            var ticket;
+            $.ajax({
+                type: 'POST',
+                url: RootURl + 'TicketBooking/PrintTicket',
+                data: { ticketid: id },
+                success: function (data) {
+
+                    $("#dvContainer").html(data);
+
+                    var contents = $("#dvContainer").html();
+                    var frame1 = $('<iframe />');
+                    frame1[0].name = "frame1";
+                    //frame1.css({ "position": "absolute", "top": "-1000000px" });
+                    $("body").append(frame1);
+                    var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+                    frameDoc.document.open();
+                    //Create a new HTML document.
+                    frameDoc.document.write('<html><head><title>E-Ticket - Forest Department Rajasthan </title>');
+                    //Append the external CSS file.
+                    frameDoc.document.write('<link href="../css/bootstrap.min.css" rel="stylesheet" />');
+                    frameDoc.document.write('<link href="../css/mobile.css" rel="stylesheet" />');
+                    frameDoc.document.write('<link href="../css/dashboard/main.css" rel="stylesheet" />');
+                    frameDoc.document.write('<link href="../css/dashboard/dashboard.css" rel="stylesheet" />');
+                    frameDoc.document.write('<link href="../css/dashboard/font-awesome.min.css" rel="stylesheet" />');
+                    frameDoc.document.write('</head><body>');
+                    //Append the DIV contents.
+                    frameDoc.document.write(contents);
+                    frameDoc.document.write('</body></html>');
+                    frameDoc.document.close();
+                    setTimeout(function () {
+                        window.frames["frame1"].focus();
+                        window.frames["frame1"].print();
+                        frame1.remove();
+                    }, 500);
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+            //var aa = "<div class='wrapper'><section class='print-invoice'> <div class='row border-divider'><div class='col-sm-2'>" +
+            //           "<a href='#' id='myLogo'><img src='../images/logo.png' width='100' alt='Forest Department, Government of Rajasthan' title='Logo' class=''></a></div>" +
+            //          "<div class='col-sm-4 centr'><span class='pdate'>E-Ticket - Rajasthan Wildlife</span></div>" +
+            //    	  "<div class='col-sm-4'><span class='pull-right pdate'>Space of QR BAR Code</span></div>" +
+            //          "<div class='divider'></div></div> </section></div>";
+        });
+
+    });
+    function reload() {
+        var r = confirm("Do you want to leave page!");
+        if (r) {
+            window.location = RootURl + "Dashboard/dashboard";
+        }
+        else {
+            //do nothing
+        }
+    }
+
+    function Vichelcategory() {
+
+        //var catID = $("#ddl_Vehiclecat").val();
+        var placeID = $("#ddl_place").val();
+        var Zone = $('#ddl_Zone').val();
+        if (!Zone) { Zone = 0; }
+        $('#ddl_vehicle').empty();
+        var values = {
+            VehicleCatID: 1,
+            PlaceID: placeID,
+            Zone: Zone
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(values),
+            url: RootURl + 'TicketBooking/vehicleByCategory',
+            success: function (data) {
+                $.each(data, function (i, items) {
+                    $("#ddl_vehicle").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                });
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+    }
+
+    //function SessionMemberInfo() {
+
+    //    $.ajax({
+    //        type: 'POST',
+    //        contentType: 'application/json; charset=utf-8',
+    //        data: JSON.stringify(''),
+    //        url: RootURl + 'TicketBooking/SessionMemberData',
+    //        success: function (data) {
+    //            if (data.length > 0) {
+    //                $.each(data, function (i, items) {
+    //                    var bardata = "<tr class='rowid'><td style='border:1px solid black'>" + items.Name + "</td><td style='border:1px solid black'>" + items.Gender + "</td><td style='border:1px solid black'>" + items.IDType + "</td><td style='border:1px solid black'>" + items.IDNo + "</td><td style='border:1px solid black'>" + items.Nationality + "</td><td style='border:1px solid black'>" + items.MemberType + "</td><td style='border:1px solid black'>" + items.TotalCamera + "</td><td style='border:1px solid black'>" + items.FeePerMember + "</td><td style='border:1px solid black'>" + items.CameraFee + "</td><td style='border:1px solid black'>" + "<button class=get-delete>Delete</button>" + "</td></tr>";
+                     
+    //                    $("#memberTable").append(bardata);
+    //                    $("#SessionTable").append(bardata);
+    //                });
+
+    //            }
+
+    //        },
+
+    //        traditional: true,
+    //        error: function (data) { console.log(data) }
+    //    });
+
+    //}
+    function FeePerMember() {
+
+        var districtID = $("#ddl_Districts").val();
+        var placeID = $("#ddl_place").val();
+        var nationality = $("#ddl_Nation").val();
+        var memberType = $("#ddl_MemberType").val();
+        var values = {
+            PlaceID: placeID,
+            DistrictID: districtID,
+            Nationality: nationality,
+            MemberType: memberType
+        };
+
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(values),
+            url: RootURl + 'TicketBooking/SelectFee',
+            success: function (data) {
+                $.each(data, function (i, items) {
+                    $('#lbl_feePerMember').text("Fees Per Member: " + items.FeePerMember + " (in INR.)");
+                    $('#lbl_feePerCamera').text("Fees Per Camera: " + items.CameraFee + " (in INR.)");
+                    $('#hdn_memberfee').val(items.FeePerMember);
+                    $('#hdn_camerafee').val(items.CameraFee);
+                });
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+
+    }
+   
+    function CurrentShift() {
+        $('#ddl_Shift').empty();
+        var hours = new Date().getHours();
+        var minutes = new Date().getMinutes();
+        var ampm = hours >= 12 ? 'pm' : 'am';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 1 ? '0' + minutes : minutes;
+        var placeID = $("#ddl_place").val();
+        var Zone = $('#ddl_Zone').val();
+        if (!Zone) { Zone = 0; }
+        var values = {
+            PlaceID: placeID,
+            Zone: Zone
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(values),
+            url: RootURl + 'TicketBooking/BindShiftByDistrictPlace',
+            success: function (data) {
+                $("#ddl_Shift").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                for (var x = 0; x < data.list1.length; x++) {
+                    if (data.list1[x].isFullDay == 'True') {
+                        $("#ddl_Shift").append('<option value="' + 3 + '">' + "Full Day" + '</option>');
+                    }
+                    if (data.list1[x].isMorning == 'True') {
+                        $("#ddl_Shift").append('<option value="' + 1 + '">' + "Morning" + '</option>');
+                        if (ampm == 'am') {
+                            $("#ddl_Shift").val(1);
+                            AvaliableTicket(1);
+                        }
+                    }
+                    if (data.list1[x].isEvening == 'True') {
+                        $("#ddl_Shift").append('<option value="' + 2 + '">' + "Evening" + '</option>');
+                        if (ampm == 'pm') {
+                            $("#ddl_Shift").val(2);
+                            AvaliableTicket(2);
+                        }
+                    }
+                }
+                $('#ddl_Accomo').empty();
+                $("#ddl_Accomo").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+                for (var i = 0; i < data.list2.length; i++) {
+                    $("#ddl_Accomo").append('<option value="' + data.list2[i].Value + '">' + data.list2[i].Text + '</option>');
+                }
+                // });
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+    }
+
+    function AvaliableTicket(shift) {
+        // $("#ddl_Shift").val()
+        var arrivalDate = $("#txt_dateofarrival").val();
+        if (arrivalDate) {
+            var placeID = $("#ddl_place").val();
+            var shiftTime = shift;
+            var Zone = $('#ddl_Zone').val();
+            if (!Zone) { Zone = 0; }
+            var values = {
+                PlaceID: placeID,
+                ArrivalDate: arrivalDate,
+                ShiftTime: shiftTime,
+                Zone: Zone
+            };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootURl + 'TicketBooking/CheckTicketAvailability',
+                success: function (data) {
+                    $('#lbl_NumberofMembersavailable').text("Currently available tickets: " + data);
+                    $('#hdn_availTicket').val(data);
+                    $('#txt_NoOfTicket').focus();
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        }
+        document.getElementById("errorShift").style.display = 'none';
+    }
+ </script>
+<script type="text/javascript">   
+
+
+    function Captcha() {
+        var alpha = new Array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+           'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+        var i;
+        for (i = 0; i < 6; i++) {
+            var a = alpha[Math.floor(Math.random() * alpha.length)];
+            var b = alpha[Math.floor(Math.random() * alpha.length)];
+            var c = alpha[Math.floor(Math.random() * alpha.length)];
+            var d = alpha[Math.floor(Math.random() * alpha.length)];
+            var e = alpha[Math.floor(Math.random() * alpha.length)];
+            var f = alpha[Math.floor(Math.random() * alpha.length)];
+            var g = alpha[Math.floor(Math.random() * alpha.length)];
+        }
+        var code = a + ' ' + b + ' ' + ' ' + c + ' ' + d + ' ' + e + ' ' + f + ' ' + g;
+        document.getElementById("mainCaptcha").innerHTML = code
+        document.getElementById("mainCaptcha").value = code
+    }
+    function ValidCaptcha() {
+        var string1 = removeSpaces(document.getElementById('mainCaptcha').value);
+        var string2 = removeSpaces(document.getElementById('txtInput').value);
+        if (string1 == string2) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    function removeSpaces(string) {
+        return string.split(' ').join('');
+    }
+
+
+    function SafariRequired() {
+        if (document.getElementById('rbl_safariyes').checked) {
+            document.getElementById('IsSafari').style.display = 'block';
+        }
+        else document.getElementById('IsSafari').style.display = 'none';
+
+    }
+    function AccommodationRequired() {
+        if (document.getElementById('rbl_Accommodationyes').checked) {
+            document.getElementById('IsAccommodation').style.display = 'block';
+        }
+        else document.getElementById('IsAccommodation').style.display = 'none';
+
+    }
+
+    function vehicleInfo()
+    {        
+        var vSeat = $("#txt_Totalseat").val();
+        var perSeatFee = $('#hdn_vehiclefee').val();
+        if (!vSeat) { vSeat = 0; }
+        if (!perSeatFee) { perSeatFee = 0; }
+        var totalVfee = (parseInt(vSeat, 10) * parseFloat(perSeatFee))
+        
+        var vehicleInfo = {
+            VehicleCatID: $("#ddl_Vehiclecat").val(),
+            VehicleCategory: $("#ddl_Vehiclecat  option:selected").text(),
+            VehicleID: $("#ddl_vehicle").val(),
+            VehicleName: $("#ddl_vehicle  option:selected").text(),
+            SeatForBooking: vSeat,
+            FeePerVehicle: perSeatFee,
+            VehicleFeeTotal: totalVfee
+        }
+
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(vehicleInfo),
+            url: RootURl + 'TicketBooking/safariData',
+            success: function (data) {
+                var bardata = "<tr class='rowid'><td style='border:1px solid black'>" + data.VehicleCategory + "</td><td style='border:1px solid black'>" + data.VehicleName + "</td><td style='border:1px solid black'>" + data.SeatForBooking + "</td><td style='border:1px solid black'>" + data.FeePerVehicle + "</td><td style='border:1px solid black'>" + data.VehicleFeeTotal + "</td><td style='border:1px solid black'>" + "<button class=deleteSeat>Delete</button>" + "</td></tr>";
+                $("#vehicleTable").append(bardata);
+            },
+
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+        //$("#ddl_Vehiclecat").val('0');
+        //$("#ddl_vehicle").empty();
+        //$("#ddl_vehicle").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+        //document.getElementById("txt_Totalseat").value = "";
+        //$('#hdn_vehiclefee').val('');
+        //$('#hdn_vehicleSeatAvailable').val('');
+        //$('#lbl_vehicleSeatAvailable').text("");
+        //$('#lbl_feePerVehicle').text("");
+
+        $("#ddl_vehicle").val(0);
+        $('#hdn_vehiclefee').val('');
+        $('#hdn_vehicleSeatAvailable').val('');
+        $('#lbl_vehicleSeatAvailable').text("");
+        $('#lbl_feePerVehicle').text("");
+    }
+
+    $(document).on('click', '.deleteSeat', function (e) {
+        var $row = jQuery(this).closest('tr');
+        var $columns = $row.find('td');
+        var ID = $.trim($columns[0].innerHTML);
+        var rowID = $(this).index() + 1;     
+        jQuery(this).closest('tr').remove();
+        var i = 0;
+        var RowInfo = {
+            Id: rowID
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(RowInfo),
+            url: RootURl + 'TicketBooking/deletesafariData',
+            success: function (data) {
+
+            },
+            error: function (ex) { alert(ex); }
+
+        });
+        e.preventDefault();
+    });
+
+    function PostMemberInfo() {        
+        var mCamera = $("#txt_camera").val();
+        var mFee = $('#hdn_memberfee').val();
+        var camFee = $('#hdn_camerafee').val();
+        var uploadid = $('#hdUploadDoc').val();       
+        if (!mFee) { mFee = 0;}
+        if (!mCamera) { mCamera = 0; }
+        if (!camFee)  { camFee = 0;}
+        if (!uploadid)  { uploadid ='';}
+        var totalcamfee = (parseInt(mCamera, 10) * parseFloat(camFee))
+
+        var memberInfo = {           
+            Name: $("#txt_memberName").val(),
+            Gender: $("#ddl_Gender  option:selected").text(),
+            IDType: $("#ddl_IDType  option:selected").text(),
+            IDNo: $("#txt_IDno").val(),
+            Nationality: $("#ddl_Nation  option:selected").text(),
+            MemberType: $("#ddl_MemberType  option:selected").text(),
+            TotalCamera: mCamera,
+            FeePerMember: mFee,
+            CameraFee: totalcamfee,
+            UploadId: uploadid
+          
+        };
+       
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(memberInfo),
+            url: RootURl + 'TicketBooking/memberData',
+            success: function (data) {
+                var bardata = "<tr class='rowid'><td style='border:1px solid black'>" + data.Name + "</td><td style='border:1px solid black'>" + data.Gender + "</td><td style='border:1px solid black'>" + data.IDType + "</td><td style='border:1px solid black'>" + data.IDNo + "</td><td style='border:1px solid black'>" + data.Nationality + "</td><td style='border:1px solid black'>" + data.MemberType + "</td><td style='border:1px solid black'>" + data.TotalCamera + "</td><td style='border:1px solid black'>" + data.FeePerMember + "</td><td style='border:1px solid black'>" + data.CameraFee + "</td><td style='border:1px solid black'>" + "<button class=get-delete>Delete</button>" + "</td></tr>";
+                $("#memberTable").append(bardata);
+                $("#SessionTable").append(bardata);
+                
+            },
+
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+        document.getElementById("txt_memberName").value = "";
+        document.getElementById("txt_IDno").value = "";
+        document.getElementById("txt_camera").value = "";
+        $("#ddl_Gender").val('0');
+        $("#ddl_IDType").val('0');
+        $("#ddl_Nation").val('0');
+        $("#ddl_MemberType").empty();
+        $("#ddl_MemberType").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+        $('#hdn_memberfee').val('');
+        $('#hdn_camerafee').val('');
+        $('#lbl_feePerMember').text("");
+        $('#lbl_feePerCamera').text("");
+        $('#txtUploadId').val("");
+        $('#hdUploadDoc').val("");
+
+        // }
+    }
+
+    $(document).on('click', '.get-delete', function (e) {
+        var $row = jQuery(this).closest('tr');
+        var $columns = $row.find('td');
+        var ID = $.trim($columns[3].innerHTML);
+        jQuery(this).closest('tr').remove();
+        var i = 0;
+        var RowInfo = {
+            Id: ID
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(RowInfo),
+            url: RootURl + 'TicketBooking/deleteMemberData',
+            success: function (data) {              
+               
+            },
+            error: function (ex) { alert(ex); }
+
+        });
+        e.preventDefault();
+    });
+
+    function isNumberKey(evt) {
+        var id = $(evt.target).attr("id");
+        if (id == 'txt_NoOfTicket') {
+            document.getElementById("error").style.display = 'none';
+        }
+        else if (id == 'txt_camera') {
+            document.getElementById("error1").style.display = 'none';
+        }
+        else if (id == 'txt_Totalseat') {
+            document.getElementById("error3").style.display = 'none';
+        }
+        else if (id == 'txt_Totalroom') {
+            document.getElementById("error4").style.display = 'none';
+        }
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        //alert(charCode);
+        if (charCode == 46 || charCode > 31 && (charCode < 48 || charCode > 57)) {
+            if (id == 'txt_NoOfTicket') {
+                document.getElementById("error").style.display = 'block';
+            }
+            else if (id == 'txt_camera') {
+                document.getElementById("error1").style.display = 'block';
+            }
+            else if (id == 'txt_Totalseat') {
+                document.getElementById("error3").style.display = 'block';
+            }
+            else if (id == 'txt_Totalroom') {
+                document.getElementById("error4").style.display = 'block';
+            }
+            return false;
+        }
+        else
+            return true;
+    }   
+</script>
+<style>
+    .capt {
+        background-color: #f8f8f8;
+        border-color: #e7e7e7;
+        border: 1px solid #e7e7e7;
+        width: 240px;
+        height: 110px;
+        float: left;
+    }
+
+    #mainCaptcha {
+        position: relative;
+        padding-left: 15px;
+    }
+
+    #refresh {
+        width: 42px;
+        height: 26px;
+    }
+
+    #txtInput, #Button1 {
+        position: relative;
+        left: 15px;
+    }
+
+    .refrs {
+        left: 5px;
+        position: relative;
+    }
+
+    .capt h1 {
+        font-size: 14px;
+        padding: 10px 0 5px 15px;
+        margin: 0;
+    }
+
+    #mainCaptcha {
+        margin: 0;
+    }
+</style>
+
+<div style="display:none" id="dvContainer">
+
+</div>
+@*<input id="hdnDeptKiosk" type="hidden" value='@Session["IsDepartmentalKioskUser"]'>*@ 
+<input type="hidden" value="@Session["IsDepartmentalKioskUser"]" id="hdnDeptKiosk" /> 
+<div id="page-wrapper-inn">
+    @if (TempData["maxdate"] != null)
+    {
+
+        <script type="text/javascript" language="javascript">
+            alert('@TempData["maxdate"]');
+        </script>
+    }
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Online Ticket Booking</h1>
+    </div>
+     <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                
+               
+         
+                <div class="panel-heading"> <span style="color:red;">* Mandatory field(s) to fill.</span> <span style="float:right" title="Help doc for onlinebooking"><i class="bg-light-blue" style="color:ButtonText"><a href="~/Help/User_Manual_Online%20_Ticket_Booking.pdf" target="_blank" >Help doc for onlinebooking</a> </i>     </span> </div>
+    @using (Html.BeginForm("SubmitticketDetails", "TicketBooking", FormMethod.Post))
+    {
+   
+    <div class="panel-body">
+        @*<div class="col-lg-6">
+            <div class="form-group un-bold">
+                <label>Select Category: <span class="mandatory">*</span></label>
+                <select class="form-control" id="ddl_Category" name="Category">
+                    <option value="0">---Select---</option>
+                    <option value="Conservation Resrve">Conservation Resrve</option>
+                    <option value="National Park">National Park</option>
+                    <option value="Wildlife Santuaries">Wildlife Sanctuaries</option>
+                </select>
+                <span id="errorType" style="color: Red; display: none" class="alert-danger1">* Please Select Category.</span>
+            </div>
+
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group un-bold">
+                <label>Select District: <span class="mandatory">*</span></label>
+                @Html.DropDownList("ddl_Districts", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control" })
+                <span id="errorDis" style="color: Red; display: none" class="alert-danger1">* Please Select District.</span>
+            </div>
+        </div>*@
+
+        <div class="col-lg-6">
+            <div class="form-group un-bold">
+                <label>Select Place: <span class="mandatory">*</span></label>
+                @*@Html.DropDownList("ddl_place", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control" })*@
+                @Html.DropDownList("ddl_place", (IEnumerable<SelectListItem>)ViewBag.Place, "--Select--", new { id = "ddl_place",name="ddl_place", @class = "form-control" })
+                <span id="errorPlace" style="color: Red; display: none" class="alert-danger1">* Please Select Place.</span>
+            </div>
+        </div>
+
+        <div class="col-lg-6 zone">
+            <div class="form-group un-bold">
+                <label>Select Zone: <span class="mandatory">*</span></label>
+                @*@Html.DropDownList("ddl_place", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control" })*@
+                @Html.DropDownList("ddl_Zone", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @id = "ddl_Zone", @name = "ddl_Zone", @class = "form-control" })
+                <span id="errorPlace" style="color: Red; display: none" class="alert-danger1">* Please Select Place.</span>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="form-group un-bold">
+                <label>Date of Visit:<span class="mandatory">*</span></label>
+                <input type="text" class="form-control datefield" id="txt_dateofarrival" name="ArrivalDate" title="Enter the date of visit" readonly="readonly" />
+                <span id="errorDate" style="color: Red; display: none" class="alert-danger1">* Please Select Date.</span>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="form-group un-bold">
+                <label>Choose Shift: <span class="mandatory">*</span></label>
+                <select class="form-control" id="ddl_Shift" name="ddl_Shift">                   
+                </select>
+                <span id="errorShift" style="color: Red; display: none" class="alert-danger1">* Please Select Shift.</span>
+            </div>
+        </div>
+      
+        <div class="col-lg-6">
+            <div class="form-group un-bold">
+                <label>No. of Tickets For Booking: <span class="mandatory">*</span></label>
+                <input type="text" class="form-control" id="txt_NoOfTicket" name="TotalMember" title="Enter the number of visitors E.G. 5" onkeypress="return isNumberKey(event);" />
+                <span id="error" style="color: Red; display: none" class="alert-danger1">* Input digits (0 - 9)</span>
+                <span id="errortotMember" style="color: Red; display: none" class="alert-danger1">* Please Enter Total Member.</span>
+                <label id="lbl_NumberofMembersavailable" for="email"></label>
+                <input type="hidden" id="hdn_availTicket" />
+            </div>
+        </div>
+
+        <div class="col-lg-12" style="display:none" id="divSafariHead">
+            <label>Safari Details</label> 
+            <div class="divider"></div>
+        </div>
+
+        <div class="col-lg-12  un-bold" style="display:none">
+            <label>Is Safari Required</label><br />
+            <form>
+                <input type="radio" id="rbl_safariyes" name="Safari" value="Yes" onclick="SafariRequired();">Yes
+                <input type="radio" id="rbl_safarino" name="Safari" value="No" checked onclick="SafariRequired();">No
+            </form>
+        </div>
+
+        <div id="IsSafari" style="display:none">
+            <input type="hidden" id="hdnSafari" name="hdnSafari" />
+            <div class="col-lg-6 un-bold">
+                <div class="form-group">
+                    <label>Select Vehicle Type:</label>
+                    @Html.DropDownList("Vehiclecat", (IEnumerable<SelectListItem>)ViewBag.Vehiclecat, "--Select--", new { @class = "form-control", id = "ddl_Vehiclecat",@readonly="readonly" })
+                    <span id="errorVehicleType" style="color: Red; display: none" class="alert-danger1">* Please Select Vehicle Type.</span>
+                    <input type="hidden" id="vehiclecatId" name="VehiclecatName" />
+                </div>
+
+            </div>
+            <div class="col-lg-6 un-bold">
+                <div class="form-group">
+                    <label>Select Vehicle:</label>
+                    @Html.DropDownList("ddl_vehicle", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control" })
+                    <span id="errorVehicle" style="color: Red; display: none" class="alert-danger1">* Please Select Vehicle.</span>
+                    <label id="lbl_feePerVehicle" for="email"></label>
+                    <input type="hidden" id="hdn_vehiclefee" />
+                    <input type="hidden" id="hdn_vehicleID" name="hdn_vehicleID" />
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group un-bold">
+                    <label>No of Seat:</label>
+                    <input type="text" class="form-control" id="txt_Totalseat" readonly="readonly" title="Enter the number of seats required in Safari Vehicle"
+                           onkeypress="return isNumberKey(event);" />
+                    <span id="error3" style="color: Red; display: none" class="alert-danger1">* Input digits (0 - 9)</span>
+                    <span id="errorSeat" style="color: Red; display: none" class="alert-danger1">* Please Enter Seat.</span>
+                    <label id="lbl_vehicleSeatAvailable" for="email"></label>
+                    <input type="hidden" id="hdn_vehicleSeatAvailable" />
+
+                </div>
+            </div>
+            <div class="col-lg-6 un-bold">
+                <div class="form-group" id="btn-cont1">
+                    <button type="button" class="btn btn-success" id="btn_addSafari">
+                        Add
+                    </button>
+                    <button type="button" id="btnVehicleView" class="btn btn-success" data-toggle="modal" data-target="#VehicleModal">View</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-12">
+            <label>Members Details</label><span >  ( Fill Each Member Details below ) </span>
+            <div class="divider"></div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="form-group un-bold">
+                <label>Name: <span class="mandatory">*</span></label>
+                <input type="text" class="form-control" id="txt_memberName" title="Enter the name of the visitor" maxlength="30"/>
+                <span id="errorName" style="color: Red; display: none" class="alert-danger1">* Please Enter Name</span>
+                @*<div id="errordiv13" style="display:none" class="alert-danger1"></div>*@
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="form-group un-bold">
+                <label>Gender: <span class="mandatory">*</span></label>
+                <select class="form-control" id="ddl_Gender" name="ddl_Gender">
+                    <option value="0">---Select---</option>
+                    <option value="1">Male</option>
+                    <option value="2">Female</option>
+                    <option value="3">Transgender</option>
+                </select>
+                <span id="errorGender" style="color: Red; display: none" class="alert-danger1">* Please Select Gender</span>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="form-group un-bold">
+                <label>Select Nationality:<span class="mandatory">*</span></label>
+                <select class="form-control" name="ddl_Nation" id="ddl_Nation">
+                    <option value="0">Select</option>
+                    <option value="1">Indian</option>
+                    <option value="2">Foreigner</option>
+                </select>
+                <span id="errorNationality" style="color: Red; display: none" class="alert-danger1">* Please Select Nationality.</span>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="form-group un-bold">
+                <label>Select Member Type:<span class="mandatory">*</span></label>
+                <select class="form-control" name="ddl_MemberType" id="ddl_MemberType"></select>
+                <span id="errorMemberType" style="color: Red; display: none" class="alert-danger1">* Please Select Member Type.</span>
+                <label id="lbl_feePerMember" for="email"></label>
+                <input type="hidden" id="hdn_memberfee" />
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="form-group un-bold">
+                <label>Select Photo ID Type: <span class="mandatory">* </span></label>
+                <select class="form-control" name="ddl_IDType" id="ddl_IDType">
+                    <option value="0">Select</option>
+                    <option value="1">Passport</option>
+                    <option value="2">Aadhar</option>
+                    <option value="3">Driving Licence</option>
+                    <option value="4">Voter ID</option>
+                    <option value="5">PAN Card</option>
+                    <option value="6">Office ID</option>
+                    <option value="7">Student ID</option>
+                </select>
+                <span id="errorIDtype" style="color: Red; display: none" class="alert-danger1">* Please Select ID Type</span>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="form-group un-bold">
+                <label>Photo ID proof No: <span class="mandatory">*</span></label>
+                <input type="text" class="form-control" id="txt_IDno" name="txt_IDno" title="Enter the ID proof number of the selected ID" maxlength="20"/>
+                <span id="errorIDNo" style="color: Red; display: none" class="alert-danger1">* Please Enter ID No.</span>
+                <span class="mandatory">  </span>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="form-group un-bold">
+                <label>Upload ID <span> (Only.jpg/.pdf/.png/.gif allowed with max size 100kb)</span></label>
+                <input type="file" class="form-control" id="txtUploadId" name="txtUploadId" title="Upload valid photo Id" />
+                <input type="hidden" id="hdUploadDoc" value="" name="hdUploadDoc" />
+                <div id="errordivUpload" style="display:none" class="alert-danger1"></div>
+            </div>
+                  
+        </div>
+       
+        
+ <div class="col-lg-6">
+    <div class="form-group un-bold">
+        <label>No.of Amateur Video Camera:</label>
+        <input type="text" class="form-control" id="txt_camera" name="txt_camera" title="Enter the number of video cameras being carried during the visit" onkeypress="return isNumberKey(event);" maxlength="2" />
+        <span id="error1" style="color: Red; display: none" class="alert-danger1">* Input digits (0 - 9)</span>
+        <label id="lbl_feePerCamera" for="email"></label>
+        <input type="hidden" id="hdn_camerafee" />
+    </div>
+</div>
+        <div class="col-lg-12">
+            <div class="form-group un-bold">
+                <button type="button" id="btnUploadId" name="Command" value="Cancel" style="width:10%" class="btn btn-danger" title="Cancel">
+                    <i class="fa"></i>Upload
+                </button> 
+                <span class="mandatory"> Please carry original photo ID at the time of entry. Any wrong Id will be treated as fake booking and will be prosecuted as per Law.</span>
+            </div>
+        </div>
+        <div class="col-lg-6 un-bold">
+            <div class="form-group">
+            </div>
+        </div>
+
+            <div class="col-lg-6 un-bold" >
+                <div class="form-group" id="btn-cont1">
+                    <label> &nbsp;</label>
+                    <button type="button" class="btn btn-success" id="btn_addMembers">To Add Member</button>
+                    @*<button type="button" id="btnView" class="btn btn-success" data-toggle="modal" data-target="#MemberModal">View</button>*@
+                </div>
+            </div>
+            <div class="col-lg-12">
+                <div class="form-group un-bold">
+                    <table id="tblSession" class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Gender</th>
+                                <th>IDType</th>
+                                <th>IDNo</th>
+                                <th>Nationality</th>
+                                <th>Member Type</th>
+                                <th>Total Camera</th>
+                                <th>Fee Per Member</th>
+                                <th>Camera Fee</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="SessionTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div class="col-lg-12" style="display:none" id="divAccomoHead">
+                <label>Accommodation Details</label>
+                <div class="divider"></div>
+            </div>
+            <div class="col-lg-12  un-bold" style="display:none">
+                <label>Is Accommodation Required</label>
+                <form>
+                    <input type="radio" id="rbl_Accommodationyes" name="Accommodation" value="Yes" onclick="AccommodationRequired();">Yes
+                    <input type="radio" id="rbl_Accommodationno" name="Accommodation" value="No" checked onclick="AccommodationRequired();">No
+                </form>
+            </div>
+            <div id="IsAccommodation" style="display:none">
+                <div class="col-lg-6 un-bold">
+                    <div class="form-group">
+                        <label>Select Accommodation Type:</label>
+                        @Html.DropDownList("ddl_Accomo", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control" })
+                        <label id="lbl_roomAvail" for="email"></label>
+                        <input type="hidden" id="hdn_roomAvail" />
+                    </div>
+
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group un-bold">
+                        <label>Total Rooms:</label>
+                        <input type="text" class="form-control" id="txt_Totalroom" name="TotalRoom" title="Enter the total number of rooms required for stay"
+                               onkeypress="return isNumberKey(event);" />
+                        <span id="error4" style="color: Red; display: none" class="alert-danger1">* Input digits (0 - 9)</span>
+                        <label id="lbl_PerroomCharge" for="email"></label>
+                        <input type="hidden" id="hdn_perRoomRate" name="RoomCharge" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 un-bold">
+             <div class="capt">
+                <h1>Captcha is case sensative</h1>
+                <h2 id="mainCaptcha">Captcha is case sensative</h2>
+                <p>
+                    <input type="text" id="txtInput" />
+                    <button type="button" id="refresh" onclick="Captcha();" /><i class="fa fa-refresh fa-spin fa-fw refrs"></i>
+                </p>
+
+                @*<input id="Button1" type="button" value="Check" onclick="alert(ValidCaptcha());" />*@
+            </div>
+        </div>
+            <div class="col-lg-12 un-bold">
+                <div class="form-group" id="btn-cont1">
+                    <label> &nbsp;</label>
+                    <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_Submit">
+                        Submit
+                    </button>
+                    <button type="button" id="btnView" class="btn btn-success" onclick=" reload(); return false;">Cancel</button>
+                </div>
+            </div>
+
+            <div id="tbl" class="table-responsive">
+                <table class="table table-striped table-bordered table-hover" id="tbl_allTicket">
+                    <thead>
+                        <tr>
+
+                            <th>
+                                Transaction ID
+                            </th>
+                            <th>
+                                Total Tickets
+                            </th>
+                            <th>
+                                Arrival Date
+                            </th>
+                            <th>
+                                Paid Amount (In INR)
+                            </th>
+                            <th>
+                                Action
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                    {
+
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(model => item.TransactionId)
+                                    @Html.HiddenFor(model => item.TicketID)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(model => item.TotalMember)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(model => item.Date)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(model => item.TotalAmount)
+                                </td>
+                                <td>
+                                    <a href="#" class="Print">Print Ticket</a>
+
+                                    @*@Html.ActionLink("Print Ticket", "", new { id = item.TicketID }, new { @Class = "Print" })*@
+                                </td>
+
+                            </tr>
+
+                    }
+
+
+                    </tbody>
+                </table>
+                <table id="tbl_tkt">
+                    <tbody></tbody>
+                </table>
+
+            </div>
+
+
+
+            <div class="modal fade" id="MemberModal" role="dialog">
+                <div class="modal-dialog modal-lg">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">
+                                &times;
+                            </button>
+                            <h4 class="modal-title">
+                                Members List
+                            </h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-horizontal" role="form">
+                                <table id="temp" class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            @*<th>Id</th>*@
+                                            <th>Name</th>
+                                            <th>Gender</th>
+                                            <th>IDType</th>
+                                            <th>IDNo</th>
+                                            <th>Nationality</th>
+                                            <th>Member Type</th>
+                                            <th>Total Camera</th>
+                                            <th>Fee Per Member (in INR.)</th>
+                                            <th>Camera Fee (in INR.)</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="memberTable"></tbody>
+                                </table>
+
+
+
+                                <div class="form-group" id="btn-cont1">
+                                    <div class="col-sm-10">
+                                        <button type="button" class="btn btn-success" id="procedId" style="display:none">
+                                            Proceed
+                                        </button>
+
+                                        <button type="button" class="btn btn-danger" data-dismiss="modal">
+                                            Close
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="modal fade" id="VehicleModal" role="dialog">
+                <div class="modal-dialog modal-lg">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">
+                                &times;
+                            </button>
+                            <h4 class="modal-title">
+                                Safari Details
+                            </h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-horizontal" role="form">
+                                <table id="vtemp" class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Vehicle Category</th>
+                                            <th>Vehicle Name</th>
+                                            <th>Total Seat</th>
+                                            <th>Fee Per Vehicle (in INR.)</th>
+                                            <th>Total Fee (in INR.)</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="vehicleTable"></tbody>
+                                </table>
+
+
+
+                                <div class="form-group" id="btn-cont1">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <button type="button" class="btn btn-success" id="procedId" style="display:none">
+                                            Proceed
+                                        </button>
+
+                                        <button type="button" class="btn btn-danger" data-dismiss="modal">
+                                            Close
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+            <!-- /.panel-body -->
+                }
+
+
+        </div>
+        <!-- /.panel -->
+
+    </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>

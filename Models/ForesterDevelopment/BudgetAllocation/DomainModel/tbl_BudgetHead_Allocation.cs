@@ -1,0 +1,35 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel.DataAnnotations;
+
+namespace FMDSS.Models.ForesterDevelopment.BudgetAllocation.DomainModel
+{
+    public class tbl_BudgetHead_Allocation
+    {
+        [Key]
+        public long ID { get; set; }
+
+        public long BudgetHeadID { get; set; }
+
+        public long SubBudgetHeadID { get; set; }
+
+        public int FY_ID { get; set; }
+
+        public decimal AllocatedAmount { get; set; }
+
+        public decimal TotalAllocatedAmount { get; set; }
+
+        public long EnteredBy { get; set; }
+
+        public long SchemeID { get; set; }
+        public long ActivityID { get; set; }
+        public long SubActivityID { get; set; }
+        public bool isActive { get; set; }
+
+        public string Unit { get; set; }
+        public decimal RatePerUnit { get; set; }
+        public decimal NumberPerUnit { get; set; }
+    }
+}

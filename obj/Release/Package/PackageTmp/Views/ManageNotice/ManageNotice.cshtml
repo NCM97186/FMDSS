@@ -1,0 +1,207 @@
+﻿@{
+    ViewBag.Title = "ManageNotice";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+
+@model IEnumerable<FMDSS.Models.ForestProduction.NoticeManagement>
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header"><span>Notice Management</span></h1>
+
+        @if (@TempData["No_Status"] != null)
+            {
+            <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["No_Status"]</div>
+            TempData["No_Status"] = null;
+        }
+        @Html.Partial("_ErrorMsg")
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="help"><a href="~/PDFFolder/User Manual_Auction_Department.pdf" target="_blank">Help Document</a></div>
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+
+
+                <div class="panel-body">
+                    <!--./Search-->
+                    <!--Add New Btn-->
+                    <div class="col-lg-3 rgt pull-right">
+                        <button type="button" class="btn btn-success AddNewAuction pull-right" data-toggle="modal" id="addNewnotice" title="Add New Notice" onclick="OpenDialogCommon('_AddNewNotice','0','AddNewNotice','divTarget')">
+                            <i class="fa fa-plus"></i> For Sale Create Notice
+                        </button>
+                    </div>
+                    <!--./Add New Btn-->
+
+                    <div class="dataTable_wrapper">
+                        <table class="table table-striped table-bordered table-hover table-responsive" id="tbl_notice">
+                            <thead>
+                                <tr>
+                                    <th style="display:none;"><i class="fa fa-envelope fa-fw"></i>S.No </th>
+                                    <th> Notice No.</th> 
+                                    <th><i class="fa fa-caret-down"></i> Notice Status</th>
+                                    <th>Depot Name</th>
+                                    <th>Auction Date</th>
+                                    <th class="nosort" style="width:170px!important;">Action</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                { 
+                                    <tr>
+                                        <td style="display:none;">@Html.DisplayFor(model => item.NoticeId)</td>
+                                        <td>@Html.DisplayFor(model => item.NoticeNo)</td> 
+                                        <td>
+                                            @if (@item.No_Status == "Published" || @item.No_Status == "Winner Declared")
+                                            {
+                                                @Html.DisplayFor(model => item.No_Status)
+                                            }
+                                            else
+                                            {
+                                                @Html.DisplayFor(model => item.ReqAction)
+                                            }
+
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.DepotName)
+                                        </td>
+                                        <td>@(item.DurationTo == null ? "N/A" : FMDSS.Globals.Util.GetDateWithFormat(Convert.ToString(item.DurationTo),"dd/MM/yyyy HH:mm"))</td>
+
+                                        <td>
+                                            <button type="button" class="btn btn-success btn-circle" data-toggle="modal" style="cursor:pointer" title="view" onclick="ViewNoticeCommon('@item.NoticeId','View')">
+                                                <i class="fa fa-eye"></i>
+                                            </button> 
+                                            @*@if (@item.ReqAction == "Approved" && @item.No_Status == "NEW")
+                                            {
+                                                <button type="button" class="btn btn-info btn-circle" data-toggle="modal" data-target="#myViewNoticeModal2" style="cursor:pointer" title="Publish/Generate Auction Notice" onclick="PublishNotice('@Html.DisplayFor(model => item.NoticeId)')">
+                                                    <i class="fa fa-eye"></i>
+                                                </button>
+
+                                            }*@ 
+                                            <a class="btn btn-danger btn-circle" title="Delete" onclick="return confirm('Are you absolutely sure you want to delete?')" href="@Url.Action("DeleteNoticeData", "ManageNotice", new { id = item.NoticeId })">
+
+                                                <i class="fa fa-times"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody> 
+                        </table>
+                    </div>
+
+                </div>
+                <!-- /.panel-body -->
+
+            </div>
+            <!-- /.panel --> 
+        </div>
+        <!-- /.col-lg-12 --> 
+        <div class="modal fade in" id="myViewNoticeModal" tabindex="-1" role="dialog" aria-hidden="false">
+            <div class="modal-dialog mdw">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                        <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> </label></h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <!-- From URL Get -->
+
+                        <table class="table table-striped table-bordered table-hover">
+                            <tbody id="tbdyScart"></tbody>
+                        </table>
+
+                        <!-- /. From URL Get -->
+                    </div>
+                    <!-- /.modal-body -->
+                    <div class="modal-footer" id="fot-f">
+                        <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                            <i class="fa fa-times fa-fw"></i> Close
+                        </button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>  
+        <div class="modal fade" id="modalCommon" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog modal-lg" id="divTarget"></div>
+        </div> 
+        <div class="modal fade in" id="myViewCommonModel" tabindex="-1" role="dialog" aria-hidden="false"></div>
+    </div>
+</div> 
+ 
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#tbl_notice').DataTable({
+            responsive: true,
+            "aaSorting": [],
+            'aoColumnDefs': [{
+                'bSortable': false,
+                'aTargets': ['nosort']
+            }]
+        }); 
+    });
+    var RootUrl = '@Url.Content("~/")';
+    function OpenDialogCommon(partialViewName, objID, type, targetControlID) {
+        switch (type) {
+            case type:
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'ManageNotice/LoadPartialCommon',
+                    dataType: 'html',
+                    data: { partialViewName: partialViewName, objID: objID, type: type },
+                    success: function (response) {
+                        $('#' + targetControlID).html(response);
+                        $('#modalCommon').modal('show');
+                    }
+                });
+                break;
+        }
+    }
+
+    function ViewNoticeCommon(noticeId, actionType) {
+        $("#lbpl_header").text('View Auction Notice Details');
+
+        $.ajax({
+            type: 'GET',
+            url: RootUrl + 'ManageNotice/ViewDetailsCommon',
+            dataType: 'html',
+            data: { "noticeId": $.trim(noticeId), "actionType": actionType },
+            success: function (response) {
+                $("#myViewCommonModel").html(response);
+                $("#myViewCommonModel").modal("show");
+            },
+            error: function (ex) {
+                alert('Failed to retrieve details.' + ex);
+            }
+        });
+    }
+
+</script>
+
+
+<style>
+    #page-wrapper-inn .table > thead > tr > th:last-child {
+        width: 170px !important;
+    }
+
+    #myModal {
+        z-index: 1050;
+    }
+
+    .ad-srl {
+        overflow-y: auto;
+        height: 615px;
+    }
+
+    .help {
+        float: right;
+        margin-right: 18px;
+        font-style: italic;
+    }
+</style> 

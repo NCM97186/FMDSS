@@ -1,0 +1,1201 @@
+﻿@model FMDSS.Models.ForestDevelopment.Workorder
+
+@{
+    ViewBag.Title = "Create";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/Forestlayout.cshtml";
+}
+
+<style type="text/css">
+    .field-validation-error {
+        color: #ff0000;
+    }
+
+    .field-validation-valid {
+        display: none;
+    }
+
+    .input-validation-error {
+        border: 1px solid #ff0000;
+        background-color: #ffeeee;
+    }
+
+    .validation-summary-errors {
+        font-weight: bold;
+        color: #ff0000;
+    }
+
+    .validation-summary-valid {
+        display: none;
+    }
+</style>
+
+<div id="page-wrapper-inn">
+
+    <div class="col-lg-12 pad">
+        <div class="col-lg-10 pad">
+            <h1 class="page-header">Add Work Order &amp; Contract</h1>
+        </div>
+        <div class="col-lg-2 pull-right">
+            <button type="button" class="btn btn-success btn_pp pull-right" name="btn_addpopip" value="" title="Micro Plan List" onclick="location.href='@Url.Action("index", "WorkOrder")'">
+                <i class=" fa fa-th-list ">
+                </i> Work Order List
+            </button>
+        </div>
+    </div>
+
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!--<div class="panel-heading">Processing Fees</div>-->
+                <!-- /.panel-heading -->
+                @using (Html.BeginForm("Create", "WorkOrder", FormMethod.Post, new { enctype = "multipart/form-data", data_behavior = "confirm" }))
+                {
+                    <div class="panel-body">
+                        @Html.Hidden("hdnDistCode")
+                        @Html.HiddenFor(x => x.DIV_CODE, new { id = "hdnDivCode" })
+                        @if (HttpContext.Current.Session["DesignationId"] != null)
+                        {
+                            if (HttpContext.Current.Session["DesignationId"].ToString() == "8")
+                            {
+                                <div class="col-lg-6 multi range">
+                                    <div class="form-group">
+                                        <label for="Tehsil">
+                                            Range Name:<span class="mandatory">*</span>
+                                        </label>
+                                        @Html.DropDownListFor(x => x.RANGE_CODE, (IEnumerable<SelectListItem>)ViewBag.ddlRange, "--Select--", new { @class = "form-control input-width", id = "ddlRange" })
+                                        <div id="errordiv03" style="display:none" class="alert-danger1"></div>
+                                       
+                                        @*<input type="hidden" id="hdnDivCode" name="hdnDivCode" />*@
+                                    </div>
+                                </div>
+                            }
+                            else if (HttpContext.Current.Session["DesignationId"].ToString() == "6")
+                            {
+                                <div class="col-lg-6 multi">
+                                    <div class="form-group">
+                                        <label for="Proposed">
+                                            Forest Division Name:<span class="mandatory">*</span>
+                                        </label>
+                                        @Html.DropDownList("division", (IEnumerable<SelectListItem>)ViewBag.ddlDivision1, "--Select--", new { @class = "form-control common", id = "division" })
+                                        @Html.HiddenFor(x => x.DIV_CODE, new { id = "lbldivision" })
+                                        <div id="errordiv52" style="display:none" class="alert-danger1"></div>
+
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 multi">
+                                    <div class="form-group">
+                                        <label>Select District: <span class="mandatory">*</span></label>
+                                        @Html.DropDownList("ddlDistrict", (IEnumerable<SelectListItem>)ViewBag.ddlDistrict1, "--Select--", new { @class = "form-control common", title = "Select District", id = "district" })
+                                        <div id="errordiv51" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6 multi">
+                                    <div class="form-group">
+                                        <label>Select Block: <span class="mandatory">*</span></label>
+                                        @Html.DropDownList("ddlBlockName", (IEnumerable<SelectListItem>)ViewBag.ddlBlockName1, new { @class = "form-control common", title = "Select Block Name", id = "blockname" })
+                                        <div id="errordiv2" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-lg-6 multi">
+                                    <div class="form-group">
+                                        <label for="GramPanchayat">
+                                            Gram Panchayat Name:
+                                        </label>
+                                        @Html.DropDownList("ddlGPName", (IEnumerable<SelectListItem>)ViewBag.ddlGPName1, new { @class = "form-control common", title = "Select GP Name", id = "ddlGPName" })
+                                        <div id="errordiv3" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        <div class="col-lg-6 multi">
+                            <div class="form-group">
+                                <label for="Village">
+                                    Village Name:
+                                </label>
+
+                                @Html.DropDownList("ddlVillName", (IEnumerable<SelectListItem>)ViewBag.ddlVillName1, new { @class = "form-control common", title = "Select Village Name", id = "ddlVillName" })
+                                <div id="errordiv4" style="display:none" class="alert-danger1"></div>
+
+                            </div>
+                        </div>
+
+                        @*<div class="col-lg-6 multi">
+                                <div class="form-group">
+                                    <label>Micro Plan: <span class="mandatory">*</span></label>
+                                    @Html.DropDownList("ddlMicroPlan", (IEnumerable<SelectListItem>)ViewBag.ddlVillName1, new { @class = "form-control common", title = "Select Microplan", id = "ddlMicroPlan" })
+                                    <div id="errordiv5" style="display:none" class="alert-danger1"></div>
+
+                                </div>
+                            </div>*@
+
+                        @*<div class="col-lg-6 multi">
+                                <div class="form-group">
+                                    <label>Project Name: <span class="mandatory">*</span></label>
+                                    @Html.DropDownList("ddlProject", (IEnumerable<SelectListItem>)ViewBag.ddlVillName1, new { @class = "form-control common", title = "Select Project", id = "ddlProject" })
+                                    <div id="errordiv6" style="display:none" class="alert-danger1"></div>
+
+                                </div>
+                            </div>*@
+                        <div class="col-lg-6 multi">
+                            <div class="form-group">
+                                <label>Scheme Name: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("ddlScheme", (IEnumerable<SelectListItem>)ViewBag.ddlVillName1, new { @class = "form-control common", title = "Select Scheme", id = "ddlScheme" })
+                                <div id="errordiv6" style="display:none" class="alert-danger1"></div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6 multi">
+                            <div class="form-group">
+                                <label>Model: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("ddlModel", (IEnumerable<SelectListItem>)ViewBag.ddlVillName1, new { @class = "form-control common", title = "Select Model", id = "ddlModel" })
+                                <div id="errordiv7" style="display:none" class="alert-danger1"></div>
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 multi">
+                            <div class="form-group">
+                                <label>Model-Activity: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("ddlActivity", (IEnumerable<SelectListItem>)ViewBag.ddlVillName1, new { @class = "form-control common", title = "Select Activity", id = "ddlActivity" })
+                                <div id="errordiv8" style="display:none" class="alert-danger1"></div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6 edit">
+                            <div class="form-group">
+                                <label>Sub Activity: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("ddlSubActivity", (IEnumerable<SelectListItem>)ViewBag.ddlVillName1, new { @class = "form-control common", title = "Select Sub Activity", id = "ddlSubActivity" })
+                                <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.SubActivity)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 multi">
+                            <div class="form-group">
+                                <label>Quantum of work: <span class="mandatory">*</span></label>
+                                @*@Html.TextBox("txtNoofActivity", new { @class = "form-control common", title = "Select No of Activities", id = "txtNoofActivity", name = "txtNoofActivity" })*@
+
+                                <input type="text" id="txtNoofActivity" name="txtNoofActivity" class="form-control" maxlength="5" />
+
+                                <div id="errordiv8" style="display:none" class="alert-danger1"></div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-2 pull-right multi">
+                            <button type="button" class="btn btn-success btn_pp pull-right" name="btn_addpopip" onclick="AddWorkOrderMicroplan();" value="" title="Add">
+                                <i class=" fa btn-success ">
+                                </i>Add
+                            </button>
+                        </div>
+                        <div class="col-lg-12">
+                            <table id="temp" class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        @*<th>Id</th>*@
+                                        @*<th>Village</th>*@
+                                        <th>Scheme</th>
+                                        <th>Model</th>
+                                        <th>Activity</th>
+                                        <th>SubActivity</th>
+                                        <th>Quantum of work</th>
+                                        <th class="edit">Total Cost</th>
+                                        <th class="edit">Unit</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="microPlanTable"></tbody>
+                            </table>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="divider"></div>
+                        </div>
+                        <!--Ref doc and ref no added for defect log id 244 solved by Durgesh N Sharma-->
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Reference No. of Related Document:<span class="mandatory">*</span><span id="SRefno" style="display:none;" class="mandatory">Required</span></label>
+                                @Html.TextBoxFor(x => x.refno, new { @class = "form-control Alphanumeric", title = "Enter Reference number of document eg: DOC2016ASW00001", @placeholder = "Enter Ref no document", @maxlength = 50, @id = "refno" })
+                                <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.refno)</div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Ref Document:(pdf file)<span class="mandatory">*</span><span id="SDoc" style="display:none;" class="mandatory">Documment Required</span><a style="display:none;" id="viewimgREF">view document</a></label>
+                                <input class="form-control" id="Upload_Button" name="Upload_Button" type="file">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Name of Site</label>
+                                @Html.TextBoxFor(x => x.Placeofwork, new { @class = "form-control Alphanumeric", title = "Enter Name of Site eg: XYZ", @placeholder = "Enter Name of Site", @maxlength = 100, @id = "refno" })
+                                <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.Placeofwork)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Work &ndash; order type (Capital , Maintenance): <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.WorkOrderType, new List<SelectListItem>
+                 {
+                    new SelectListItem{ Text="Capital", Value = "Capital" },
+                    new SelectListItem{ Text="Maintenance", Value = "Maintenance" }
+                 }, new { @class = "form-control common", title = "Select Workorder Type", id = "ddlOrderType" })
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Work Description: <span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(x => x.WorkOrder_Name, new { @class = "form-control Alphanumeric", title = "Enter Description of work order eg: Work order for Pole", @placeholder = "Enter Description of work order", @maxlength = 500, @id = "WorkOrder_Name" })
+                                <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.WorkOrder_Name)</div>
+                                @Html.HiddenFor(x => x.ID)
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Working Agency: <span class="mandatory">*</span></label><br />
+                                <label class="radio-inline">
+                                    @Html.RadioButtonFor(x => x.ContractAgencyType, "VFMC", new { id = "rbtnJFMC" })   VFPMC
+                                </label>
+                                <label class="radio-inline">
+                                    @Html.RadioButtonFor(x => x.ContractAgencyType, "Contractor", new { id = "rbtnContractor" }) Contractor from IFMS
+                                </label>
+                                @*<div class="divider"></div>*@
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Agency(Order Placed To): <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.JFMCorContractAgency, (IEnumerable<SelectListItem>)ViewBag.JFMCorContractAgency1, "--Select--", new { @class = "form-control common", title = "Select Agency(Order Placed To)", id = "ddlJFMC" })
+                                <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.JFMCorContractAgency)</div>
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>From Date: <span class="mandatory">*</span></label>
+                                <div data-date-format="mm-dd-yyyy" class="input-group date" id="datepicker">
+                                    @Html.TextBoxFor(x => x.StartDate, new { @class = "form-control datefield", title = "Enter Start Date eg: 02/22/2016", @maxlength = 50, @id = "StartDate" })
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.StartDate)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <div id="errordivDuration" style="display:none" class="alert-danger1"></div>
+                                <label>To Date: <span class="mandatory">*</span></label>
+                                <div data-date-format="mm-dd-yyyy" class="input-group date" id="datepicker">
+                                    @Html.TextBoxFor(x => x.EndDate, new { @class = "form-control datefield", title = "Enter End Date eg: 02/29/2020", @maxlength = 50, @id = "EndDate" })
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.EndDate)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Budget Head for Work Order: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.BudgetHead, (IEnumerable<SelectListItem>)ViewBag.ddlBudgetHead1, new { @class = "form-control common", title = "Select Budget Head", id = "ddlBudgetHead" })
+                                <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.BudgetHead)</div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6" style="display:none">
+                            <div class="form-group">
+                                <label>Activity cost per unit (INR): <span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(x => x.FinancialTarget, new { @class = "form-control Numeric", title = "Enter Activity cost per unit eg: 11785.00", @readonly = "true", @placeholder = "Enter Activity cost per unit", @maxlength = 500, @id = "FinancialTarget" })
+                                <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.FinancialTarget)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Total work order Cost (INR): <span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(x => x.TotalProjectCost, new { @class = "form-control Numeric", title = "Enter total project cost eg: 11785.00", @placeholder = "Enter total projectr Cost", @maxlength = 15, @id = "Totalprojectcost" })
+                                <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.TotalProjectCost)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Area Covered from projects (In Hectare): </label>
+                                @Html.TextBoxFor(x => x.PhysicalTarget, new { @class = "form-control Numeric", @readonly = "true", title = "Enter Area Covered in Hectare eg: 1155.5", @placeholder = "Enter Area Covered", @maxlength = 500, @id = "PhysicalTarget" })
+                                <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.PhysicalTarget)</div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>IFMS Work Order Code: <span class="mandatory">*</span></label>
+                                @*@Html.TextBoxFor(x => x.IFMC_WorkOrder_Code, new { @class = "form-control Alphanumeric", title = "Enter IFMS Work Order eg: IF2016022211", @placeholder = "Enter IFMC Work Order Code", @maxlength = 500, @id = "RevenueVillage" })*@
+                                @Html.DropDownListFor(x => x.IFMC_WorkOrder_Code, (IEnumerable<SelectListItem>)ViewBag.ddlIFMSWorkOrder1, "--Select--", new { @class = "form-control common", title = "Select IFMS Work Order", id = "ddlIFMSWorkOrder" })
+                                <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.IFMC_WorkOrder_Code)</div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <div class="divider"></div>
+                        </div>
+                        <!--Milestone removed from here and made a new page for the same for defect log id 256 solved by Durgesh N Sharma-->
+                        @*@*<div class="col-lg-6 multi">
+                                <div class="form-group">
+                                    <label>Milestone Title:</label>
+                                    @Html.TextBox("Milestone", null, new { @class = "form-control Alphanumeric", title = "Enter Milestone title eg: Milestone for first payment", @placeholder = "Enter Milestone title", @maxlength = 500, @id = "Milestone" })
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 multi">
+                                <div class="form-group">
+                                    <label>Milestone Payment Percentage: </label>
+                                    @Html.TextBox("Percentage", null, new { @class = "form-control Numeric", title = "Enter Percentage in 0-100", @placeholder = "Enter Milestone Percentage", @maxlength = 3, @id = "Percentage" })
+                                </div>
+                            </div>
+                            <div class="col-lg-2 pull-right multi">
+                                <button type="button" class="btn btn-success btn_pp pull-right" name="btn_addMilestone" onclick="AddMilestone();" value="" title="Add">
+                                    <i class=" fa btn-success ">
+                                    </i>Add
+                                </button>
+                            </div>
+                                    <div class="col-lg-12">
+                                        <table id="temp" class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Id</th>
+                                                    <th>Milestone Title</th>
+                                                    <th>Percentage</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="milestoneTable"></tbody>
+                                        </table>
+                                    </div>*@
+                        @*<label class="checkbox-inline">
+                                @Html.CheckBoxFor(x => x.AdminApproved, new { @class = "checkbox", @id = "AdminApproved" })
+                                Administration Approved
+                            </label>
+                            <label class="checkbox-inline">
+                                @Html.CheckBoxFor(x => x.FinanceApproved, new { @class = "checkbox", @id = "FinanceApproved" })
+                                    Financial Approved
+                                    @*<input type="checkbox">Financial Approved
+                                </label><div class="divider"></div>*@
+
+
+
+                        @*<div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Admin Approval Order No: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.AdminApprovedOrderNo, new { @class = "form-control Alphanumeric", title = "Enter Admin Approved Work Order No: 11785", @placeholder = "Enter Admin Approved Work Order No", @maxlength = 500, @id = "AdminApprovedOrderNo" })
+                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.AdminApprovedOrderNo)</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Admin Approval Date: <span class="mandatory">*</span></label>
+                                    <div data-date-format="mm-dd-yyyy" class="input-group date" id="datepicker">
+                                        @Html.TextBoxFor(x => x.AdminApprovedDate, new { @class = "form-control datefield", title = "Enter Admin Approved Date eg: 02/22/2016", @maxlength = 50, @id = "AdminApprovedDate" })
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Finance Approval Order No: <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.FinanceApprovedOrderNo, new { @class = "form-control Alphanumeric", title = "Enter Finance Approved Order No eg: FMCC11785", @placeholder = "Enter Finance Approved Order No", @maxlength = 500, @id = "FinancialapprovedOrderNo" })
+                                    <div id="errMicroPlanName" class="alert-danger1">@Html.ValidationMessageFor(x => x.FinanceApprovedOrderNo)</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Finance Approval Date: <span class="mandatory">*</span></label>
+                                    <div data-date-format="mm-dd-yyyy" class="input-group date" id="datepicker">
+                                        @Html.TextBoxFor(x => x.FinanceApprovedDate, new { @class = "form-control datefield", title = "Enter Finance Approved Date eg: 02/29/2020", @maxlength = 50, @id = "FinanceApprovedDate" })
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    </div>
+                                </div>
+                            </div>*@
+
+                        <div class="col-lg-12"></div>
+
+                        <!-- Btn Groping -->
+                        <div class="btn-padd">
+                            <div class="col-lg-12" id="btn">
+                                <button id="btn_submit1" value="Submit" name="Command" class="btn btn-success" type="submit">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+                                <button class="btn btn-warning" type="reset">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+                                <button class="btn btn-danger" onclick="location.href='@Url.Action("index", "WorkOrder")'" type="button" name="Command" value="Cancel">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+
+                            </div>
+                            <div class="col-lg-12" id="divnobutton">
+                                Only a pending or reassigned workorder can be edited.
+                                <!-- /.Btn Groping -->
+
+                            </div>
+                        </div>
+                        <!-- /.Btn Groping -->
+
+                    </div>
+                }
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/js/validation.js" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery-1.8.2.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.js")" type="text/javascript"></script>
+<script type="text/javascript">
+    if ('@ViewData["Message"]' != '') {
+        alert('@ViewData["Message"]');
+    }
+    var RootUrl = '@Url.Content("~/")';
+    var ddlVillage = 0;
+    var educount = 1;
+    var castcount = 1;
+
+   
+
+    $(document).ready(function () {
+      
+        $('#txtNoofActivity').keyup(function () { 
+            this.value = this.value.replace(/[^0-9]/g,'');
+        });
+
+      
+
+        $(".datefield").datepicker({ minDate: new Date(1999, 10 - 1, 25), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        $(".Alphanumeric").on("keypress", function (event) { return IsAlphanumeric(event); });
+        $(".Numeric").on("keypress", function (event) { return isNumber(event, this); });
+
+        $("#StartDate").change(function () {
+            $("#EndDate").val('');
+        });
+
+        $('#divnobutton').hide();
+
+        if(@Model.ID>0)
+        {
+            $("#lbldivision").val(@Model.DIV_CODE);
+            $(".multi").hide();
+            //  alert("'"+@Model.refDocument);
+            if ('@Model.refDocument' != '') {
+                $('#viewimgREF').show();
+                $('#viewimgREF').attr('href','@Model.refDocument');
+                $('#viewimgREF').attr('target', '_blank');
+            }
+            $("#microPlanTable").empty();
+            var totalarea = 0;
+            var RowInfo = {
+                Id: 0
+            };
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(RowInfo),
+                url: '@Url.Content("~/")' + 'WorkOrder/deleteWorkOrderMicroplan',
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        //  totalarea += parseFloat(items.projectArea);
+                        ddlVillage=items.Village_Code;
+                        var id = "'" + items.rowID + "'";
+                        // var bardata = "<tr class='" + items.rowID + "'><td style='border:1px'>" + items.Village_Name + "</td><td style='border:1px'>" + items.SchemeName + "</td><td style='border:1px'>" + items.ModelName+ "</td><td style='border:1px'>" + items.ActivityName  + "</td><td style='border:1px'>" + items.UnitName + "</td><td style='border:1px'>NA</td><td></td></tr>";
+                        // var bardata = "<tr class='" + items.rowID + "'><td style='border:1px'>" + items.SchemeName + "</td><td style='border:1px'>" + items.ModelName+ "</td><td style='border:1px'>" + items.ActivityName  + "</td><td style='border:1px'>" + items.UnitName + "</td><td style='border:1px'>NA</td><td></td></tr>";
+                        var bardata = "<tr class='" + items.rowID + "'><td>" + items.SchemeName + "</td><td>" + items.ModelName + "</td><td>" + items.ActivityName + "</td><td>" + items.SubActivityName + "</td><td>" + items.Quantity + "</td><td class=edit>" + items.ActivityCost + "</td><td class=edit>" + items.UnitName + "</td><td>N/A</td></tr>";
+                        $("#microPlanTable").append(bardata);
+                        // $('#PhysicalTarget').val(totalarea);
+                        $('.edit').hide();
+                    })
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+            $("#milestoneTable").empty();
+            var RowInfo = {
+                Id: 0
+            };
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(RowInfo),
+                url: '@Url.Content("~/")' + 'WorkOrder/deleteWorkOrderMilestone',
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        var id = "'" + items.rowID + "'";
+                        var bardata = "<tr class='" + items.rowID + "'><td style='border:1px'>" + items.MilestoneName + "</td><td style='border:1px'>" + items.MilestonePaymentPercentage + "</td><td style='border:1px'>NA</td></tr>";
+                        $("#milestoneTable").append(bardata);
+                    })
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+            if (!(@Model.Status ==1 || @Model.Status==6)) {     divnobutton,
+                     $('#btn').hide(); $('#divnobutton').show();
+            }
+        }
+        else
+        {
+            $('#divnobutton').hide();
+            $(".multi").show();
+        }
+        $("#EndDate").change(function () {
+            var str1 = $("#StartDate").val();
+            var str2 = $("#EndDate").val();
+
+            var L = 3, d1 = $("#StartDate").val().split('/'), d2 = $("#EndDate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                $('#errordivDuration').hide();
+
+            }
+            else {
+                $("#EndDate").val('');
+                $('#errordivDuration').show();
+                $('#errordivDuration').html("To Date Must be Greater then From Date" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+
+                return false;
+
+            }
+        });
+
+        $('#division').change(function (e) {
+            $("#district").empty();
+            $("#ddlJFMC").empty();
+            var ddldiv = $("#division option:selected").val();
+            // $("#ddlJFMC").append('<option value="0">--Select--</option>');
+
+            //   alert(ddldiv);
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'FixedPermission/GetDistrictName', // we are calling json method
+                dataType: 'json',
+                data: { Division: ddldiv },
+                success: function (range) {
+                    //  $("#district").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#district").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MicroPlan/GetJFMCbyDivCode', // we are calling json method
+                dataType: 'json',
+                data: { div_Code: ddldiv },
+                success: function (range) {
+                    $("#ddlJFMC").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlJFMC").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+        });
+
+        $("#ddlRange").bind("change", function () {
+            $('#ddlVillName').empty();
+            $("#ddlVillName").append('<option value="' + 0 + '">' + "--Select--" + '</option>');
+            var values = {
+                RangeCode: $("#ddlRange option:selected").val()
+            };
+
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'FdmBudgetEstimation/GetVillageNamebyRange',
+                data: JSON.stringify(values),
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddlVillName").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+        $('#district').change(function (e) {
+
+
+            var ddldist = $("#district option:selected").val();
+            //   alert(ddldist);
+            //  $('#blockname').val(ddldist);
+            $("#blockname").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MicroPlan/GetBlockName', // we are calling json method
+                dataType: 'json',
+                data: { District: ddldist },
+                success: function (range) {
+                    //  $("#blockname").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#blockname").append('<option value="' + items.Value + '">  ' +   items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+
+        });
+
+        $('#blockname').change(function (e) {
+            var ddldist = $("#district option:selected").val();
+            var ddlblockname = $("#blockname option:selected").val();
+            $("#ddlGPName").empty();
+            //$('#blockname').val(ddldist);
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MicroPlan/GetGramPName', // we are calling json method
+                dataType: 'json',
+                data: { District: ddldist, BlockName: ddlblockname },
+                success: function (range) {
+                    //   $("#ddlGPName").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlGPName").append('<option value="' + items.Value + '">    ' +    items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+
+        });
+
+        $('#ddlGPName').change(function (e) {
+            var ddldist = $("#district option:selected").val();
+            var ddlblockname = $("#blockname option:selected").val();
+            var ddlGPName = $("#ddlGPName option:selected").val();
+            $("#ddlVillName").empty();
+            //$('#blockname').val(ddldist);
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MicroPlan/GetVillageName', // we are calling json method
+                dataType: 'json',
+                data: { District: ddldist, BlockName: ddlblockname, GPName: ddlGPName },
+                success: function (range) {
+                    //  $("#ddlVillName").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlVillName").append('<option value="' + items.Value + '">    ' +    items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+
+        });
+
+        $('#ddlVillName').change(function (e) {
+            var Div_Code ='';
+            var Dist_Code =''
+            var GP_Code='';
+            var block_Code='';
+            ddlVillage = $("#ddlVillName option:selected").val();
+            $("#ddlMicroPlan").empty();
+            $("#ddlScheme").empty();
+            Gethierarchy();
+
+        });
+        function Gethierarchy()
+        {
+            //$('#blockname').val(ddldist);
+            $.ajax({
+                type: 'POST',
+                // contentType: 'application/json; charset=utf-8',
+                url: RootUrl + 'MicroPlan/GetGetHierarchybyVillageCode', // we are calling json method
+                dataType: 'json',
+                data: { Vill_Code: ddlVillage },
+                success: function (data) {
+                    Div_Code = data.DIV_CODE;
+                    Dist_Code = data.DIST_CODE;
+                    GP_Code = data.GP_CODE;
+                    block_Code = data.BLK_CODE;
+                    $('#hdnDivCode').val(data.DIV_CODE);   
+                    $('#hdnDistCode').val(data.DIST_CODE);                  
+                    GetSchemes();
+                    ////});
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+        }
+
+        function GetSchemes()
+        {
+
+            // $("#ddlMicroPlan").empty();
+            // $("#ddlProject").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MicroPlan/SelectSchemeByDist_Code', // we are calling json method
+                dataType: 'json',
+                data: { Dist_Code:  $('#hdnDistCode').val() },
+                success: function (range) {
+                    $("#ddlScheme").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlScheme").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve Projects.' + ex);
+                }
+
+            });}
+        //$.ajax({
+        //    type: 'POST',
+        //    url: RootUrl + 'WorkOrder/SelectMicroPlanByVilageCode', // we are calling json method
+        //    dataType: 'json',
+        //    data: { Village_Code: ddlVillage },
+        //    success: function (range) {
+        //        $("#ddlMicroPlan").append('<option value=0>--Select--</option>');
+        //        $.each(range, function (i, items) {
+        //            $("#ddlMicroPlan").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+        //        });
+        //    },
+        //    error: function (ex) {
+        //        alert('Failed to retrieve states.' + ex);
+        //    }
+
+        //});
+
+
+        $('#ddlMicroPlan').change(function (e) {
+            var  ddlMicroPlan = $("#ddlMicroPlan option:selected").val();
+            // $("#ddlMicroPlan").empty();
+            $("#ddlScheme").empty();
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'WorkOrder/SelectProjectByMicroplan', // we are calling json method
+                dataType: 'json',
+                data: { MicroplanID: ddlMicroPlan },
+                success: function (range) {
+                    $("#ddlScheme").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlScheme").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+
+        });
+
+        $('#ddlScheme').change(function (e) {
+            var ddlScheme = $("#ddlScheme option:selected").val();
+
+            $("#ddlModel").empty();
+            //$('#blockname').val(ddldist);
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'WorkOrder/SelectModelBySchemeID', // we are calling json method
+                dataType: 'json',
+                data: { SchemeID: ddlScheme},
+                success: function (range) {
+                    $("#ddlModel").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlModel").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+        });
+
+        $('#ddlModel').change(function (e) {
+            var ddlModel = $("#ddlModel option:selected").val();
+            var DIV_Code= $('#hdnDivCode').val();
+            $("#ddlActivity").empty();$("#txtNoofActivity").val('0');
+            //$('#blockname').val(ddldist);
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'WorkOrder/SelectActivityByModelID', // we are calling json method
+                dataType: 'json',
+                data: { ModelID: ddlModel,DIV_Code:DIV_Code},
+                success: function (range) {
+                    $("#ddlActivity").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlActivity").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+
+        });
+
+
+        $('#ddlActivity').change(function (e) {
+            var ddlActivity = $("#ddlActivity option:selected").val();
+            $("#ddlSubActivity").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'WorkOrder/SelectSubActivityByActivityIDWorkOrder', // we are calling json method
+                dataType: 'json',
+                data: { ActivityID: ddlActivity },
+                success: function (range) {
+                    $("#ddlSubActivity").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlSubActivity").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+
+        });
+
+
+        $('#rbtnJFMC').on('click', function () {
+
+            // var ddldiv = $("#division option:selected").val();
+            //alert(ddlVillage);
+            $('#rbtnContractor').attr('checked', false);
+            $("#ddlJFMC").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MicroPlan/GetJFMC', // we are calling json method
+                dataType: 'json',
+                data: { Village_Code: ddlVillage },
+                success: function (range) {
+                    $("#ddlJFMC").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlJFMC").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+        });
+
+        $('#rbtnContractor').on('click', function () {
+            //   alert(ddlVillage);
+            $('#rbtnJFMC').attr('checked', false);
+            // var ddlVillage = $("#ddlVillName option:selected").val();
+            $("#ddlJFMC").empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'WorkOrder/GetIFMSVendorsJson', // we are calling json method
+                dataType: 'json',
+                data: { OfficeId: '19329' },
+                success: function (range) {
+                    $("#ddlJFMC").append('<option value=0>--Select--</option>');
+                    $.each(range, function (i, items) {
+                        $("#ddlJFMC").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+        });
+
+        $('#Upload_Button').blur(function (e) {
+            fileext = $('#Upload_Button').val().split('.').pop();
+            iSize = ($("#Upload_Button")[0].files[0].size / 1048576);
+            if ($('#Upload_Button').val().length == 0) {
+                $('#SDoc').show();
+                e.preventDefault();
+            }
+            else if (fileext != 'pdf' && fileext != 'PDF') {
+                alert('Upload Pdf file only!!!');
+                $('#Upload_Button').focus();
+                e.preventDefault();
+            }
+            else if (iSize > 2) {
+                alert('File size cannot be more than 2 MB!!');
+                $('#Upload_Button').focus();
+                e.preventDefault();
+            }
+            else {
+                $('#SDoc').hide();
+                $('#Startdate').focus();
+            }
+        });
+
+
+    });
+
+    function DeleteWorkOrderMicroplan(ID) {
+        var totalCost=0;var totalActivityCost=0;
+        $("#microPlanTable").empty();
+        $("#ddlBudgetHead").empty();
+
+        var totalarea = 0;
+        var RowInfo = {
+            Id: ID
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(RowInfo),
+            url: '@Url.Content("~/")' + 'WorkOrder/deleteWorkOrderMicroplan',
+            success: function (data) {
+                $.each(data, function (i, items) {
+                    totalarea += parseFloat(items.projectArea);
+                    totalCost=(parseFloat(items.Quantity)*parseFloat(items.ActivityCost));
+                    totalActivityCost +=(parseFloat(totalCost));
+                    var id = "'" + items.rowID + "'";
+                    //var bardata = "<tr class='" + items.rowID + "'><td style='border:1px'>" + items.Village_Name + "</td><td style='border:1px'>" + items.SchemeName + "</td><td style='border:1px'>" + items.ModelName + "</td><td style='border:1px'>" + items.ActivityName+ "</td><td style='border:1px'>" + items.UnitName  + "</td><td style='border:1px'>" + "<button type=button class=get-delete onclick=DeleteWorkOrderMicroplan("+id+")>Delete</button>" + "</td></tr>";
+                    var bardata = "<tr class='" + items.rowID + "'><td style='border:1px'>" + items.SchemeName + "</td><td style='border:1px'>" + items.ModelName + "</td><td style='border:1px'>" + items.ActivityName + "</td><td style='border:1px'>" + items.SubActivityName + "</td><td style='border:1px'>" + items.Quantity + "</td><td style='border:1px'>" + items.ActivityCost + "</td><td style='border:1px'>" + items.UnitName + "</td><td style='border:1px'><button type=button class=get-delete onclick=DeleteWorkOrderMicroplan("+id+")>Delete</button>" + "</td></tr>";
+                    $("#microPlanTable").append(bardata);
+                    $('#PhysicalTarget').val(totalarea);
+                    $('#Totalprojectcost').val(totalActivityCost);
+                })
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(''),
+            url: '@Url.Content("~/")' + 'WorkOrder/SelectBudgetHeadByScheme',
+            success: function (range) {
+                $("#ddlBudgetHead").append('<option value=0>--Select--</option>');
+                $.each(range, function (i, items) {
+                    $("#ddlBudgetHead").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                })
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+        //alert(totalarea);
+
+    }
+    function AddMilestone() {
+
+
+
+        if ($('#Milestone').val() == null || $('#Milestone').val() == '' || $('#Milestone').val() == '0') {
+            alert('Please Enter Milestone title.');
+            return;
+        }
+        if ($('#Percentage').val() == null || $('#Percentage').val() == '' || $('#Percentage').val() == '0') {
+            alert('Please Enter Percentage.');
+            return;
+        }
+        var sum = parseFloat($("#Percentage").val());
+        // alert(sum);
+        $('.totalper').each(function(){
+            sum += parseFloat($(this).text());
+        });
+        // alert(sum);
+        if(sum>100)
+        {
+            alert('Combined percentage can not be more than 100');
+            $("#Percentage").focus();
+            return;
+        }
+        $("#milestoneTable").empty();
+        //  $('#division').attr("readOnly", "true");
+        var WOMP = {
+            rowID: '',
+            WorkorderID: '',
+            MilestoneName: $('#Milestone').val(),
+            MilestonePaymentPercentage: $('#Percentage').val()
+        };
+
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(WOMP),
+            url: '@Url.Content("~/")' + 'WorkOrder/AddWorkOrderMilestone',
+            success: function (data) {
+                $.each(data, function (i, items) {
+                    var id = "'" + items.rowID + "'";
+                    var bardata = "<tr class='" + items.rowID + "'><td style='border:1px'>" + items.MilestoneName + "</td><td class='totalper' style='border:1px'>" + items.MilestonePaymentPercentage + "</td><td style='border:1px'><button type=button class=get-delete onclick=DeleteMilestone(" + id + ")>Delete</button>" + "</td></tr>";
+                    $("#milestoneTable").append(bardata);
+                })
+            },
+
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+        //  $("#ddlVillName").val('0');
+        $("#Milestone").val('');
+        $("#Percentage").val('');
+        // }
+    }
+    function DeleteMilestone(ID) {
+        //  alert(ID);
+
+        $("#milestoneTable").empty();
+        var RowInfo = {
+            Id: ID
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(RowInfo),
+            url: '@Url.Content("~/")' + 'WorkOrder/deleteWorkOrderMilestone',
+            success: function (data) {
+                $.each(data, function (i, items) {
+                    var id = "'" + items.rowID + "'";
+                    var bardata = "<tr class='" + items.rowID + "'><td style='border:1px'>" + items.MilestoneName + "</td><td class='totalper' style='border:1px'>" + items.MilestonePaymentPercentage + "</td><td style='border:1px'><button type=button class=get-delete onclick=DeleteMilestone(" + id + ")>Delete</button>" + "</td></tr>";
+                    $("#milestoneTable").append(bardata);
+                })
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+    }
+    function AddWorkOrderMicroplan() {
+
+        var totalarea = 0; var totalActivityCost = 0;var totalCost=0;
+        var SubActivity=0;var SubActivityName="";
+
+        $("#lbldivision").val($("#division option:selected").val());
+        if ($('#ddlVillName').val() == null || $('#ddlVillName').val() == '' || $('#ddlVillName').val() == '0')
+        {
+            alert('Village Name Selection is compulsory.');
+            return;
+        }
+        if ($('#ddlActivity').val() == null || $('#ddlActivity').val() == '' || $('#ddlActivity').val() == '0') {
+            alert('Activity Selection is compulsory.');
+            return;
+        }
+        if ($('#ddlSubActivity').val() == null || $('#ddlSubActivity').val() == '' || $('#ddlSubActivity').val() == '0' || $('#ddlSubActivity').val() == '-1') {
+            SubActivity=0;
+            SubActivityName="";
+        }
+        else{
+            SubActivity=$("#ddlSubActivity option:selected").val();
+            SubActivityName=$("#ddlSubActivity option:selected").text();
+        }
+        $("#microPlanTable").empty();
+        $("#ddlBudgetHead").empty();
+        $('#division').attr("readOnly", "true");
+        var WOMP = {
+            rowID: '',
+            WorkorderID: '',
+            Village_Code: $("#ddlVillName option:selected").val(),
+            Village_Name: $("#ddlVillName option:selected").text(),
+            MicroPlanID: $("#ddlMicroPlan option:selected").val(),
+            MicroPlanName: $("#ddlMicroPlan option:selected").text(),
+            SchemeID: $("#ddlScheme option:selected").val(),
+            SchemeName: $("#ddlScheme option:selected").text(),
+            UnitName:'',
+            ModelIDs: $("#ddlModel option:selected").val(),
+            ModelName: $("#ddlModel option:selected").text(),
+            ActivityIDs: $("#ddlActivity option:selected").val(),
+            ActivityName: $("#ddlActivity option:selected").text(),
+            SubActivityId:SubActivity,
+            SubActivityName:SubActivityName,
+            Quantity: $("#txtNoofActivity").val(),
+            Division:$('#hdnDivCode').val(),
+            projectArea:0
+        };
+
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(WOMP),
+            url: '@Url.Content("~/")' + 'WorkOrder/AddWorkOrderMicroplan',
+            success: function (data) {
+                $.each(data, function (i, items) {
+                    totalarea += parseFloat(items.projectArea);
+                    totalCost=(parseFloat(items.Quantity)*parseFloat(items.ActivityCost));
+                    totalActivityCost +=(parseFloat(totalCost));
+                    var id = "'"+ items.rowID+"'";
+                    var bardata = "<tr class='" + items.rowID + "'><td style='border:1px'>" + items.SchemeName + "</td><td style='border:1px'>" + items.ModelName + "</td><td style='border:1px'>" + items.ActivityName + "</td><td style='border:1px'>" + items.SubActivityName + "</td><td style='border:1px'>" + items.Quantity + "</td><td style='border:1px'>" + items.ActivityCost + "</td><td style='border:1px'>" + items.UnitName + "</td><td style='border:1px'><button type=button class=get-delete onclick=DeleteWorkOrderMicroplan("+id+")>Delete</button>" + "</td></tr>";
+                    $("#microPlanTable").append(bardata);
+                    $('#PhysicalTarget').val(totalarea);
+                    $('#FinancialTarget').val(totalActivityCost);
+                    $('#Totalprojectcost').val(totalActivityCost);
+                });
+            },
+
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(''),
+            url: '@Url.Content("~/")' + 'WorkOrder/SelectBudgetHeadByScheme',
+            success: function (range) {
+                $("#ddlBudgetHead").append('<option value=0>--Select--</option>');
+                $.each(range, function (i, items) {
+                    $("#ddlBudgetHead").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                })
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+        //alert(totalarea);
+
+
+        $('#ddlVillName,#district,#blockname,#ddlGPName,#ddlRange').attr("readOnly", "true");
+        //  $("#ddlVillName").val('0');
+        $("#ddlMicroPlan").val('0');
+        $("#ddlScheme").val('0');
+        $("#ddlModel").val('0');
+        $("#ddlActivity").val('0');
+        // }
+    }
+
+    function reload() {
+        var r = confirm("Do you want to leave page!");
+        if (r) {
+            window.location = RootUrl + "ForesterAction/ForesterAction";
+        }
+        else {
+            //do nothing
+        }
+    }
+
+</script>
+
+
+

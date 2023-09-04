@@ -1,0 +1,546 @@
+﻿@{
+    ViewBag.Title = "ACFDecision";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model FMDSS.Models.Encroachment.ViewModel.EncroachmentView
+
+<script>
+    var RootURl = '@Url.Content("~/")';
+</script>
+<script type="text/javascript">
+    $(function () {
+        $('footer.foot-inn').hide();
+        $('.gridtable').DataTable({
+            responsive: true,
+            "bSort": false
+        });
+
+        $(".datefield").datepicker({ minDate: new Date(), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+
+        $("#NoticeDate").datepicker().datepicker("setDate", new Date());
+
+        $('#ACF_Status').change(function () { 
+            if ($('#ACF_Status').val() == 'Approve') {
+                $('.Notice').show();
+            }
+            else {
+                $('.Notice').hide();
+            }
+        });
+
+        $("#AcfDecisionFiles").change(function () {
+            try {
+                var file = getNameFromPath($(this).val());
+                if (file != null) {
+                    var extension = file.substr((file.lastIndexOf('.') + 1));
+                    switch (extension) {
+                        case 'pdf':
+                        case 'PDF':
+                            flag = true;
+                            break;
+                        default:
+                            flag = false;
+                    }
+                }
+                if (flag == false) {
+                    $("#err5").text("You can only upload only pdf extension file");
+                    $("#AcfDecisionFiles").val('');
+                    return false;
+                }
+                else {
+                    var size = GetFileSize('AcfDecisionFiles');
+                    if (size > 2) {
+                        $("#err5").text("You can upload file up to 2 MB");
+                        $("#AcfDecisionFiles").val('');
+                    }
+                    else {
+                        $("#err5").text("");
+                    }
+                }
+            }
+            catch (err) { alert(err.message); }
+        });
+
+        $('#btnSubmit').click(function () {
+
+            if ($('#ACF_Status').val() == '') {
+                $("#err1").text("Select action status");
+                $('#ACF_Status').focus();
+                return false;
+            }
+            else {
+                $("#err1").text("");
+            }
+            if ($('#ACF_Remarks').val() == '') {
+
+                $("#err2").text("Select remarks");
+                $('#ACF_Remarks').focus();
+                return false;
+            }
+            else {
+                $("#err2").text("");
+            }
+            if ($('#ACF_Status').val() == 'Approve' && $('#NoticeNo').val() == '') {
+
+                $("#err3").text("Enter notice no.");
+                $('#NoticeNo').focus();
+                return false;
+            }
+            else {
+                $("#err3").text("");
+            }
+            if ($('#ACF_Status').val() == 'Approve' && $('#NoticeDate').val() == '') {
+
+                $("#err4").text("Select notice date");
+                $('#NoticeDate').focus();
+                return false;
+            }
+            else {
+                $("#err4").text("");
+            }
+            //if ($('#AcfDecisionFiles').val().length == 0) {
+
+            //    $("#err5").text("Upload copy of decision in pdf format");
+            //    $('#AcfDecisionFiles').focus();
+            //    return false;
+            //}
+            //else {
+            //    $("#err5").text("");
+            //}
+        });
+
+        $('#btnprint').click(function (e) {
+            var divContents = $("#divNotice").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            frameDoc.document.write('<html><head><link href="../css/bootstrap.min.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/mobile.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/main.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/dashboard.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/font-awesome.min.css" rel="stylesheet" />');
+            frameDoc.document.write('</head><body>');
+            frameDoc.document.write(divContents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        });
+
+        $('.printDetail').click(function (e) {
+            var divContents = $(".modelDetailPrint").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            frameDoc.document.write('<html><head><link href="../css/bootstrap.min.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/mobile.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/main.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/dashboard.css" rel="stylesheet" />');
+            frameDoc.document.write('<link href="../css/dashboard/font-awesome.min.css" rel="stylesheet" />');
+            frameDoc.document.write('</head><body>');
+            frameDoc.document.write(divContents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        });
+    });
+
+    function Assign(EnCode) {
+        $('#tblViewDetails').empty();
+        $('#EncroachmentId').val($.trim(EnCode));
+        var EnchId = EnCode;
+        $.ajax({
+            type: 'POST',
+            url: RootURl + 'ACFDecision/ViewDetails', // we are calling json method
+            dataType: 'json',
+            data: { EnchId: EnchId },
+            success: function (data) {
+                $.each(data, function (i, item) {
+                    $('#NoticeNo').val(item.NoticeNo);
+                    var bardata = "<tr><td>Encroachment ID</td><td>" + item.EncroachmentId +
+                                    "</tr><tr></td> <td>Division</td><td>" + item.DIV_CODE +
+                                    "</tr><tr></td> <td>Range</td><td>" + item.RANGE_CODE +
+                        "</tr><tr></td> <td>Enchroacher Name</td><td>" + item.Encroacher_Name +
+                                    "</tr><tr></td><td>Dispatch date</td><td>" + item.Dispatch_Date +
+                                    "</tr><tr></td><td>Year</td><td>" + item.Year +
+                                    "</tr><tr></td><td>TypeofLand</td><td>" + item.TypeofLand +
+                                    "</tr><tr></td><td>Encroched Area</td><td>" + item.Encroachment_Area +
+                                    "</tr><tr></td><td>Date of Encroachment</td><td>" + item.DateOfEntry +
+                                    "</tr><tr></td> <td>Dispatch No.</td><td>" + item.DispatchNo +
+                                    "</tr>";
+                    $('#tblViewDetails').append(bardata);
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    }
+
+    function RegDetails(EnCode) {
+        var EnchId = EnCode;
+        $.ajax({
+            type: 'GET',
+            url: RootURl + 'ACFDecision/RegDetails', // we are calling json method
+            dataType: 'json',
+            data: { EnchId: EnchId },
+            success: function (query) {
+                    var bardata = "";
+                    var bardata = "<tr><td>Encroachment ID</td><td>" + query.EN_Code +
+                        "</tr><tr></td> <td>Division</td><td>" + query.DIV_CODE +
+                        "</tr><tr></td> <td>Range</td><td>" + query.RANGE_CODE +
+                        "</tr><tr></td> <td>Near By Area</td><td>" + query.Near_by_area +
+                        "</tr><tr></td> <td>Block</td><td>" + query.Block +
+                        "</tr><tr></td> <td>khasra No</td><td>" + query.khasraNo +
+                        "</tr><tr></td><td>TypeofLand</td><td>" + query.TypeofLand +
+                        "</tr><tr></td><td>Tax Per Hact</td><td>" + query.TaxPerHact +
+                        "</tr><tr></td><td>Total Area</td><td>" + query.TotalArea +
+                        "</tr><tr></td><td>Encroched Area</td><td>" + query.Encroachment_Area +
+                        "</tr><tr></td><td>Date of Encroachment</td><td>" + (query.DOE==null?'NA': dateFormat(new Date(parseInt((query.DOE).match(/\d+/)[0],)))) +
+                        "</tr><tr></td> <td>Enchroacher Name</td><td>" + query.Encroacher_Name +
+                        "</tr><tr></td><td>LR ACT NO</td><td>" + query.LRACTNO +
+                        "</tr><tr></td><td>Year</td><td>" + query.Year +
+                        "</tr><tr></td><td>Dispatch No</td><td>" + query.DispatchNo +
+                        "</tr><tr></td><td>Dispatch date</td><td>" + (query.DispatchDate == null ? 'NA' : dateFormat(new Date(parseInt((query.DispatchDate).match(/\d+/)[0])))) +
+                        "</tr><tr></td><td>Description</td><td>" + query.Description +
+                        "</tr><tr></td><td>Special_Instruction</td><td>" + query.Special_Instruction +
+                        "</tr><tr></td><td>Notice No</td><td>" + query.NoticeNo +
+                        "</tr><tr></td><td>Notice Date</td><td>" + (query.NoticeDate == null ? 'NA' : dateFormat(new Date(parseInt((query.NoticeDate).match(/\d+/)[0])))) + 
+                        "</tr>";
+                    $('.tblViewDetails').empty().append(bardata);
+               
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    }
+
+  
+    function dateFormat(d) {
+        console.log(d);
+        return ((d.getDate() + "").padStart(2, "0")
+            + "/" +(d.getMonth() + 1) + "").padStart(2, "0")
+            + "/" + d.getFullYear();
+    }
+    function Notice(En_Code) {
+        if (En_Code != '') {
+            $.ajax({
+                type: 'POST',
+                url: RootURl + 'ACFDecision/GetNotice', // we are calling json method
+                dataType: 'json',
+                data: { encode: En_Code },
+                success: function (data) {
+                    $('#divNotice').html(data.list1);
+                    $.each(data.list2, function (i, item) {
+                        var bardata = "<tr><td>" + item.Encroacher_Name + "</td><td>" + item.Encroacher_Address + "</td></tr>";
+                        $('#tblNotice').append(bardata);
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        }
+    }
+
+    function getNameFromPath(strFilepath) {
+        try {
+            var objRE = new RegExp(/([^\/\\]+)$/);
+            var strName = objRE.exec(strFilepath);
+
+            if (strName == null) {
+                return null;
+            }
+            else {
+                return strName[0];
+            }
+        }
+        catch (err) { alert(err.message); }
+    }
+    function GetFileSize(fileid) {
+        try {
+            var fileSize = 0;
+            fileSize = $("#" + fileid)[0].files[0].size //size in kb
+            fileSize = fileSize / 1048576; //size in mb
+            return fileSize;
+        }
+        catch (e) {
+            alert("Error is :" + e);
+        }
+    }
+
+    function reload() {
+        location.reload(true);
+    }
+</script>
+@using (Html.BeginForm("Submit", "ACFDecision", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data", id = "AcfDecision" }))
+{
+    <div id="page-wrapper-inn">
+        @if (TempData["DecisionMsg"] != null)
+        {
+            <script type="text/javascript" language="javascript">
+                alert('@TempData["DecisionMsg"]');
+            </script>
+        }
+        @if (TempData["ZipMsg"] != null)
+        {
+            <script type="text/javascript" language="javascript">
+                alert('@TempData["ZipMsg"]');
+            </script>
+        }
+        <div class="col-lg-12 pad">
+            <h1 class="page-header">Encroachment List</h1>
+        </div>
+        <div class="row">
+            <!-- Tab1 -->
+            @Html.HiddenFor(x => x.EncroachmentId, new { @id = "EncroachmentId", @name = "EncroachmentId" })
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <!--Table-->
+                        <div id="tbl" class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover gridtable">
+                                <thead>
+                                    <tr>
+                                        <th style="width:5%;">Encode Id</th>
+                                        <th style="width:5%;">Division</th>
+                                        <th style="width:5%;">Range</th>
+                                        <th style="width:5%;">Enchroacher Name</th>
+                                        <th style="width:5%;">Date Of Enchroachment</th>
+                                        <th style="width:5%;">Dispatch No.</th>
+                                        <th style="width:5%;">Dispatched On</th>
+                                        <th style="width:5%;">Document(Zip)</th>
+                                        @*<th style="width:5%;">Notice</th> RegDetails*@
+                                        <th style="width:5%;">Decision</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @foreach (var item in ViewData["DecisionList"] as IEnumerable<FMDSS.Models.Encroachment.ViewModel.EncroachmentView>)
+                                    {
+                                        if (item.EncroachmentId != "")
+                                        {
+                                            <tr>
+                                                <td style="width:5%;">
+                                                    <a href="#" class="btn btn-default" data-toggle="modal" onclick="RegDetails('@Html.DisplayFor(model => item.EncroachmentId)')" data-target="#myModalDetail">
+                                                        @Html.DisplayFor(model => item.EncroachmentId)
+                                                    </a>
+                                                </td>
+                                                <td style="width:5%;">
+                                                    @Html.DisplayFor(model => item.DIV_CODE)
+                                                </td>
+                                                <td style="width:5%;">
+                                                    @Html.DisplayFor(model => item.RANGE_CODE)
+                                                </td>
+                                                <td style="width:10%;">
+                                                    @Html.DisplayFor(model => item.Encroacher_Name)
+                                                </td>
+                                                <td style="width:5%;">
+                                                    @Html.DisplayFor(model => item.DOE)
+                                                </td>
+                                                <td style="width:5%;">
+                                                    @Html.DisplayFor(model => item.DispatchNo)
+                                                </td>
+                                                <td style="width:5%;">
+                                                    @Html.DisplayFor(model => item.DispatchDate)
+                                                </td>
+                                                <td style="width:5%;">
+                                                    <a class="fa fa-download" href='@Url.Action("ZipDownload", "ACFDecision", new { @En_Code = Encryption.encrypt(item.EncroachmentId) })'>
+                                                        Download
+                                                    </a>
+                                                </td>
+                                                @*Comment by Karni Singh*@
+                                                @*<td style="width:5%;">
+                                                        @if (item.ACF_Status != string.Empty && item.ACF_Status == "Approve") {
+                                                            <a href="#" class="btn btn-default" data-toggle="modal" onclick="Notice('@Html.DisplayFor(model => item.EncroachmentId)')" data-target="#myModalNotice">
+                                                                <span class="fa fa-print"></span> Print
+                                                            </a>
+                                                        }
+                                                        else
+                                                        {
+                                                        <a class="btn btn-default">
+                                                            <span></span> NA
+                                                        </a>
+                                                        }
+                                                    </td>*@
+                                                <td style="width:5%;">
+                                                    @if (Convert.ToString(item.ACF_Status) == string.Empty || Convert.ToString(item.ACF_Status) == null)
+                                                    {
+                                                        <button id="btnDecision" type="button" class="btn btn-success" title="Edit" data-toggle="modal" onclick="Assign('@Html.DisplayFor(model => item.EncroachmentId)')" data-target="#myModalDfo">Action</button>
+                                                    }
+                                                    else if (item.ACF_Status != string.Empty && item.ACF_Status == "Approve")
+                                                    {
+                                                        <button id="btnDecision" type="button" class="btn btn-default" title="Edit">Approved</button>
+                                                    }
+                                                    else if (item.ACF_Status != string.Empty && item.ACF_Status == "Reject")
+                                                    {
+                                                        <button id="btnDecision" type="button" class="btn btn-default" title="Edit">Rejected</button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button id="btnDecision" type="button" class="btn btn-default" title="Edit">@item.ACF_Status</button>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /.table-responsive -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade in" id="myModalDfo" tabindex="-1" role="dialog" aria-hidden="false">
+            <div class="modal-dialog mdw">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel">
+                            ACF Decision
+                        </h4>
+                    </div>
+                    <br />
+
+                    <div class="modal-body">
+                        <table class="table table-striped table-bordered table-hover">
+                            <tbody id="tblViewDetails"></tbody>
+                        </table>
+                        <!-- From URL Get -->
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Action: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.ACF_Status, new List<SelectListItem>
+                                    {
+                                        new SelectListItem { Text = "--Select--", Value = ""},
+                                        new SelectListItem { Text = "Approve", Value = "Approve"},
+                                        //new SelectListItem { Text = "Reject", Value = "Reject"},
+                                        new SelectListItem { Text = "Reassign", Value = "Reassign"},
+                                    }, new { id = "ACF_Status", name = "ACF_Status", @class = "form-control" })
+                                <div id="err1" class="alert-danger1">@Html.ValidationMessageFor(x => x.ACF_Status)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>
+                                    Remarks:<span class="mandatory">*</span>
+                                </label>
+                                @Html.TextAreaFor(x => x.ACF_Remarks, new { @class = "form-control", @maxlength = 200, @id = "ACF_Remarks", @name = "ACF_Remarks" })
+                                <div id="err2" class="alert-danger1">@Html.ValidationMessageFor(x => x.ACF_Remarks)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 Notice" style="display:none">
+                            <div class="form-group">
+                                <label>
+                                    Notice No.:<span class="mandatory">*</span>
+                                </label>
+                                @Html.TextBoxFor(x => x.NoticeNo, new { @class = "form-control", @maxlength = 50, @id = "NoticeNo", @name = "NoticeNo", @readonly = "readonly" })
+                                <div id="err3" class="alert-danger1">@Html.ValidationMessageFor(x => x.NoticeNo)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 Notice" style="display:none">
+                            <div class="form-group">
+                                <label>
+                                    Notice Date:<span class="mandatory">*</span>
+                                </label>
+                                @Html.TextBoxFor(x => x.NoticeDate, new { id = "NoticeDate", name = "NoticeDate",@disabled="disabled", @class = "form-control datefield" })
+                                <div id="err4" class="alert-danger1">@Html.ValidationMessageFor(x => x.NoticeDate)</div>
+                            </div>
+                        </div>
+                        @*<div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Upload Decision(PDF): <span class="mandatory">*</span></label>
+                                    @Html.TextBoxFor(x => x.AcfDecisionFiles, new { @class = "form-control", @id = "AcfDecisionFiles", name = "AcfDecisionFiles", type = "file" })
+                                    <div id="err5" class="alert-danger1">@Html.ValidationMessageFor(x => x.AcfDecisionFiles)</div>
+                                </div>
+                            </div>*@
+                    </div>
+                    <!-- /.modal-body -->
+                    <div class="modal-footer" id="fot-f" style="clear:both;">
+                        <div id="btn" class="col-lg-12">
+                            <button id="btnSubmit" type="submit" class="btn btn-success" name="Command" value="Submit">
+                                <i class="fa fa-check"></i> Forward
+                            </button> 
+                            <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto" onclick="reload(); return false;">
+                                <i class="fa fa-times fa-fw"></i> Close
+                            </button> 
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+
+        <div class="modal fade in" id="myModalDetail" tabindex="-1" role="dialog" aria-hidden="false">
+            <div class="modal-dialog mdw">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 style="text-align:center" class="modal-title" id="myModalLabel">
+                            ACF Detail 
+                            <button type="button" class="btn btn-default pull-right printDetail">
+                                <i class="fa fa-print"></i> Print
+                            </button>
+                        </h4>
+                    </div>
+                    <br />
+                    <div class="modal-body modelDetailPrint">
+                        <table class="table table-striped table-bordered table-hover">
+                            <tbody class="tblViewDetails"></tbody>
+                        </table>
+                    </div>
+                    <!-- /.modal-body -->
+                    <div class="modal-footer" id="fot-f" style="clear:both;">
+                        <div id="btn" class="col-lg-12">
+                            <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto" onclick="reload(); return false;">
+                                <i class="fa fa-times fa-fw"></i> Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+
+        <div class="modal fade in" id="myModalNotice" tabindex="-1" role="dialog" aria-hidden="false">
+            <div class="modal-dialog mdw">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 style="text-align:center" class="modal-title" id="myModalLabel">
+                            Notice
+                            <button type="button" name="btnprint" id="btnprint" class="btn btn-default pull-right">
+                                <i class="fa fa-print"></i> Print
+                            </button>
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <div id="divNotice"></div>
+                        <!-- From URL Get -->
+                    </div>
+                    <!-- /.modal-body -->
+                    <div class="modal-footer" id="fot-f" style="clear:both;">
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+    </div>
+}

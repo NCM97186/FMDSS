@@ -1,0 +1,478 @@
+﻿@model FMDSS.Models.ForestProduction.InventoryManagement
+@{
+    ViewBag.Title = "ManageInventory"; 
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString());
+}
+
+<style>
+    .table > thead > tr > th:first-child {
+        width: 50px !important;
+    }
+
+    #page-wrapper-inn .table > thead > tr > th {
+        width: auto;
+    }
+
+    #dvAddInventory, #dvUpdateInventory {
+        z-index: 99994;
+    }
+
+
+    .dataTables_wrapper > div:first-child {
+        border-top: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+        padding: 10px 0 5px;
+        margin: 0;
+    }
+    .padding-bottom10 {
+        padding-bottom: 10px;
+    }
+
+    .help {
+        float: right;
+        margin-right: 18px;
+        font-style: italic;
+    }
+</style>
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Manage Depot Inventory</h1>
+        @if (@Session["StockStatus"] != null)
+        {
+            if (@Session["StockStatus"].ToString().Contains("Failed"))
+            {  <div id="divError" class="alert alert-danger1"><i class="fa fa-fw"></i>There is some technical error while processing your request!</div>}
+            else
+            {  <div id="divSuccess" class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@Session["StockStatus"]</div>}
+            Session["StockStatus"] = null;
+        }
+    </div>
+
+    <div class="row">
+        <div class="help"><a href="~/PDFFolder/User Manual_Auction_Department.pdf" target="_blank">Help Document</a></div>
+        <div class="col-lg-12">
+            <div class="panel with-nav-tabs panel-default">
+                <div class="panel-heading">
+                    <ul class="nav nav-tabs"> 
+                        <li class="active"><a href="#tab2default" data-toggle="tab"><i class="fa fa-truck fa-fw"></i> Items to be added to Inventory</a></li>
+                        <li class=""><a href="#tab1default" data-toggle="tab"><i class="fa fa-tree fa-fw"></i> Items Available</a></li>
+                        <li class=""><a href="#tab3default" data-toggle="tab"><i class="fa fa-tree fa-fw"></i> Reserve for Auction</a></li>
+                    </ul>
+                </div>
+
+                <div class="panel-body">
+                    <div class="tab-content">
+                        @*<div class="tab-pane fade active in" id="tab3default">
+                            @Html.Partial("_LotList")
+                        </div>*@
+                        <div class="tab-pane fade active in" id="tab2default">
+                            @Html.Partial("_ItemInventoryList")
+                        </div> 
+                        <div class="tab-pane fade" id="tab1default">
+                            @Html.Partial("_ItemAvailableList")
+                        </div>
+                        <div class="tab-pane fade" id="tab3default">
+                            @Html.Partial("_ReserveForAuctionList")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="myInventory" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog mdw">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title" id="myModalLabel"><b>Product Details</b></h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped table-bordered table-hover">
+                        <tbody id="tbdyScart"></tbody>
+                    </table>
+                </div>
+                <div id="btn" class="modal-footer">
+                    <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal">
+                        <i class="fa fa-times fa-fw"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="myLotDetails" tabindex="-1" role="dialog" aria-labelledby="myLotDetailsLabel" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog mdw">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title" id="myLotDetailsLabel"><b>Lot Details</b></h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped table-bordered table-hover">
+                        <tbody id="tbdyLot"></tbody>
+                    </table>
+                </div>
+                <div id="btn" class="modal-footer">
+                    <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal">
+                        <i class="fa fa-times fa-fw"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="myViewItemDetails" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog mdw">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title" id="myModalLabel"><b>Inventory Details</b></h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped table-bordered table-hover">
+                        <tbody id="tbdyItemDetails"></tbody>
+                    </table>
+                </div>
+                <div id="btn" class="modal-footer">
+                    <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal">
+                        <i class="fa fa-times fa-fw"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="myNewItemToInventory" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog mdw">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title" id="myModalLabel"><b>Add New Item to Inventory</b></h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped table-bordered table-hover">
+                        <tbody id="tbdyNewItemToInventory"></tbody>
+                    </table>
+                </div>
+                <div id="btn" class="modal-footer">
+                    <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal">
+                        <i class="fa fa-times fa-fw"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div> 
+    <div class="modal fade" id="myModalAddItemDOD" role="dialog">
+        <div class="modal-dialog modal-lg" id="divLoadTabData"></div>
+    </div> 
+    @*<div class="modal fade" id="modalCommon" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;"> 
+        <div class="modal-dialog modal-lg" id="divTarget"></div>
+    </div>*@ 
+</div>
+ 
+<script type="text/javascript">
+
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+        $('#dataTableInventory, #dataTableReserveInventory').DataTable({
+            responsive: true
+        });
+
+        $('#dtAddItemToInventory').DataTable({
+            responsive: true
+        });
+
+        $('#dtAssignLot').DataTable({
+            responsive: true
+        });
+
+        $('#txtQty').keypress(function (event) {
+            return isNumber(event, this)
+        });
+
+        $('#produceQty').keypress(function (event) {
+            return isNumber(event, this)
+        }); 
+    });
+
+
+
+    function FindDetail(object1, IsTP, action) {
+        var tpID = ''; var stockID = '';
+        if (IsTP == 0)
+            stockID = object1.value;
+        else
+            tpID = object1.value;
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'ManageInventory/FetchDetails',
+            dataType: 'json',
+            data: { tpID: tpID, stockID: stockID },
+            success: function (data) {
+                if (action = 'VIEW') {
+                    $("#tbdyScart").empty();
+                    if (IsTP != 0) {
+                        bardata = "<tr><td><b>TP Number </b></td><td>" + data.list.TPID +
+                            "</td></tr><tr><td><b>Depot Name</b></td><td>" + data.list.nurseryDepotName +
+                            "</td></tr><tr><td><b>Division Name</b></td><td>" + data.list.DivName +
+                            "</td></tr><tr><td><b>Circle Name</b></td><td>" + data.list.CircleName +
+               "</td></tr><tr><td><b>Product Type</b></td><td>" + data.list.produceType +
+               "</td></tr><tr><td><b>Product Name</b></td><td>" + data.list.produce +
+               "</td></tr><tr><td><b>Unit Name</b></td><td>" + data.list.produceUnit +
+               "</td></tr><tr><td><b>Quantity</b></td><td>" + data.list.produceQty +
+               "</td></tr><tr><td><b>Transport Mode</b></td><td>" + data.list.transportMode +
+               "</td></tr><tr><td><b>Driver Name</b></td><td>" + data.list.driverName +
+               "</td></tr><tr><td><b>Driver Contact No.</b></td><td>" + data.list.driverNumber +
+               "</td></tr><tr><td><b>Vehicle Number</b></td><td>" + data.list.vehicleNo +
+               "</td></tr>";
+                    }
+                    else {
+                        var tempString = '';
+                        for (var i = 0; i < data.list1.length; i++) {
+                            tempString = tempString + "</td></tr><tr><td><b>Lot Number: </b>" + data.list1[i].lotNumber + "</td><td>" + data.list1[i].lotQuantity;
+                        }
+
+                        bardata = "</td></tr><tr><td><b>Depot Name</b></td><td>" + data.list.nurseryDepotName +
+                            "</td></tr><tr><td><b>Division Name</b></td><td>" + data.list.DivName +
+                            "</td></tr><tr><td><b>Circle Name</b></td><td>" + data.list.CircleName +
+            "</td></tr><tr><td><b>Produce Type</b></td><td>" + data.list.produceType +
+            "</td></tr><tr><td><b>Produce Name</b></td><td>" + data.list.produce +
+            "</td></tr><tr><td><b>Unit Name</b></td><td>" + data.list.produceUnit +
+           tempString +
+            "</td></tr><tr><td><b>Total Quantity</b></td><td>" + data.list.produceQty +
+            "</td></tr>";
+                    }
+                    $("#tbdyScart").append(bardata);
+                }
+                if (action = 'ADD') {
+                    $('#TPID').val(data.list.TPID);
+                    $('#produceFor').val(data.list.produceFor);
+                    $('#nurseryDepotCode').val(data.list.nurseryDepotCode);
+                    $('#nurseryDepotName').val(data.list.nurseryDepotName);
+                    $('#produceTypeID').val(data.list.produceTypeID);
+                    $('#produceType').val(data.list.produceType);
+                    $('#produceID').val(data.list.produceID);
+                    $('#produce').val(data.list.produce);
+                    $('#produceUnit').val(data.list.produceUnit);
+                    $('#produceQty').val(data.list.produceQty);
+                    $('#hdnQty').val(data.list.produceQty);
+                }
+                if (action = 'UPDATE') {
+                    $('#stockID1').val(data.list.stockID);
+                    $('#txtDivName').val(data.list.DivName);
+                    $('#txtCircleName').val(data.list.CircleName);
+                    $('#nurseryDepotName1').val(data.list.nurseryDepotName);
+                    $('#produceType1').val(data.list.produceType);
+                    $('#produce1').val(data.list.produce);
+                    $('#produceUnit1').val(data.list.produceUnit);
+                    $('#produceQty1').val(data.list.produceQty);
+                    $("#ddllotNumber").empty();
+                    $("#ddllotNumber").append('<option value=0>--Select--</option>');
+                    for (var i = 0; i < data.list1.length; i++) {
+                        $("#ddllotNumber").append('<option value="' + data.list1[i].lotId + '">  ' + data.list1[i].lotNumber + ' (' + data.list1[i].lotQuantity + ')</option>');
+                    }
+                }
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    } 
+
+    function OpenDialogCommon(partialViewName, objID, type, targetControlID) {
+        switch (type)
+        {
+            case type:
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'ManageInventory/LoadPartialCommon',
+                    dataType: 'html',
+                    data: { partialViewName: partialViewName, objID: objID, type: type },
+                    success: function (response) {
+                        $('#' + targetControlID).html(response);
+                    }
+                });
+                break;
+        } 
+    }
+
+    function OpenDialog(partialViewName, objID) {
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'ManageInventory/LoadPartial',
+            dataType: 'html',
+            data: { value: partialViewName, objID: objID },
+            success: function (data) {
+                $('#divLoadTabData').html(data);
+            }
+        });
+    }
+
+    function OpenDialogForLot(partialViewName, objID) {
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'ManageInventory/LoadPartialForLot',
+            dataType: 'html',
+            data: { value: partialViewName, objID: objID },
+            success: function (data) {
+                $('#divLoadTabData').html(data);
+            }
+        });
+    }
+
+    $('.EditStock').click(function (e) {
+        $(this).parents('tr').find('label').css('display', 'none');
+        $(this).parents('tr').find('input[type="text"]').css('display', 'block');
+        $(this).parents('tr').find('button').each(function () {
+            if (this.innerText.indexOf("Save") != -1) {
+                $(this).css('display', 'block');
+            }
+            else {
+                $(this).css('display', 'none');
+            }
+        });
+    });
+
+    function updateStock(object, action) {
+        var qty = $(object).parents('tr').find('input[type="text"]').val();
+        if (validateNumericTextbox(qty)) {
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageInventory/UpdateProduceStock',
+                dataType: 'json',
+                data: { stockID: object.value, produceQty: qty, actionFlag: action },
+                success: function (data) {
+                    $(object).parents('tr').find('label').css('display', 'block');
+                    $(object).parents('tr').find('input[type="text"]').css('display', 'none');
+                    $(object).parents('tr').find('button').each(function () {
+                        if (this) {
+                            $(this).css('display', 'none');
+                        }
+                        else {
+                            $(this).css('display', 'block');
+                        }
+                    });
+                    window.location.reload(true);
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve result.' + ex);
+                }
+            });
+        }
+        else {
+            alert('Kindly put correct produce quantity!!');
+            $(object).parents('tr').find('input[type="text"]').focus();
+        }
+    }
+
+    function ActivateDeactivateStock(object, action) {
+        if (confirm('Are you sure you to proceed ahead?')) {
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ManageInventory/UpdateProduceStock',
+                dataType: 'json',
+                data: { stockID: object.value, produceQty: 0, actionFlag: action },
+                success: function (data) {
+                    window.location.reload(true);
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve result.' + ex);
+                }
+            });
+        }
+    }
+
+    function GetProductByProductType() {
+        $("#ddlProductID").empty().append('<option value="">--Select--</option>');
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + "ManageInventory/GetProductByProductTypeID",
+            dataType: 'json',
+            data: { productTypeID: $("#ProductTypeID").val() },
+            success: function (response) {
+                $.each(response.productList, function (i, items) {
+                    $("#ddlProductID").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                });
+                $('#txtUnitName').val(response.unitDetails.UnitName);
+            }
+        });
+    }
+
+    $('#btn_submit').click(function () {
+        var txtQty = $('#produceQty').val();
+        var hdnQty = $('#hdnQty').val();
+        if (validateNumericTextbox(txtQty)) {
+            if ((parseFloat(txtQty)) <= (parseFloat(hdnQty))) {
+                if ($('#lotNumber').val() == "") {
+                    alert('Kindly enter Lot number!');
+                    $('#lotNumber').focus();
+                    return false;
+                }
+                else {
+                    if ($('#recComments').val() == "") {
+                        alert('Kindly put some comments!');
+                        $('#recComments').focus();
+                        return false;
+                    }
+                    else {
+                        if (confirm('Are you sure you to proceed ahead?')) { return true; }
+                    }
+                }
+            }
+            else {
+                alert('Received quantity cannot be more than transferred one!');
+                $('#produceQty').focus();
+                return false;
+            }
+        }
+        else {
+            alert('Kindly put correct produce quantity!');
+            $('#produceQty').focus();
+            return false;
+        }
+    });
+
+    $('#btn_submit1').click(function () {
+        if ($('option:selected', $('#ddllotNumber')).index() == 0) {
+            alert('Kindly select Lot number!');
+            $('#ddllotNumber').focus();
+            return false;
+        }
+        else {
+            if (validateNumericTextbox($('#deductibleQty').val())) {
+                if ((parseFloat($('#deductibleQty').val())) <= (parseFloat($('option:selected', $('#ddllotNumber')).text().match(/\d+\.\d+/)[0]))) {
+                    if ($('#recComments1').val() == "") {
+                        alert('Kindly put some comments!');
+                        $('#recComments1').focus();
+                        return false;
+                    }
+                    else {
+                        if (confirm('Are you sure you to proceed ahead?')) { return true; }
+                    }
+                }
+                else {
+                    alert('Deductible quantity cannot be more than available in assigned Lot!');
+                    $('#deductibleQty').focus();
+                    return false;
+                }
+            }
+            else {
+                alert('Kindly put correct produce quantity!');
+                $('#deductibleQty').focus();
+                return false;
+            }
+        }
+    });
+</script>
+
+
+
+<script type="text/javascript">
+    $.noConflict(true);
+</script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/Scripts/Controller/Common.js"></script> 

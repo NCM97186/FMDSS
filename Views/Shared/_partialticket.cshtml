@@ -1,0 +1,759 @@
+﻿@model FMDSS.Models.Master.TicketingFee
+
+
+<link href="~/css/timepicki.css" rel="stylesheet" />
+<script src="~/js/timepicki.js"></script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+
+<script>
+    var RootUrl = '@Url.Content("~/")';
+     
+    $('#Indian_TRDF,#Foreigner_TRDF,#IndianAdultFees,#IndianChildFees,#ForeignAdultFees,#ForeignChildFees,#CameraFees,#CameraFeesForeigner,#Discount,#TaxRate,#StudentFees,.numberordecimal').bind('keypress', function (evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode
+        // var charCode = evt.which;
+        if (charCode != 8) {
+
+            if ((charCode == 46) || (charCode >= 97 && charCode <= 122) || (charCode >= 65 && charCode <= 90)) {
+                return false;
+            }
+            else {
+                if (charCode >= 48 && charCode <= 57 || charCode == 46) {
+                    return true;
+                }
+                else {
+                    evt.preventDefault();
+                }
+            }
+        }
+    });
+
+    $(document).ready(function () {
+
+        $('#btn_submit1').click(function (e) {
+
+           
+
+
+            if ($('option:selected', $('#DIST_CODE')).index() == 0) {
+                $("#errDIST_CODE").css("display", "block");
+                $('#errDIST_CODE').focus();
+                return false;
+            }
+            else {
+                $("#errDIST_CODE").css("display", "none");
+            }
+
+            if ($('option:selected', $('#PlaceID')).index() == 0) {
+                $("#errPlaceID").css("display", "block");
+                $('#errPlaceID').focus();
+                return false;
+            }
+            else {
+                $("#errPlaceID").css("display", "none");
+            }
+
+            if ($('#IndianAdultFees_Surcharge').val().trim() == "") {
+                $('#errIndianAdultFees_Surcharge').css("display", "block");
+                $('#errIndianAdultFees_Surcharge').focus();
+                return false;
+            }
+            else {
+                $('#errIndianAdultFees_Surcharge').css("display", "none");
+            }
+
+            if ($('#Foreigner_Surcharge').val().trim() == "") {
+                $("#errForeigner_Surcharge").css("display", "block");
+                $('#errForeigner_Surcharge').focus();
+                return false;
+            }
+            else {
+                $("#errForeigner_Surcharge").css("display", "none");
+            }
+
+
+
+
+            if ($('#IndianAdultFees_TigerProject').val().trim() == "") {
+                $("#errIndianAdultFees_TigerProject").css("display", "block");
+                $('#errIndianAdultFees_TigerProject').focus();
+                return false;
+            }
+            else {
+                $("#errIndianAdultFees_TigerProject").css("display", "none");
+            }
+
+          
+
+            if ($('#Foreigner_TigerProject').val().trim() == "") {
+                $("#errForeigner_TigerProject").css("display", "block");
+                $('#errForeigner_TigerProject').focus();
+                return false;
+            }
+            else {
+                $("#errForeigner_TigerProject").css("display", "none");
+            }
+
+           
+
+            if ($('#Indian_TRDF').val().trim() == "") {
+                $("#errIndian_TRDF").css("display", "block");
+                $('#errIndian_TRDF').focus();
+                return false;
+            }
+            else {
+                $("#errIndian_TRDF").css("display", "none");
+            }
+
+            if ($('#Foreigner_TRDF').val().trim() == "") {
+                $("#errForeigner_TRDF").css("display", "block");
+                $('#errForeigner_TRDF').focus();
+                return false;
+            }
+            else {
+                $("#errForeigner_TRDF").css("display", "none");
+            }
+
+
+
+            if ($('#Indian_TRDF_Gypsy').val().trim() == "") {
+                $("#errIndian_TRDF_Gypsy").css("display", "block");
+                $('#errIndian_TRDF_Gypsy').focus();
+                return false;
+            }
+            else {
+                $("#errIndian_TRDF_Gypsy").css("display", "none");
+            }
+
+            if ($('#Foreigner_TRDF_Gypsy').val().trim() == "") {
+                $("#errForeigner_TRDF_Gypsy").css("display", "block");
+                $('#errForeigner_TRDF_Gypsy').focus();
+                return false;
+            }
+            else {
+                $("#errForeigner_TRDF_Gypsy").css("display", "none");
+            }
+
+
+            if ($('#Vehicle_TRDF_Gypsy').val().trim() == "") {
+                $("#errVehicle_TRDF_Gypsy").css("display", "block");
+                $('#errVehicle_TRDF_Gypsy').focus();
+                return false;
+            }
+            else {
+                $("#errVehicle_TRDF_Gypsy").css("display", "none");
+            }
+
+            if ($('#Vehicle_TRDF_Canter').val().trim() == "") {
+                $("#errVehicle_TRDF_Canter").css("display", "block");
+                $('#errVehicle_TRDF_Canter').focus();
+                return false;
+            }
+            else {
+                $("#errVehicle_TRDF_Canter").css("display", "none");
+            }
+
+
+
+
+
+
+
+            if ($('#GuidFee_TRDF_Indian_Gypsy').val().trim() == "") {
+                $("#errGuidFee_TRDF_Indian_Gypsyr").css("display", "block");
+                $('#errGuidFee_TRDF_Indian_Gypsyr').focus();
+                return false;
+            }
+            else {
+                $("#errGuidFee_TRDF_Indian_Gypsyr").css("display", "none");
+            }
+            if ($('#GuidFee_TRDF_NonIndian_Gypsy').val().trim() == "") {
+                $("#errGuidFee_TRDF_NonIndian_Gypsy").css("display", "block");
+                $('#errGuidFee_TRDF_NonIndian_Gypsy').focus();
+                return false;
+            }
+            else {
+                $("#errGuidFee_TRDF_NonIndian_Gypsy").css("display", "none");
+            }
+            if ($('#GuidFee_TRDF_Indian_Canter').val().trim() == "") {
+                $("#errGuidFee_TRDF_Indian_Canter").css("display", "block");
+                $('#errGuidFee_TRDF_Indian_Canter').focus();
+                return false;
+            }
+            else {
+                $("#errGuidFee_TRDF_Indian_Canter").css("display", "none");
+            }
+            if ($('#GuidFee_TRDF_NonIndian_Canter').val().trim() == "") {
+                $("#errGuidFee_TRDF_NonIndian_Canter").css("display", "block");
+                $('#errGuidFee_TRDF_NonIndian_Canter').focus();
+                return false;
+            }
+            else {
+                $("#errGuidFee_TRDF_NonIndian_Canter").css("display", "none");
+            }
+
+           
+            
+            if ($('#TaxRate').val().trim() == "") {
+                $("#errTaxRate").css("display", "block");
+                $('#errTaxRate').focus();
+                return false;
+            }
+            else {
+                $("#errTaxRate").css("display", "none");
+            }
+
+
+            if ($('#CameraFeesIndian_Surcharge').val().trim() == "") {
+                $("#errCameraFeesIndian_Surcharge").css("display", "block");
+                $('#errCameraFeesIndian_Surcharge').focus();
+                return false;
+            }
+            else {
+                $("#errCameraFeesIndian_Surcharge").css("display", "none");
+            }
+
+
+
+            if ($('#CameraFeesForeigner_Surcharge').val().trim() == "") {
+                $("#errCameraFeesForeigner_Surcharge").css("display", "block");
+                $('#errCameraFeesForeigner_Surcharge').focus();
+                return false;
+            }
+            else {
+                $("#errCameraFeesForeigner_Surcharge").css("display", "none");
+            }
+
+
+
+
+            if ($('#CameraFeesIndian_TigerProject').val().trim() == "") {
+                $("#errCameraFeesIndian_TigerProject").css("display", "block");
+                $('#errCameraFeesIndian_TigerProject').focus();
+                return false;
+            }
+            else {
+                $("#errCameraFeesIndian_TigerProject").css("display", "none");
+            }
+
+          
+            if ($('#CameraFeesForeigner_TigerProject').val().trim() == "") {
+                $("#errCameraFeesForeigner_TigerProject").css("display", "block");
+                $('#errCameraFeesForeigner_TigerProject').focus();
+                return false;
+            }
+            else {
+                $("#errCameraFeesForeigner_TigerProject").css("display", "none");
+            }
+
+
+            //Rajveer
+            if ($('#Indian_GypsyVehicleRentFees').val().trim() == "") {
+                $("#errIndian_GypsyVehicleRentFees").css("display", "block");
+                $('#Indian_GypsyVehicleRentFees').focus();
+                return false;
+            }
+            else {
+                $("#Indian_GypsyVehicleRentFees").css("display", "none");
+            }
+
+            if ($('#Indian_CanterVehicleRentFees').val().trim() == "") {
+                $("#errIndian_CanterVehicleRentFees").css("display", "block");
+                $('#errIndian_CanterVehicleRentFees').focus();
+                return false;
+            }
+            else {
+                $("#errIndian_CanterVehicleRentFees").css("display", "none");
+            }
+
+           
+
+            if ($('#Indian_GypsyGuideFee').val().trim() == "") {
+                $("#errIndian_GypsyGuideFee").css("display", "block");
+                $('#errIndian_GypsyGuideFee').focus();
+                return false;
+            }
+            else {
+                $("#errIndian_GypsyGuideFee").css("display", "none");
+            }
+
+            if ($('#Indian_CanterGuideFee').val().trim() == "") {
+                $("#errIndian_CanterGuideFee").css("display", "block");
+                $('#errIndian_CanterGuideFee').focus();
+                return false;
+            }
+            else {
+                $("#errIndian_CanterGuideFee").css("display", "none");
+            }
+
+
+
+
+            if ($('#Foreigner_GypsyVehicleRentFees').val().trim() == "") {
+                $("#errForeigner_GypsyVehicleRentFees").css("display", "block");
+                $('#Foreigner_GypsyVehicleRentFees').focus();
+                return false;
+            }
+            else {
+                $("#Foreigner_GypsyVehicleRentFees").css("display", "none");
+            }
+
+            if ($('#Foreigner_CanterVehicleRentFees').val().trim() == "") {
+                $("#errForeigner_CanterVehicleRentFees").css("display", "block");
+                $('#errForeigner_CanterVehicleRentFees').focus();
+                return false;
+            }
+            else {
+                $("#errForeigner_CanterVehicleRentFees").css("display", "none");
+            }
+
+
+
+            if ($('#Foreigner_GypsyGuideFee').val().trim() == "") {
+                $("#errForeigner_GypsyGuideFee").css("display", "block");
+                $('#errForeigner_GypsyGuideFee').focus();
+                return false;
+            }
+            else {
+                $("#errForeigner_GypsyGuideFee").css("display", "none");
+            }
+
+            if ($('#Foreigner_CanterGuideFee').val().trim() == "") {
+                $("#errForeigner_CanterGuideFee").css("display", "block");
+                $('#errForeigner_CanterGuideFee').focus();
+                return false;
+            }
+            else {
+                $("#errForeigner_CanterGuideFee").css("display", "none");
+            }
+
+            if ($('#GSTonGuideFee').val().trim() == "") {
+                $("#errGSTonGuideFee").css("display", "block");
+                $('#errGSTonGuideFee').focus();
+                return false;
+            }
+            else {
+                $("#errGSTonGuideFee").css("display", "none");
+            }
+
+
+            if ($('#GSTonVehicleRentFee').val().trim() == "") {
+                $("#errGSTonVehicleRentFee").css("display", "block");
+                $('#errGSTonVehicleRentFee').focus();
+                return false;
+            }
+            else {
+                $("#errGSTonVehicleRentFee").css("display", "none");
+            }
+
+
+            //End
+
+
+
+            if ($('#GuideFees').val().trim() == "") {
+                $("#errGuideFees").css("display", "block");
+                $('#errGuideFees').focus();
+                return false;
+            }
+            else {
+                $("#errGuideFees").css("display", "none");
+            }
+
+
+
+            if ($('#SingleOccupancyFees').val().trim() == "") {
+                $("#errSingleOccupancyFees").css("display", "block");
+                $('#errSingleOccupancyFees').focus();
+                return false;
+            }
+            else {
+                $("#errSingleOccupancyFees").css("display", "none");
+            }
+
+            if ($('#DoubleOccupancyFees').val().trim() == "") {
+                $("#errDoubleOccupancyFees").css("display", "block");
+                $('#errDoubleOccupancyFees').focus();
+                return false;
+            }
+            else {
+                $("#errDoubleOccupancyFees").css("display", "none");
+            }
+            if ($('#StudentFees').val().trim() == "") {
+                $("#errStudentFees").css("display", "block");
+                $('#errStudentFees').focus();
+                return false;
+            }
+            else {
+                $("#errStudentFees").css("display", "none");
+            }
+
+            if ($('option:selected', $('#Isactive')).index() == 0) {
+                 $("#errIsactive").css("display", "block");
+                 $('#errIsactive').focus();
+                return false;
+            }
+            else {
+                 $("#errIsactive").css("display", "none");
+            }
+        });
+
+
+
+
+
+
+
+
+        $('#DIST_CODE').change(function (e) {
+
+            $("#PlaceID").empty();            
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'Master/PlaceByDistrict', // we are calling json method
+            dataType: 'json',
+            data: { districtID: $("#DIST_CODE").val() },
+            success: function (circle) {
+                $("#PlaceID").append('<option value="0">--Select--</option>');
+                $.each(circle, function (i, items) {
+                    $("#PlaceID").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+
+        });
+        return false;
+    });
+
+    });
+
+
+
+
+
+
+
+</script>
+
+@using (Html.BeginForm("ADDUpdateTicket", "Master",FormMethod.Post))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                @*<label id="lbl_dpt">Add/Edit Place</label>*@
+                @ViewBag.OpType
+            </h4>
+        </div>
+
+        <div class="modal-body">
+            @Html.HiddenFor(model => model.FeesID)
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>District Name: <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.DIST_CODE, (IEnumerable<SelectListItem>)ViewBag.ddlDistrict1, "--Select--", new { @class = "form-control common", id = "DIST_CODE" })
+                    <div id="errDIST_CODE" style="display:none" class="alert-danger1">District Name is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Place Name: <span class="mandatory">*</span></label>                   
+                    @Html.DropDownListFor(Model => Model.PlaceID, (IEnumerable<SelectListItem>)ViewBag.ddlPlace1, "--Select--", new { @class = "form-control common", id = "PlaceID" })
+                    <div id="errPlaceID" style="display:none" class="alert-danger1">Place Name is Required.</div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Indian Adult Fees Surcharge: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.IndianAdultFees_Surcharge, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errIndianAdultFees_Surcharge" style="display:none" class="alert-danger1">Indian Adult Fees Surcharge is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Foreigner Adult Fees Surcharge: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Foreigner_Surcharge, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errForeigner_Surcharge" style="display:none" class="alert-danger1">Foreigner Adult Fees Surcharge  is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Indian Adult Fees Tiger Project : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.IndianAdultFees_TigerProject, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errIndianAdultFees_TigerProject" style="display:none" class="alert-danger1">Indian Adult Fees Tiger Project is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Foreigner Adult Fees Tiger Project: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Foreigner_TigerProject, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errForeigner_TigerProject" style="display:none" class="alert-danger1">Foreigner Adult Fees Tiger Project is Required.</div>
+                </div>
+            </div>
+
+
+            <div class="col-lg-6"> 
+                <div class="form-group">
+                    <label>Indian TRDF ( Canter )  : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Indian_TRDF, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errIndian_TRDF" style="display:none" class="alert-danger1">Indian TRDF ( Canter )  is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Foreigner TRDF ( Canter ) : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Foreigner_TRDF, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errForeigner_TRDF" style="display:none" class="alert-danger1">Foreigner TRDF ( Canter )  is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Indian TRDF ( Gypsy )  : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Indian_TRDF_Gypsy, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errIndian_TRDF_Gypsy" style="display:none" class="alert-danger1">Indian TRDF ( Gypsy )  is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Foreigner TRDF ( Gypsy ) : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Foreigner_TRDF_Gypsy, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errForeigner_TRDF_Gypsy" style="display:none" class="alert-danger1">Foreigner TRDF ( Gypsy ) is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Vehicle TRDF Gypsy: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Vehicle_TRDF_Gypsy, new { @class = "form-control common numberordecimal", @maxlength = "8" })
+                    <div id="errVehicle_TRDF_Gypsy" style="display:none" class="alert-danger1">Vehicle TRDF Gypsy is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Vehicle TRDF Canter : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Vehicle_TRDF_Canter, new { @class = "form-control common numberordecimal", @maxlength = "8" })
+                    <div id="errVehicle_TRDF_Canter" style="display:none" class="alert-danger1">Vehicle TRDF Canter is Required.</div>
+                </div>
+            </div>
+
+
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Guid Fee TRDF Gypsy (Indian) : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.GuidFee_TRDF_Indian_Gypsy, new { @class = "form-control common numberordecimal", @maxlength = "8" })
+                    <div id="errGuidFee_TRDF_Indian_Gypsy" style="display:none" class="alert-danger1">Guid Fee TRDF Gypsy (Indian) is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Guid Fee TRDF Gypsy (Foreigner): <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.GuidFee_TRDF_NonIndian_Gypsy, new { @class = "form-control common numberordecimal", @maxlength = "8" })
+                    <div id="errGuidFee_TRDF_NonIndian_Gypsy" style="display:none" class="alert-danger1">Guid Fee TRDF Gypsy (Foreigner) is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Guid Fee TRDF Canter (Indian): <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.GuidFee_TRDF_Indian_Canter, new { @class = "form-control common numberordecimal", @maxlength = "8" })
+                    <div id="errGuidFee_TRDF_Indian_Canter" style="display:none" class="alert-danger1">Guid Fee TRDF Canter (Indian) is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Guid Fee TRDF Canter (Foreigner): <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.GuidFee_TRDF_NonIndian_Canter, new { @class = "form-control common numberordecimal", @maxlength = "8" })
+                    <div id="errGuidFee_TRDF_NonIndian_Canter" style="display:none" class="alert-danger1">Guid Fee TRDF Canter (Foreigner) is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Camera Fees Indian Surcharge: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.CameraFeesIndian_Surcharge, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errCameraFeesIndian_Surcharge" style="display:none" class="alert-danger1">Camera Fees Indian Surcharge is Required.</div>
+                </div>
+            </div>     
+            
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Camera Fees Foreigner Surcharge : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.CameraFeesForeigner_Surcharge, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errCameraFeesForeigner_Surcharge" style="display:none" class="alert-danger1">Camera Fees Foreigner Surcharge is Required.</div>
+                </div>
+            </div>     
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Camera Fees Indian Tiger Project: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.CameraFeesIndian_TigerProject, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errCameraFeesIndian_TigerProject" style="display:none" class="alert-danger1">Camera Fees Indian Tiger Project is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Camera Fees Foreigner Tiger Project : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.CameraFeesForeigner_TigerProject, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errCameraFeesForeigner_TigerProject" style="display:none" class="alert-danger1">Camera Fees Foreigner Tiger Project is Required.</div>
+                </div>
+            </div>
+
+         
+            
+            
+                   
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Indian Member Gypsy Vehicle Rent Fees : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Indian_GypsyVehicleRentFees, new { @class = "form-control common numberordecimal", @maxlength = "8" })
+                    <div id="errIndian_GypsyVehicleRentFees" style="display:none" class="alert-danger1">Indian Member Gypsy Vehicle Rent Fees is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Indian Member Canter Vehicle Rent Fees : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Indian_CanterVehicleRentFees, new { @class = "form-control common numberordecimal", @maxlength = "8" })
+                    <div id="errIndian_CanterVehicleRentFees" style="display:none" class="alert-danger1">Indian Member Canter Vehicle Rent Fees is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Indian Member Gypsy Guide Fee : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Indian_GypsyGuideFee, new { @class = "form-control common numberordecimal", @maxlength = "8" })
+                    <div id="errIndian_GypsyGuideFee" style="display:none" class="alert-danger1">Indian Member Gypsy Guide Fee is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Indian Member Canter Guide Fee : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Indian_CanterGuideFee, new { @class = "form-control common numberordecimal", @maxlength = "8" })
+                    <div id="errIndian_CanterGuideFee" style="display:none" class="alert-danger1">Indian Member Canter Guide Fee is Required.</div>
+                </div>
+            </div>
+
+
+
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Foreigner Member Gypsy Vehicle Rent Fees : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Foreigner_GypsyVehicleRentFees, new { @class = "form-control common numberordecimal", @maxlength = "8" })
+                    <div id="errForeigner_GypsyVehicleRentFees" style="display:none" class="alert-danger1">Foreigner Member Gypsy Vehicle Rent Fees is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Foreigner Member Canter Vehicle Rent Fees : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Foreigner_CanterVehicleRentFees, new { @class = "form-control common numberordecimal", @maxlength = "8" })
+                    <div id="errForeigner_CanterVehicleRentFees" style="display:none" class="alert-danger1">Foreigner Member Canter Vehicle Rent Fees is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Foreigner Member Gypsy Guide Fee : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Foreigner_GypsyGuideFee, new { @class = "form-control common numberordecimal", @maxlength = "8" })
+                    <div id="errForeigner_GypsyGuideFee" style="display:none" class="alert-danger1">Foreigner Member Gypsy Guide Fee is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Foreigner Member Canter Guide Fee : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.Foreigner_CanterGuideFee, new { @class = "form-control common numberordecimal", @maxlength = "8" })
+                    <div id="errForeigner_CanterGuideFee" style="display:none" class="alert-danger1">Foreigner Member Canter Guide Fee is Required.</div>
+                </div>
+            </div>
+
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>GST on Guide Fee (%): <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.GSTonGuideFee, new { @class = "form-control common numberordecimal", @maxlength = "8" })
+                    <div id="errGSTonGuideFee" style="display:none" class="alert-danger1">GST on Guide Fee is Required.</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>GST on Vehicle Rent Fee (%): <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.GSTonVehicleRentFee, new { @class = "form-control common numberordecimal", @maxlength = "8" })
+                    <div id="errGSTonVehicleRentFee" style="display:none" class="alert-danger1">GST on Vehicle Rent Fee is Required.</div>
+                </div>
+            </div>
+           
+
+
+            <div class="col-lg-6" style="display:none">
+                <div class="form-group">
+                    <label>GuideFees: <span class="mandatory">*</span></label>
+                    @Html.HiddenFor(model => model.GuideFees, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errGuideFees" style="display:none" class="alert-danger1">Guide Fees is Required.</div>
+                </div>
+            </div>
+
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Single Occupancy Fees : <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.SingleOccupancyFees, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errSingleOccupancyFees" style="display:none" class="alert-danger1">Single Occupancy Fees is Required.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label>Double Occupancy Fees: <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(model => model.DoubleOccupancyFees, new { @class = "form-control common", @maxlength = "8" })
+                    <div id="errDoubleOccupancyFees" style="display:none" class="alert-danger1">Double Occupancy Fees is Required.</div>
+                </div>
+            </div>
+
+
+            @*<div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Student Fees: <span class="mandatory">*</span></label>
+                        @Html.TextBoxFor(model => model.StudentFees, new { @class = "form-control common", @maxlength = "8" })
+                        <div id="errStudentFees" style="display:none" class="alert-danger1">Student Fees is Required.</div>
+                    </div>
+                </div>*@
+
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Active / Deactive : <span class="mandatory">*</span></label>
+                        @Html.DropDownListFor(Model => Model.Isactive, (IEnumerable<SelectListItem>)ViewBag.ISactivelst, "--Select--", new { @class = "form-control common", id = "Isactive" })
+                        <div id="errIsactive" style="display:none" class="alert-danger1">Active / Deactive  is Required.</div>
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer" style="clear:both">
+                <div id="btn" class="col-lg-12">
+
+                    <button type="submit" class="btn btn-success"  value="Save" id="btn_submit1">
+                        <i class="fa fa-check"></i> Save
+                    </button>
+
+                    <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                        <i class="fa fa-times fa-fw"></i> Close
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+
+    }

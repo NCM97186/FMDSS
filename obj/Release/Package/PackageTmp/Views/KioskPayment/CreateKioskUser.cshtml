@@ -1,0 +1,252 @@
+﻿@model FMDSS.Models.KioskUserDetail
+@{
+    ViewBag.Title = "CreateKioskUser";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+<script src="http://ajax.microsoft.com/ajax/jquery.validate/1.7/jquery.validate.min.js"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#OrganizationName").prop("disabled", true);
+        $("#Designation").prop("disabled", true);
+        $("#OrganizationAddress").prop("disabled", true);
+        $("#OrganizationContact").prop("disabled", true);
+        $("#OrganizationSPOC").prop("disabled", true);
+
+
+        $("#DOB").datepicker({ yearRange: '1947:', dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, maxDate: new Date(), onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+
+        var currentDate = new Date();
+
+        $(document).on('keypress', '#DOB', function (event) {
+            event.preventDefault();
+            return false;
+
+        });
+
+        $('#DOB').keydown(function (event)
+        { return cancelBackspace(event) });
+
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+
+        $('#Individual').change(function () {
+
+            if ($(this).is(":checked")) { // check if the radio is checked
+                EnableDisableOrg(true);
+            }
+        })
+
+        $('#Organization').change(function () {
+
+            if ($(this).is(":checked")) { // check if the radio is checked
+                EnableDisableOrg(false);
+            }
+        })
+
+    });
+
+
+    function EnableDisableOrg(flag) {
+        $("#OrganizationName").prop("disabled", flag);
+        $("#Designation").prop("disabled", flag);
+        $("#OrganizationAddress").prop("disabled", flag);
+        $("#OrganizationContact").prop("disabled", flag);
+        $("#OrganizationSPOC").prop("disabled", flag);
+
+
+    }
+
+    OrganizationSPOC
+
+
+
+
+</script>
+
+<style>
+    #txt-area .form-control {
+        min-height: 101px;
+    }
+
+    .mar {
+        margin-bottom: 28px;
+    }
+
+    .field-validation-error {
+        color: red;
+    }
+</style>
+
+<div style="display:none" id="dvContainer">
+
+</div>
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">User Details</h1>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                @*<div class="panel-heading"></div>*@
+                @using (Html.BeginForm("CreateKioskUser", "KioskPayment", FormMethod.Post, new { @name = "Kioskuser" }))
+                {
+                    @Html.ValidationSummary(true)
+                    @Html.AntiForgeryToken()
+                    <div class="panel-body">
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Display Name: <span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(model => model.DisplayName, new { @class = "form-control", @maxlength = "50" })
+                                @Html.ValidationMessageFor(model => model.DisplayName)
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Email: <span class="mandatory"></span></label>
+                                @Html.TextBoxFor(model => model.Email, new { @class = "form-control", @maxlength = "100" })
+                                @Html.ValidationMessageFor(model => model.Email)
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Mobile Number: <span class="mandatory"></span></label>
+                                @Html.TextBoxFor(model => model.MobileNumber, new { @class = "form-control", @maxlength = "10" })
+                                @Html.ValidationMessageFor(model => model.MobileNumber)
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Gender: <span class="mandatory"></span></label><br />
+                                @Html.RadioButtonFor(model => model.Gender, "M", new { @class = "lib", @checked = "checked" })
+                                @Html.Label("Male")
+                                @Html.RadioButtonFor(model => model.Gender, "F", new { @class = "lib" })
+                                @Html.Label("Female")
+
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Date of birth: <span class="mandatory"></span></label>
+                                @Html.TextBoxFor(model => model.DOB, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.DOB)
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold" id="txt-area">
+                                <label>Postal Address: <span class="mandatory"></span></label>
+                                @Html.TextAreaFor(model => model.PostalAddress, new { @class = "form-control", @maxlength = "500" })
+                                @Html.ValidationMessageFor(model => model.PostalAddress)
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>City: <span class="mandatory"></span></label>
+                                @Html.TextBoxFor(model => model.City, new { @class = "form-control", @maxlength = "50" })
+                                @Html.ValidationMessageFor(model => model.City)
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>District: <span class="mandatory"></span></label>
+                                @Html.DropDownListFor(Model => Model.State, (IEnumerable<SelectListItem>)ViewBag.districts, "--Select--", new { @class = "form-control common", id = "State" })
+                                @Html.ValidationMessageFor(model => model.State)
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Postal Code: </label>
+                                @Html.TextBoxFor(model => model.PinCode, new { @class = "form-control", @maxlength = "6" })
+                                @Html.ValidationMessageFor(model => model.PinCode)
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 mar">
+                            <div class="form-group un-bold">
+                                <label>User Type: </label><br />
+
+                                @Html.RadioButtonFor(model => model.UserType, "Individual", new { @class = "lib", @checked = "checked", @id = "Individual" })
+                                @Html.Label("Individual")
+                                @Html.RadioButtonFor(model => model.UserType, "Organization", new { @class = "lib", @id = "Organization" })
+                                @Html.Label("Organization")
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>OrganizationName: </label>
+                                @Html.TextBoxFor(model => model.OrganizationName, new { @class = "form-control", @maxlength = "100" })
+
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Organization Address: </label>
+                                @Html.TextAreaFor(model => model.OrganizationAddress, new { @class = "form-control", @maxlength = "500" })
+
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Organization Contact: </label>
+                                @Html.TextAreaFor(model => model.OrganizationContact, new { @class = "form-control", @maxlength = "500" })
+                                @Html.ValidationMessageFor(model => model.OrganizationContact)
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group un-bold">
+                                <label>Organization SPOC: </label>
+                                @Html.TextAreaFor(model => model.OrganizationSPOC, new { @class = "form-control", @maxlength = "500" })
+                            </div>
+                        </div>
+
+
+
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <button type="submit" class="btn btn-success" name="Command" value="">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+                                <button type="button" name="Command" id="btn_Cancel" value="Cancel" class="btn btn-danger">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+
+                            </div>
+                        </div>
+                    </div>
+            <!-- /.panel-body -->
+                }
+
+
+            </div>
+            <!-- /.panel -->
+
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>

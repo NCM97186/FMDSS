@@ -1,0 +1,433 @@
+﻿@model FMDSS.Models.MIS.MISFPM
+@{
+    ViewBag.Title = "MISParivadDetailsStatus";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_SuperAdmin.cshtml";
+}
+
+<h2></h2>
+
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        var RootUrl = '@Url.Content("~/")';
+
+        $('#Circle').change(function (e) {
+
+            $('#Circle_Text').val($("#Circle option:selected").text());
+
+
+            $("#Division").empty();
+            $("#Range").empty();
+            $("#Range").append('<option value="' + "0" + '">' + "--Select--" + '</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MISProducation/DivisionData', // we are calling json method
+                dataType: 'json',
+                data: { circleCode: $("#Circle").val() },
+                success: function (circle) {
+                    $.each(circle, function (i, items) {
+                        $("#Division").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#Division').change(function (e) {
+            $("#Range").empty();
+            $('#Division_Text').val($("#Division option:selected").text());
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MISProducation/RangeData', // we are calling json method
+                dataType: 'json',
+                data: { DivisionCode: $("#Division").val() },
+                success: function (divCode) {
+                    $.each(divCode, function (i, items) {
+                        $("#Range").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+    });
+</script>
+
+<style>
+    #tbl {
+        overflow-x: auto;
+        overflow-y: auto;
+        padding: 15px;
+        width: 100%;
+        height: 400px;
+    }
+</style>
+<script>
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+
+
+        // date validation ========================================================================
+        var currentYear = (new Date).getFullYear();
+
+        var Range = '2008:' + (currentYear + 1)
+
+        $("#FromDate,#ToDate").datepicker({ maxDate: new Date(), yearRange: Range, dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        var currentDate = new Date();
+
+        $("#FromDate").change(function () {
+            $("#ToDate").val('');
+        });
+
+        $(document).on('keypress', '#FromDate,#ToDate', function (event) {
+
+            event.preventDefault();
+            return false;
+
+        });
+
+        $('#FromDate,#ToDate').keydown(function (event)
+        { return cancelBackspace(event) });
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+        $("#ToDate").change(function () {
+            var str1 = $("#FromDate").val();
+            var str2 = $("#ToDate").val();
+
+            var L = 3, d1 = $("#FromDate").val().split('/'), d2 = $("#ToDate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#ToDate").val('');
+                alert('Date Must be GreaterThen From Date');
+            }
+        });
+
+        // date validation ========================================================================
+
+
+        $(document).on('click', '.GetRecords', function (e) {
+
+            
+            var OffenseStatus = $(this).parents('tr').find('input[name=OffenseStatus1]').val();
+            var PlaceId = $(this).parents('tr').find('input[name=Index1]').val();
+           
+            var a1 =  $('#HIERARCHY_CODE').val();
+            var a2 = $('#FromDate').val();
+            var a3 = $('#ToDate').val();
+           
+            ('#btn_' + PlaceId).src = "images/minus.png";
+            $('#ID_' + PlaceId).toggle();
+
+            $('#ID_' + PlaceId).html("");
+
+          
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'MISFPM/GetApplicationNo', // we are calling json method
+                dataType: 'json',
+                data: { HIERARCHY_CODE: a1, FromDate: a2, ToDate: a3, OffenseStatus: OffenseStatus, },
+                success: function (response) {
+                    var str = '<thead><th>Case ID</th><th>Assign To</th><th>Assign Date</th></thead>';
+                    $('#ID_' + PlaceId).append(str);
+                    $.each(response, function (i, item) {
+                        debugger;
+                        $('#ID_' + PlaceId).append('<tbody><tr> <td>  <a id="btnAddModel" data-target="#myModal" data-toggle="modal" href="javascript:void(0);" onclick=CallApplicationDetails("' + response[i].OFFENSE_CODE + '") >' + response[i].OFFENSE_CODE + ' </a></td><td>' + response[i].AssignTo + '</td><td>' + response[i].AssignDate + '</td></tr>  </tbody>');
+
+                    });
+                },
+                error: function (ex) {
+                    alert(ex.error);
+                }
+            });
+        });
+      
+       
+   
+        $('#btn_submit1').click(function (e) {
+
+            if ($("#Circle option").length > 1) {
+
+                if ($('option:selected', $('#Circle')).index() == 0) {
+                    $("#errCircle").css("display", "block");
+                    $('#errCircle').focus();
+                    return false;
+                }
+                else {
+                    $("#errCircle").css("display", "none");
+                }
+            }
+            if ($("#Division option").length > 1) {
+
+                if ($('option:selected', $('#Division')).index() == 0) {
+                    $("#errDivision").css("display", "block");
+                    $('#errDivision').focus();
+                    return false;
+                }
+                else {
+                    $("#errDivision").css("display", "none");
+                }
+            }
+
+            if ($("#Range option").length > 1) {
+                if ($('option:selected', $('#Range')).index() == 0) {
+                    $("#errRange").css("display", "block");
+                    $('#errRange').focus();
+                    return false;
+                }
+                else {
+                    $("#errRange").css("display", "none");
+                }
+            }
+
+                if ($('#FromDate').val() == '') {
+                    $("#errFromDate").css("display", "block");
+                    $('#errFromDate').focus();
+                    return false;
+                }
+                else {
+                    $("#errFromDate").css("display", "none");
+                }
+
+                if ($('#ToDate').val() == '') {
+                    $("#errToDate").css("display", "block");
+                    $('#errToDate').focus();
+                    return false;
+                }
+                else {
+                    $("#errToDate").css("display", "none");
+                }
+
+
+
+               
+
+               
+
+
+        });
+
+
+
+
+
+
+    });
+
+    function CallApplicationDetails(id) {
+
+
+        $.ajax({
+            type: 'GET',
+            url: RootUrl + 'MISFPM/GetApplicationDetails', // we are calling json method
+            dataType: 'html',
+            data: { ids: id },
+            success: function (data) {
+                $('#modelPlace').html(data);
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+
+    };
+
+</script>
+
+<div class="row">
+    <div class="col-lg-9 pad">
+        <h1 class="page-header"><span>Report : Parivad Detail Status</span></h1>
+    </div>
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog modal-lg" id="modelPlace">
+            <!-- Modal content-->
+        </div>
+    </div>
+
+
+    @using (Html.BeginForm("MISParivadDetailsStatus", "MISFPM", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+
+
+                    @Html.HiddenFor(model => model.CircleStatus)
+                    @if (Model.CircleStatus == "True")
+                    {
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Circle:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(model => model.Circle, (IEnumerable<SelectListItem>)ViewBag.CIRCLE, new { @class = "form-control", @readonly = "readonly", id = "Circle" })
+                                <div id="errCircle" style="display:none" class="alert-danger1">Circle is Required.</div>
+                                @Html.Hidden("Circle_Text", new { @class = "form-control", id = "Circle_Text" })
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Circle:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(model => model.Circle, (IEnumerable<SelectListItem>)ViewBag.CIRCLE, new { @class = "form-control", id = "Circle" })
+                                <div id="errCircle" style="display:none" class="alert-danger1">Circle is Required.</div>
+                                @Html.Hidden("Circle_Text", new { @class = "form-control", id = "Circle_Text" })
+                            </div>
+                        </div>
+                    }
+                    @Html.HiddenFor(model => model.DivisionStatus)
+                    @if (Model.DivisionStatus == "True")
+                    {
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Division:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(model => model.Division, (IEnumerable<SelectListItem>)ViewBag.Division, new { @class = "form-control", @readonly = "readonly", id = "Division" })
+                                <div id="errDivision" style="display:none" class="alert-danger1">Division is Required.</div>
+                                @Html.Hidden("Division_Text", new { @class = "form-control", id = "Division_Text" })
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Division:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(model => model.Division, (IEnumerable<SelectListItem>)ViewBag.Division, new { @class = "form-control", id = "Division" })
+                                <div id="errDivision" style="display:none" class="alert-danger1">Division is Required.</div>
+                                @Html.Hidden("Division_Text", new { @class = "form-control", id = "Division_Text" })
+                            </div>
+                        </div>
+                    }
+                    @Html.HiddenFor(model => model.RangeStatus, new { @id = "RangeStatus" })
+                    @if (Model.RangeStatus == "True")
+                    {
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Range:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(model => model.Range, (IEnumerable<SelectListItem>)ViewBag.Range, new { @class = "form-control", @readonly = "readonly", id = "Range" })
+                                <div id="errRange" style="display:none" class="alert-danger1">Range is Required.</div>
+                                @Html.Hidden("Range_Text", new { @class = "form-control", id = "Range_Text" })
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Range:<span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(model => model.Range, (IEnumerable<SelectListItem>)ViewBag.Range, new { @class = "form-control", id = "Range" })
+                                <div id="errRange" style="display:none" class="alert-danger1">Range is Required.</div>
+                                @Html.Hidden("Range_Text", new { @class = "form-control", id = "Range_Text" })
+                            </div>
+                        </div>
+                    }
+
+
+
+
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>From Date:<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.FromDate, new { @class = "form-control common ", id = "FromDate" })
+                            <span id="errFromDate" style="display: none" class="alert-danger1">From Date is Required.</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>To Date:<span class="mandatory">*</span></label>
+                            @Html.TextBoxFor(model => model.ToDate, new { @class = "form-control common ", id = "ToDate" })
+                            <span id="errToDate" style="display: none" class="alert-danger1">To Date is Required.</span>
+                        </div>
+                    </div>
+
+
+                    <div id="btn" class="col-lg-12">
+
+                        <button type="submit" class="btn btn-success" name="Command" value="Save" id="btn_submit1">
+                            <i class="fa fa-check"></i> Submit
+                        </button>
+                        <button type="button" class="btn btn-warning" id="btn_reset">
+                            <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                        </button>
+
+                    </div>
+
+                </div>
+            </div>
+
+         
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="dataTable_wrapper">
+                        <div id="tbl" class="table-responsive">
+
+                            <table class="table table-striped table-bordered table-hover table-responsive gridtable">
+
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Offense Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in ViewData["ListMISParivadDetailsStatus"] as IEnumerable<FMDSS.Models.MIS.MISFPM>)
+                                    {
+                                        <tr>
+                                            <td>@Html.DisplayFor(model => item.Index)</td>
+                                            <td>@Html.DisplayFor(model => item.OffenseStatusText)
+                                                @Html.Hidden("OffenseStatus1", item.OffenseStatus)
+                                                @Html.Hidden("Index1", item.Index)
+                                                <img src="~/images/Plus.png" id="btn_@item.Index" class="GetRecords" title="Expand for more details" />
+                                            </td>
+                                            <td>
+                                                <table cellpadding="0" id="ID_@item.Index" style="display:none;" class="table table-striped table-bordered table-hover table-responsive dataTable no-footer"></table>
+
+                                            </td>
+                                        </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+
+
+        </div>
+    }
+</div>
+
+
+

@@ -1,0 +1,445 @@
+﻿@model FMDSS.Models.OtherStateElephantMovement
+
+
+<script src="~/js/jquery.min.js"></script>
+
+<script src="~/Scripts/jquery.validate.js"></script>
+
+<script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+
+
+<script type="text/javascript">
+    $(".digit").keypress(function (e) {
+        if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+            return false;
+        }
+    });
+
+
+
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        // date validation ========================================================================
+        var currentYear = (new Date).getFullYear();
+
+       
+
+
+
+
+        var Range = '2008:' + (currentYear + 1)
+        $("#ReturnFromDate,#ReturnToDate, #FromDate,#ToDate,#OtherStateRequestedTPDate").datepicker({ yearRange: Range, dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        var currentDate = new Date();
+        //$("#txt_fromdate").datepicker("setDate", currentDate);
+        //$("#txt_todate").datepicker("setDate", currentDate);
+
+        $("#FromDate").change(function () {
+            $("#ToDate").val('');
+            $("#ReturnFromDate").val('');
+            $("#ReturnToDate").val('');
+
+        });
+
+        $("#ReturnFromDate").change(function () {
+            $("#ReturnToDate").val('');
+        });
+
+
+        $(document).on('keypress', '#ReturnFromDate,#ReturnToDate, #FromDate,#ToDate,#OtherStateRequestedTPDate', function (event) {
+
+            event.preventDefault();
+            return false;
+
+        });
+
+        $('#ReturnFromDate,#ReturnToDate, #FromDate,#ToDate,#OtherStateRequestedTPDate').keydown(function (event)
+        { return cancelBackspace(event) });
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+        $("#ToDate").change(function () {
+            var str1 = $("#FromDate").val();
+            var str2 = $("#ToDate").val();
+
+            var L = 3, d1 = $("#FromDate").val().split('/'), d2 = $("#ToDate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#ToDate").val('');
+                alert('Date Must be GreaterThen From Date');
+            }
+        });
+
+
+
+
+        $("#ReturnFromDate").change(function () {
+            var str1 = $("#ReturnFromDate").val();
+            var str2 = $("#ToDate").val();
+
+            var L = 3, d1 = $("#ToDate").val().split('/'), d2 = $("#ReturnFromDate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#ReturnFromDate").val('');
+                alert('Date Must be GreaterThen To Date');
+            }
+        });
+
+
+        $("#ReturnToDate").change(function () {
+            var str1 = $("#ReturnFromDate").val();
+            var str2 = $("#ReturnToDate").val();
+
+            var L = 3, d1 = $("#ReturnFromDate").val().split('/'), d2 = $("#ReturnToDate").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#ReturnToDate").val('');
+                alert('Date Must be GreaterThen Return From Date');
+            }
+        });
+
+
+        // date validation ========================================================================
+
+        $('#FromStateID').change(function (e) {
+            $("#FromDistrict_Code").empty();
+            $("#FromDistrict_Code").append('<option value="">--Select--</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'Elephant/DistrictData', // we are calling json method
+                dataType: 'json',
+                data: { StateId: $('#FromStateID').val() },
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#FromDistrict_Code").append('<option value=' + items.Value + '>' + items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+
+
+        $('#ToStateId').change(function (e) {
+            $("#ToDistrictId").empty();
+            $("#ToDistrictId").append('<option value="">--Select--</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'Elephant/DistrictData', // we are calling json method
+                dataType: 'json',
+                data: { StateId: $('#ToStateId').val() },
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ToDistrictId").append('<option value=' + items.Value + '>' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#FromStateId').change(function (e) {
+            $("#FromDistrictId").empty();
+            $("#FromDistrictId").append('<option value="">--Select--</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'Elephant/DistrictData', // we are calling json method
+                dataType: 'json',
+                data: { StateId: $('#FromStateId').val() },
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#FromDistrictId").append('<option value=' + items.Value + '>' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+        $('#ToDistrictId').change(function (e) {
+            $("#RajasthanAreaDCF").empty();
+            $("#RajasthanAreaDCF").append('<option value="">--Select--</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'Elephant/GetRajasthanAreaDCF', // we are calling json method
+                dataType: 'json',
+                data: { DistrictId: $('#ToDistrictId').val() },
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#RajasthanAreaDCF").append('<option value=' + items.Value + '>' +
+                            items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+            return false;
+        });
+
+
+
+        $("#OtherStateRequestedTPDoc").change(function (e) {
+            var iSize = parseFloat($("#OtherStateRequestedTPDoc")[0].files[0].size / 1024).toFixed(2);
+            if (iSize > 100) {
+                $('#OtherStateRequestedTPDoc').val('');
+                $('#errOtherStateRequestedTPDoc').show();
+                $('#errOtherStateRequestedTPDoc').html("</br>Upload ID should not be larger than 100 KB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#OtherStateRequestedTPDoc').focus();
+                return false;
+            }
+            var file = $("#OtherStateRequestedTPDoc").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#OtherStateRequestedTPDoc').val('');
+                    $('#errOtherStateRequestedTPDoc').show();
+                    $('#errOtherStateRequestedTPDoc').html("Please upload only jpeg or jpg or pdf or png or gif file format in MedicalCertificate DOC Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#OtherStateRequestedTPDoc').focus();
+                    return false;
+                } else {
+                    $('#errOtherStateRequestedTPDoc').hide();
+                }
+            }
+            else { $('#errOtherStateRequestedTPDoc').hide(); }
+
+        });
+
+
+
+        $("#MovementRecommendationLatter").change(function (e) {
+            var iSize = parseFloat($("#MovementRecommendationLatter")[0].files[0].size / 1024).toFixed(2);
+            if (iSize > 100) {
+                $('#MovementRecommendationLatter').val('');
+                $('#errMovementRecommendationLatter').show();
+                $('#errMovementRecommendationLatter').html("</br>Upload ID should not be larger than 100 KB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#MovementRecommendationLatter').focus();
+                return false;
+            }
+            var file = $("#MovementRecommendationLatter").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $('#MovementRecommendationLatter').val('');
+                    $('#errMovementRecommendationLatter').show();
+                    $('#errMovementRecommendationLatter').html("Please upload only jpeg or jpg or pdf or png or gif file format in Movement Recommendation Latter DOC Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#MovementRecommendationLatter').focus();
+                    return false;
+                } else {
+                    $('#errMovementRecommendationLatter').hide();
+                }
+            }
+            else { $('#errMovementRecommendationLatter').hide(); }
+
+        });
+
+    });
+
+
+</script>
+
+
+@using (Html.BeginForm("IssueNOCOtherStateMovement", "Elephant", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                &times;
+            </button>
+            <h4 class="modal-title">
+                Other State Elephant Movement
+            </h4>
+        </div>
+
+        <div class="modal-body">
+
+
+            <div class="col-lg-6 un-bold">
+                <div class="form-group">
+                    <label>@Html.LabelFor(Model => Model.FromStateId) <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.FromStateId, (IEnumerable<SelectListItem>)ViewBag.From_place, "--Select--", new { @class = "form-control common", id = "FromStateId" })
+                    @Html.ValidationMessageFor(model => model.FromStateId, "", new { @class = "alert-danger1" })
+                </div>
+            </div>
+
+            <div class="col-lg-6 un-bold">
+                <div class="form-group">
+                    <label>@Html.LabelFor(Model => Model.ToStateId) <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.ToStateId, (IEnumerable<SelectListItem>)ViewBag.ToStateId, "--Select--", new { @class = "form-control common", id = "ToStateId" })
+                    @Html.ValidationMessageFor(model => model.ToStateId, "", new { @class = "alert-danger1" })
+                </div>
+            </div>
+
+            <div class="col-lg-6 un-bold">
+                <div class="form-group">
+                    <label>@Html.LabelFor(Model => Model.FromDistrictId) <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.FromDistrictId, (IEnumerable<SelectListItem>)ViewBag.District, "--Select--", new { @class = "form-control common", id = "FromDistrictId" })
+                    @Html.ValidationMessageFor(model => model.FromDistrictId, "", new { @class = "alert-danger1" })
+                </div>
+                <div id="errordiv10" style="display:none" class="alert-danger1"></div>
+            </div>
+            <div class="col-lg-6 un-bold">
+                <div class="form-group">
+                    <label>@Html.LabelFor(Model => Model.ToDistrictId) <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.ToDistrictId, (IEnumerable<SelectListItem>)ViewBag.District, "--Select--", new { @class = "form-control common", id = "ToDistrictId" })
+                    @Html.ValidationMessageFor(model => model.ToDistrictId, "", new { @class = "alert-danger1" })
+                </div>
+            </div>
+
+            <div class="col-lg-12 un-bold">
+                <div class="form-group">
+                    <label>@Html.LabelFor(Model => Model.RajasthanAreaDCF) <span class="mandatory">*</span></label>
+                    @Html.DropDownListFor(Model => Model.RajasthanAreaDCF, (IEnumerable<SelectListItem>)ViewBag.District, "--Select--", new { @class = "form-control common", id = "RajasthanAreaDCF" })
+                    @Html.ValidationMessageFor(model => model.RajasthanAreaDCF, "", new { @class = "alert-danger1" })
+
+                </div>
+            </div>
+
+            <div class="col-lg-6 un-bold">
+                <div class="form-group">
+                    <label>@Html.LabelFor(Model => Model.FromDate) <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(Model => Model.FromDate, new { @class = "form-control common", id = "FromDate" })
+                    @Html.ValidationMessageFor(model => model.FromDate, "", new { @class = "alert-danger1" })
+
+                </div>
+            </div>
+
+            <div class="col-lg-6 un-bold">
+                <div class="form-group">
+                    <label>@Html.LabelFor(Model => Model.ToDate) <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(Model => Model.ToDate, new { @class = "form-control common", id = "ToDate" })
+                    @Html.ValidationMessageFor(model => model.ToDate, "", new { @class = "alert-danger1" })
+
+                </div>
+            </div>
+
+           
+
+
+            <div class="col-lg-6 un-bold">
+                <div class="form-group">
+                    <label>@Html.LabelFor(Model => Model.ReturnFromDate) <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(Model => Model.ReturnFromDate, new { @class = "form-control common", id = "ReturnFromDate" })
+                    @Html.ValidationMessageFor(model => model.ReturnFromDate, "", new { @class = "alert-danger1" })
+
+                </div>
+            </div>
+
+            <div class="col-lg-6 un-bold">
+                <div class="form-group">
+                    <label>@Html.LabelFor(Model => Model.ReturnToDate) <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(Model => Model.ReturnToDate, new { @class = "form-control common", id = "ReturnToDate" })
+                    @Html.ValidationMessageFor(model => model.ReturnToDate, "", new { @class = "alert-danger1" })
+
+                </div>
+            </div>
+
+
+            <div class="col-lg-6 un-bold">
+                <div class="form-group">
+                    <label>@Html.LabelFor(Model => Model.OtherStateRequestedTPNumber) <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(Model => Model.OtherStateRequestedTPNumber, new { @class = "form-control common", id = "OtherStateRequestedTPNumber" })
+                    @Html.ValidationMessageFor(model => model.OtherStateRequestedTPNumber, "", new { @class = "alert-danger1" })
+
+                </div>
+            </div>
+
+            <div class="col-lg-6 un-bold">
+                <div class="form-group">
+                    <label>@Html.LabelFor(Model => Model.OtherStateRequestedTPDate) <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(Model => Model.OtherStateRequestedTPDate, new { @class = "form-control common", id = "OtherStateRequestedTPDate" })
+                    @Html.ValidationMessageFor(model => model.OtherStateRequestedTPDate, "", new { @class = "alert-danger1" })
+
+                </div>
+            </div>
+
+            <div class="col-lg-6 un-bold">
+                <div class="form-group">
+                    <label>@Html.LabelFor(Model => Model.OtherStateContactNo) <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(Model => Model.OtherStateContactNo, new { @class = "form-control common digit", id = "OtherStateContactNo",@maxlength=10 })
+                    @Html.ValidationMessageFor(model => model.OtherStateContactNo, "", new { @class = "alert-danger1" })
+
+                </div>
+            </div>
+
+            <div class="col-lg-6 un-bold">
+                <div class="form-group">
+                    <label>@Html.LabelFor(Model => Model.OtherStateRequestedTPDoc) <span class="mandatory">*</span></label>
+                    @Html.TextBoxFor(Model => Model.OtherStateRequestedTPDoc, new { Type = "File", @class = "form-control common", @id = "OtherStateRequestedTPDoc", name = "OtherStateRequestedTPDoc" })
+                    @Html.ValidationMessageFor(model => model.OtherStateRequestedTPDoc, "", new { @class = "alert-danger1", @id = "errOtherStateRequestedTPDoc" })
+
+                </div>
+            </div>
+
+
+        </div>
+        <div class="modal-footer" style="clear:both">
+            <div id="btn" class="col-lg-12">
+
+                <button type="submit" class="btn btn-success" value="Save" id="btn_submit1">
+                    <i class="fa fa-check"></i> Save
+                </button>
+
+                <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Close
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+}
+
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/js/bootstrap.min.js"></script>
+<script src="~/js/Common.js"></script>
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />

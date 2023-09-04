@@ -1,0 +1,426 @@
+﻿@{
+    ViewBag.Title = "ManageNotice";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString());
+}
+
+@model IEnumerable<FMDSS.Entity.DOD.ViewModel.AuctionClearanceDetails>   
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header"><span>Auction Report</span></h1>
+        @Html.Partial("_ErrorMsg")
+        @*<div id="datetimepicker" class="input-append date">
+            <input type="text"></input>
+            <span class="add-on">
+                <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
+            </span>
+        </div>*@
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="help"><a href="~/PDFFolder/User Manual_Auction_Department.pdf" target="_blank">Help Document</a></div> 
+        <div class="col-lg-12"> 
+            <div class="panel with-nav-tabs panel-default"> 
+                <div class="panel-heading">
+                    <ul class="nav nav-tabs" id="myTab">
+                        <li class=""><a href="#tab1default" data-toggle="tab"><i class="fa fa-user fa-fw"></i>Clearance Report</a></li>
+                        <li class="hide"><a href="#tab2default " data-toggle="tab"><i class="fas fa-truck"></i>Produce Wise Report</a></li>
+                        <li class="hide"><a href="#tab3default " data-toggle="tab"><i class="fas fa-truck"></i>Product Wise Report</a></li>
+                        <li class="hide"><a href="#tab4default " data-toggle="tab"><i class="fas fa-truck"></i>Winner Wise Report</a></li>
+                        <li class="hide"><a href="#tab5default " data-toggle="tab"><i class="fas fa-truck"></i>Auction Register Report</a></li>
+                    </ul>
+
+                </div>
+                <div class="panel-body">
+                    <div class="tab-content">
+                        <div class="tab-pane fade scroll active in" id="tab1default">
+                            <div class="panel panel-default"> 
+                                <div class="panel-body">
+                                    <!--./Search-->
+                                    <!--Add New Btn-->
+                                    <div class="col-lg-3 rgt pull-right">
+                                        <button type="button" class="btn btn-success AddNewAuction pull-right" data-toggle="modal" id="addNewnotice" title="Add New Notice" onclick="ViewNoticeCommon('0','AuctionClearance')">
+                                            <i class="fa fa-plus"></i> Auction Clearance
+                                        </button>
+                                    </div>
+                                    <!--./Add New Btn-->
+
+                                    <div class="dataTable_wrapper">
+                                        <table class="table table-striped table-bordered table-hover table-responsive" id="tblClearance">
+                                            <thead>
+                                                <tr>
+                                                    <th>S.No </th>
+                                                    <th>Request No.</th> 
+                                                    <th>FatherName</th>
+                                                    <th>Address</th>
+                                                    <th>ClearanceFromDate</th>
+                                                    <th>ClearanceToDate</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @if (Model != null)
+                                                {
+                                                    foreach (var item in Model)
+                                                    {
+                                                        <tr>
+                                                            <td>@Html.DisplayFor(model => item.SNo)</td>
+                                                            <td>@Html.DisplayFor(model => item.RequestedId)</td> 
+                                                            <td>@Html.DisplayFor(model => item.FatherName)</td>
+                                                            <td>@Html.DisplayFor(model => item.DestinationAddress)</td>
+                                                            <td>@Html.DisplayFor(model => item.ClearanceFromDate)</td>
+                                                            <td>@Html.DisplayFor(model => item.ClearanceToDate)</td>
+                                                            <td>
+                                                                @if (string.IsNullOrWhiteSpace(item.ClearanceDocPath))
+                                                                {
+                                                                    <a href="javascript:void(0);" onclick="SendOTPEsignIntegration('@item.ClearanceDetailsID', 'Clearance')">Generate</a>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <a target="_blank" href="@Url.Content("~/" + item.ClearanceDocPath)">Download</a>
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                                <!-- /.panel-body -->
+
+                            </div>
+                        </div>
+                        <div class="tab-pane fade  in scroll" id="tab2default">
+                            <div class="panel panel-default">
+                                <div class="panel-body"> 
+                                    <div class="dataTable_wrapper">
+                                        <table class="table table-striped table-bordered table-hover table-responsive" id="tblProduceWise">
+                                            <thead>
+                                                <tr>
+                                                    <th>S.No </th>
+                                                    <th>Request No.</th> 
+                                                    <th>FatherName</th>
+                                                    <th>Address</th>
+                                                    <th>ClearanceFromDate</th>
+                                                    <th>ClearanceToDate</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @if (Model != null)
+                                                {
+                                                    foreach (var item in Model)
+                                                    {
+                                                        <tr>
+                                                            <td>@Html.DisplayFor(model => item.SNo)</td>
+                                                            <td>@Html.DisplayFor(model => item.RequestedId)</td> 
+                                                            <td>@Html.DisplayFor(model => item.FatherName)</td>
+                                                            <td>@Html.DisplayFor(model => item.DestinationAddress)</td>
+                                                            <td>@Html.DisplayFor(model => item.ClearanceFromDate)</td>
+                                                            <td>@Html.DisplayFor(model => item.ClearanceToDate)</td>
+                                                            <td>
+                                                                @if (string.IsNullOrWhiteSpace(item.ProduceWiseDocPath))
+                                                                {
+                                                                    <a href="javascript:void(0);" onclick="SendOTPEsignIntegration('@item.ClearanceDetailsID','ProduceWise')">Generate</a>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <a target="_blank" href="@Url.Content("~/" + item.ProduceWiseDocPath)">Download</a>
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                                <!-- /.panel-body -->
+
+                            </div>
+                        </div>
+                        <div class="tab-pane fade  in scroll" id="tab3default">
+                            <div class="panel panel-default">
+                                <div class="panel-body">  
+                                    <div class="dataTable_wrapper">
+                                        <table class="table table-striped table-bordered table-hover table-responsive" id="tblProductWise">
+                                            <thead>
+                                                <tr>
+                                                    <th>S.No </th>
+                                                    <th>Request No.</th> 
+                                                    <th>FatherName</th>
+                                                    <th>Address</th>
+                                                    <th>ClearanceFromDate</th>
+                                                    <th>ClearanceToDate</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @if (Model != null)
+                                                {
+                                                    foreach (var item in Model)
+                                                    {
+                                                        <tr>
+                                                            <td>@Html.DisplayFor(model => item.SNo)</td>
+                                                            <td>@Html.DisplayFor(model => item.RequestedId)</td> 
+                                                            <td>@Html.DisplayFor(model => item.FatherName)</td>
+                                                            <td>@Html.DisplayFor(model => item.DestinationAddress)</td>
+                                                            <td>@Html.DisplayFor(model => item.ClearanceFromDate)</td>
+                                                            <td>@Html.DisplayFor(model => item.ClearanceToDate)</td>
+                                                            <td>
+                                                                @if (string.IsNullOrWhiteSpace(item.ProductWiseDocPath))
+                                                                {
+                                                                    <a href="javascript:void(0);" onclick="SendOTPEsignIntegration('@item.ClearanceDetailsID', 'ProductWise')">Generate</a>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <a target="_blank" href="@Url.Content("~/" + item.ProductWiseDocPath)">Download</a>
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                                <!-- /.panel-body -->
+
+                            </div>
+                        </div>
+                        <div class="tab-pane fade  in scroll" id="tab4default">
+                            <div class="panel panel-default">
+                                <div class="panel-body">  
+                                    <div class="dataTable_wrapper">
+                                        <table class="table table-striped table-bordered table-hover table-responsive" id="tblWinnerWise">
+                                            <thead>
+                                                <tr>
+                                                    <th>S.No </th>
+                                                    <th>Request No.</th> 
+                                                    <th>FatherName</th>
+                                                    <th>Address</th>
+                                                    <th>ClearanceFromDate</th>
+                                                    <th>ClearanceToDate</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @if (Model != null)
+                                                {
+                                                    foreach (var item in Model)
+                                                    {
+                                                        <tr>
+                                                            <td>@Html.DisplayFor(model => item.SNo)</td>
+                                                            <td>@Html.DisplayFor(model => item.RequestedId)</td> 
+                                                            <td>@Html.DisplayFor(model => item.FatherName)</td>
+                                                            <td>@Html.DisplayFor(model => item.DestinationAddress)</td>
+                                                            <td>@Html.DisplayFor(model => item.ClearanceFromDate)</td>
+                                                            <td>@Html.DisplayFor(model => item.ClearanceToDate)</td>
+                                                            <td>
+                                                                @if (string.IsNullOrWhiteSpace(item.WinnerWiseDocPath))
+                                                                {
+                                                                    <a href="javascript:void(0);" onclick="SendOTPEsignIntegration('@item.ClearanceDetailsID','WinnerWise')">Generate</a>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <a target="_blank" href="@Url.Content("~/" + item.WinnerWiseDocPath)">Download</a>
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                                <!-- /.panel-body -->
+
+                            </div>
+                        </div>
+                        <div class="tab-pane fade  in scroll" id="tab5default">
+                            <div class="panel panel-default">
+                                <div class="panel-body"> 
+                                    <div class="dataTable_wrapper">
+                                        <table class="table table-striped table-bordered table-hover table-responsive" id="tblAuctionRegister">
+                                            <thead>
+                                                <tr>
+                                                    <th>S.No </th>
+                                                    <th>Request No.</th> 
+                                                    <th>FatherName</th>
+                                                    <th>Address</th>
+                                                    <th>ClearanceFromDate</th>
+                                                    <th>ClearanceToDate</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @if (Model != null)
+                                                {
+                                                    foreach (var item in Model)
+                                                    {
+                                                        <tr>
+                                                            <td>@Html.DisplayFor(model => item.SNo)</td>
+                                                            <td>@Html.DisplayFor(model => item.RequestedId)</td> 
+                                                            <td>@Html.DisplayFor(model => item.FatherName)</td>
+                                                            <td>@Html.DisplayFor(model => item.DestinationAddress)</td>
+                                                            <td>@Html.DisplayFor(model => item.ClearanceFromDate)</td>
+                                                            <td>@Html.DisplayFor(model => item.ClearanceToDate)</td>
+                                                            <td>
+                                                                @if (string.IsNullOrWhiteSpace(item.AuctionRegisterDocPath))
+                                                                {
+                                                                    <a href="javascript:void(0);" onclick="SendOTPEsignIntegration('@item.ClearanceDetailsID','AuctionRegister')">Generate</a>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <a target="_blank" href="@Url.Content("~/" + item.AuctionRegisterDocPath)">Download</a>
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                                <!-- /.panel-body -->
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+        <div class="modal fade in" id="myViewCommonModel" tabindex="-1" role="dialog" aria-hidden="false"></div>
+        <div class="modal fade in" id="AadharCardModal" tabindex="-1" role="dialog" aria-hidden="false">
+            @using (Ajax.BeginForm("GenerateReport", "AuctionRequest", new AjaxOptions { HttpMethod = "POST", OnSuccess = "BackToList('ManageAuctionClearance')" }))
+            {
+                <div class="modal-dialog mdw">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                            <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> Please Enter Valid OTP on your Registered Mobile Number </label></h4>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- From URL Get -->
+                            @Html.TextBox("OTP", null, new { @class = "form-control", autocomplete="off" })
+                            @Html.Hidden("TransationID", null, new { @class = "form-control", id = "TransationID" })
+                            @Html.Hidden("RequestID", null, new { @class = "form-control", id = "RequestID" })
+
+
+                            <!-- /. From URL Get -->
+                        </div>
+                        <!-- /.modal-body -->
+                        <div class="modal-footer" id="fot-f">
+                            <div id="btn" class="col-lg-12">
+                                <button name="Command" id="btnOTPContinue" class="btn btn-success" type="submit" value="Continue" style="width: auto">
+                                    <i class="fa fa-times fa-fw"></i> Submit
+                                </button>
+                                <button name="button" class="btn btn-danger" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                                    <i class="fa fa-times fa-fw"></i> Exit
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- /.modal-content -->
+                </div>
+            <!-- /.modal-dialog -->
+            }
+        </div>
+    </div>
+</div> 
+<script src="~/Scripts/Controller/Common.js"></script>
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+    $(document).ready(function () { 
+        $('#tblClearance,#tblProduceWise,#tblProductWise,#tblWinnerWise,#tblAuctionRegister').DataTable({
+            responsive: true,
+            "aaSorting": [],
+            'aoColumnDefs': [{
+                'bSortable': false,
+                'aTargets': ['nosort']
+            }]
+        });
+    });
+    function ViewNoticeCommon(parentID, actionType) {
+        $("#lbpl_header").text('View Auction Notice Details');
+
+        $.ajax({
+            type: 'GET',
+            url: RootUrl + 'AuctionRequest/ViewDetailsCommon',
+            dataType: 'html',
+            data: { "parentID": $.trim(parentID), "actionType": actionType },
+            success: function (data) {
+                $("#myViewCommonModel").html(data); $('#myViewCommonModel').modal('show');
+            },
+            error: function (ex) {
+                alert('Failed to retrieve details.' + ex);
+            }
+        });
+    }
+
+    function SendOTPEsignIntegration(reqID,type) {
+        $('#RequestID').val(reqID);
+        var RequestId = reqID;
+        $.ajax({
+            type: 'GET',
+            url: RootUrl + "E_Sign/SendOTPESign",
+            dataType: 'json',
+            data: { RequestId: RequestId },
+            success: function (result) {
+                if (result.Status == 1) {
+                    $("#TransationID").val(result.TransactionId);
+                    $("#btnOTPContinue").val(type);
+                    $("#AadharCardModal").modal("show");
+                    return true;
+                }
+                else if (result.Status == 0) {
+                    $("#AadharCardModal").modal("hide");
+                    alert(result.ErrorMessage);
+                    return false;
+                }
+                else {
+                    $("#AadharCardModal").modal("hide");
+                    alert("Some error has occurred please try again later!!!");
+                    return false;
+                }
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+    }
+
+</script>
+ 
+
+<style>
+    #page-wrapper-inn .table > thead > tr > th:last-child {
+        width: 170px !important;
+    }
+
+    #myModal {
+        z-index: 1050;
+    }
+
+    .ad-srl {
+        overflow-y: auto;
+        height: 615px;
+    }
+
+    .help {
+        float: right;
+        margin-right: 18px;
+        font-style: italic;
+    }
+</style>

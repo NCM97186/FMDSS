@@ -1,0 +1,256 @@
+﻿@model IEnumerable<FMDSS.Entity.DOD.ViewModel.AuctionVM>
+@{
+    ViewBag.Title = "Apply New Auction";
+    @*@model IEnumerable<FMDSS.Entity.DOD.ViewModel.AuctionTransaction>*@
+    var auctionTransaction =  (IEnumerable<FMDSS.Entity.DOD.ViewModel.AuctionTransaction>)ViewBag.AppliedAuctionList;
+
+}
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header"><span>Auction Details</span></h1>
+        @Html.Partial("_ErrorMsg")
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel with-nav-tabs panel-default">
+                <div class="panel-heading">
+                    <ul class="nav nav-tabs" id="myTab">
+                        <li class=""><a href="#tab1default" data-toggle="tab"><i class="fa fa-user fa-fw"></i>Latest Auctions</a></li>
+                        <li class=""><a href="#tab2default" data-toggle="tab"><i class="fas fa-truck"></i>Applied Auctions</a></li>
+                    </ul>
+                </div>
+                <div class="panel-body">
+                    <div class="tab-content">
+                        <div class="tab-pane fade scroll active in" id="tab1default">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    <div class="dataTable_wrapper">
+                                        <table class="table table-striped table-bordered table-hover table-responsive" id="tbl_notice">
+                                            <thead>
+                                                <tr>
+                                                    <th style="display:none;"><i class="fa fa-envelope fa-fw"></i>Notice Id </th>
+                                                    <th> Notice No.</th>
+                                                    <th><i class="fa  fa-angle-double-right fa-fw"></i>Product</th>
+                                                    <th>Division</th>
+                                                    <th>Range</th>
+                                                    <th style="width:170px!important;">Action</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @if (Model != null)
+                                                {
+                                                    foreach (var item in Model)
+                                                    {
+                                                <tr>
+                                                    <td style="display:none;">@Html.DisplayFor(model => item.NoticeID)</td>
+                                                    <td>@Html.DisplayFor(model => item.NoticeNumber)</td>
+                                                    <td>@Html.DisplayFor(model => item.ProductName)</td>
+                                                    <td>@Html.DisplayFor(model => item.DivisionName)</td>
+                                                    <td>@Html.DisplayFor(model => item.RangeName)</td>
+                                                    <td>
+                                                        <a href="@Url.Action("AuctionRequest",new { noticeID =item.NoticeID})" class="btn btn-warning btn-pay"><i class="fa fa-edit"></i>Apply for Auction</a>
+                                                    </td>
+                                                </tr>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                <tr><td colspan="5">There is no any notice available for Auction.</td></tr>
+                                                }
+                                            </tbody>
+
+
+
+                                        </table>
+                                    </div>
+
+                                </div>
+                                <!-- /.panel-body -->
+
+                            </div>
+                        </div>
+                        <div class="tab-pane fade scroll in" id="tab2default">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    @*<div class="col-lg-3 pull-right">
+                                        <button type="button" class="btn btn-success btn_pp pull-right" name="btn_addpopip" value="" title="Apply For New Auction" onclick="location.href='@Url.Action("ApplyNewAuction", "AuctionRequest")'">
+                                            <i class=" fa fa-plus">
+                                            </i> Apply For New Auction
+                                        </button>
+                                    </div>*@
+                                    <div class="dataTable_wrapper scrollGrid col-lg-12">
+                                        <table class="table table-striped table-bordered table-hover table-responsive" id="tbl_notice">
+                                            <thead>
+                                                <tr>
+                                                    <th style="display:none;"><i class="fa fa-envelope fa-fw"></i>Auction Id </th>
+                                                    <th>Request No.</th>
+                                                    <th>NoticeNo</th>
+                                                    <th>ApplicantName</th>
+                                                    <th>RequestedOn</th>
+                                                    @*<th>EMD_Amount</th>*@
+                                                    <th>Emitra_Amount</th>
+                                                    <th>TotalPaidAmt</th>
+                                                    <th>PendingAmt</th>
+                                                    <th>Transaction_Status</th>
+                                                    @*<th>Auction_Status</th>*@
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @if (auctionTransaction != null)
+                                                {
+                                                    foreach (var item in auctionTransaction)
+                                                    {
+                                                        <tr>
+                                                            <td style="display:none;">@Html.DisplayFor(model => item.AuctionID)</td>
+                                                            <td>@Html.DisplayFor(model => item.RequestedId)</td>
+                                                            <td>@Html.DisplayFor(model => item.Notice_Number)</td>
+                                                            <td>@Html.DisplayFor(model => item.ApplicantName)</td>
+                                                            <td>@Html.DisplayFor(model => item.RequestedOn)</td>
+                                                            @*<td>@Html.DisplayFor(model => item.EMD_Amount)</td>*@
+                                                            <td>@Html.DisplayFor(model => item.Emitra_Amount)</td>
+                                                            <td>@Html.DisplayFor(model => item.TotalPaidAmt)</td>
+                                                            <td>@Html.DisplayFor(model => item.PendingAmount)</td>
+                                                            <td>
+                                                                @if (item.TransactionStatus == 1)
+                                                                {
+                                                                    @Html.Raw("Success")
+                                                                }
+                                                                else
+                                                                {
+                                                                    @Html.Raw("Failed")
+                                                                }
+                                                            </td>
+                                                            @*<td>@Html.DisplayFor(model => item.AuctionStatus)</td>*@
+                                                            <td style="text-align:center;">
+                                                                @if (item.PendingAmount > 0)
+                                                            {<a href="@Url.Action("AuctionPayment", new { auctionID =item.AuctionID})" class="btn btn-pay">Pay</a>}
+                                                            else
+                                                            { <span>--</span> }
+                                                        </td>
+                                                    </tr>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <tr><td colspan="9">No record found.</td></tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                                <!-- /.panel-body -->
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+        <div class="modal fade in" id="myViewNoticeModal" tabindex="-1" role="dialog" aria-hidden="false">
+            <div class="modal-dialog mdw">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                        <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> </label></h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <!-- From URL Get -->
+
+                        <table class="table table-striped table-bordered table-hover">
+                            <tbody id="tbdyScart"></tbody>
+                        </table>
+
+                        <!-- /. From URL Get -->
+                    </div>
+                    <!-- /.modal-body -->
+                    <div class="modal-footer" id="fot-f">
+                        <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                            <i class="fa fa-times fa-fw"></i> Close
+                        </button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+
+        <div class="modal fade in" id="myViewNoticeModal2" tabindex="-1" role="dialog" aria-hidden="false">
+            <div class="modal-dialog mdw">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                        <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> </label></h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <!-- From URL Get -->
+                        <input type="hidden" id="pHdn_No" name="PHdn_No" />
+                        <div id="divPublish"></div>
+
+                        <!-- /. From URL Get -->
+                    </div>
+                    <!-- /.modal-body -->
+                    <div class="modal-footer" id="fot-f">
+                        <div id="btn" class="col-lg-12">
+                            <button type="submit" class="btn btn-success hdm" name="Command" value="Publish" id="btn_Save">
+                                <i class="fa fa-check"></i>Publish
+                            </button>
+
+                            <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                                <i class="fa fa-times fa-fw"></i> Close
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+
+        <div class="modal fade in" id="myViewNoticeModalau" tabindex="-1" role="dialog" aria-hidden="false">
+            <div class="modal-dialog mdw">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                        <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> </label></h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <!-- From URL Get -->
+
+                        <div id="divPublishau"></div>
+
+                        <!-- /. From URL Get -->
+                    </div>
+                    <!-- /.modal-body -->
+                    <div class="modal-footer" id="fot-f">
+                        <div id="btn" class="col-lg-12">
+
+                            <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                                <i class="fa fa-times fa-fw"></i> Close
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+    </div>
+</div>
+
+

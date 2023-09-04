@@ -1,0 +1,186 @@
+﻿@{
+    ViewBag.Title = "UserProfileDetails";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_SuperAdmin.cshtml";
+}
+@model IEnumerable<FMDSS.Models.Master.UserProfileDetails>
+
+   
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+
+
+   
+     <script type="text/javascript">
+        var RootUrl = '@Url.Content("~/")';
+
+        $(document).ready(function () {
+
+            $('#tbltemp').DataTable({
+                responsive: true
+            });
+
+        });
+
+        $(document).ready(function () {
+            $("#Import").click(function () {
+                //  alert('Import');
+                var form = $("form#myForm");
+                form.attr("action", "@Url.Action("ImportData", "Master", new { name = "Place"})");
+                form.submit();
+            });
+
+            $("#Export").click(function () {
+
+                 alert('Export');
+                var form = $("form#myForm");
+                form.attr("action", "@Url.Action("ExportData", "Master", new { name ="Place"})");
+                form.submit();
+            });
+        });
+
+
+        function CallPlaceData(id) {
+            // alert(id);
+
+            $.ajax({
+                type: 'GET',
+                url: "../UserManagementMaster/GetUserProfileDetails?UserID=" + id,
+                dataType: 'html',
+                success: function (data) {
+                    $('#modelPlace').html(data);
+                },
+                error: function (ex) {
+                    alert(ex.error);
+                }
+            });
+
+        };
+
+        function postRequestIsOnlineBookingView(id) {
+            var r = confirm('Are you sure you wish to change current status of Record ?');
+            if (r == false) {
+                return false;
+            }
+
+            //var id = $(this).closest("tr").find('td:eq(0)').text();
+            /// var id = $(this).parents('tr').find('input[type="hidden"]').val();
+
+            var Status = $('#' + id).is(":checked");
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'Master/UpdateMasterRecordStatus', // we are calling json method
+                dataType: 'json',
+                data: { ID: id, STATUS: Status, MasterType: 'UserProfileDetails' },
+                success: function (circle) {
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+
+            });
+        }
+
+     
+
+    </script>
+
+    @*@using (Html.BeginForm("ImportData", "Master", FormMethod.Post, new { id = "myForm", enctype = "multipart/form-data" }))
+        {*@
+
+      <div id="page-wrapper-inn">
+                          <div class="col-lg-12 pad">
+                              <h1 class="page-header">User Profile Details</h1>
+
+                              @if (ViewBag.RecordStatus != -1)
+                              {
+                                  if (ViewBag.RecordStatus == 0)
+                                  {  
+                                      <div id="divError" class="alert alert-danger"><i class="fa fa-exclamation-triangle fa-fw"></i>Duplicate Record Found</div>}
+                                  else if (ViewBag.RecordStatus == 1)
+                                  {  <div id="divSuccess" class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>Record Successfully Submit</div>}
+                                 
+                              }
+                              
+                              </div>                      
+                                  <div class="row">
+                                      <div class="col-lg-4 pull-right" id="place">
+                                          
+
+                                          <button type="button" class="btn btn-success" id="btnAddModel" data-target="#myModal" data-toggle="modal" onclick="return CallPlaceData(0);" title="Create Place">
+                                              <i class="fa fa-plus"></i> ADD
+                                          </button>
+                                      </div>                                    
+                                      <div class="col-lg-12">
+                                          <div class="panel panel-default">
+                                              <div class="panel-body">
+                                                  <div class="dataTable_wrapper">
+                                                      <div id="tbl" class="table-responsive">
+                                                          <table id="tbltemp" class="table table-striped table-bordered table-hover table-responsive">
+
+                                                              <thead>
+                                                                  <tr>
+                                                                      <th style="width:8%;">Sr No.</th>
+                                                                      <th width="20%">Name</th>
+                                                                      <th width="20%">SSOID</th>
+                                                                       <th>Status</th>
+                                                                      
+                                                                      <th>Action</th>
+                                                                  </tr>
+                                                              </thead>
+                                                              <tbody>
+
+                                                                  @foreach (var item in Model)
+                                                                  {
+
+                                                                      <tr>
+                                                                          <td>
+                                                                              @Html.DisplayFor(model => item.Index)
+                                                                              @Html.HiddenFor(model => item.UserID)
+
+                                                                          </td>
+                                                                          <td>
+                                                                              @Html.DisplayFor(model => item.Name)
+                                                                          </td>
+                                                                          <td>
+                                                                              @Html.DisplayFor(model => item.Ssoid)
+
+                                                                          </td>
+                                                                                                                                              
+                                                                            
+                                                                          <td>
+                                                                              <input onclick='return postRequest(@item.UserID)' type="checkbox" id='@item.UserID' value="true" @(item.IsactiveView ? "checked=\"checked\"" : "") />
+                                                                          </td>
+
+
+                                                                          <td colspan="2">
+
+                                                                              <button type="button" class="btn btn-warning btn-circle EditDepot" data-toggle="modal" data-target="#myModal" title="Edit" onclick="return CallPlaceData(@item.UserID);">
+                                                                                  <i class="fa fa-edit"></i>
+                                                                              </button>
+
+                                                                              <a class="btn btn-warning btn-circle" title="Remove department user right(s)"  onclick="return confirm('Are you sure you wish to delete department roles and assign only citizen role to this user?');" href='@Url.Action("RemoveDepartmentUser", "UserManagementMaster", new { id = item.UserID })'>
+                                                                                  <i class="fa fa-eraser"></i>
+                                                                              </a>
+                                                                          </td>
+                                                                      </tr>
+
+                                                                  }
+                                                              </tbody>
+                                                          </table>
+                                                      </div>
+
+                                                  </div>
+                                              </div>
+                                          </div>
+
+                                          <div class="modal fade" id="myModal" role="dialog">
+                                              <div class="modal-dialog modal-lg" id="modelPlace">
+                                                  <!-- Modal content-->
+
+
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+
+                              </div>
+                              @*}*@

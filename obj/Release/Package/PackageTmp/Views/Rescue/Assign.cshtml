@@ -1,0 +1,601 @@
+﻿@model FMDSS.Models.Rescue.RescueModel
+
+@{
+    ViewBag.Title = "Capture";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-lg-9 pad">
+        <h2>Assign Details</h2>
+    </div>
+    @using (Html.BeginForm("Assign", "Rescue", FormMethod.Post, new { enctype = "multipart/form-data", @id = "main" }))
+    {
+
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true)
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="col-lg-12 Institutional">
+                        <label>Applicant Details:</label>
+                        <div class="divider"></div>
+                    </div>
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Citizen Name</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                @Html.HiddenFor(model => model.RegistrationID)
+                                @Html.TextBoxFor(model => model.CitizenName, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Citizen EmailID</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                @Html.TextBoxFor(model => model.CitizenEmailID, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Citizen Mobile</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                @Html.TextBoxFor(model => model.CitizenMobileNo, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 Institutional">
+                        <label>Animal Details:</label>
+                        <div class="divider"></div>
+                    </div>
+                    @*<div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Address Type</label>
+                            <div class="radio">
+                                <span class=""></span>
+                                <label>
+                                    @Html.RadioButtonFor(model => model.Rural, true, new { id = "rbRural", @disabled = "disabled", @readonly = "readonly" })  Rural
+                                </label>
+                                <label>
+                                    @Html.RadioButtonFor(model => model.Rural, false, new { id = "rbUrban", @disabled = "disabled", @readonly = "readonly" }) Urban
+                                </label>
+                            </div>
+                        </div>
+                    </div>*@
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>District</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                @Html.DropDownListFor(model => model.DistrictID, (IEnumerable<SelectListItem>)ViewBag.Districts, "--Select--", new { @class = "form-control common", @disabled = "disabled", @readonly = "readonly" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 Institutional">
+                        <div class="divider"></div>
+                    </div>
+                    <div id="divUrban">
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>City</label>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                    @Html.DropDownListFor(model => model.CityID, (IEnumerable<SelectListItem>)ViewBag.City, new { @class = "form-control common", @disabled = "disabled", @readonly = "readonly" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Ward</label>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                    @Html.DropDownListFor(model => model.WardID, (IEnumerable<SelectListItem>)ViewBag.Ward, new { @class = "form-control common", @disabled = "disabled", @readonly = "readonly" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divRural">
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Block</label>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                    @Html.DropDownListFor(model => model.BlockID, (IEnumerable<SelectListItem>)ViewBag.Blocks, new { @class = "form-control common", @disabled = "disabled", @readonly = "readonly" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Gram Panchayat</label>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                    @Html.DropDownListFor(model => model.GPID, (IEnumerable<SelectListItem>)ViewBag.GPs, new { @class = "form-control common", @disabled = "disabled", @readonly = "readonly" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Village</label>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                    @Html.DropDownListFor(model => model.VillageID, (IEnumerable<SelectListItem>)ViewBag.Villages, new { @class = "form-control common", @disabled = "disabled", @readonly = "readonly" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Location</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                @Html.TextBoxFor(model => model.Location, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Animal Name</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                @Html.DropDownListFor(model => model.AnimalID, (IEnumerable<SelectListItem>)ViewBag.Animals, new { @class = "form-control common", @disabled = "disabled", @readonly = "readonly" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 un-bold">
+                        <div class="form-group">
+                            <label>Description</label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                @Html.TextAreaFor(model => model.RegistrationDescription, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                    </div>
+                    @if (Model.RegistrationPhotoPath != null && Model.RegistrationPhotoPath != "")
+                    {
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Uploaded Picture</label>
+                                <div class="input-group">
+                                    @{ var imgPathRegistration = "";
+                                        string[] imgs = null;
+
+                                        imgs = Model.RegistrationPhotoPath.Split(',');
+                                        for (int i = 0; i < imgs.Length; i++)
+                                        {
+                                            imgPathRegistration = UrlHelper.GenerateContentUrl(imgs[i], this.ViewContext.HttpContext);
+                                            <text>
+                                                <a href="@Url.Content(imgs[i])" title="Click to view full Image" target="_blank"><img src="@Url.Content(imgs[i])" width="50" height="50" alt="" /></a>&nbsp;&nbsp;</text>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                                        }
+                                        @*<div class="clearfix"></div>*@
+                                        @*<div class="col-lg-6 un-bold">
+                                                <div class="form-group">
+                                                    <label>First Reporting Time</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        @Html.TextBoxFor(model => model.ReportingTime, "{0:dd/MM/yyyy HH:mm}", new { @class = "form-control", @readonly = "readonly" })
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6 un-bold">
+                                                <div class="form-group">
+                                                    <label>To whom reported</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        @Html.TextBoxFor(model => model.WhomReported, new { @class = "form-control", @readonly = "readonly" })
+                                                    </div>
+
+                                                </div>
+                                            </div>*@
+                                        <div class="col-lg-6 un-bold">
+                                            <div class="form-group">
+                                                <label>Mode of Communication</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                    @Html.TextBoxFor(model => model.ModeOfCommunication, new { @class = "form-control", @readonly = "readonly" })
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-12">
+                                            @if (!string.IsNullOrEmpty(Model.SendTOCWLWStatus))
+                                            {
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label> Remarks by DCF : </label>
+                                                        <div class="input-group">
+                                                            @Html.TextAreaFor(model => model.SendTOCWLWStatus, new { @class = "form-control", @readonly = "readonly", @cols = "70" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                            @if (!string.IsNullOrEmpty(Model.SendTODCFafterAPPROVALStatus))
+                                            {
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label> Special Instructions by CWLW : </label>
+                                                        <div class="input-group">
+                                                            @Html.TextAreaFor(model => model.SendTODCFafterAPPROVALStatus, new { @class = "form-control", @readonly = "readonly", @cols = "70" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="col-lg-12">
+                                            @if (!string.IsNullOrEmpty(Model.SendTONGOStatus))
+                                            {
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label> Remarks For NGO : </label>
+                                                        <div class="input-group">
+                                                            @Html.TextAreaFor(model => model.SendTONGOStatus, new { @class = "form-control", @readonly = "readonly", @cols = "70" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="col-lg-6 un-bold submitbtnCWLWApproval" style="display:none">
+
+                                            <div class="form-group">
+                                                <label>Remarks</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                    @Html.TextAreaFor(model => model.WildlifeScheduleRemarks, new { @class = "form-control" })
+                                                </div>
+
+                                            </div>
+                                            @if (ViewBag.Roles.ToString().Contains("Animal Rescue Reviewer"))
+                                            {
+
+                                                <input type="submit" class="btn btn-success" value="Send TO CWLW Approval" name="buttonType" />
+                                                @*<input type="button" id="create" class="btn btn-success" value="Capture" />*@
+                                            }
+                                        </div>
+                                        <div class="forestStaff"> 
+                                            <div class="col-lg-4 forestOfficerDesignation">
+                                                <div class="form-group">
+                                                    <label>Assign TO:<span class="mandatory">*</span></label>
+                                                    @Html.DropDownListFor(d => d.SendToNGOOrSelf, (IEnumerable<SelectListItem>)ViewBag.OfficerDesignation, "--Select--", new { @class = "form-control required", id = "dropDesignation" })
+                                                    <div class="alert-danger1">@Html.ValidationMessageFor(model => model.SendToNGOOrSelf)</div>
+                                                </div>
+                                            </div>
+                                            <div id="divNGO" class="col-lg-4 forestOfficer">
+                                                <div class="form-group">
+                                                    <label>NGO List:<span class="mandatory">*</span></label>
+                                                    @Html.DropDownListFor(d => d.SendToOfficerSSOID, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "dropForester", @class = "form-control" })
+                                                    <div class="alert-danger1">@Html.ValidationMessageFor(model => model.SendToOfficerSSOID)</div>
+                                                </div>
+                                            </div>
+
+                                            <div id="divForestStaff" class="col-lg-4 un-bold forestOfficerDesignation">
+                                                <div class="form-group">
+                                                    <label>Forest Staff Name<span class="mandatory">*</span></label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        @Html.TextBoxFor(model => model.ForestStaffSSOID, new { @class = "form-control" })
+                                                        <div class="alert-danger1">@Html.ValidationMessageFor(model => model.ForestStaffSSOID)</div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4 un-bold">
+                                                <div class="form-group">
+                                                    <label>Mobile Number</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        @Html.TextBoxFor(model => model.ForestStaffMobile, new { @class = "form-control" }) 
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6 un-bold">
+                                                <div class="form-group">
+                                                    <label>Remarks</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                                        @Html.TextAreaFor(model => model.RescueRemarks, new { @class = "form-control" })
+                                                    </div>
+                                                    <div class="alert-danger1">@Html.ValidationMessageFor(model => model.RescueRemarks)</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12 un-bold">
+                                                <label></label>
+                                                <div class="input-group">
+                                                    <div class="form-group">
+
+                                                        <button type="submit" name="buttonType" class="btn btn-success" value="Submit">
+                                                            <i class="fa fa-check"></i> Submit
+                                                        </button>
+                                                        @Html.ActionLink("Back to List", "Index", "Rescue", new { RoleName = ViewBag.CitizenRoles }, new { @class = "btn btn-danger" })
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                                        }
+</div>
+
+<script src="~/Scripts/jquery.validate.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+<script src="~/js/bootstrap-multiselect.js"></script>
+<link href="~/css/bootstrap-multiselect.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-ui.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.js"></script>
+
+<script type="text/javascript">
+    $('#ddlWLSchedule').multiselect({
+        includeSelectAllOption: true
+    });
+    var RootUrl = 'http://10.68.128.101/fmdsstest/';
+    var ddlVillage = 0;
+    var educount = 1;
+    var castcount = 1;
+    $("#MediAssistType").change(function () {
+
+        if ($("#MediAssistType").val() == "1") {
+            $("#divfirstAids").css("display", "block");
+        }
+        else {
+            $("#divfirstAids").css("display", "none");
+        }
+
+    });
+
+    $('#DistrictID').change(function (e) {
+        var ddldist = $("#DistrictID option:selected").val();
+        $("#BlockID").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'Rescue/GetBlockName',
+            dataType: 'json',
+            data: { District: ddldist },
+            success: function (range) {
+                $.each(range, function (i, items) {
+                    if (i == 1) {
+                        bindGP(ddldist, items.Value);
+                    }
+                    $("#BlockID").append('<option value="' + items.Value + '">  ' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    });
+
+    $('#BlockID').change(function (e) {
+        var ddldist = $("#DistrictID option:selected").val();
+        var ddlblockname = $("#BlockID option:selected").val();
+        bindGP(ddldist, ddlblockname);
+    });
+
+    $('#GPID').change(function (e) {
+        var ddldist = $("#DistrictID option:selected").val();
+        var ddlblockname = $("#BlockID option:selected").val();
+        var ddlGPName = $("#GPID option:selected").val();
+        bindVillage(ddldist, ddlblockname, ddlGPName);
+    });
+
+    function bindGP(ddldist, ddlblockname) {
+        $("#GPID").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'Rescue/GetGramPName',
+            dataType: 'json',
+            data: { District: ddldist, BlockName: ddlblockname },
+            success: function (range) {
+                $.each(range, function (i, items) {
+                    if (i == 1) {
+                        bindVillage(ddldist, ddlblockname, items.Value);
+                    }
+                    $("#GPID").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    }
+
+    function bindVillage(ddldist, ddlblockname, ddlGPName) {
+        $("#VillageID").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootUrl + 'Rescue/GetVillageName',
+            dataType: 'json',
+            data: { District: ddldist, BlockName: ddlblockname, GPName: ddlGPName },
+            success: function (range) {
+                $.each(range, function (i, items) {
+                    $("#VillageID").append('<option value="' + items.Value + '">    ' + items.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    }
+    $('#rbCasualty').on('change', function () {
+        if ($(this.checked)) {
+            $('#divCasuality').show();
+        }
+    }).change();
+    $('#rbNoCasualty').on('change', function () {
+        if ($(this.checked)) {
+            $('#divCasuality').hide();
+        }
+    }).change();
+    $('#rbAssistRequired').on('change', function () {
+        if ($(this.checked)) {
+            $('#divAssistance').show();
+        }
+    }).change();
+    $('#rbNoAssistRequired').on('change', function () {
+        if ($(this.checked)) {
+            $('#divAssistance').hide();
+        }
+    }).change();
+    $('#rbRural').on('change', function () {
+        if ($(this.checked)) {
+            $('#divRural').show();
+            $('#divUrban').hide();
+        }
+    }).change();
+    $('#rbUrban').on('change', function () {
+        if ($(this.checked)) {
+            $('#divUrban').show();
+            $('#divRural').hide();
+        }
+    }).change();
+    $(function () {
+        if ($('#rbUrban').is(':checked')) {
+            $('#divUrban').show();
+            $('#divRural').hide();
+        } else {
+            $('#divRural').show();
+            $('#divUrban').hide();
+        }
+        if ($('#rbCasualty').is(':checked')) {
+            $('#divCasuality').show();
+        } else {
+            $('#divCasuality').hide();
+        }
+        if ($('#rbAssistRequired').is(':checked')) {
+            $('#divAssistance').show();
+        } else {
+            $('#divAssistance').hide();
+        }
+    });
+    $('input').on('keypress', function (event) {
+        var regex = new RegExp(/^[a-zA-Z0-9\s,._]*$/);
+        if (this.id == "CitizenEmailID") {
+            regex = new RegExp(/^[a-zA-Z0-9\s,._@@]*$/);
+        }
+        if (this.id == "CitizenMobileNo") {
+            regex = new RegExp(/^[0-9\s+\-]*$/);
+        }
+        var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+        if (!regex.test(key)) {
+            event.preventDefault();
+            return false;
+        }
+    }); 
+    $('.datepicker').datetimepicker({
+    });
+    $("#ImageDataCapture").change(function () {
+        var fileExtension = ['jpeg', 'jpg', 'png', 'gif', 'bmp'];
+        if ($.inArray($(this).val().split('.').pop().toLowerCase(), fileExtension) == -1) {
+            alert("Only " + fileExtension.join(', ') + " formats are allowed : ");
+            $("#ImageDataCapture").val('');
+        }
+    });
+
+
+</script>
+
+<script> 
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+        var statusName = $("#RescueStatus").val();
+        if (statusName == "Approved") {
+            $(".checkCWLWRequest").css("display", "block");
+        }
+        else if (statusName == "Send TO NGO") {
+            $(".checkCWLWRequest").css("display", "block");
+            $(".forestOfficer").css("display", "none");
+            $(".forestOfficerDesignation").css("display", "none");
+
+        }
+
+    });
+     
+    $("#ddlWLSchedule").change(function () {
+        var WLScheduleListCWLWApproval = $("#WLScheduleListCWLWApproval").val();
+        var flag = 0;
+        if (WLScheduleListCWLWApproval != null && WLScheduleListCWLWApproval != '') {
+
+            var WLScheduleListCWLWApprovalArr = WLScheduleListCWLWApproval.split(',');
+            for (var i = 0; i < WLScheduleListCWLWApprovalArr.length; i++) {
+                $(".multiselect-container > li").each(function () {
+                    if ($(this).attr("class") == "active") {
+                        if (parseInt(WLScheduleListCWLWApprovalArr[i]) == parseInt($(this).find('a').find('label').find('input').val())) {
+                            $(".checkCWLWRequest").css("display", "none");
+                            $(".submitbtnCWLWApproval").css("display", "block");
+                            flag = 1;
+                        }
+
+                    }
+
+
+                });
+            }
+
+            if (flag == 0) {
+                $(".checkCWLWRequest").css("display", "block");
+                $(".submitbtnCWLWApproval").css("display", "none");
+            }
+        }
+        else {
+            $(".checkCWLWRequest").css("display", "block");
+            $(".submitbtnCWLWApproval").css("display", "none");
+        }
+    });
+</script>
+
+<script type="text/javascript">
+    $('#dropDesignation').change(function (e) { 
+        if ($("#dropDesignation").val() == "-1") { 
+            $("#divNGO").addClass("hide");
+            $("#divForestStaff").removeClass("hide");
+            $('#ForestStaffSSOID').addClass('required');
+            $("#dropForester").removeClass("required")
+        }
+        else if ($("#dropDesignation").val() == "26") { 
+            $("#divNGO").removeClass("hide");
+            $("#divForestStaff").addClass("hide");
+            $("#dropForester").addClass("required");
+            $('#ForestStaffSSOID').removeClass('required');
+            GetNgoDetails();
+        }
+        else {
+            $("#divNGO,#divForestStaff").removeClass("hide");
+            $("#dropForester,#ForestStaffSSOID").addClass("required");
+            GetNgoDetails();
+        }
+    });
+
+    function GetNgoDetails() {
+        $("#dropForester").empty().append('<option value="">--Select--</option>');
+
+        $.ajax({
+            type: 'POST',
+            url: 'GetNgoDetail', // we are calling json method
+            dataType: 'json',
+            data: { designation: $("#dropDesignation").val() },
+            success: function (states) {
+                $.each(states, function (i, block) {
+                    $("#dropForester").append('<option value="' + block.Value + '">' + block.Text + '</option>');
+                });
+            },
+            error: function (ex) {
+                alert('Failed to retrieve states.' + ex);
+            }
+        });
+    }
+</script>

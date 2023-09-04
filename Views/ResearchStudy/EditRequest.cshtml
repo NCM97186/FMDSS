@@ -1,0 +1,722 @@
+﻿@model FMDSS.Models.CitizenService.ProductionServices.EducationService.Research
+@{
+    ViewBag.Title = "ResearchStudy";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //
+}
+<style>
+    .error, .errorText {
+        color: #e85c41;
+        font-weight: bold;
+        text-align: center;
+    }
+</style>
+
+<script src="~/js/jquery.min.js"></script>
+<script src="~/js/rs.js"></script>
+
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+    function reload() {
+        var r = confirm("Do you want to leave page!");
+        if (r) {
+            window.location = RootUrl + "Dashboard/dashboard";
+        }
+        else {
+            //do nothing
+        }
+    }
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    specialKeys.push(9); //Tab
+    specialKeys.push(46); //Delete
+    specialKeys.push(36); //Home
+    specialKeys.push(35); //End
+    specialKeys.push(37); //Left
+    specialKeys.push(39); //Right
+    function IsAlphaNumeric(e) {
+        var keyCode = e.keyCode == 0 ? e.charCode : e.keyCode;
+        var ret = ((keyCode >= 48 && keyCode <= 57) || (keyCode >= 65 && keyCode <= 90) || (keyCode >= 97 && keyCode <= 122) || (specialKeys.indexOf(e.keyCode) != -1 && e.charCode != e.keyCode));
+        return ret;
+    }
+</script>
+
+@using (Html.BeginForm("SaveEdit", "ResearchStudy", FormMethod.Post, new { @id = "ResearchstudyEdit", enctype = "multipart/form-data" }))
+{
+    <div id="page-wrapper-inn">
+        <div class="col-lg-12 pad">
+            <h1 class="page-header">@Model.RsearchType</h1>
+            @Html.HiddenFor(x => x.RsearchType)
+            @Html.HiddenFor(x => x.RequestedId)
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Application Type: <span class="mandatory">*</span></label>
+                                @if (ViewBag.Applicant_Type != null)
+                                {
+                                    @Html.DropDownListFor(s => s.ApplicantType, (IEnumerable<SelectListItem>)ViewBag.Applicant_Type, new { @class = "form-control", id = "Applicant_type" })
+                                }
+                                <input type="hidden" id="appLicant" name="AppLicant">
+                            </div>
+                        </div>
+                        <div></div>
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <div class="border-add" id="dvAgency" style="display: none;">
+                                    <div class="col-sm-6">
+                                        <div class="form-group" id="Name">
+                                            <label class="" for="FatherName">
+                                                Father Name:<span class="mandatory">*</span>
+                                            </label>
+                                            <input class="form-control" id="fatherName" name="FatherName" value="@Model.FName" placeholder="Enter Father Name" maxlength="50"><div class="col-sm-8">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group" id="Name">
+                                            <label class="" for="FatherName">
+                                                Education Qualification:<span class="mandatory">*</span>
+                                            </label>
+                                            @if (ViewBag.Qualification != null)
+                                            {
+                                                @Html.DropDownList("Qualification", (IEnumerable<SelectListItem>)ViewBag.Qualification, "--Select--", new { @class = "form-control common", id = "qualification" })
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group" id="Name">
+                                            <label class="" for="FatherName">
+                                                College / Institute Name:<span class="mandatory">*</span>
+                                            </label>
+                                            <input type="text" class="form-control" id="College" name="College" value="@Model.College" placeholder="Enter College/Institute Name" maxlength="50" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label> Title of Research: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="R_Subject" name="R_Subject" value="@Model.R_Subject" maxlength="100" placeholder="Subject of Research" title="Enter the subject in which reseach is being conducted. E.G. Research on Tigers" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label> Abstract: <span class="mandatory">*</span></label>
+                                <input class="form-control" id="R_Procedure" name="R_Procedure" value="@Model.R_Procedure" placeholder="Please Enter Procedure/Method" maxlength="100" title="Enter the methodology opted for conducting reasearch. E.G. Practical Qualitative Research" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Duration of Research:</label>
+                                <label>From: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control datefield" id="durationfrom" name="DurationFrom" value="@Model.DurationFrom.ToShortDateString()" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>To: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control datefield" id="durationto" name="DurationTo" value="@Model.DurationTo.ToShortDateString()" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label> Select Research Category: <span class="mandatory">*</span></label>
+                                @if (ViewBag.RCategory != null)
+                                {
+                                    @Html.DropDownList("ResearchCategory", (IEnumerable<SelectListItem>)ViewBag.RCategory, new { @class = "form-control common", id = "researchCategory" })
+                                }
+                                <input type="hidden" id="appLicant" name="AppLicant">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Select Area Category: <span class="mandatory">*</span></label>
+                                @if (ViewBag.Category != null)
+                                {
+                                    @Html.DropDownList("Area_Category", (IEnumerable<SelectListItem>)ViewBag.Category, new { @class = "form-control common", id = "ddl_Category" })
+                                }
+                            </div>
+                        </div>
+                        <div class="col-lg-6" id="divDist" style="display:none;">
+                            <div class="form-group">
+                                <label>District: <span class="mandatory">*</span></label>
+                                @if (ViewBag.District != null)
+                                {
+                                    @Html.DropDownList("ddlistrict", (IEnumerable<SelectListItem>)ViewBag.District, new { @class = "form-control", id = "district" })
+                                }
+                                else
+                                {
+                                    @Html.DropDownList("ddlistrict", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "district" })
+                                }
+
+
+                                <input type="hidden" id="disName" name="DisName">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Place for Research: <span class="mandatory">*</span></label>
+                                @if (ViewBag.Locations != null)
+                                {
+                                    @Html.DropDownList("Location", (IEnumerable<SelectListItem>)ViewBag.Locations, new { @class = "form-control", id = "locationId" })
+                                }
+                                else
+                                {
+                                    @Html.DropDownList("Location", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "locationId" })
+                                }
+                                <input type="hidden" id="LocName" name="LocName">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="border-add" id="dvAnimal">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Category of Animal: <span class="mandatory">*</span></label>
+                                        @if (ViewBag.AnimalCat != null)
+                                        {
+
+                                            @Html.DropDownList("Animal_cat", (IEnumerable<SelectListItem>)ViewBag.AnimalCat, new { @class = "form-control", id = "Animal_cat" })
+                                        }
+                                        else
+                                        {
+                                            @Html.DropDownList("Animal_cat", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "Animal_cat" })
+                                        }
+                                        <input type="hidden" id="catAnimal" name="CatAnimal">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Name of Animal: <span class="mandatory">*</span></label>
+                                        @if (ViewBag.Animals != null)
+                                        {
+                                            @Html.DropDownList("Animal_Name", (IEnumerable<SelectListItem>)ViewBag.Animals, new { @class = "form-control", id = "AnimalName" })
+                                        }
+                                        else
+                                        {
+                                            @Html.DropDownList("Animal_Name", new SelectList(string.Empty, "Value", "Text"), "---Please Select Name Of Animal---", new { @class = "form-control", id = "AnimalName" })
+                                        }
+                                        <input type="hidden" id="nameAnimal" name="NameAnimal">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Serial No of Wild Animal(Acc. to Security Act-1972): </label>
+                                        <input type="text" class="form-control" id="animal_Sno" name="Animal_Sno" value="@Model.Animal_Sno" readonly="readonly" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>If particular species is not available in above list, specify the group to which it belongs : </label>
+                                        <input type="text" class="form-control" id="SpecifyGroup" name="SpecifyGroup" value="@Model.SpecifyGroup" readonly="readonly" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="border-add" id="dvSpecies" style="display:none;">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Category of Plant: <span class="mandatory">*</span></label>
+                                        @Html.DropDownList("Species_cat", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "SpeciesCat" })
+                                        <input type="hidden" id="catSpecies" name="CatSpecies">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Name of Plant: <span class="mandatory">*</span></label>
+                                        @Html.DropDownList("Species_Name", new SelectList(string.Empty, "Value", "Text"), "---Please Enter Name of Species---", new { @class = "form-control", id = "SpeciesName" })
+                                        <input type="hidden" id="nameSpecies" name="NameSpecies">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Serial No of Species(Acc. to Security Act-1972):</label>
+                                        <input type="text" class="form-control" id="species_Sno" name="Species_Sno" value="@Model.Species_Sno" readonly="readonly" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <label>Benefits of Research to Forest & wild Life Management: <span class="mandatory">*</span></label>
+                                <textarea class="form-control" id="Benefits" name="R_Benefits" value="@Model.R_Benefits" maxlength="100" title="Enter the benefits of this research to the Forest & Wildlife Department. E.G. This will help the department to understand the various characteristics of a Tiger" placeholder="Benefits of Research" rows="4">@Model.R_Benefits</textarea>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>
+                                    Upload Synopsis:<span class="mandatory">*</span>
+                                </label>
+                                <input type="file" class="form-control common" id="ResSynopsis" style="width:80%" title="upload synopsis for research" name="ResSynopsis" />
+                                <label><span class="spanmark">* Only .txt/ .doc/ .docx/ .pdf file formats are allowed with max size: 2Mb.</span></label>
+                                <br /><br />
+                                <label style="font-weight:bold">
+                                    Uploaded File
+                                </label>
+                                <a href="@Model.ResSynopsis">Uploaded file</a>
+                                @Html.HiddenFor(x => x.ResSynopsisName)
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>
+                                    Upload Presentation:<span class="mandatory">*</span>
+                                </label>
+                                <input type="file" class="form-control common" id="ResPresentation" style="width:80%" title="upload presentation for research" name="ResPresentation" />
+                                <label><span class="spanmark">* Only .ppt /.pptx file formats are allowed with max size: 2Mb.</span></label>
+
+                                <br /><br />
+                                <label style="font-weight:bold">
+                                    Uploaded File
+                                </label>
+                                <a href="@Model.ResPresentation">Uploaded file</a>
+                                @Html.HiddenFor(x => x.ResPresentationName)
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Coordinator/Supervisor Name:<span class="mandatory">*</span></label>
+                                @if (ViewBag.C_name != null)
+                                {
+                                    @Html.DropDownList("C_ID", (IEnumerable<SelectListItem>)ViewBag.C_name, new { @class = "form-control", title = "Enter Coordinator Name under whom the research is being conducted.", id = "coordinatorName" })
+                                }
+                                else
+                                {
+                                    @Html.DropDownList("C_name", new SelectList(string.Empty), new { @class = "form-control", title = "Enter Coordinator Name under whom the research is being conducted.", id = "coordinatorName" })
+                                }
+                                <input type="hidden" name="C_ID" id="coordinatorId" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Address:</label>
+                                <input type="text" class="form-control" id="Address1" name="Address1" value="@Model.Address1" readonly="readonly" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Vehicle Type:</label>
+                                @if (ViewBag.VehicleCats != null)
+                                {
+                                    @Html.DropDownList("Vehiclecat", (IEnumerable<SelectListItem>)ViewBag.VehicleCats, "--Select--", new { @class = "form-control", id = "ddl_Vehiclecat" })
+                                }
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Vehicle:</label>
+                                @if (ViewBag.VehicleList != null)
+                                {
+                                    @Html.DropDownList("ddl_vehicle", (IEnumerable<SelectListItem>)ViewBag.VehicleList, new { @class = "form-control" })
+                                }
+                                else
+                                {
+                                    @Html.DropDownList("ddl_vehicle", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control" })
+                                }
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <label>Assistant Detail</label>
+                            <div class="divider"></div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>Assistant Name:</label>
+                                <input type="text" class="form-control" name="txt_AssistName" id="txt_AssistName" value="@Model.txt_AssistName" title="Enter the name of the Assistant" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>ID Type:</label>
+                                @Html.DropDownList("ddl_AssistIDType", (IEnumerable<SelectListItem>)ViewBag.IdTypes, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>ID proof No: <span class="mandatory">Please carry original photo ID at the time of entry.</span></label>
+                                <input type="text" class="form-control" id="txt_AssistIDno" name="txt_AssistIDno" value="@Model.txt_AssistIDno" title="Enter the ID proof number of the selected ID" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6 un-bold">
+                            <div class="form-group">
+                                <label>
+                                    Upload Assistant Id Proof:<span class="mandatory">*</span>
+                                </label>
+                                <input type="file" class="form-control" id="AssistIDProof" name="AssistIDProof" />
+                                <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with max size: 2Mb.</span></label>
+                                @Html.HiddenFor(x => x.AssistIDProofName)
+                                <br /><br />
+                                <label style="font-weight:bold">
+                                    Uploaded File
+                                </label>
+                                <a href="@Model.AssistIDProof">Uploaded file</a>
+                            </div>
+                        </div>
+                        <div class="col-lg-12"></div>
+                        <!-- Btn Groping -->
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <button type="submit" class="btn btn-success" id="btnproced">
+                                    <i class="fa fa-check"></i> Proceed
+                                </button>
+                                <button type="button" class="btn btn-warning" id="btnReset">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+                                <button type="button" name="command" value="Cancel" class="btn btn-danger" onclick="reload(); return false;">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+    $(document).ready(function () {
+        $("#btnproced").click(function () {
+            $("#ResearchstudyEdit").submit();
+        });
+
+        $("#ResearchCategory").bind("change", function () {
+            var category = $("#ResearchCategory").val();
+            $('#locationId').empty();
+            $('#Animal_cat').empty();
+            $('#SpeciesCat').empty();
+            $('#AnimalName').empty();
+            $('#SpeciesName').empty();
+            var values = {
+                Category: category,
+                ReaserchType: $('#researchType').val()
+            };
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootUrl + 'ResearchStudy/DistrictbyCategory',
+                success: function (data) {
+                    if ($('#researchType').val().toString() == 'Research in Wildlife') {
+                        $.each(data, function (i, items) {
+                            $("#locationId").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                        });
+                    } else if ($('#researchType').val().toString() == 'Research in Forest') {
+                        $("#divDist").show();
+                        $("#district").empty();
+                        $.each(data, function (i, items) {
+                            $("#district").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                        });
+                    }
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+        $('#district').change(function (e) {
+            $('#locationId').empty();
+            var disName = $("#district option:selected").text();
+            $('#disName').val(disName);
+            $('#Animal_cat').empty();
+            $('#SpeciesCat').empty();
+            $('#AnimalName').empty();
+            $('#SpeciesName').empty();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ResearchStudy/getDistrict', // we are calling json method
+                dataType: 'json',
+                data: { district: $('#district').val() },
+                success: function (range) {
+                    $.each(range, function (i, items) {
+                        $("#locationId").append('<option value="' + items.Value + '">' +
+                         items.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+            return false;
+        });
+        $("#locationId").bind("change", function () {
+            $('#Animal_cat').empty();
+            $('#SpeciesCat').empty();
+            var rCategory = $("#researchCategory").val();
+            var category = $("#ddl_Category").val();
+            var locationId = $("#locationId").val();
+            var values = {
+                RCategory: rCategory,
+                Category: category,
+                LocationId: locationId
+            };
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootUrl + 'ResearchStudy/GetCategoryPlantanimal',
+                success: function (data) {
+                    if (rCategory == "Animal") {
+                        $.each(data.item2, function (i, items) {
+                            $("#Animal_cat").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                            $("#SpeciesCat").append('<option value="' + "" + '">' + "--Select--" + '</option>');
+                            $("#SpeciesName").append('<option value="' + "" + '">' + "--Select--" + '</option>');
+                        });
+                    }
+                    else if (rCategory == "Plant") {
+                        $.each(data.item2, function (i, items) {
+                            $("#Animal_cat").append('<option value="' + "" + '">' + "--Select--" + '</option>');
+                            $("#AnimalName").append('<option value="' + "" + '">' + "--Select--" + '</option>');
+                            $("#SpeciesCat").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                        });
+                    }
+                    else {
+                        $.each(data.item1, function (i, items) {
+                            $("#Animal_cat").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                        });
+                        $.each(data.item2, function (i, items) {
+                            $("#SpeciesCat").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                        });
+                    }
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+        $("#Animal_cat").bind("change", function () {
+            var rCategory = $("#researchCategory").val();
+            var category = $("#ddl_Category").val();
+            var locationId = $("#locationId").val();
+            var aAnimal_cat = $("#Animal_cat").val();
+            var values = {
+                ARCategory: 'Animal',
+                ACategory: category,
+                ALocationId: locationId,
+                AAnimal_cat: aAnimal_cat
+            };
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootUrl + 'ResearchStudy/GetAnimalNameByCategory',
+                success: function (data) {
+                    $('#AnimalName').empty();
+                    $.each(data, function (i, items) {
+                        $("#AnimalName").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+        $("#SpeciesCat").bind("change", function () {
+            var rCategory = $("#researchCategory").val();
+            var category = $("#ddl_Category").val();
+            var locationId = $("#locationId").val();
+            var aAnimal_cat = $("#SpeciesCat").val();
+            $('#SpeciesName').empty();
+            var values = {
+                ARCategory: 'Plant',
+                ACategory: category,
+                ALocationId: locationId,
+                AAnimal_cat: aAnimal_cat
+            };
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootUrl + 'ResearchStudy/GetAnimalNameByCategory',
+                success: function (data) {
+                    $('#SpeciesName').empty();
+                    if (data == "") {
+                        $("#SpeciesName").append('<option value="' + "" + '">' + "--Select--" + '</option>');
+                    }
+                    else {
+                        $.each(data, function (i, items) {
+                            $("#SpeciesName").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                        });
+                    }
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+        $('#AnimalName').change(function (e) {
+            var nameAnimal = $("#AnimalName option:selected").text();
+            $('#nameAnimal').val(nameAnimal);
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ResearchStudy/GetAnimalsno', // we are calling json method
+                dataType: 'json',
+                data: { animalName: $('#AnimalName').val() },
+                success: function (data) {
+                    $('#animal_Sno').val(data);
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+            return false;
+        });
+        $('#SpeciesName').change(function (e) {
+            var nameSpecies = $("#SpeciesName option:selected").text();
+            $('#nameSpecies').val(nameSpecies);
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ResearchStudy/GetAnimalsno', // we are calling json method
+                dataType: 'json',
+                data: { animalName: $('#SpeciesName').val() },
+                success: function (data) {
+                    $('#species_Sno').val(data);
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+            return false;
+        });
+        $('#coordinatorName').change(function (e) {
+            var cName = $("#coordinatorName option:selected").text();
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'ResearchStudy/chkCoordinator', // we are calling json method
+                dataType: 'json',
+                data: { coordinatorName: cName },
+                success: function (data) {
+                    $('#coordinatorId').val(data.CoordinatorName);
+                    $('#address').val(data.Address);
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        }).change();
+        $("#ResSynopsis").change(function (e) {
+            var iSize = ($("#ResSynopsis")[0].files[0].size / 1048576);
+            if (iSize > 2) {
+                $("#ResSynopsis").val('');
+                $('#errordiv20').show();
+                $('#errordiv20').html("Research synopsis file size should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#ResSynopsis').focus();
+                return false;
+            }
+            else { $('#errordiv20').hide(); }
+            var file = $("#ResSynopsis").val();
+            var exts = ['txt', 'doc', 'docx', 'pdf'];
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $("#ResSynopsis").val('');
+                    $('#errordiv20').show();
+                    $('#errordiv20').html("Please upload only txt/doc/docx/pdf file format!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#ResSynopsis').focus();
+                    return false;
+                } else {
+                    $('#errordiv20').hide();
+                }
+            }
+            else { $('#errordiv20').hide(); }
+        });
+        $("#ResPresentation").change(function (e) {
+            var iSize = ($("#ResPresentation")[0].files[0].size / 1048576);
+            if (iSize > 2) {
+                $("#ResPresentation").val('');
+                $('#errordiv21').show();
+                $('#errordiv21').html("Research presentation file size should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#ResPresentation').focus();
+                return false;
+            }
+            else { $('#errordiv21').hide(); }
+            var file = $("#ResPresentation").val();
+            var exts = ['ppt', 'pptx'];
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $("#ResPresentation").val('');
+                    $('#errordiv21').show();
+                    $('#errordiv21').html("Please upload only ppt/pptx file format!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#ResPresentation').focus();
+                    return false;
+                } else {
+                    $('#errordiv21').hide();
+                }
+            }
+            else { $('#errordiv21').hide(); }
+        });
+        $("#ddl_Vehiclecat").bind("change", function () {
+            var vehicleCat = $("#ddl_Vehiclecat option:selected").text();
+            $('#vehiclecatId').val(vehicleCat);
+            var catID = $("#ddl_Vehiclecat").val();
+            $('#ddl_vehicle').empty();
+            var values = {
+                VehicleCatID: catID
+            };
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootUrl + 'FilmShooting/vehicleByCategory',
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddl_vehicle").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+        $('#txt_AssistName').keypress(function (e) {
+            var kc = e.which;
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 32)) {
+            }
+            else {
+                e.preventDefault();
+            }
+        })
+        $("#AssistIDProof").change(function (e) {
+            // var iSize = ($("#AssistIDProof")[0].files[0].size / 1024).toFixed(2);
+            // if (iSize > 100) {
+            var iSize = ($("#AssistIDProof")[0].files[0].size / 1048576);
+            if (iSize > 2) {
+                $("#AssistIDProof").val('');
+                $('#errordivUpload').show();
+                $('#errordivUpload').html("Assistant Id Proof file size should not be larger than 100 KB!" + "<i class='fa fa-times fa-fw' style='float:right;padding: 2px;'></i>");
+                $('#AssistIDProof').focus();
+                return false;
+            }
+            else { $('#errordivUpload').hide(); }
+            var file = $("#AssistIDProof").val();
+            var exts = ['jpg', 'jpeg', 'png', 'gif', 'pdf'];
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $("#AssistIDProof").val('');
+                    $('#errordivUpload').show();
+                    $('#errordivUpload').html("Please upload only jpg/pdf/png/gif file format!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#AssistIDProof').focus();
+                    return false;
+                } else {
+                    $('#errordivUpload').hide();
+                }
+            }
+            else { $('#errordivUpload').hide(); }
+        });
+    });
+    </script>
+
+}

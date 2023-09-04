@@ -1,0 +1,799 @@
+﻿@using System.Data;
+@using FMDSS.Globals;
+@{
+    DataSet ds = null; DataTable tbl = null; DataTable tblTrail = null; DataTable dtWildlife = null; DataTable dtForest = null; DataTable tblCmd = null; DataTable dtMemberInfo = null;
+    int currentApprovalLevel = 0; string ruleType = string.Empty;
+
+    ds = ViewBag.Data;
+    if (Util.isValidDataSet(ds, 0))
+    {
+        tbl = ds.Tables[0];
+        if (Util.isValidDataSet(ds, 1))
+        {
+            tblTrail = ds.Tables[1];
+            if (ds.Tables.Contains("Table3"))
+            {
+                dtMemberInfo = ds.Tables[3];
+            }
+            if (Util.isValidDataSet(ds, 2, true))
+            {
+                tblCmd = ds.Tables[2];
+                currentApprovalLevel = string.IsNullOrEmpty(Convert.ToString(tblCmd.Rows[0]["CurrentApprovalLevel"])) ? 0 : Convert.ToInt32(tblCmd.Rows[0]["CurrentApprovalLevel"]);
+                ruleType = Convert.ToString(tblCmd.Rows[0]["RuleType"]);
+            }
+        }
+    }
+    var origin = System.Configuration.ConfigurationManager.AppSettings["websiteUrl"].ToString();
+}
+<script src="~/Themes/ckeditor/ckeditor.js"></script>
+
+<script type="text/javascript">
+
+    CKEDITOR.editorConfig = function (config) {
+        config.toolbar = 'MyToolbar';
+
+        config.toolbar_MyToolbar =
+            [
+
+                { name: 'clipboard', items: ['Undo', 'Redo'] },
+                { name: 'styles', items: ['FontSize'] },
+                { name: 'basicstyles', items: ['Bold', 'Italic'] },
+                { name: 'paragraph', items: ['Outdent', 'Indent'] },
+
+            ];
+
+        config.removePlugins = 'contextmenu';
+        config.forcePasteAsPlainText = true;
+        config.pasteFromWordRemoveFontStyles = true;
+        config.pasteFromWordRemoveStyles = true;
+        config.extraPlugins = 'cwjdsjcsconfineselection';
+        config.startupShowBorders = false;
+        config.disableObjectResizing = true;
+
+    };
+
+</script>
+<div id="divPrint" class="modal-body tbl-scroll divPrintone" style="height:430px;">
+    @{
+        string submitclassWL = "nav-item";
+        string forwardclassWL = "nav-item";
+        string reviewedclassWL = "nav-item";
+        string goiclassWL = "nav-item";
+        string pdateclassWL = "nav-item";
+        string pdoneclassWL = "nav-item";
+        string approvedclassWL = "nav-item";
+
+        string submitclassFR = "nav-item";
+        string forwardclassFR = "nav-item";
+        string reviewedclassFR = "nav-item";
+        string goiclassFR = "nav-item";
+        string pdateclassFR = "nav-item";
+        string pdoneclassFR = "nav-item";
+        string approvedclassFR = "nav-item";
+
+        string wildlifeclass = "hide";
+        string forestclass = "hide";
+
+        if (Convert.ToString(Session["UserType"]) == "Wildlife")
+        {
+            DataRow[] drWild = tblTrail.Select("AreaType='Wildlife' OR AreaType='N/A'");
+            if (drWild.Count() > 0)
+            {
+                dtWildlife = tblTrail.Select("AreaType='Wildlife' OR AreaType='N/A'").CopyToDataTable();
+            }
+            wildlifeclass = "show";
+        }
+        else if (Convert.ToString(Session["UserType"]) == "Forest")
+        {
+            DataRow[] drForest = tblTrail.Select("AreaType='Forest' OR AreaType='N/A'");
+            if (drForest.Count() > 0)
+            {
+                dtForest = tblTrail.Select("AreaType='Forest' OR AreaType='N/A'").CopyToDataTable();
+            }
+
+            forestclass = "show";
+        }
+        else if (Convert.ToString(Session["UserType"]) == "Both")
+        {
+            DataRow[] drWild = tblTrail.Select("AreaType='Wildlife' OR AreaType='N/A'");
+            if (drWild.Count() > 0)
+            {
+                dtWildlife = tblTrail.Select("AreaType='Wildlife' OR AreaType='N/A'").CopyToDataTable();
+            }
+            DataRow[] drForest = tblTrail.Select("AreaType='Forest'");
+            if (drForest.Count() > 0)
+            {
+                dtForest = tblTrail.Select("AreaType='Forest' OR AreaType='N/A'").CopyToDataTable();
+            }
+            forestclass = "show";
+            wildlifeclass = "show";
+        }
+
+    }
+
+    @if (dtWildlife != null && dtWildlife.Rows.Count > 0)
+    {
+        <div id="smartwizardWildlife" class="@wildlifeclass">
+            <h4>Wildlife Status:</h4>
+            <ul>
+
+                @foreach (DataRow dr in dtWildlife.Rows)
+                {
+                    if (dr["Action"].ToString() == "Submitted")
+                    {
+                        submitclassWL = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Forwarded")
+                    {
+                        forwardclassWL = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Reviewed")
+                    {
+                        reviewedclassWL = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Letter sent to GOI" || dr["Action"].ToString() == "Letter sent to GOR" || dr["Action"].ToString() == "Letter sent to GOI & GOR")
+                    {
+                        goiclassWL = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Set Presentation Date")
+                    {
+                        pdateclassWL = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Presentation")
+                    {
+                        pdoneclassWL = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Approved")
+                    {
+                        approvedclassWL = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Rejected")
+                    {
+                        approvedclassWL = "nav-item rejected";
+                    }
+
+
+                }
+                <li class="@submitclassWL"><a href="#step-1">Step 1<br /><small>Submitted</small></a></li>
+                <li class="@forwardclassWL"><a href="#step-2">Step 2<br /><small>Forwarded</small></a></li>
+                <li class="@reviewedclassWL"><a href="#step-3">Step 3<br /><small>Reviewed</small></a></li>
+                <li class="@goiclassWL"><a href="#step-4">Step 4<br /><small>Sent to GOI/GOR</small></a></li>
+                <li class="@pdateclassWL"><a href="#step-5">Step 5<br /><small>Presention Date Set</small></a></li>
+                <li class="@pdoneclassWL"><a href="#step-6">Step 6<br /><small>Presention Done</small></a></li>
+                <li class="@approvedclassWL"><a href="#step-7">Step 7<br /><small>Approved/Rejected</small></a></li>
+
+
+
+
+
+            </ul>
+        </div>
+    }
+    @if (dtForest != null && dtForest.Rows.Count > 0)
+    {
+        <div id="smartwizardForest" class="@forestclass">
+            <h4>Forest Status:</h4>
+            <ul>
+
+                @foreach (DataRow dr in dtForest.Rows)
+                {
+                    if (dr["Action"].ToString() == "Submitted")
+                    {
+                        submitclassFR = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Forwarded")
+                    {
+                        forwardclassFR = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Reviewed")
+                    {
+                        reviewedclassFR = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Letter sent to GOI" || dr["Action"].ToString() == "Letter sent to GOR" || dr["Action"].ToString() == "Letter sent to GOI & GOR")
+                    {
+                        goiclassFR = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Set Presentation Date")
+                    {
+                        pdateclassFR = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Presentation")
+                    {
+                        pdoneclassFR = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Approved")
+                    {
+                        approvedclassFR = "nav-item done";
+                    }
+                    if (dr["Action"].ToString() == "Rejected")
+                    {
+                        approvedclassFR = "nav-item rejected";
+                    }
+
+                }
+                <li class="@submitclassFR"><a href="#step-1">Step 1<br /><small>Submitted</small></a></li>
+                <li class="@forwardclassFR"><a href="#step-2">Step 2<br /><small>Forwarded</small></a></li>
+                <li class="@reviewedclassFR"><a href="#step-3">Step 3<br /><small>Reviewed</small></a></li>
+                <li class="@goiclassFR"><a href="#step-4">Step 4<br /><small>Sent to GOI/GOR</small></a></li>
+                <li class="@pdateclassFR"><a href="#step-5">Step 5<br /><small>Presention Date Set</small></a></li>
+                <li class="@pdoneclassFR"><a href="#step-6">Step 6<br /><small>Presention Done</small></a></li>
+                <li class="@approvedclassFR"><a href="#step-7">Step 7<br /><small>Approved/Rejected</small></a></li>
+
+
+            </ul>
+        </div>
+    }
+
+    <h4>Basic Details:</h4>
+    <table class="table table-striped table-bordered table-hover">
+        <tbody id="tbReqDetail">
+            @foreach (DataColumn dc in tbl.Columns)
+            {
+                string colVal = Convert.ToString(tbl.Rows[0][dc.ColumnName]);
+                if (!string.IsNullOrEmpty(colVal))
+                {
+                    if (dc.ColumnName.Contains(" File"))
+                    {
+                        <tr><td>@dc.ColumnName</td><td><a href="@origin/@colVal" target="_blank" title="View @dc.ColumnName"> <i class="fa fa-eye"></i> </a></td></tr>
+                    }
+                    else
+                    {
+                        <tr><td>@dc.ColumnName</td><td>@colVal</td></tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+    <h4>Team Details:</h4>
+    <table class="table table-striped table-bordered table-hover">
+        <thead>
+            <tr>
+                <td>Member Name</td>
+                <td>Member Type</td>
+                <td>Gender</td>
+            </tr>
+        </thead>
+        <tbody>
+            @if (dtMemberInfo != null && dtMemberInfo.Rows.Count > 0)
+            {
+                for (int i = 0; i < dtMemberInfo.Rows.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            @Convert.ToString(dtMemberInfo.Rows[i]["MemberName"])
+                        </td>
+                        <td>
+                            @Convert.ToString(dtMemberInfo.Rows[i]["MemberType"])
+                        </td>
+                        <td>
+                            @Convert.ToString(dtMemberInfo.Rows[i]["Gender"])
+                        </td>
+                    </tr>
+                }
+
+            }
+            else
+            {
+                <tr>
+                    <td colspan="3"><strong>No record found.</strong></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <h4>Action Taken Details:</h4>
+    <table class="table table-striped table-bordered table-hover" id="tbTrail">
+        <thead>
+            <tr>
+                @foreach (DataColumn trailDc in tblTrail.Columns)
+                {
+                    <th>@trailDc.ColumnName</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (DataRow dr in tblTrail.Rows)
+            {
+                <tr>
+                    @for (int i = 0; i < tblTrail.Columns.Count; i++)
+                    {
+                        <td>@dr[i]</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<br />
+<div class="divAssign">
+    @using (Html.BeginForm("ReviewReq", "ForesterAction", FormMethod.Post, new { @id = "formAssign", enctype = "multipart/form-data" }))
+    {
+        <div class="modal fade in" id="AadharCardModal" tabindex="-1" role="dialog" aria-hidden="false">
+            <div class="modal-dialog mdw">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                        <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> Please Enter Valid OTP on your Registered Mobile Number </label></h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <!-- From URL Get -->
+                        @Html.TextBox("OTP", null, new { @class = "form-control" })
+                        @Html.Hidden("TransationID", null, new { @class = "form-control", @id = "TransationID" })
+
+
+                        <!-- /. From URL Get -->
+                    </div>
+                    <!-- /.modal-body -->
+                    <div class="modal-footer" id="fot-f">
+                        <div id="btn" class="col-lg-12">
+                            <button name="button" id="clicks" class="btn btn-success" type="submit" value="Cancel" style="width: auto">
+                                <i class="fa fa-times fa-fw"></i> Save
+                            </button>
+                            <button name="button" class="btn btn-danger" type="button" value="Cancel" data-dismiss="modal" style="width: auto">
+                                <i class="fa fa-times fa-fw"></i> Close
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <div class="modal fade in" id="DocumentFormatModel" tabindex="-1" role="dialog" aria-hidden="false">
+            <div class="modal-dialog mdw">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close btnDocumentCancel" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel"><label id="lbpl_header"> Create Document </label></h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <textarea rows="200" id="DocumentTemplate" class="form-control"></textarea>
+                        <script>
+                            CKEDITOR.replace("DocumentTemplate");
+                        </script>
+                    </div>
+                    <!-- /.modal-body -->
+                    <div class="modal-footer" id="fot-f">
+                        <div id="btn" class="col-lg-12">
+                            <a href="javascript:void(0)" target="_blank" style="float:right;margin-left:10px;display:none;" class="btn btn-success" id="aFileDownlaod"><i class="fa fa-times fa-download"></i> Download</a>
+                            <button name="button" id="btnCreateFormat" class="btn btn-success" type="button" value="Cancel" style="width: auto">
+                                <i class="fa fa-times fa-save"></i> Submit
+                            </button>
+
+                            @*<button name="button" class="btn btn-danger btnDocumentCancel" type="button" value="Cancel" style="width: auto">
+                                    <i class="fa fa-times fa-fw"></i> Close
+                                </button>*@
+                        </div>
+
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+        </div>
+
+
+        <input type="hidden" id="ReqId" name="ReqId" value="@tbl.Rows[0]["RequestedId"].ToString()" />
+        <input type="hidden" id="cmdText" name="cmdText" value="@tblCmd.Rows[0]["NextStep"].ToString()" />
+        @Html.Hidden("ResearchID", tblCmd.Rows[0]["ResearchID"].ToString())
+
+        if ((ruleType.Equals("GOIGOR") || ruleType.Equals("GOIGORF")) && currentApprovalLevel == 3)
+        {
+            <input type="hidden" id="cmd" name="cmd" value="18" />
+            <input type="hidden" id="cmdAction" value="@tblCmd.Rows[0]["Level"].ToString()" />
+            <div class="review">
+                <div class="divResLetter">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Letter Status:<span class="mandatory">*</span></label> <a href="javascript:void(0)" data-type="goiFormat" id="createformat_me">Create Format</a>
+                            @Html.DropDownList("ddlLetterStatus", new List<SelectListItem>
+                                                                                 (){
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                new SelectListItem { Text="Letter sent to GOI",Value="18" },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                new SelectListItem { Text="Letter sent to GOR",Value="19" },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                new SelectListItem { Text="Letter sent to GOI & GOR",Value="20" },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                new SelectListItem { Text="Forward to Next level approver",Value=tblCmd.Rows[0]["Level"].ToString() }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }, new { @class = "form-control", onchange = "OnChange_LetterStatus(this)" })
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 goireqLetter">
+                        <div class="form-group">
+                            <label>Letter No:<span class="mandatory">*</span></label>
+                            <input type="text" id="txtGOIRequestNo" class="form-control required" name="GOILetterNo" />
+                            <div class="alert-danger1">@Html.ValidationMessage("GOILetterNo")</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 gorreqLetter" style="display:none;">
+                        <div class="form-group">
+                            <label>Letter No:<span class="mandatory">*</span></label>
+                            <input type="text" id="txtGORRequestNo" class="form-control required" name="GORLetterNo" />
+                            <div class="alert-danger1">@Html.ValidationMessage("GOILetterNo")</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 resLetter" style="display:none">
+                        <div class="form-group">
+                            <label>Response No:<span class="mandatory">*</span></label>
+                            <input type="text" id="txtGOIResponseNo" class="form-control" name="GOIResponseNo" />
+                            <div class="alert-danger1">@Html.ValidationMessage("GOIResponseNo")</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 goireqFileUpload">
+                        <div class="form-group">
+                            <label>GOI Request Letter:<span class="mandatory">*</span><br><i class="small">Upload file up to 8 MB</i></label>
+                            @Html.TextBox("GOIRequestLetterPath", "", new { @class = "form-control required", id = "fuGOIRequestLetterPath", type = "file", onchange = "UploadDataSingle(this,46)" })
+                            <div class="alert-danger1">@Html.ValidationMessage("GOIRequestLetterPath")</div>
+                        </div>
+                    </div>
+                    @*<div class="col-lg-6 gorreqFileUpload" style="display:none">
+                            <div class="form-group">
+                                <label>GOR Request Letter:<span class="mandatory">*</span><br><i class="small">Upload file up to 8 MB</i></label>
+                                @Html.TextBox("GOIRequestLetterPath", "", new { @class = "form-control required", id = "fuGORRequestLetterPath", type = "file", onchange = "UploadDataSingle(this,46)" })
+                                <div class="alert-danger1">@Html.ValidationMessage("GOIRequestLetterPath")</div>
+                            </div>
+                        </div>*@
+                    <div class="col-lg-6 resFileUpload" style="display:none">
+                        <div class="form-group">
+                            <label>GOI Response Letter:<span class="mandatory">*</span><br><i class="small">Upload file up to 8 MB</i></label>
+                            @Html.TextBox("GOIResponseLetterPath", "", new { @class = "form-control", id = "fuGOIResponseLetterPath", type = "file", onchange = "UploadDataSingle(this,47)" })
+                            <div class="alert-danger1">@Html.ValidationMessage("GOIResponseLetterPath")</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Remarks:<span class="mandatory">*</span></label>
+                        <textarea class="form-control required" name="Comments"></textarea>
+                        <div class="alert-danger1">@Html.ValidationMessage("Comments")</div>
+                    </div>
+                </div>
+                <div class="col-lg-12"></div>
+                <div class="modal-footer">
+                    <div id="btn" class="col-lg-12">
+                        @*@if (Convert.ToString(tblCmd.Rows[0]["NextStep"]).Trim().ToLower() == "approved")
+                            {
+                                <button type="button" class="btn btn-success" name="Command" id="btnapproved">
+                                    <i class="fa fa-check"></i>@tblCmd.Rows[0]["NextStep"]
+                                </button>
+                            }
+                            else
+                            {*@
+                        <button type="submit" class="btn btn-success" name="Command" id="btnReview">
+                            <i class="fa fa-check"></i>@tblCmd.Rows[0]["NextStep"]
+                        </button>
+                        @*}*@
+                        <button type="button" class="btn btn-warning" name="Command" id="btn_Reasign">
+                            <i class="fa fa-circle-o-notch fa-fw"></i>Reasign
+                        </button>
+                        <button type="button" class="btn btn-danger" name="Command" id="btn_Reject">
+                            <i class="fa fa-circle-o-notch fa-fw"></i>Reject
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <input type="hidden" id="cmd" name="cmd" value="@tblCmd.Rows[0]["Level"].ToString()" />
+            <div class="review">
+
+                @if (Convert.ToString(tblCmd.Rows[0]["NextStep"]).Equals("Set Presentation Date"))
+                {
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Date: <span class="mandatory">*</span></label>
+                            <input type="text" class="form-control datefield required" id="presDate" name="presDate" readonly="readonly" />
+                            <div class="alert-danger1">@Html.ValidationMessage("presDate")</div>
+                        </div>
+                    </div>
+                }
+                else if (Convert.ToString(tblCmd.Rows[0]["NextStep"]).Equals("Approved"))
+                {
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Research Permission File:<span class="mandatory">*</span><br><i class="small">Upload file up to 8 MB</i></label> <a href="javascript:void(0)" data-type="approvedFormat" id="createformat_me">Create Format</a>
+                            @Html.TextBox("permFile", "", new { @class = "form-control required", id = "fuPermFile", type = "file", onchange = "UploadDataSingle(this,48)" })
+                            <div class="alert-danger1">@Html.ValidationMessage("permFile")</div>
+                        </div>
+                    </div>
+                }
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Remarks:<span class="mandatory">*</span></label>
+                        <textarea class="form-control required" name="Comments"></textarea>
+                        <div class="alert-danger1">@Html.ValidationMessage("Comments")</div>
+                    </div>
+                </div>
+                <div class="col-lg-12"></div>
+                <div class="modal-footer">
+                    <div id="btn" class="col-lg-12">
+                        @*@if (Convert.ToString(tblCmd.Rows[0]["NextStep"]).Trim().ToLower() == "approved")
+                            {
+                                <button type="button" class="btn btn-success" name="Command" id="btnapproved">
+                                    <i class="fa fa-check"></i>@tblCmd.Rows[0]["NextStep"]
+                                </button>
+                            }
+                            else
+                            {*@
+                        <button type="submit" class="btn btn-success" name="Command" id="btnReview">
+                            <i class="fa fa-check"></i>@tblCmd.Rows[0]["NextStep"]
+                        </button>
+                        @*}*@
+                        <button type="button" class="btn btn-warning" name="Command" id="btn_Reasign">
+                            <i class="fa fa-circle-o-notch fa-fw"></i>Reasign
+                        </button>
+                        <button type="button" class="btn btn-danger" name="Command" id="btn_Reject">
+                            <i class="fa fa-circle-o-notch fa-fw"></i>Reject
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+<script src="~/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js" type="text/javascript"></script>
+<link href="~/Content/StepWizard/smart_wizard.css" rel="stylesheet" />
+<link href="~/Content/StepWizard/smart_wizard_theme_circles.css" rel="stylesheet" />
+<script src="~/Content/StepWizard/jquery.smartWizard.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(".datefield").datepicker({
+            minDate: '+7d',
+            dateFormat: 'dd/mm/yy',
+            changeYear: true,
+            onClose: function (dateText, inst) { $("[id$=auto]").focus(); }
+        });
+        $('#smartwizardWildlife').smartWizard({
+            selected: 0,
+            theme: 'circles',
+            transitionEffect: 'fade',
+            showStepURLhash: false
+            //toolbarSettings: {
+            //    toolbarPosition: 'both',
+            //    toolbarButtonPosition: 'end',
+            //    toolbarExtraButtons: [btnFinish, btnCancel]
+            //}
+        });
+        $('#smartwizardForest').smartWizard({
+            selected: 0,
+            theme: 'circles',
+            transitionEffect: 'fade',
+            showStepURLhash: false
+            //toolbarSettings: {
+            //    toolbarPosition: 'both',
+            //    toolbarButtonPosition: 'end',
+            //    toolbarExtraButtons: [btnFinish, btnCancel]
+            //}
+        });
+    });
+    function UploadDataSingle(cntrl, docType) {
+        /**/
+        var rootURl = '@System.Configuration.ConfigurationManager.AppSettings["websiteUrl"].ToString()';
+    /**/
+    if (window.FormData !== undefined) {
+        var isValid = true;
+
+        if (isValid) {
+            var files = $(cntrl).get(0).files;
+            var fileData = new FormData();
+            for (var i = 0; i < files.length; i++) {
+                fileData.append(files[i].name, files[i]);
+                fileData.append("docTypeID", docType);
+            }
+            if ($(cntrl).val() != '') {
+                var size = GetFileSize(cntrl.id);
+
+                if (size > 8) {
+                    alert(size + '::You can upload file up to 8 MB');
+                    return false;
+                }
+                else {
+                    var rowdata = "";
+
+                    $.ajax({
+                        url: rootURl + "Common/UploadFileSingle",
+                        type: "POST",
+                        contentType: false, // Not to set any content header
+                        processData: false, // Not to process data
+                        data: fileData,
+                        success: function (response) {
+                            alert(response.returnMsg);
+                        },
+                        error: function (err) {
+                            alert(err.statusText);
+                        }
+                    });
+                }
+            }
+            else { alert("Select file to upload"); }
+        }
+        else {
+            alert("Please select file to upload");
+            $(cntrl).val(''); return false;
+        }
+    } else {
+        alert("FormData is not supported.");
+    }
+}
+
+function GetFileSize(fileid) {
+    try {
+        var fileSize = 0;
+        fileSize = $("#" + fileid)[0].files[0].size //size in kb
+        fileSize = fileSize / 1048576; //size in mb
+        return fileSize;
+    }
+    catch (e) {
+        alert("Error is :" + e);
+    }
+}
+
+$('#btn_Reasign').on('click', function () {
+    PerformRequestAction('6');
+});
+$('#btn_Reject').on('click', function () {
+    PerformRequestAction('3');
+});
+
+function OnChange_LetterStatus(cntrl) {
+    $('#cmd').val(cntrl.value);
+
+
+    $('#txtGOIRequestNo').val('');
+    $('#txtGORRequestNo').val('');
+    $('#txtGOIResponseNo').val('');
+
+    if (cntrl.value == "18") {
+
+        $('.goireqLetter').show();
+        $('.gorreqLetter').hide();
+        $('.gorreqFileUpload').hide();
+        $('.goireqFileUpload').show();
+        $('.resLetter').hide();
+        $('.resFileUpload').hide();
+
+    }
+    else if (cntrl.value == "19") {
+        $('.goireqLetter').hide();
+        $('.gorreqLetter').show();
+        $('.gorreqFileUpload').show();
+        $('.goireqFileUpload').show();
+        $('.resLetter').hide();
+
+        $('.resFileUpload').hide();
+    }
+    else if (cntrl.value == "20") {
+        $('.goireqLetter').show();
+        $('.gorreqLetter').show();
+        $('.resLetter').hide();
+        $('.gorreqFileUpload').show();
+        $('.goireqFileUpload').show();
+        $('.resFileUpload').hide();
+    }
+    else if (cntrl.value == "10") {
+        $('.resLetter').show();
+        $('.goireqLetter').hide();
+        $('.gorreqLetter').hide();
+        $('.resFileUpload').show();
+
+        $('.gorreqFileUpload').hide();
+        $('.goireqFileUpload').hide();
+
+        //$('div.reqLetter').addClass('hide');
+        //$('div.reqLetter').find('input[type="text"],input[type="file"]').removeClass('required');
+        //$('div.resLetter').removeClass('hide');
+        //$('div.resLetter').find('input[type="text"],input[type="file"]').addClass('required');
+    }
+
+}
+
+function PerformRequestAction(actionCode) {
+    $('div.reqLetter,div.resLetter').find('input[type="text"],input[type="file"]').removeClass('required');
+    $('#cmd').val(actionCode);
+    $('#formAssign').submit();
+    }
+
+</script>
+<script>
+    var origin = '@System.Configuration.ConfigurationManager.AppSettings["websiteUrl"].ToString()'; /*'http://localhost:17105';*/
+    $("#btnapproved").click(function () {
+
+        SendOTPEsignIntegration();
+    });
+    //Rajveer
+
+    //Step 1
+    function SendOTPEsignIntegration() {
+        //  $(".modal").css("z-index","0");
+        var RequestId = $('#ReqId').val();
+        $.ajax({
+            type: 'GET',
+            url: "../E_Sign/SendOTPESign",
+            dataType: 'json',
+            data: { RequestId: RequestId },
+            success: function (result) {
+                console.log(result);
+                if (result.Status == 1) {
+                    $("#TransationID").val(result.TransactionId);
+
+                    $("#AadharCardModal").modal("show");
+                }
+                else {
+                    $("#modal-window").modal("hide");
+                    alert(result.ErrorMessage + "!! Some error has occurred please try again later!!!");
+                }
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+    }
+    $('#createformat_me').click(function () {
+
+        var type = $(this).attr('data-type');
+        $.ajax({
+            type: 'GET',
+            url: origin + '/ForesterAction/GetDocumentTemplate',
+            dataType: 'html',
+            data: { Type:type },
+            success: function (result) {
+                var d = JSON.parse(result);
+                if (d.status_code == "200") {
+                    CKEDITOR.instances['DocumentTemplate'].setData(d.msg);
+                }
+                else {
+                    CKEDITOR.instances['DocumentTemplate'].setData('');
+                }
+
+            },
+            error: function (ex) {
+                alert(ex.error);
+            }
+        });
+
+        $("#DocumentFormatModel").modal("show");
+        $('#aFileDownlaod').attr('href', 'javascript:void(0)')
+        $('#aFileDownlaod').hide();
+        $('#btnCreateFormat').show();
+    });
+    $('.btnDocumentCancel').click(function () {
+        $("#DocumentFormatModel").modal("hide");
+    });
+    $('#btnCreateFormat').click(function () {
+        var html = CKEDITOR.instances['DocumentTemplate'].getData();
+        var reqid = $('#ReqId').val();
+        if (html != '') {
+            $.ajax({
+                type: 'POST',
+                url: origin + '/ForesterAction/CreateDocument',
+                dataType: 'html',
+                data: { Html: html, requestId: reqid },
+                success: function (result) {
+                    var d = JSON.parse(result);
+                    if (d.status_code == "200") {
+                        alert(d.msg);
+                        $('#aFileDownlaod').attr('href', origin + d.filepath)
+                        $('#aFileDownlaod').show();
+                        $('#btnCreateFormat').hide();
+                    }
+                    else {
+                        alert(d.msg);
+                        return false;
+                    }
+
+                },
+                error: function (ex) {
+                    alert(ex.error);
+                }
+            });
+        }
+        else {
+            alert("Please enter content.");
+            return false;
+        }
+
+    });
+
+</script>

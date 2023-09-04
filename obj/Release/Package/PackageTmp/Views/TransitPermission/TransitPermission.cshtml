@@ -1,0 +1,555 @@
+﻿@{
+    ViewBag.Title = "TransitPermission";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script type="text/javascript">
+
+    var RootUrl = '@Url.Content("~/")';
+
+
+
+    $(document).ready(function () {
+        $('#tbl-new').hide();
+
+        $(".datefield").datepicker({ minDate: new Date(), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+
+
+
+        $('#driverName').keypress(function (e) {
+            var kc = e.which;
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+        $('#driverLicense,#toLocation,#vehicleNo').keypress(function (e) {
+            var kc = e.which;
+
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95) || (kc >= 44 && kc <= 57) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        })
+
+        $('#durationfrom,#durationto').keydown(function (event)
+        { return cancelBackspace(event) });
+
+        function cancelBackspace(event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                return false;
+            }
+        }
+
+
+        $('#driverMobileno,#transferQty').keypress(function (e) {
+            var kc = e.which;
+            if (kc >= 48 && kc <= 57) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+
+        })
+        $('#btn_submit1').click(function () {
+
+
+            if ($('#Applicant_type').val() == '0') {
+
+                $('#aerrordiv1').show();
+                $('#aerrordiv1').html("Please Select Applicant Type" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                $('html, body').animate({
+                    scrollTop: $("#Applicant_type").offset().top
+                }, 600);
+                return false;
+            }
+
+            else { $('#aerrordiv1').hide(); }
+
+            if ($('#reqID').val() == '') {
+
+                $('#transerrordiv2').show();
+                $('#transerrordiv2').html("Please Select Transaction ID!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                $('html, body').animate({
+                    scrollTop: $("#reqID").offset().top
+                }, 600);
+                return false;
+            }
+
+            else { $('#transerrordiv2').hide(); }
+
+
+            if ($('#toLocation').val().trim() == '') {
+
+                $('#errordiv2').show();
+                $('#errordiv2').html("Please Enter To Location!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                $('html, body').animate({
+                    scrollTop: $("#toLocation").offset().top
+                }, 600);
+                return false;
+            }
+
+            else { $('#errordiv2').hide(); }
+
+
+
+            if ($('#vehicleNo').val().trim() == '') {
+
+                $('#errordiv3').show();
+                $('#errordiv3').html("Please Enter Vehicle Number!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                $('html, body').animate({
+                    scrollTop: $("#vehicleNo").offset().top
+                }, 600);
+                return false;
+            }
+
+            else { $('#errordiv3').hide(); }
+
+            if ($('#driverLicense').val().trim() == '') {
+
+                $('#errordiv4').show();
+                $('#errordiv4').html("Please Enter Driver License!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                $('html, body').animate({
+                    scrollTop: $("#driverLicense").offset().top
+                }, 600);
+                return false;
+            }
+
+            else { $('#errordiv4').hide(); }
+
+            if ($('#driverName').val().trim() == '') {
+
+                $('#errordiv5').show();
+                $('#errordiv5').html("Please Enter Driver Name!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                $('html, body').animate({
+                    scrollTop: $("#driverName").offset().top
+                }, 600);
+                return false;
+            }
+
+            else { $('#errordiv5').hide(); }
+
+            if ($('#driverMobileno').val().trim() == '') {
+
+                $('#errordiv6').show();
+                $('#errordiv6').html("Please Enter Driver Mobile Number!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                $('html, body').animate({
+                    scrollTop: $("#driverMobileno").offset().top
+                }, 600);
+                return false;
+            }
+
+            else { $('#errordiv6').hide(); }
+
+            if ($('#durationfrom').val() == '') {
+
+                $('#errordiv7').show();
+                $('#errordiv7').html("Please Select From Date!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                $('html, body').animate({
+                    scrollTop: $("#durationfrom").offset().top
+                }, 600);
+                return false;
+            }
+
+            else { $('#errordiv7').hide(); }
+
+            if ($('#durationto').val() == '') {
+
+                $('#errordiv8').show();
+                $('#errordiv8').html("Please Select To Date!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>")
+                $('html, body').animate({
+                    scrollTop: $("#durationto").offset().top
+                }, 600);
+                return false;
+            }
+
+            else { $('#errordiv8').hide(); }
+
+
+
+        });
+
+
+        $('#transferQty').on("keyup", function (event) {
+            if (parseInt($('#transferQty').val()) > parseInt($('#tQty').val())) {
+                alert('Transferred Qty can not be greater than Available Qty');
+                $('#transferQty').val(0);
+            }
+        })
+
+
+        $("#transportMode").bind("change", function () {
+            $('#ddl_VehicleType').empty();
+            $('#ddl_Vehicle').empty();
+            $("#ddl_VehicleType").append('<option value="' + "" + '">' + "--Select--" + '</option>');
+            var transportModel = $("#transportMode option:selected").text();
+
+            var values = {
+                TransportModel: transportModel
+            };
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootUrl + 'TransitPermission/vehicleCategoryMode',
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddl_VehicleType").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+        $("#ddl_VehicleType").bind("change", function () {
+
+            $('#ddl_Vehicle').empty();
+            $("#ddl_Vehicle").append('<option value="' + "" + '">' + "--Select--" + '</option>');
+            var vehicleType = $("#ddl_VehicleType").val();
+
+            var values = {
+                VehicleType: vehicleType
+            };
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(values),
+                url: RootUrl + 'TransitPermission/Bindvehicle',
+                success: function (data) {
+                    $.each(data, function (i, items) {
+                        $("#ddl_Vehicle").append('<option value="' + items.Value + '">' + items.Text + '</option>');
+                    });
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+        });
+
+
+        $("#durationfrom").change(function () {
+            $("#durationto").val('');
+        });
+        $("#durationto").change(function () {
+            var str1 = $("#durationfrom").val();
+            var str2 = $("#durationto").val();
+
+            var L = 3, d1 = $("#durationfrom").val().split('/'), d2 = $("#durationto").val().split('/');
+            d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+            d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+            if (new Date(d1) <= new Date(d2)) {
+                // parseDate(str1, str2);
+            }
+            else {
+                $("#durationto").val('');
+                alert('Date Must be GreaterThen From Date');
+            }
+        });
+
+        $('#durationfrom,#durationto').keydown(function (event)
+        { return cancelBackspace(event) });
+
+
+        $('#reqID').change(function (e) {
+            $('#reqTable').empty();
+            var reqID = $("#reqID option:selected").text();
+            $("#transID").val(reqID);
+
+            if ($("#reqID").val() == "AUC") {
+
+                $('#lbl_aucPurInv').text("Auction Invoice");
+                $('#lbl_Vilrand').text("Range");
+                $('#lbl_DepotNur').text("Depot");
+
+
+            }
+            else {
+                $('#lbl_aucPurInv').text("Purchase Invoice");
+                $('#lbl_Vilrand').text("Range");
+                $('#lbl_DepotNur').text("Depot");
+
+
+                //$('#lbl_Vilrand').text("Village");
+                //$('#lbl_DepotNur').text("Nursery");
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'TransitPermission/FetchAllTransactionDetail', // we are calling json method
+                dataType: 'json',
+                data: { reqType: $("#reqID").val(), reqID: reqID },
+                success: function (data) {
+                    $('#tbl-new').hide();
+
+                    if (data.length > 0) {
+                        $('#tbl-new').show();
+                        $.each(data, function (i, items) {
+                            //var id = "'" + items.rowID + "'";
+                            $("#unit").text("(" + items.Unit + ")");
+                            var bardata = "<tr><td>" + items.RowID + "</td><td>" + items.ReqID + "</td><td>" + items.DistNAME + "</td><td>" + items.VillRange + "</td><td>" + items.Location + "</td><td>" + items.Product + "</td><td>" + items.QTy + "</td><td style='display:none;'><input type='hidden' id='tQty' value='" + items.QTy + "' /><td>" + items.PaidAMT + "</td></tr>";
+                            $("#reqTable").append(bardata);
+                        })
+                    }
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+        });
+
+
+    });
+</script>
+
+<script type="text/javascript">
+
+    function ClearField() {
+
+        $("#Applicant_type").val('');
+        $("#reqID").val('');
+        $("#tbl-new").hide();
+        $("#toLocation").val('');
+        $("#transportMode").val('');
+        $("#vehicleNo").val('');
+        $("#driverLicense").val('');
+        $("#driverName").val('');
+        $("#driverMobileno").val('');
+        $("#durationfrom").val('');
+        $("#durationto").val('');
+
+
+    }
+
+    function reload() {
+        var r = confirm("Do you want to leave page!");
+        if (r) {
+            window.location = RootUrl + "Dashboard/dashboard";
+        }
+        else {
+            //do nothing
+        }
+    }
+
+
+</script>
+
+
+
+
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header"><span>Permission for Transit</span></h1>
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                @using (Html.BeginForm("Create", "TransitPermission", FormMethod.Post, new { data_behavior = "confirm" }))
+                {
+                    <div class="panel-body">
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Application Type: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("Applicant_Type", (IEnumerable<SelectListItem>)ViewBag.Applicant_Type, new { @class = "form-control common", id = "Applicant_type" })
+
+                                <div id="aerrordiv1" style="display:none" class="alert-danger1"></div>
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Name Of Applicant/Purchase: <span class="mandatory">*</span></label>
+                                <input class="form-control" id="applicantName" name="ApplicantName" readonly="readonly" value="@ViewData["Name"]">
+
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Select Transaction ID: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("ReqID", (IEnumerable<SelectListItem>)ViewBag.ReqID, "--Select--", new { @class = "form-control", id = "reqID" })
+                                <input type="hidden" id="transID" name="TransID" />
+                                <div id="transerrordiv2" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12" id="rtable">
+                            <div id="tbl-new" class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>S.No</th>
+                                            <th><label id="lbl_aucPurInv"> </label> </th>
+                                            <th>District</th>
+                                            <th><label id="lbl_Vilrand"> </label></th>
+                                            <th> <label id="lbl_DepotNur"> </label></th>
+                                            <th>Product</th>
+                                            <th>Quantity <label id="unit"></label> </th>
+                                            <th>Paid Amount(INR)</th>
+
+
+                                        </tr>
+                                    </thead>
+                                    <tbody id="reqTable"></tbody>
+                                </table>
+                            </div>
+
+
+                            <!-- Btn Groping -->
+                            <!-- /.Btn Groping -->
+                        </div>
+                        <div class="col-lg-12"></div>
+
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Transfer Quantity: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="transferQty" name="TransferQty" placeholder="Enter Quantity" maxlength="30" />
+                                <div id="errordiv2" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label> S.N. of e-challan : <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="echalan" name="Echalan" placeholder="Enter e-challan" maxlength="30" />
+                                <div id="errordiv2" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Amount  : <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="paidamount" name="Paid_amount" placeholder="Enter e-challan" maxlength="30" />
+                                <div id="errordiv2" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>To Location: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="toLocation" name="ToLocation" placeholder="Enter Location" maxlength="30" />
+                                <div id="errordiv2" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label> Mode Of Trasport: <span class="mandatory">*</span></label>
+                                <select class="form-control" id="transportMode" name="TransportMode">
+                                    <option>--Select--</option>
+                                    <option>By Road</option>
+
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Vehicle Type: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("VehicleType", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "ddl_VehicleType" })
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Vehicle: <span class="mandatory">*</span></label>
+                                @Html.DropDownList("Vehicle", new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control", id = "ddl_Vehicle" })
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Vehicle Number: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="vehicleNo" name="VehicleNo" placeholder="Enter Vehicle" maxlength="10" />
+                                <div id="errordiv3" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Driver License No: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="driverLicense" name="DriverLicense" placeholder="Enter Driver License No." maxlength="20" />
+                                <div id="errordiv4" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label> Driver Name: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="driverName" name="DriverName" maxlength="30" />
+                                <div id="errordiv5" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Driver Mob No.: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="driverMobileno" name="DriverMobileno" maxlength="10" />
+                                <div id="errordiv6" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <label> Duration of Validity of Transit Permit <span class="mandatory">*</span></label>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>From: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control datefield" id="durationfrom" name="Durationfrom" />
+
+                                <div id="errordiv7" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>To: <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control datefield" id="durationto" name="Durationto" />
+
+                                <div id="errordiv8" style="display:none" class="alert-danger1"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Amount to be Paid (INR): <span class="mandatory">*</span></label>
+                                <input type="text" class="form-control" id="amtTobePaid" name="Amounttobepaid" value="500" readonly="readonly" />
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12"></div>
+
+
+
+                        <!-- Btn Groping -->
+                        <div class="btn-padd">
+                            <div id="btn" class="col-lg-12">
+                                <button type="submit" class="btn btn-success" name="Command" value="Submit" id="btn_submit1">
+                                    <i class="fa fa-check"></i> Submit
+                                </button>
+                                <button type="button" class="btn btn-warning" onclick="ClearField();">
+                                    <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                </button>
+                                <button type="button" name="Command" value="Cancel" class="btn btn-danger" onclick="reload(); return false;">
+                                    <i class="fa fa-times fa-fw"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+                        <!-- /.Btn Groping -->
+
+                    </div>
+                <!-- /.panel-body -->
+                }
+            </div>
+            <!-- /.panel -->
+
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>

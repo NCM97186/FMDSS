@@ -1,0 +1,884 @@
+﻿@model FMDSS.Models.AmritaDeviAwardModel
+@{
+    ViewBag.Title = "Amrita Devi Award";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //
+}
+<!-- Created by Rajveer -->
+<style>
+    #tbldistmapping {
+        margin: 15px;
+        width: 97%;
+    }
+
+    #page-wrapper-inn #tbldistmapping > thead > tr > th {
+        width: auto;
+        background-color: #dff0d8;
+        border-color: #d6e9c6;
+    }
+
+    #page-wrapper-inn #btnUploadSHPKML {
+        width: auto;
+    }
+
+    .spanmark {
+        color: #222;
+        font-size: 12px;
+        font-weight: normal;
+    }
+
+    #Industrial_Type {
+        width: 49%;
+    }
+
+    .fix-tbl {
+        height: 154px !important;
+        display: block;
+        overflow: auto;
+        width: 100%;
+    }
+
+    #page-wrapper-inn .fix-tbl > thead > tr > th {
+        width: 16%;
+    }
+
+    .ErrorColor {
+        border-color: red;
+    }
+</style>
+<!-- /.navbar-static-side -->
+<!--GIS Data Post 22-04-2016-->
+<form id="form11" name="form11" method="post">
+    <input type="hidden" id="portalid" name="portalid" value="rajcomp123" />
+    <input type="hidden" id="ssoId" name="ssoId" value="" />
+    <input type="hidden" id="requestFor" name="requestFor" value="" />
+    <input type="hidden" id="returnurl" name="returnurl" value="" />
+</form>
+<!--Gis Data Post End-->
+<!-- Form design -->
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad" style="display:none">
+    </div>
+    <div class="panel-heading"> <span>@Html.Raw(TempData["Message"]) </span> </div>
+    <div class="panel-heading col-lg-12 col-md-12 col-sm-12 c-xs-12">
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+            <span style="color:red;">* आवेदक को अनिवार्य क्षेत्र भरना है| (Mandatory field(s) to be filled by applicant)</span>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+            <div style="float:right">
+                <span title="Help Document"><i class="bg-light-blue" style="color:ButtonText"><a href="~/Help/FMDSS_Citizen_UserManualFor_AmritaDeviAward.pdf" target="_blank">Help Document</a> </i>     </span>|
+                <span title="Help Document"><i class="bg-light-blue" style="color:ButtonText"><a href="~/Help/HelpDocHindi.doc" target="_blank">सहायता दस्तावेज़</a> </i>     </span>|
+                <span title="Help Document"><i class="bg-light-blue" style="color:ButtonText"><a href="~/Help/समिति आदेश.pdf" target="_blank">समिति आदेश</a> </i>     </span>|
+                <span title="Help Document"><i class="bg-light-blue" style="color:ButtonText"><a href="~/Help/नियम एवं प्रक्रिया.pdf" target="_blank">नियम एवं प्रक्रिया</a> </i>     </span>|
+                <span title="Help Document"><i class="bg-light-blue" style="color:ButtonText"><a href="~/Help/आवेदन - पत्र.pdf" target="_blank">आवेदन-पत्र</a> </i>     </span>|
+            </div>
+        </div>
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading" style="text-align:center">
+                    राजस्थान सरकार <br />
+                    वन विभाग<br />
+                    अमृता देवी विष्नोई स्मृति पुरस्कार<br />
+                    आवेदन - पत्र
+                </div>
+                <div class="panel-body">
+                    @*<div class="col-lg-6 Edithide">
+                            <div class="form-group">
+                                <label>
+                                    NOC For:<span class="mandatory">*</span>
+                                </label>
+                                @if (HttpContext.Current.Session["NOCPurpose"] != null && HttpContext.Current.Session["NOCPurpose"] != "")
+                                {
+                                    <input type="text" class="form-control common" id="txtNOCPurpose" readonly value="@Session["NOCPurpose"].ToString()" />
+                                }
+                                else
+                                {  @Html.DropDownList("NOCPurpose", (IEnumerable<SelectListItem>)ViewBag.NOCPurpose, "--Select--", new { @class = "form-control common", id = "NOCPurpose" })}
+                                <div id="errordiv" style="display: none; position: initial !important" class="alert-danger1"></div>
+                            </div>
+                        </div>*@
+                    @*<div class="col-lg-6 Edithide">
+                            <div class="form-group">
+                                <label>
+                                    NOC Purpose:<span class="mandatory">*</span>
+                                </label>
+                                @if (HttpContext.Current.Session["NOCType"] != null && HttpContext.Current.Session["NOCType"] != "")
+                                {
+                                    <input type="text" class="form-control common" id="txtNOCType" readonly value="@Session["NOCType"].ToString()" />
+                                }
+                                else
+                                {
+                                    @Html.DropDownList("NOCType", new SelectList(string.Empty, "Value", "Text"), "--Select--", new { @class = "form-control", id = "NOCType" })
+                                }
+                                <div id="errordiv" style="display: none; position: initial !important" class="alert-danger1"></div>
+                            </div>
+                        </div>*@
+                </div>
+                <!-- /.panel-heading -->
+                <!--From Start-->
+                @using (Html.BeginForm("AmritaDeviAwardIndex", "AmritaDeviAward", FormMethod.Post, new { enctype = "multipart/form-data", data_behavior = "confirm" }))
+                {
+                    <label class="lblhide">
+                        @*Request ID:- @Model.RequestID*@
+                    </label>
+                    <div class="panel-body">
+                        <div id="reviewForm">
+                            <label class="Edithide" id="lblDisclaimer" style="width:100%;display:none">
+                                <marquee id="test" behavior="scroll" direction="left" scrolldelay="100" scrollamount="10" onmouseover="this.stop();" onmouseout="this.start();"> *Permission is only applicable for non forest area which do not include in wildlife area.</marquee>
+                                <input type="hidden" id="hdTreeCount" value="0" />
+                            </label>
+                            <label class="lblhide">
+                            </label>
+                            <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12 edithide">
+                                <div class="form-group">
+                                    <label>
+                                        Upload KML/SHP:<span class="mandatory">* All details will be generated automatically by uploading KML file.</span>
+                                    </label>
+                                    <button type="button" class="btn btn-warning btn-block" name="" value="" id="btnUploadSHPKML">
+                                        <i class="fa fa-check"></i> Upload
+                                    </button>
+                                    <div id="errordiv88" style="display:none; position:initial; right:0px;" class="alert-danger1"></div>
+                                    @Html.Hidden("hdSSOID", "" + Session["SSOID"] + "", new { @id = "hdSSOID" })
+                                </div>
+                            </div>
+                            <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12">
+                            </div>
+                            <fieldset id="fieldLocation" class="corner" style="margin: 10px; min-height: 300px; width:99%; border: 1px Solid #ccc;">
+                                <label style="font-weight:normal; padding:10px">
+                                </label>
+                                <div class="col-lg-12">
+                                    <label>Location Details:</label>
+                                    <div class="divider"></div>
+                                </div>
+                                <div class="table-responsive request-id col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <table id="tbldistmapping" class="table table-striped table-bordered table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Division</th>
+                                                <th>District</th>
+                                                <th>Tehsil</th>
+                                                <th>Panchayat Samiti</th>
+                                                <th>Gram Panchayat</th>
+                                                <th>Village</th>
+                                                <th>Name of Area</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbodydistmap">
+                                            @foreach (var item in ViewData["fixedlandlist"] as IEnumerable<FMDSS.Models.CitizenService.PermissionServices.clsPermission>)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Div_NM)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Dist_NM)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Tehsil_NM)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Block_NM)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Gp_NM)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Village_NM)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.areaName)
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-lg-12 Edithide">
+                                    <label>GPS Address:</label>
+                                    <div class="divider"></div>
+                                </div>
+                                <div class="col-lg-6 un-bold Edithide">
+                                    <div class="form-group">
+                                        <label>Latitude</label>
+                                        @Html.TextBoxFor(x => x.GPSLat, new { @class = "form-control  ", @title = "Enter the GPS latitude in the range of 26° - 27°. E.G. 26.52°", @placeholder = "Latitude", @maxlength = 50, @id = "txt_lat", @readonly = "readonly" })
+                                        @Html.ValidationMessageFor(s => s.GISInformationList[0].GPSLat)
+                                        <div id="errordiv8" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 un-bold Edithide">
+                                    <div class="form-group">
+                                        <label>Longitude:</label>
+                                        @Html.TextBoxFor(x => x.GPSLong, new { @class = "form-control  ", @title = "Enter the GPS longitude in the range of 69° - 78°. E.G. 75.52°", @placeholder = "Longitude", @maxlength = 50, @id = "txt_long", @readonly = "readonly" })
+                                        @Html.ValidationMessageFor(s => s.GISInformationList[0].GPSLong)
+                                        <div id="errordiv9" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 un-bold Edithide">
+                                    <div class="form-group">
+                                        <label>Area in Hectare:</label>
+                                        @Html.TextBoxFor(x => x.AreaShape, new { @class = "form-control  ", @title = "Enter the Area (In Hectare)", @placeholder = "Area (In Hectare)", @maxlength = 6, @readonly = "readonly" })
+                                        @Html.ValidationMessageFor(s => s.AreaShape)
+                                        <div id="errordiv9" style="display:none" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                @if (Model.ReferedBy != "Self")
+                                {
+                                    <div class="col-lg-6 un-bold">
+                                        <div class="form-group">
+                                            <label>Referred By:</label>
+                                            @Html.TextBoxFor(x => x.ReferedBy, new { @class = "form-control  ", @title = "Refered By", @placeholder = "Refered By", @readonly = "readonly" })
+
+                                        </div>
+                                    </div>
+                                }
+                            </fieldset>
+                            <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12 edithide">
+                                <div class="col-lg-6 col-md-6 col-xs-6 col-sm-6">
+                                    <label>
+                                        <span class="mandatory1">आवेदन वर्ष</span>
+                                    </label>
+                                    <div class="form-group">
+                                        @Html.DropDownListFor(model => model.CurrentYear, (IEnumerable<SelectListItem>)ViewBag.ApplicantYear,  new { @class = "form-control", @id = "CurrentYear" })
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-sm-12 col-xs-12 col-md-6">
+                                    <label>
+                                        <span class="mandatory1">आवेदक का प्रकार</span>
+                                    </label>
+                                    @Html.DropDownListFor(model => model.IsOrgOrPerson, new List<SelectListItem> { new SelectListItem { Text = "संगठन", Value = "true" }, new SelectListItem { Text = "व्यक्ति", Value = "false" } }, new { @class = "form-control" })
+                                    @*@Html.RadioButtonFor(model => model.IsOrgOrPerson, true)<label> संगठन</label>
+                                        @Html.RadioButtonFor(model => model.IsOrgOrPerson, false)<label> व्यक्ति</label>*@
+                                </div>
+                            </div>
+                            <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12">
+                                <div class="col-lg-6 col-sm-12 col-xs-12 col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(s => s.FirstName1):<span class="mandatory">*</span>
+                                        @Html.TextBoxFor(x => x.FirstName1, new { @class = "form-control  ", @title = @Html.DisplayNameFor(n => n.FirstName1), @placeholder = @Html.DisplayNameFor(n => n.FirstName1), @maxlength = 50 })
+                                        @Html.ValidationMessageFor(s => s.FirstName1)
+                                        <div id="errordiv" style="display: none; position: initial !important" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-sm-12 col-xs-12 col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(s => s.FirstName2):@*<span class="mandatory">*</span>*@
+                                        @Html.TextBoxFor(x => x.FirstName2, new { @class = "form-control  ", @title = @Html.DisplayNameFor(n => n.FirstName2), @placeholder = @Html.DisplayNameFor(n => n.FirstName2), @maxlength = 50 })
+                                        @Html.ValidationMessageFor(s => s.FirstName2)
+                                        <div id="errordiv" style="display: none; position: initial !important" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12">
+                                <div class="col-lg-12 col-sm-12 col-xs-12 col-md-12">
+                                    <div class="form-group">
+                                        @Html.LabelFor(s => s.Address):<span class="mandatory">*</span>
+                                        @Html.TextAreaFor(x => x.Address, new { @class = "form-control  ", @title = @Html.DisplayNameFor(n => n.Address), @placeholder = @Html.DisplayNameFor(n => n.Address), @maxlength = 500 })
+                                        @Html.ValidationMessageFor(s => s.Address)
+                                        <div id="errordiv" style="display: none; position: initial !important" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12">
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 ">
+                                    <div class="form-group">
+                                        @Html.LabelFor(s => s.AwardCategory):<span class="mandatory">*</span>
+                                        @Html.DropDownListFor(s => s.AwardCategory, (IEnumerable<SelectListItem>)ViewBag.AwardCategory, "--Select--", new { @class = "form-control  ", id = "AwardCategory" })
+                                        @Html.ValidationMessageFor(s => s.AwardCategory)
+                                        <div id="errordiv" style="display: none; position: initial !important" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 ">
+                                    <div class="form-group">
+                                        @Html.LabelFor(s => s.WorkStationName):<span class="mandatory">*</span>
+                                        @Html.TextBoxFor(x => x.WorkStationName, new { @class = "form-control  ", @title = @Html.DisplayNameFor(n => n.WorkStationName), @placeholder = @Html.DisplayNameFor(n => n.WorkStationName), @maxlength = 50 })
+                                        @Html.ValidationMessageFor(s => s.WorkStationName)
+                                        <div id="errordiv" style="display: none; position: initial !important" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12"><b> व्यक्ति/संस्था द्वारा जिस भूमि पर उत्कृष्ट कार्य किया है, उसकी किस्म को बताते हुए वास्तविक क्षेत्र, स्थान तथा मालिकाना पद्वतिः- </b></div>
+                            <div class="clearfix"></div><br />
+                            <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12">
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 ">
+                                    <div class="form-group">
+                                        @Html.LabelFor(s => s.LandPlace):<span class="mandatory">*</span>
+                                        @Html.TextBoxFor(x => x.LandPlace, new { @class = "form-control  ", @title = @Html.DisplayNameFor(n => n.LandPlace), @placeholder = @Html.DisplayNameFor(n => n.LandPlace), @maxlength = 50 })
+                                        @Html.ValidationMessageFor(s => s.LandPlace)
+                                        <div id="errordiv" style="display: none; position: initial !important" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 ">
+                                    <div class="form-group">
+                                        @Html.LabelFor(s => s.Landhacktor):<span class="mandatory">*</span>
+                                        @Html.TextBoxFor(x => x.Landhacktor, new { @class = "form-control Numbers ", @title = @Html.DisplayNameFor(n => n.Landhacktor), @placeholder = @Html.DisplayNameFor(n => n.Landhacktor), @maxlength = 7 })
+                                        @Html.ValidationMessageFor(s => s.Landhacktor)
+                                        <div id="errordiv" style="display: none; position: initial !important" class="alert-danger1"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive col-sm-12 col-md-12 col-lg-12 col-xs-12">
+                                <table id="tbldistmapping" class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>स्वामित्व</th>
+                                            <th>हैक्टेयर क्षेत्र</th>
+                                            <th>क्षेत्र का विवरण</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <label>निजी भूमि</label>
+                                            </td>
+                                            <td>
+                                                @Html.TextAreaFor(x => x.PersonalLandHactor, new { @class = "form-control Numbers ", @title = @Html.DisplayNameFor(n => n.PersonalLandHactor), @placeholder = @Html.DisplayNameFor(n => n.PersonalLandHactor), @maxlength = 7 })
+                                            </td>
+                                            <td>
+                                                @Html.TextAreaFor(x => x.PersonalLandHactorDesc, new { @class = "form-control  ", @title = @Html.DisplayNameFor(n => n.PersonalLandHactorDesc), @placeholder = @Html.DisplayNameFor(n => n.PersonalLandHactorDesc), @maxlength = 500 })
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label>सामूदायिक भूमि</label>
+                                            </td>
+                                            <td>
+                                                @Html.TextAreaFor(x => x.CollectiveLandHactor, new { @class = "form-control Numbers ", @title = @Html.DisplayNameFor(n => n.CollectiveLandHactor), @placeholder = @Html.DisplayNameFor(n => n.CollectiveLandHactor), @maxlength = 7 })
+                                            </td>
+                                            <td>
+                                                @Html.TextAreaFor(x => x.CollectiveLandDesc, new { @class = "form-control  ", @title = @Html.DisplayNameFor(n => n.CollectiveLandDesc), @placeholder = @Html.DisplayNameFor(n => n.CollectiveLandDesc), @maxlength = 500 })
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label>राजस्व भूमि</label>
+                                            </td>
+                                            <td>
+                                                @Html.TextAreaFor(x => x.RevenueLandHactor, new { @class = "form-control Numbers ", @title = @Html.DisplayNameFor(n => n.RevenueLandHactor), @placeholder = @Html.DisplayNameFor(n => n.RevenueLandHactor), @maxlength = 7 })
+                                            </td>
+                                            <td>
+                                                @Html.TextAreaFor(x => x.RevenueLandDesc, new { @class = "form-control  ", @title = @Html.DisplayNameFor(n => n.RevenueLandDesc), @placeholder = @Html.DisplayNameFor(n => n.RevenueLandDesc), @maxlength = 500 })
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label>वन भूमि</label>
+                                            </td>
+                                            <td>
+                                                @Html.TextAreaFor(x => x.ForestLandHactor, new { @class = "form-control Numbers ", @title = @Html.DisplayNameFor(n => n.ForestLandHactor), @placeholder = @Html.DisplayNameFor(n => n.ForestLandHactor), @maxlength = 7 })
+                                            </td>
+                                            <td>
+                                                @Html.TextAreaFor(x => x.ForestLandDesc, new { @class = "form-control  ", @title = @Html.DisplayNameFor(n => n.ForestLandDesc), @placeholder = @Html.DisplayNameFor(n => n.ForestLandDesc), @maxlength = 500 })
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12"><b>अर्थात चट्टानी, दलदली, बुलई मिट्टी, लवणीय/क्षारीय, पहाडी एवं बीहड़ क्षेत्र अन्य कोई विषेष किस्म </b></div>
+                            <div class="clearfix"></div>
+                            <div class="table-responsive request-id">
+                                <table id="tbldistmapping" class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:40%">किए गये कार्य का विवरण</th>
+                                            @*@foreach (System.Data.DataRow row in Model.DetailList.Tables["Years"].Rows)
+                                                {
+                                                    <th style="width:20%">@row["Years"]</th>
+                                                }*@
+                                            <th style="width:20%"><span id="current"> @DateTime.Now.AddYears(-1).Year </span></th>
+                                            <th style="width:20%"><span id="prev">@DateTime.Now.AddYears(-2).Year</span></th>
+                                            <th style="width:20%"><span id="end">@DateTime.Now.AddYears(-3).Year</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{int i = 1; Model.WorkDetail = new FMDSS.Models.YearsDetails[Model.DetailList.Tables["WorkDetails"].Rows.Count];}
+                                        @foreach (System.Data.DataRow row in Model.DetailList.Tables["WorkDetails"].Rows)
+                                        {
+                                            <tr>
+                                                <th> @row["WorkDescription"] </th>
+                                                <td>
+                                                    @Html.TextAreaFor(x => x.WorkDetail[i - 1].Current, new { @class = "form-control  ", @title = "वास्तविक क्षेत्र विवरण", @placeholder = "वास्तविक क्षेत्र विवरण", @maxlength = 500 })
+                                                    @Html.HiddenFor(x => x.WorkDetail[i - 1].WorkDescID, new { @Value = @row["workdescriptionID"] })
+                                                    @Html.HiddenFor(x => x.WorkDetail[i - 1].WorkDesc, new { @Value = @row["WorkDescription"] })
+                                                    @*<input type="hidden" name="@Model.WorkDetail[i-1].WorkDescID" value="@row["workdescriptionID"]" />*@
+                                                <td>
+                                                    @Html.TextAreaFor(x => x.WorkDetail[i - 1].Prev, new { @class = "form-control  ", @title = "वास्तविक क्षेत्र विवरण", @placeholder = "वास्तविक क्षेत्र विवरण", @maxlength = 500 })
+                                                </td>
+                                                <td>
+                                                    @Html.TextAreaFor(x => x.WorkDetail[i - 1].End, new { @class = "form-control  ", @title = "वास्तविक क्षेत्र विवरण", @placeholder = "वास्तविक क्षेत्र विवरण", @maxlength = 500 })
+                                                </td>
+                                                @{i++;}
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12">
+                            @*<div class="col-lg-6 col-sm-6 col-md-6 col-xs-6">
+                                    <div class="form-group">
+                                        <label for="Additional"> (क) विस्तृत परियोजना रिपोर्ट (DPR):</label>
+                                        <input type="file" class="form-control Additional_Document common" title="Upload the DPR" id="Additional_Document" name="Additional_Document" multiple="multiple">
+                                        <label><span class="spanmark"> Only .jpg /.pdf /.png /.gif फ़ाइल प्रारूपों को अधिकतम आकार के साथ अनुमति है: 2Mb.</span></label>
+                                        <div id="errordiv26" style="display: none; color: #a94442;"></div>
+                                    </div>
+                                </div>*@
+                            @*<div class="col-lg-6 col-sm-6 col-md-6 col-xs-6">
+                                    <div class="form-group">
+                                        <label for="Additional"> (ख) विस्तृत परियोजना रिपोर्ट (DPR):</label>
+                                        <input type="file" class="form-control Additional_Document1 common" title="Upload the DPR" id="Additional_Document1" name="Additional_Document1">
+                                        <label><span class="spanmark"> Only .jpg /.pdf /.png /.gif फ़ाइल प्रारूपों को अधिकतम आकार के साथ अनुमति है: 2Mb.</span></label>
+                                        <div id="errordivs" style="display: none; color: #a94442;"></div>
+                                    </div>
+                                </div>*@
+                            <div class="col-lg-6 col-sm-6 col-md-6 col-xs-6">
+                                <div class="form-group">
+                                    <label for="Additional"> (क) विस्तृत परियोजना रिपोर्ट (DPR1):<span class="mandatory">*</span></label>
+                                    <input type="file" class="form-control common fileToUpload" multiple="multiple" title="Upload the DPR" id="fileToUpload" name="fileUpload">
+                                    <label><span class="spanmark"> Only .jpg /.pdf /.png /.gif फ़ाइल प्रारूपों को अधिकतम आकार के साथ अनुमति है: 2Mb.</span></label>
+                                    <label><span style="display: none; color: #a94442;" class="spanmark" id="erroruploadfile"> </span></label>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-sm-6 col-md-6 col-xs-6">
+                                <div class="form-group">
+                                    <label for="Additional"> (ख) विस्तृत परियोजना रिपोर्ट (DPR2):<span class="mandatory">*</span></label>
+                                    <input type="file" class="form-control common fileToUpload1" multiple="multiple" title="Upload the DPR" id="fileToUpload1" name="fileUpload1">
+                                    <label><span class="spanmark"> Only .jpg /.pdf /.png /.gif फ़ाइल प्रारूपों को अधिकतम आकार के साथ अनुमति है: 2Mb.</span></label>
+                                    <label><span style="display: none; color: #a94442;" class="spanmark" id="erroruploadfile1"> </span></label>
+                                </div>
+                            </div>
+                            @*<div class="control-section" style="padding: 0px;">
+                                    <div id="selectedFiles"></div>
+                                </div>*@
+                        </div>
+                        <br />
+                        <br /><br />
+                        <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12"><b>संबंधित उप वन संरक्षक/मण्डल वन अधिकारी की संस्तुति (नामित व्यक्ति/संस्था द्वारा किये गये अग्रणी तथा नवीन कार्यो के संबंध में।</b></div>
+                        <br /><br />
+                        <!-- /.panel-body -->
+                        <div id="btn" class="col-lg-12 col-sm-12 col-md-12 col-xs-12">
+                            <button type="submit" class="btn btn-success confirm-toggle" name="command" value="" id="Savepermission">
+                                <i class="fa fa-check"></i> Submit / जमा करें
+                            </button>
+                            <button type="reset" class="btn btn-warning Edithide">
+                                <i class="fa fa-circle-o-notch fa-fw"></i> Reset / रीसेट
+                            </button>
+                            @*<button type="button" name="Command" value="Cancel" class="btn btn-danger" onclick=" reload(); return false;">
+                                    <i class="fa fa-times fa-fw"></i> Cancel / रद्द करना
+                                </button>*@
+                        </div>
+                    </div>
+                            <!-- /.panel -->
+                }
+            </div>
+        </div>
+        <!-- /.page-wrapper-inn -->
+        <!-- /.Form design -->
+        <!-- Footer -->
+        <!-- /.Footer -->
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+    </div>
+</div>
+<style type="text/css">
+    .Error {
+        color: red;
+    }
+
+    .field-validation-error {
+        color: #b94a48;
+    }
+
+    .field-validation-valid {
+        display: none;
+    }
+
+    input.input-validation-error {
+        border: 1px solid #b94a48;
+    }
+
+    select.input-validation-error {
+        border: 1px solid #b94a48;
+    }
+
+    input[type="checkbox"].input-validation-error {
+        border: 0 none;
+    }
+
+    .validation-summary-errors {
+        color: #b94a48;
+    }
+
+    .validation-summary-valid {
+        display: none;
+    }
+</style>
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/js/bootstrap.min.js"></script>
+<script src="~/js/comman.js"></script>
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+    $("#NOCPurpose").bind("change", function () {
+        var NOCcategory = $("#NOCPurpose").val();
+        $('#NOCType').empty();
+        var values = {
+            NOCPuproseId: NOCcategory
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(values),
+            url: RootUrl + 'FixedPermission/GetNOCType',
+            success: function (data) {
+                $("#NOCType").append('<option value="' + "" + '">' + "--Select--" + '</option>');
+                $.each(data, function (i, NOCPurpose) {
+                    $("#NOCType").append('<option value="' + NOCPurpose.Value + '">' + NOCPurpose.Text + '</option>');
+                });
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+    });
+    $("#NOCType").bind("change", function () {
+        var aid = $("#NOCType").val();
+        var messagetype = "NOC";
+        var NOCType = $("#NOCPurpose option:selected").text();
+        var NOCName = $("#NOCType option:selected").text();
+        var NOCTypeId = $("#NOCPurpose").val();
+        //var values = {
+        //    aid: aid,
+        //    messagetype: "NOC",
+        //    NOCType: $("#NOCPurpose option:selected").text(),
+        //    NOCName: $("#NOCType option:selected").text(),
+        //    NOCTypeId: $("#NOCPurpose").val()
+        //};
+        $.ajax({
+            type: 'GET',
+            contentType: 'application/json; charset=utf-8',
+            //data: JSON.stringify(values),
+            url: RootUrl + 'AmritaDeviAward/AmritaDeviAwardIndex?messagetype?=' + messagetype + '&NOCType=' + NOCType + '&NOCName=' + NOCName + '&NOCTypeId=' + NOCTypeId + '',
+            success: function (data) {
+                manageDivHideShow(aid);
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+    });
+    function manageDivHideShow(id) {
+        if (id != '') {
+            $("#PermissionServices ul").addClass("in");
+            $("#MyDashboar").removeClass("active");
+        }
+        if (id == '4') {
+            $("#OpermissionId").hide();
+            $("#showsawmilltype").hide();
+            $("#showsawmillsize").hide();
+            $("#Industry").hide();
+            $('#divPayment').show();
+            $("#miningId").show();
+        }
+        else if (id == '9') {
+            $("#OpermissionId").hide();
+            $("#showsawmilltype").show();
+            $("#showsawmillsize").show();
+            $("#miningId").show();
+            $("#Industry").hide();
+        }
+        else if (id == '11') {
+            $("#OpermissionId").show();
+            $("#showsawmilltype").hide();
+            $("#showsawmillsize").hide();
+            $("#miningId").show();
+            $("#Industry").hide();
+        }
+        else if (id == '3') {
+            $("#OpermissionId").hide();
+            $("#showsawmilltype").hide();
+            $("#showsawmillsize").hide();
+            $("#miningId").show();
+            $("#Industry").show();
+        }
+        else if (id == '12') {
+            $("#OpermissionId").hide();
+            $("#showsawmilltype").hide();
+            $("#showsawmillsize").hide();
+            $("#miningId").show();
+            $("#Industry").hide();
+            $('#lblDisclaimer').css("display", "none");
+        }
+        else {
+            $("#OpermissionId").hide();
+            $("#otherpermission").removeAttr('required');
+            $("#otherpermission").attr("disabled", "disable");
+            $("#showsawmilltype").hide();
+            $("#showsawmillsize").hide();
+            $("#miningId").show();
+            $("#Industry").hide();
+        }
+    }
+    var origin = document.location.origin;
+    $(document).ready(function () {
+        $("#returnurl").val(origin + "/AmritaDeviAward/getGISData");
+    });
+    $("#btnUploadSHPKML").click(function () {
+        if ($("#NOCType").val() != '0') {
+            var strname = GISPerName();
+            var ssoid = $("#hdSSOID").val();
+            $("#ssoId").val(ssoid);
+            $("#requestFor").val(strname);
+            var actionUrl = "@System.Web.Configuration.WebConfigurationManager.AppSettings["GISPATH"].ToString()";
+            document.getElementById("form11").action = actionUrl;
+            document.getElementById("form11").submit();
+        }
+        else { alert('Kindly select NOC Type first!!'); return; }
+    });
+    function GISPerName() {
+        var GisName = "AmritaDevi";
+        return GisName;
+    }
+    $(document).ready(function () {
+        //called when key is pressed in textbox
+        $(".Numbers").keypress(function (evt) {
+            //if the letter is not digit then display error and don't type anything
+            //if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+            //    return false;
+            //}
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (charCode == 8) { return true; }
+            if (
+                 (charCode != 46 || $(this).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+                (charCode < 48 || charCode > 57))
+                return false;
+        });
+    });
+    $(".Additional_Document").change(function (e) {
+        var iSize = ($(".Additional_Document")[0].files[0].size / 1048576);
+        if (iSize > 2) {
+            $('.Additional_Document').val('');
+            $('#errordiv26').show();
+            $('#errordiv26').html("DPR 2MB से बड़ा नहीं होना चाहिए!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#Additional_Document').focus();
+            return false;
+        }
+        var file = $(".Additional_Document").val();
+        var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+        if (file) {
+            // split file name at dot
+            var get_ext = file.split('.');
+            // reverse name to check extension
+            get_ext = get_ext.reverse();
+            // check file type is valid as given in 'exts' array
+            if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                $('.Additional_Document').val('');
+                $('#errordiv26').show();
+                $('#errordiv26').html("कृपया DRP फील्ड में केवल jpeg या jpg या pdf या png या gif फ़ाइल प्रारूप अपलोड करें !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('.Additional_Document').focus();
+                return false;
+            } else {
+                $('#errordiv26').hide();
+            }
+        }
+        else { $('#errordiv26').hide(); }
+    });
+    $(".Additional_Document1").change(function (e) {
+        var iSize = ($(".Additional_Document1")[0].files[0].size / 1048576);
+        if (iSize > 2) {
+            $('.Additional_Document1').val('');
+            $('#errordiv26').show();
+            $('#errordiv26').html("DPR 2MB से बड़ा नहीं होना चाहिए!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#Additional_Document1').focus();
+            return false;
+        }
+        var file = $(".Additional_Document1").val();
+        var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+        if (file) {
+            // split file name at dot
+            var get_ext = file.split('.');
+            // reverse name to check extension
+            get_ext = get_ext.reverse();
+            // check file type is valid as given in 'exts' array
+            if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                $('.Additional_Document1').val('');
+                $('#errordivs').show();
+                $('#errordivs').html("कृपया DRP फील्ड में केवल jpeg या jpg या pdf या png या gif फ़ाइल प्रारूप अपलोड करें !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('.Additional_Document1').focus();
+                return false;
+            } else {
+                $('#errordivs').hide();
+            }
+        }
+        else { $('#errordivs').hide(); }
+    });
+</script>
+<script>
+    function FileVal(file) {
+        var iSize = (file.size / 1048576);
+        if (iSize > 2) {
+            $('.fileToUpload').val('');
+            $('#erroruploadfile').show();
+            $('#erroruploadfile').html("DPR 2MB से बड़ा नहीं होना चाहिए!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#fileToUpload').focus();
+            return false;
+        }
+        var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+        if (file) {
+            // split file name at dot
+            var get_ext = file.name.split('.');
+            // reverse name to check extension
+            get_ext = get_ext.reverse();
+            // check file type is valid as given in 'exts' array
+            if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                $('.fileToUpload').val('');
+                $('#erroruploadfile').show();
+                $('#erroruploadfile').html("कृपया DRP फील्ड में केवल jpeg या jpg या pdf या png या gif फ़ाइल प्रारूप अपलोड करें !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('.fileToUpload').focus();
+                return false;
+            } else {
+                $('#erroruploadfile').hide();
+            }
+        }
+        else { $('#erroruploadfile').hide(); }
+    }
+    var nowTemp = new Date();
+    var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+    var files;
+    var storedFiles = [];
+    var upc = 0;
+    $(function () {
+        $(":file").attr('title', '  ');
+        var $loading = $('#loadingDiv').hide();
+        $(".fileToUpload").change(function (e) {
+            doReCreate(e);
+        });
+        selDiv = $("#selectedFiles");
+    });
+    function doReCreate(e) {
+        upc = upc + 1;
+        handleFileSelect(e);
+    }
+    function handleFileSelect(e) {
+        if (!e.target.files) return;
+        files = e.target.files;
+        for (var i = 0; i < files.length; i++) {
+            var ret = FileVal(files[i]);
+            if (ret != false) {
+                var f = files[i];
+                storedFiles.push(f.name);
+            }
+            else {
+                $(".fileToUpload").val('');
+            }
+        }
+    }
+    function removeAtt(t) {
+        var serEle = $(t).parent().text().slice(0, -3);
+        var index = storedFiles.indexOf(serEle);
+        if (index !== -1) {
+            storedFiles.splice(index, 1);
+        }
+        $(t).parent().remove();
+    }
+    $("#Savepermission").click(function () {
+        if ($("input[id ='fileToUpload']").val() == "") {
+            $("#fileToUpload").addClass("ErrorColor");
+            return false;
+        }
+        else {
+            $("#fileToUpload").removeClass("ErrorColor");
+        }
+        if ($("input[id ='fileToUpload1']").val() == "") {
+            $("#fileToUpload1").addClass("ErrorColor");
+            return false;
+        }
+        else {
+            $("#fileToUpload1").removeClass("ErrorColor");
+        }
+    });
+</script>
+<script>
+    function FileVal1(file) {
+        var iSize = (file.size / 1048576);
+        if (iSize > 2) {
+            $('.fileToUpload1').val('');
+            $('#erroruploadfile1').show();
+            $('#erroruploadfile1').html("DPR 2MB से बड़ा नहीं होना चाहिए!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+            $('#fileToUpload1').focus();
+            return false;
+        }
+        var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+        if (file) {
+            // split file name at dot
+            var get_ext = file.name.split('.');
+            // reverse name to check extension
+            get_ext = get_ext.reverse();
+            // check file type is valid as given in 'exts' array
+            if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                $('.fileToUpload1').val('');
+                $('#erroruploadfile1').show();
+                $('#erroruploadfile1').html("कृपया DRP फील्ड में केवल jpeg या jpg या pdf या png या gif फ़ाइल प्रारूप अपलोड करें !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('.fileToUpload1').focus();
+                return false;
+            } else {
+                $('#erroruploadfile1').hide();
+            }
+        }
+        else { $('#erroruploadfile1').hide(); }
+    }
+    //var nowTemp = new Date();
+    //var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+    //var files;
+    //var storedFiles = [];
+    //var upc = 0;
+    $(function () {
+        $(":file").attr('title', '  ');
+        var $loading = $('#loadingDiv').hide();
+        $("#fileToUpload1").change(function (e) {
+            doReCreate1(e);
+        });
+    });
+    function doReCreate1(e) {
+        upc = upc + 1;
+        handleFileSelect1(e);
+    }
+    function handleFileSelect1(e) {
+        if (!e.target.files) return;
+        files = e.target.files;
+        for (var i = 0; i < files.length; i++) {
+            var ret = FileVal1(files[i]);
+            if (ret != false) {
+                var f = files[i];
+                storedFiles.push(f.name);
+            }
+            else {
+                $(".fileToUpload1'").val('');
+            }
+        }
+    }
+    //function removeAtt(t) {
+    //    var serEle = $(t).parent().text().slice(0, -3);
+    //    var index = storedFiles.indexOf(serEle);
+    //    if (index !== -1) {
+    //        storedFiles.splice(index, 1);
+    //    }
+    //    $(t).parent().remove();
+    //}
+</script>
+<script language="javascript" type="text/javascript">
+    //$(document).ready(function () {
+    //    $('*').bind("cut copy paste", function (e) {
+    //        e.preventDefault();
+    //    });
+    //});
+    $("#CurrentYear").change(function () {
+        var year = $("#CurrentYear").val();
+        $("#current").text(year - 1);
+        $("#prev").text(year - 2);
+        $("#end").text(year - 3);
+    });
+</script>

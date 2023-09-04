@@ -1,0 +1,337 @@
+﻿@{
+    ViewBag.Title = "WildLifeTicketHistory";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+@model FMDSS.Models.BookOnlineTicket.BookOnTicket
+
+
+<style>
+    #myModal .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModal .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModal .modal-footer {
+        background-color: #f9f9f9;
+    }
+
+    #myModal .btn-success {
+        width: 100%;
+        padding: 10px;
+    }
+
+    ul.a {
+        list-style-type: circle;
+    }
+</style>
+
+
+<style>
+    #myModalRefund .modal-header {
+        background-color: #5cb85c;
+    }
+
+        #myModalRefund .modal-header h4, .close {
+            color: #ffffff;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    #myModalRefund .modal-footer {
+        background-color: #f9f9f9;
+    }
+
+    #myModalRefund .btn-success {
+        width: 100%;
+        padding: 10px;
+    }
+
+    ul.a {
+        list-style-type: circle;
+    }
+</style>
+
+
+<script src="~/js/jquery.min.js"></script>
+
+
+
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+
+    $(document).ready(function () {
+
+        $('#tbltemp').DataTable({
+            responsive: true
+        });
+
+    });
+    function TicketResendCancelDetails(RequestedID, Req, EmitraTranID, IsPartialOrFullCancelation) {
+        if (Req != null && Req != '' && Req != '0' && EmitraTranID != null && EmitraTranID != '' && EmitraTranID != '0') {
+            $("#CRequestID").val(RequestedID);
+            $("#RequestId").val(Req);
+            $("#EmitraTransactionId").val(EmitraTranID);
+            $("#IsPartialOrFullCancelation").val(IsPartialOrFullCancelation);
+            $("#myModal_TicketCancel").modal('show');
+        }
+        else {
+            alert("Requested Id not exists!!!!!");
+        }
+    };
+
+    $(function () {
+    $("#btn_submitDetails").click(function () {
+
+        if ($("#ConfirmRefundByCitizen").prop("checked") == true) {
+
+            if ($("#RequestId").val() == null || $("#RequestId").val() == '' || $("#RequestId").val() == 'undefined') {
+                $("#CRequestID").css("display", "block");
+                $("#CRequestID").focus();
+                return false;
+            }
+            if ($("#BankName").val() == null || $("#BankName").val() == '' || $("#BankName").val() == 'undefined') {
+                $("#ErrBankName").css("display", "block");
+                $("#ErrBankName").focus();
+                return false;
+            }
+            else {
+                $("#ErrBankName").css("display", "none");
+            }
+            if ($("#BranchName").val() == null || $("#BranchName").val() == '' || $("#BranchName").val() == 'undefined') {
+                $("#ErrBranchName").css("display", "block");
+                $("#ErrBranchName").focus();
+                return false;
+            }
+            else {
+                $("#ErrBranchName").css("display", "nonr");
+            }
+             if ($("#IFSCCode").val() == null || $("#IFSCCode").val() == '' || $("#IFSCCode").val() == 'undefined') {
+                $("#ErrIFSCCode").css("display", "block");
+                $("#ErrIFSCCode").focus();
+                return false;
+            }
+            if ($("#AccountHolderName").val() == null || $("#AccountHolderName").val() == '' || $("#AccountHolderName").val() == 'undefined') {
+                $("#ErrAccountHolderName").css("display", "block");
+                $("#ErrAccountHolderName").focus();
+                return false;
+            }
+            else {
+
+                $("#ErrAccountHolderName").css("display", "none");
+            }
+            if ($("#AccountNo").val() == null || $("#AccountNo").val() == '' || $("#AccountNo").val() == 'undefined') {
+                $("#ErrAccountNo").css("display", "block");
+                $("#ErrAccountNo").focus();
+                return false;
+            }
+            else {
+                $("#ErrAccountNo").css("display", "none");
+            }
+        }
+        else {
+            $("#errConfirmRefundByCitizen").css("display", "block");
+            $("#errConfirmRefundByCitizen").focus();
+            return false;
+        }
+
+    })
+    })
+</script>
+<div class="modal fade" id="myModal_TicketCancel" role="dialog">
+    <div class="modal-dialog">
+        @using (Html.BeginForm("ResendCancelationDetails", "BookOnlineTicket", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4><i class="fa-fw"></i>Ticket Cancellation Information</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            @Html.HiddenFor(d => d.EmitraTransactionId)
+                            @Html.HiddenFor(d => d.RequestId)
+                            @Html.HiddenFor(d => d.IsPartialOrFullCancelation)
+                            <label>Request ID:</label>
+                            @Html.TextBox("CRequestID", "", new { @class = "form-control", @readonly = "readonly" })
+                            <span id="CRequestID" style="display: none" class="alert-danger1">Request ID is Required.</span>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="col-lg-12">
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Bank Name:</label>
+                                @Html.TextBoxFor(s => s.BankName, new { @class = "form-control" })
+                                <span id="ErrBankName" style="display: none" class="alert-danger1">Bank Name is Required.</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <label>Branch Name:</label>
+                            @Html.TextBoxFor(s => s.BranchName, new { @class = "form-control" })
+                            <span id="ErrBranchName" style="display: none" class="alert-danger1">Branch Name is Required.</span>
+                        </div>
+                    </div>
+                    <br />
+
+                    <div class="col-lg-12">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>IFSC Code:</label>
+                                @Html.TextBoxFor(s => s.IFSCCode, new { @class = "form-control" })
+                                <span id="ErrIFSCCode" style="display: none" class="alert-danger1">IFSC Code is Required.</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Account Holder Full Name:</label>
+                                @Html.TextBoxFor(s => s.AccountHolderName, new { @class = "form-control" })
+                                <span id="ErrAccountHolderName" style="display: none" class="alert-danger1">Account Holder Name is Required.</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-lg-12">
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Account Type:</label>
+                                @Html.DropDownListFor(x => x.AccountType, new List<SelectListItem>
+    {
+                        new SelectListItem() {Text = "Saving", Value="Saving"},
+                        new SelectListItem() {Text = "Current", Value="Current"}
+    }, new { @class = "form-control" })
+                                <span id="ErrAccountType" style="display: none" class="alert-danger1">Account Type is Required.</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Account No:</label>
+                                @Html.TextBoxFor(s => s.AccountNo, new { @class = "form-control" })
+                                <span id="ErrAccountNo" style="display: none" class="alert-danger1">Account No is Required.</span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <input data-val="true" data-val-required="The ConfirmRefundByCitizen field is required." id="ConfirmRefundByCitizen" name="ConfirmRefundByCitizen" type="checkbox" value="true">
+                            I hereby confirm my request of cancellation of the ticket and want my refundable amount in the above mentioned bank account.
+                            <div id="errConfirmRefundByCitizen" style="display:none;" class="alert-danger1">Confirm Refund is Required.</div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer" style="clear:both">
+                    <div id="btn" class="col-lg-12">
+                        <button type="submit" class="btn btn-success" value="Save" id="btn_submitDetails">
+                            Confirm
+                        </button>
+                        <button type="button" id="btn_cancel" name="Command" value="Cancel" class="btn btn-danger" data-dismiss="modal">
+                            Exit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+<div id="page-wrapper-inn">
+
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">WildLife Ticket History</h1>
+        <div class="panel-heading"> <span>@Html.Raw(TempData["Message"]) </span> </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="tbl" class="table-responsive">
+                        <table class="table table-striped table-bordered table-hover" id="tbltemp">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Place Name
+                                    </th>
+                                    <th>
+                                        Booking No.
+                                    </th>
+                                    <th>
+                                        Emitra Transation ID
+                                    </th>
+                                    <th>
+                                        Paid Amount
+                                    </th>
+                                    <th>
+                                        Refund Amount
+                                    </th>
+                                    <th>
+                                        Remark
+                                    </th>
+                                    <th>
+                                        Action
+                                    </th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in ViewData["ticketCancelationDetaillist"] as IEnumerable<FMDSS.Models.BookOnlineTicket.BookOnTicket>)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(model => item.PlaceName)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.RequestId)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.EmitraTransactionId)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.TotalAmount)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.RefundAmount)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.Remark)
+                                        </td>
+                                        <td>
+                                            <a onclick="TicketResendCancelDetails('@item.RequestId','@Encryption.encrypt(Convert.ToString(item.RequestId))','@Encryption.encrypt(Convert.ToString(item.EmitraTransactionId))',@item.IsPartialOrFullCancelation)" style="cursor:pointer;">
+                                                Update
+                                            </a>
+
+                                        </td>
+
+
+                                    </tr>
+
+                                }
+
+
+                            </tbody>
+                        </table>
+                        <table id="tbl_tkt">
+                            <tbody></tbody>
+                        </table>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

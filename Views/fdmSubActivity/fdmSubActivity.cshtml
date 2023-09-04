@@ -1,0 +1,735 @@
+﻿@model FMDSS.Models.ForesterDevelopment.SubActivity
+
+@{
+    ViewBag.Title = "fdmSubActivity";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //  = "~/Views/Shared/Forestlayout.cshtml";
+}
+
+
+
+<!-- Form design -->
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Defining Sub Activity</h1>
+        @if (@TempData["ViewMessage"] != null)
+        {
+            <div class="alert alert-success"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["ViewMessage"]</div>
+        }
+    </div>
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <!--<div class="panel-heading">Processing Fees</div>-->
+                <!-- /.panel-heading -->
+
+                <div class="panel-body">
+
+                    <!--Add New Btn-->
+
+                    <div class="col-lg-3 rgt pull-right">
+                        <button type="button" class="btn btn-success pull-right btn_pp" id="btnAddSubActivity" data-toggle="modal" data-target="#mySubActivity" title="Add Sub Activity">
+                            <i class="fa fa-plus"></i> Create Sub-Activity
+                        </button>
+                    </div>
+                    <!--./Add New Btn-->
+                    <!--Table-->
+                    <div class="dataTable_wrapper">
+                        <table class="table table-striped table-bordered table-hover table-responsive gridtable">
+                            <thead>
+                                <tr>
+                                    <th>S. No</th>
+                                    <th>Sub Activity</th>
+                                    
+                                    <th>BSR Material Cost</th>
+                                    <th>BSR Labour Cost</th>
+                                    <th>Ceiling Cost</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                @foreach (var item in ViewData["SubActivityList"] as IEnumerable<FMDSS.Models.ForesterDevelopment.SubActivity>)
+                                {
+
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(model => item.Index)
+                                        </td>
+
+                                        <td class="name">
+                                            @Html.DisplayFor(model => item.Sub_Activity_Name)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.Sub_Activity_BSR_Material_Cost)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.Sub_Activity_BSR_Labour_Cost)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(model => item.Sub_Activity_totalCost)
+                                        </td>
+                                        <td>
+                                            @*<button type="button" class="btn btn-success btn-circle" id="btnview_@item.ID" title="View" name="command" value="@item.ID" data-toggle="modal" data-target="#subActivityManagement">
+                                                    <i class="fa fa-eye"></i>
+                                                </button>*@
+
+
+                                            <button type="button" class="btn btn-warning btn-circle" onclick="EditSubActivity('@item.ID')" id="btnedit_@item.ID" title="Edit" value="@item.ID" data-toggle="modal" data-target="#mySubActivity">
+                                                <i class="fa fa-edit"></i>
+                                            </button>
+
+                                            @*<button type="button" class="btn btn-danger btn-circle" id="btndel_@item.ID" title="Delete" value="@item.ID">
+                                                    <i class="fa fa-times"></i>
+                                                </button>*@
+
+
+                                        </td>
+
+                                    </tr>
+                                }
+
+
+                            </tbody>
+
+
+                        </table>
+
+
+
+                        <!-- /.panel-body -->
+
+                    </div>
+                    <!-- /.panel -->
+
+                </div>
+                <div class="modal fade" id="mySubActivity" role="dialog">
+                    <div class="modal-dialog modal-lg">
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">
+                                    &times;
+                                </button>
+                                <h4 class="modal-title" id="subActivityLabel">Create Sub-Activity</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-horizontal" role="form">
+                                    @using (Html.BeginForm("SaveSubActivityData", "fdmSubActivity", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data" }))
+                                    {
+                                        <div class="panel-body">
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Sub Activity: <span class="mandatory">*</span></label>
+                                                    @Html.TextBoxFor(x => x.Sub_Activity_Name, new { @class = "form-control", @title = "Please Enter Sub Activity Name", @placeholder = "Enter Sub Activity Name", @maxlength = "500", @id = "Sub_Activity_Name" })
+                                                    <div id="errordivSAName" style="display:none" class="alert-danger1"></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Unit: <span class="mandatory">*</span></label>
+                                                    @Html.DropDownList("Sub_Activity_Unit", (IEnumerable<SelectListItem>)ViewBag.Sub_Activity_Unit, "--Select--", new { @class = "form-control common", id = "Sub_Activity_Unit" })
+                                                    <div id="errordivSAUnit" style="display:none" class="alert-danger1"></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <label>Rate Per Unit: <span class="mandatory">*</span></label>
+                                                <div class="form-group input-group">
+                                                    <span class="input-group-addon"><i class="fa fa-inr fa-fw"></i></span>
+                                                    @Html.TextBoxFor(x => x.Sub_Activity_RatePerUnit, new { @class = "form-control", @placeholder = "Enter BSR Per Unit", @maxlength = 15, @id = "Sub_Activity_RatePerUnit" })
+                                                    <div id="errordivBPU" style="display:none" class="alert-danger1"></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Reference No.: <span class="mandatory"></span></label>
+                                                    @Html.TextBoxFor(x => x.Sub_Activity_RefNo, new { @class = "form-control", @title = "Enter Reference Document No.", @placeholder = "Enter Reference Document No.", @maxlength = 50, @id = "Sub_Activity_RefNo" })
+                                                    <div id="errordivRefNo" style="display:none" class="alert-danger1"></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12" id="RefFileEditMode" style="display:none">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label for="Document">
+                                                            Ref Document:<span class="mandatory"></span>
+                                                        </label>
+
+                                                        <input type="file" class="form-control common" id="Sub_Activity_DocumentPath" title="Upload the Ref. Document" value="" name="Sub_Activity_DocumentPath" />
+                                                        @Html.Hidden("hdRefDocument", @Model.Sub_Activity_DocumentPath)
+                                                        <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                                                        <div id="errordivdocument" style="display:none; right:0px; position:static" class="alert-danger1"></div>
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-2">
+                                                    <button type="button" class="btn btn-default btn-block mar-btn" name="" value="" id="btnViewFile">
+                                                        <i class="fa fa-check"></i> View
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12"></div>
+                                            <div class="col-lg-12" id="RefFileCommonMode">
+                                                <div class="form-group">
+                                                    <label for="Document">
+                                                        Ref Document:<span class="mandatory"></span>
+                                                    </label>
+
+                                                    <input type="file" class="form-control common" id="Sub_Activity_DocumentPath1" style="width:49%" title="Upload the Ref. Document" name="Sub_Activity_DocumentPath" />
+                                                    <label><span class="spanmark">* Only .jpg /.pdf /.png /.gif file formats are allowed with  max size: 2Mb.</span></label>
+                                                    <div id="errordivdocument1" style="display:none; right:0px; position:static" class="alert-danger1"></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12"></div>
+                                            <div id="divBsrType" class="col-lg-6">
+                                                <label>BSR Material Cost: <span class="mandatory">*</span></label>
+                                                <div class="form-group input-group">
+                                                    <span class="input-group-addon"><i class="fa fa-inr fa-fw"></i></span>
+                                                    @Html.TextBoxFor(x => x.Sub_Activity_BSR_Material_Cost, new { @class = "form-control", @title = "Please Enter BSR Material Cost", @placeholder = "Enter BSR Material Cost", @maxlength = 15, @id = "Sub_Activity_BSR_Material_Cost" })
+                                                    <div id="errordivMCost" style="display: none; position: static; right: 0px; padding-left: 24px;" class="alert-danger1"></div>
+                                                </div>
+                                            </div>
+                                            <div id="divPerUnit" class="col-lg-6">
+                                                <label>BSR Labour Cost: <span class="mandatory">*</span></label>
+                                                <div class="form-group input-group">
+                                                    <span class="input-group-addon"><i class="fa fa-inr fa-fw"></i></span>
+                                                    @Html.TextBoxFor(x => x.Sub_Activity_BSR_Labour_Cost, new { @class = "form-control", @title = "Please Enter BSR Labour Cost", @placeholder = "Enter BSR Labour Cost", @maxlength = 15, @id = "Sub_Activity_BSR_Labour_Cost" })
+                                                    <div id="errordivLCost" style="display: none; position: static; right: 0px; padding-left: 24px;" class="alert-danger1"></div>
+                                                </div>
+                                            </div>
+                                            @*<div class="col-lg-6">
+                                                    <label>BSR Per Unit: <span class="mandatory">*</span></label>
+                                                    <div class="form-group input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-inr fa-fw"></i></span>
+                                                        @Html.TextBoxFor(x => x.Sub_Activity_RatePerUnit, new { @class = "form-control", @placeholder = "Enter BSR Per Unit", @maxlength = 15, @id = "Sub_Activity_RatePerUnit" })
+                                                        <div id="errordivBPU" style="display:none" class="alert-danger1"></div>
+                                                    </div>
+                                                </div>*@
+                                            @*<div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label>BSR Type: <span class="mandatory">*</span></label>
+                                                        @Html.DropDownList("Sub_Activity_BSRType", (IEnumerable<SelectListItem>)ViewBag.Sub_Activity_BSRType, new { @class = "form-control", id = "Sub_Activity_BSRType" })
+                                                        <div id="errordivAtype" style="display:none" class="alert-danger1"></div>
+                                                    </div>
+                                                </div>*@
+                                            <div class="col-lg-12"></div>
+                                            <div class="col-lg-6">
+                                                <label>Ceiling Cost: <span class="mandatory">*</span></label>
+                                                <div class="form-group input-group">
+                                                    <span class="input-group-addon"><i class="fa fa-inr fa-fw"></i></span>
+                                                    @Html.TextBoxFor(x => x.Sub_Activity_totalCost, new { @class = "form-control", @title = "Please Enter Ceiling Cost", @placeholder = "Ceiling Cost", @maxlength = 15, @id = "Sub_Activity_totalCost" })
+                                                    <div id="errordivSTC" style="position: static; right: 0px; padding-left: 24px;" class="alert-danger1"></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12"></div>
+                                            <!-- Btn Groping -->
+                                            <div class="btn-padd">
+                                                <div id="btn" class="col-lg-12">
+                                                    <button type="submit" class="btn btn-success" name="Command" value="" id="btn_SaveSubActivity">
+                                                        <i class="fa fa-check"></i> Submit
+                                                    </button>
+                                                    <button type="button" name="Command" id="btn_Cancel" value="Cancel" data-dismiss="modal" class="btn btn-danger">
+                                                        <i class="fa fa-times fa-fw"></i> Cancel
+                                                    </button>
+
+                                                </div>
+                                            </div>
+                                            <!-- /.Btn Groping -->
+
+                                        </div>
+                <!-- /.panel-body -->
+                                    }
+                                </div>
+                                <!-- /.panel -->
+
+                            </div>
+                            <!-- /.col-lg-12 -->
+                        </div>
+                    </div>
+                </div>
+                <!-- /.Row -->
+                <!--Popup Model-->
+                <div class="modal fade" id="subActivityManagement" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+                    <div class="modal-dialog mdw">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                <h4 class="modal-title" id="myModalLabel">View Sub Activity</h4>
+                            </div>
+
+                            <div class="modal-body">
+                                <!-- From URL Get -->
+
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Sub Activity: </label>
+                                        <div id="divSubActivity" class="un-bold"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Unit: </label>
+                                        <div id="divUnit" class="un-bold"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>BSR Per Unit: </label>
+                                        <div id="divBSRPerUnit" class="un-bold"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>BSR Type: </label>
+                                        <div id="divBSRType" class="un-bold"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Ceiling Cost: </label>
+                                        <div id="divTotalCost" class="un-bold"></div>
+                                    </div>
+                                </div>
+
+                                <!-- /. From URL Get -->
+                            </div>
+
+                            <!-- /.modal-body -->
+
+                            <div class="modal-footer" style="clear:both">
+
+                                <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal">
+                                    <i class="fa fa-times fa-fw"></i> Close
+                                </button>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+                <!--./Popup Model-->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    @*if ('@Session["SMessage"]' != '') { showMessage("Success", "Record Save Successfully."); Session["SMessage"] = null; }
+    else if ('@Session["UMessage"]' != '') { showMessage("Success", "Record Update Successfully."); Session["UMessage"] = null; }
+    else if ('@Session["EMessage"]' != '') { showMessage("error", "Error occur while saving/updating records."); Session["EMessage"] = null; }*@
+
+    var RootUrl = '@Url.Content("~/")';
+    $(document).ready(function () {
+
+        $('.gridtable').DataTable({
+            responsive: true
+        });
+
+
+
+        //$('#Sub_Activity_RatePerUnit').keypress(function (event) {
+
+        //    return isNumber(event, this)
+
+        //});
+        $('#Sub_Activity_totalCost,#Sub_Activity_BSR_Material_Cost,#Sub_Activity_BSR_Labour_Cost').keypress(function (event) {
+
+            return isNumber(event, this)
+
+        });
+
+        $('#btnAddSubActivity,#btn_Cancel').click(function () {
+            $("#subActivityLabel").text("Create Sub-Activity");
+
+            $("#Sub_Activity_Name").val('');
+            $("#Sub_Activity_Unit").val($("#Sub_Activity_Unit option:first").val());
+            $("#Sub_Activity_BSR_Labour_Cost").val('0');
+            $("#Sub_Activity_BSR_Material_Cost").val('0');
+            $("#hdRefDocument").val('');
+            $("#RefFileEditMode").hide();
+            $("#RefFileCommonMode").show();
+            $("#Sub_Activity_RefNo").val('');
+            $("#btn_SaveSubActivity").val('');
+            $("#Sub_Activity_totalCost").val('0');
+        })
+
+        $('#btn_SaveSubActivity').click(function () {
+
+            if ($('#Sub_Activity_Name').val() == '') {
+                $('#errordivSAName').show();
+                $('#errordivSAName').html("Please enter the Sub Activity Name!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Sub_Activity_Name').focus();
+                return false;
+            }
+            else { $('#errordivSAName').hide(); }
+
+            if ($('#Sub_Activity_Unit').val() == '') {
+                $('#errordivSAUnit').show();
+                $('#errordivSAUnit').html("Please enter the Unit!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Sub_Activity_Unit').focus();
+                return false;
+            }
+            else { $('#errordivBPU').hide(); }
+
+
+            if ($('#Sub_Activity_BSR_Labour_Cost').val().indexOf('.') == 0 || (parseFloat($('#Sub_Activity_BSR_Labour_Cost').val()) == 0) || ($('#Sub_Activity_BSR_Labour_Cost').val() == '')) {
+
+                if ($('#Sub_Activity_BSR_Material_Cost').val() == '') {
+                    $('#errordivMCost').show();
+                    $('#errordivMCost').html("Please enter the valid amount !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Sub_Activity_BSR_Material_Cost').focus();
+                    return false;
+                }
+                if (($('#Sub_Activity_BSR_Material_Cost').val().substr(0, 1) == '.') && ($('#Sub_Activity_BSR_Material_Cost').val().length <= 1)) {
+                    $('#errordivMCost').show();
+                    $('#errordivMCost').html("Please enter the valid amount !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Sub_Activity_BSR_Material_Cost').focus();
+                    return false;
+                }
+                if ((parseFloat($('#Sub_Activity_BSR_Material_Cost').val())) <= 0) {
+                    $('#errordivMCost').show();
+                    $('#errordivMCost').html("Please enter the valid amount !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Sub_Activity_BSR_Material_Cost').focus();
+                    return false;
+                }
+            }
+            if ($('#Sub_Activity_BSR_Material_Cost').val().indexOf('.') == 0 || ($('#Sub_Activity_BSR_Material_Cost').val() == '') || (parseFloat($('#Sub_Activity_BSR_Material_Cost').val()) <= 0)) {
+
+
+                if ($('#Sub_Activity_BSR_Labour_Cost').val() == '') {
+                    $('#errordivLCost').show();
+                    $('#errordivLCost').html("Please enter the valid amount !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Sub_Activity_BSR_Labour_Cost').focus();
+                    return false;
+                }
+                if (($('#Sub_Activity_BSR_Labour_Cost').val().substr(0, 1) == '.') && ($('#Sub_Activity_BSR_Labour_Cost').val().length <= 1)) {
+                    $('#errordivLCost').show();
+                    $('#errordivLCost').html("Please enter the valid amount !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Sub_Activity_BSR_Labour_Cost').focus();
+                    return false;
+                }
+                if ((parseFloat($('#Sub_Activity_BSR_Labour_Cost').val())) <= 0) {
+                    $('#errordivLCost').show();
+                    $('#errordivLCost').html("Please enter the valid amount !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Sub_Activity_BSR_Labour_Cost').focus();
+                    return false;
+                }
+            }
+            if ($('#Sub_Activity_totalCost').val() == '') {
+                $('#errordivSTC').show();
+                $('#errordivSTC').html("Please enter the valid amount !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Sub_Activity_totalCost').focus();
+                return false;
+            }
+            if (($('#Sub_Activity_totalCost').val().substr(0, 1) == '.') && ($('#Sub_Activity_totalCost').val().length <= 1)) {
+                $('#errordivSTC').show();
+                $('#errordivSTC').html("Please enter the valid amount !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Sub_Activity_totalCost').focus();
+                return false;
+            }
+            if ((parseFloat($('#Sub_Activity_totalCost').val())) <= 0) {
+                $('#errordivSTC').show();
+                $('#errordivSTC').html("Please enter the valid amount !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Sub_Activity_totalCost').focus();
+                return false;
+            }
+            var tCost = parseFloat($('#Sub_Activity_totalCost').val());
+            var mCost = parseFloat($('#Sub_Activity_BSR_Material_Cost').val());
+            var lCost = parseFloat($('#Sub_Activity_BSR_Labour_Cost').val());
+            if (lCost > 0 || mCost > 0) {
+                if (tCost < mCost + lCost) {
+                    $('#errordivSTC').show();
+                    $('#errordivSTC').html("Total Cost should be greater than sum of BSR Material Cost and BSR Labour Cost!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Sub_Activity_totalCost').focus();
+                    return false;
+                }
+            }
+
+        })
+
+
+        $('[id^=btndel_]').click(function () {
+            var ID = { ID: $(this).val() };
+            var r = confirm("Are you sure you want to delete this Sub-Activity?");
+            if (r) {
+                $.ajax({
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(ID),
+                    url: RootUrl + "fdmSubActivity/DeleteSubActivityData",
+                    success: function (data) {
+                        if (parseInt(data.ID) > 0) {
+                            window.location.href = RootUrl + "fdmSubActivity/fdmSubActivity";
+                        }
+                    },
+
+                    traditional: true,
+                    error: function (data) { console.log(data) }
+                });
+            }
+            else {
+                //do nothing
+            }
+
+
+
+        });
+
+        $("#btnViewFile ,#btnViewFile1").click(function () {
+            var RootUrl = '@Url.Content("~/")';
+            var path = RootUrl + $("#hdRefDocument").val();
+
+            var pathurl = path.replace('~/', '');
+            window.open(pathurl, '_blank');
+
+        });
+
+        //$('#Sub_Activity_Name').keypress(function (e) {
+        //    var kc = e.which;
+
+        //    if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95 || kc == 37 || kc == 38) || (kc != 48 && kc >= 47 && kc <= 57) || (kc >= 44 && kc < 46) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32) || (kc != 46)) {
+
+        //    }
+        //    else {
+        //        e.preventDefault();
+        //    }
+        //});
+        $('#Sub_Activity_RefNo').keypress(function (e) {
+            var kc = e.which;
+
+            if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95 || kc == 37 || kc == 38) || (kc >= 47 && kc <= 57) || (kc >= 44 && kc < 46) || (kc >= 40 && kc < 42) || (kc >= 96 && kc <= 105) || (kc == 32) || (kc != 46)) {
+
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+        $("#Sub_Activity_DocumentPath").change(function (e) {
+
+
+            var iSize = ($("#Sub_Activity_DocumentPath")[0].files[0].size / 1048576);
+
+            if (iSize > 2) {
+                $("#Sub_Activity_DocumentPath").val('');
+                $('#errordivdocument').show();
+                $('#errordivdocument').html("Ref. Document file size should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Sub_Activity_DocumentPath').focus();
+                return false;
+
+            }
+            else { $('#errordivdocument').hide(); }
+
+
+            var file = $("#Sub_Activity_DocumentPath").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $("#Sub_Activity_DocumentPath").val('');
+                    $('#errordivdocument').show();
+                    $('#errordivdocument').html("Please upload only jpeg or jpg or pdf or png or gif file format Ref Document Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Sub_Activity_DocumentPath').focus();
+                    return false;
+                } else {
+                    $('#errordivdocument').hide();
+                }
+            }
+
+            else { $('#errordivdocument').hide(); }
+
+
+
+
+        });
+
+        $("#Sub_Activity_DocumentPath1").change(function (e) {
+
+
+            var iSize = ($("#Sub_Activity_DocumentPath1")[0].files[0].size / 1048576);
+
+            if (iSize > 2) {
+                $("#Sub_Activity_DocumentPath1").val('');
+                $('#errordivdocument1').show();
+                $('#errordivdocument1').html("Ref. Document file size should not be larger than 2MB!" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                $('#Sub_Activity_DocumentPath1').focus();
+                return false;
+
+            }
+            else { $('#errordivdocument1').hide(); }
+
+
+            var file = $("#Sub_Activity_DocumentPath1").val();
+            var exts = ['jpeg', 'jpg', 'pdf', 'png', 'gif'];
+
+            if (file) {
+                // split file name at dot
+                var get_ext = file.split('.');
+                // reverse name to check extension
+                get_ext = get_ext.reverse();
+                // check file type is valid as given in 'exts' array
+
+                if ($.inArray(get_ext[0].toLowerCase(), exts) == -1) {
+                    $("#Sub_Activity_DocumentPath1").val('');
+                    $('#errordivdocument1').show();
+                    $('#errordivdocument1').html("Please upload only jpeg or jpg or pdf or png or gif file format Ref Document Field !" + "<i class='fa fa-times fa-fw' style='float: right;padding: 2px;'></i>");
+                    $('#Sub_Activity_DocumentPath1').focus();
+                    return false;
+                } else {
+                    $('#errordivdocument1').hide();
+                }
+            }
+
+            else { $('#errordivdocument1').hide(); }
+
+
+
+
+        });
+
+        $('[id^=btnview_]').click(function () {
+            var ID = { ID: $(this).val() };
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(ID),
+                url: RootUrl + "fdmSubActivity/EditSubActivityData",
+                success: function (data) {
+
+                    $("#divSubActivity").html(data.Sub_Activity_Name);
+                    $("#divBSRPerUnit").html(data.Sub_Activity_RatePerUnit);
+                    $("#divUnit").html(data.Sub_Activity_UnitName);
+                    $("#divBSRType").html(data.Sub_Activity_BSRType);
+                    $("#divTotalCost").html(data.Sub_Activity_totalCost);
+
+                },
+
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+
+        });
+
+        $('[data-toggle=modal]').on('click', function (e) {
+            var $target = $($(this).data('target'));
+            $target.data('triggered', true);
+            setTimeout(function () {
+                if ($target.data('triggered')) {
+                    $target.modal('show').data('triggered', false);
+                };
+            }, 600); // milliseconds
+            return false;
+        });
+
+    })
+
+    //$(document).on('keypress', '#Sub_Activity_Name', function (event) {
+    //    var regex = new RegExp("^[a-zA-Z0-9 ]+$");
+    //    var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+    //    if (!regex.test(key)) {
+    //        event.preventDefault();
+    //        return false;
+    //    }
+    //});
+
+    function preventBackspace(e) {
+
+        var evt = e || window.event;
+        if (evt) {
+            var keyCode = evt.charCode || evt.keyCode;
+            if (keyCode === 8) {
+                if (evt.preventDefault) {
+                    evt.preventDefault();
+                } else {
+                    evt.returnValue = false;
+                }
+            }
+        }
+    }
+    function isNumber(evt, element) {
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+
+        if (
+            (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+            (charCode < 48 || charCode > 57))
+            return false;
+
+
+    }
+
+
+    function EditSubActivity(id) {
+        var RootUrl = '@Url.Content("~/")';
+        //$('[id^=btnedit_]').click(function () {
+        var ID = { ID: id };
+
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(ID),
+            url: RootUrl + "fdmSubActivity/EditSubActivityData",
+            success: function (data) {
+                var ddlModel = data.Activity_ID;
+
+                $("#Sub_Activity_Name").val('');
+                //$("#Sub_Activity_RatePerUnit").val('');
+                $("#Sub_Activity_Unit").val('');
+                //$("#Sub_Activity_BSRType").val('');
+                $("#Sub_Activity_totalCost").val('');
+                $("#Sub_Activity_RefNo").val('');
+                $("#Sub_Activity_BSR_Labour_Cost").val('0');
+                $("#Sub_Activity_BSR_Material_Cost").val('0');
+                $("#subActivityLabel").text("Edit Sub Activity");
+
+                $("#Sub_Activity_Name").val(data.Sub_Activity_Name);
+                $("#Sub_Activity_RatePerUnit").val(data.Sub_Activity_RatePerUnit);
+                $("#Sub_Activity_Unit").val(data.Sub_Activity_Unit);
+                $("#Sub_Activity_BSR_Labour_Cost").val(data.Sub_Activity_BSR_Labour_Cost);
+                $("#Sub_Activity_BSR_Material_Cost").val(data.Sub_Activity_BSR_Material_Cost);
+                $("#RefFileEditMode").show();
+                $("#RefFileCommonMode").hide();
+                $("#hdRefDocument").val(data.Sub_Activity_DocumentPath);
+                //$("#Sub_Activity_BSRType").val(data.Sub_Activity_BSRType);
+                $("#Sub_Activity_totalCost").val(data.Sub_Activity_totalCost);
+                $("#Sub_Activity_RefNo").val(data.Sub_Activity_RefNo);
+                $("#btn_SaveSubActivity").val(data.ID);
+
+
+            },
+
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+
+
+        //});
+    }
+
+</script>
+
+
+
+<script type="text/javascript">
+    $.noConflict(true);
+</script>
+
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+@*<script src="~/js/bootstrap.min.js"></script>*@
+@*<script src="~/js/Common.js"></script>*@
+@*<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />*@

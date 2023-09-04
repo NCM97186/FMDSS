@@ -1,0 +1,79 @@
+﻿@model FMDSS.Models.MiddleWareModules
+
+<table id="tbl_SubLinks" class="table table-striped table-bordered table-hover table-condensed">
+        <thead>
+            <tr>
+                <th>Places Name</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            @{ int i = 0;
+                int backPlaceTypeId = 0;
+                string bgColor = "lightgray";
+                string isDisplay = "block";
+
+                if (Model.MWSMG_List != null)
+                {
+                    foreach (var item in Model.MWSMG_List)
+                    {
+                        if (i % 2 == 0) { bgColor = ""; }
+                        else { bgColor = "blue"; }
+                        if (backPlaceTypeId == 0 || backPlaceTypeId != item.PTypeId)
+                        {
+                            backPlaceTypeId = item.PTypeId;
+
+                            <tr style="background-color:#058147e8;" id="linkTr_@i">
+                                <td>                                   
+                                    <a href="javascript:void(0);" onclick="displayLinks('@item.PlaceType','@i');">@item.PlaceType</a>
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                        if (backPlaceTypeId == item.PTypeId)
+                        {
+                            <tr style="background-color:#077050;display:none" id="linkTr_@i">
+                                <td style="padding-left:20px;">
+                                    <span id="spnChildPlaceType_@i" style="display:none;">@item.PlaceType</span>
+                                    @{ string placeName= item.PlaceName+ (item.PageTitle.Length>0? " (" +item.PageTitle +")" : "");}
+                                    <a href="@item.MainLink"> @placeName </a>
+                                    @*<span id="spnPageTitle_@i" style="display:none;">@item.PageTitle</span>*@
+                                </td>
+                            </tr>
+                            
+                        }
+
+                        i++;
+                    }
+                }
+            }            
+        </tbody>
+    </table>
+<script type="text/javascript">
+    function displayLinks(placeType,pos)
+    {
+       
+        var rowCount = $('#tbl_SubLinks tr').length;
+        //alert(rowCount + ',' + pos + ' ' + placeType);
+        pos++;
+        var ptypeid = $('#spnChildPlaceType_' + pos).text();
+       
+        for (var i = pos; i < rowCount - 1; i++) {
+            var new_ptypeid = $('#spnChildPlaceType_' + i).text();
+            
+            if (ptypeid == new_ptypeid) {
+                //var pageTitle = $('#spnPageTitle_' + i).text();
+                /// alert(ptypeid);
+                debugger;
+                var isVisible = document.getElementById("linkTr_" + i);
+                if (isVisible.style.display === "none") {
+                    // isVisible.style.display = "block";
+                    $("#linkTr_" + i).show();
+                } else {
+                    isVisible.style.display = "none";
+                    $("#linkTr_" + i).hide();
+                }
+            } 
+        }
+    }
+</script>

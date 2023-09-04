@@ -1,0 +1,891 @@
+﻿@{
+    ViewBag.Title = "Registration";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model FMDSS.Models.Encroachment.ViewModel.EncroachmentView
+<script src="~/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js" type="text/javascript"></script>
+<script src="~/Content/bootbox.all.min.js"></script>
+<!-- /.navbar-static-side -->
+<!--GIS Data Post 22-04-2016-->
+
+<form id="form11" name="form11" method="post">
+    <input type="hidden" id="portalid" name="portalid" value="rajcomp123" />
+    <input type="hidden" id="ssoId" name="ssoId" value="" />
+    <input type="hidden" id="requestFor" name="requestFor" value="" />
+    @* <input type="hidden" id="returnurl" name="returnurl" value="http://localhost:17105/AmritaDeviAward/getGISData" />*@
+    <input type="hidden" id="returnurl" name="returnurl" value="" />
+</form>
+@*Added by shaan 23-03-2021*@
+<div hidden="hidden">
+    <form id="postData" name="postData" method="post" target="_blank">
+        <input type="hidden" id="portalid" name="portalid" value="rajcomp123" />
+        <input type="hidden" id="ssoid" name="ssoid" value="" />
+        <input type="hidden" id="requestFor" name="requestFor" value="" />
+        <input type="hidden" id="fileName" name="fileName" value="" />
+    </form>
+</div>
+<div id="page-wrapper-inn">
+    @if (TempData["RegistrationMsg"] != null)
+    {
+        <script type="text/javascript" language="javascript">
+            alert('@TempData["RegistrationMsg"]');
+        </script>
+    }
+    @if (TempData["ZipMsg"] != null)
+    {
+        <script type="text/javascript" language="javascript">
+            alert('@TempData["ZipMsg"]');
+        </script>
+    }
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">Encroachment List</h1>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                @using (Html.BeginForm("Submit", "Encroachment", FormMethod.Post, new { data_behavior = "confirm", enctype = "multipart/form-data", id = "IdFor" }))
+                {
+                    <!--Bhamasha Model-->
+                    <div class="modal fade in" id="myModalDashboard" tabindex="-1" role="dialog" aria-hidden="false">
+                        <div class="modal-dialog mdw">
+                            <div class="modal-content" style="height:500px;">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                    <h4 class="modal-title" id="myModalLabel">
+                                        View Member(s) Detail
+                                    </h4>
+                                </div>
+                                <div id="divmember">
+                                    <table class="table table-striped table-bordered table-hover">
+                                        <tbody id="tblMemberDetails"></tbody>
+                                    </table>
+                                </div>
+                                <!-- /.modal-body -->
+                                <div class="modal-footer" id="fot-f">
+                                    <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal" style="width: auto">
+                                        <i class="fa fa-times fa-fw"></i> Close
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- /.modal-content -->
+                        </div>
+                        <!-- /.modal-dialog -->
+                    </div>
+                    <!--End Bhamasha Model-->   
+                    <div class="panel-body">
+                        <div id="tbl" class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover gridtable">
+                                <thead>
+                                    <tr>
+                                        <th style="width:10%;">Encroachment Id</th>
+                                        <th style="width:10%;">Division</th>
+                                        <th style="width:5%;">Range</th>
+                                        <th style="width:10%;">Name</th>
+                                        <th style="width:5%;">ACF Status</th>
+                                        <th style="width:5%;">ACF Remarks</th>
+                                        <th style="width:5%;">LR Act.</th>
+                                        <th style="width:5%;">Final Decision</th>
+                                        <th style="width:5%;">Decision Date</th>
+                                        <th style="width:5%;">Decision(Zip)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in ViewData["EncroachStatus"] as IEnumerable<FMDSS.Models.Encroachment.ViewModel.EncroachmentView>)
+                                    {
+                                        if (item.EncroachmentId != "")
+                                        {
+                                            <tr>
+                                                <td style="width:10%;">
+                                                    <a title='Get Details' data-toggle="modal" data-target="#myModal" href='javascript:void(0)' onclick=GetEncroachmentDetails('@item.EncroachmentId')> @Html.DisplayFor(modelItem => item.EncroachmentId)</a>
+
+                                                </td>
+                                                <td style="width:10%;">
+                                                    @Html.DisplayFor(model => item.DIV_CODE)
+                                                </td>
+                                                <td style="width:5%;">
+                                                    @Html.DisplayFor(model => item.RANGE_CODE)
+                                                </td>
+                                                <td style="width:10%;">
+                                                    @Html.DisplayFor(model => item.UserName)
+                                                </td>
+                                                <td style="width:5%;">
+                                                    @if (item.ACF_Status == null)
+                                                    {
+                                                        item.ACF_Status = "Pending";
+                                                    }
+                                                    @Html.DisplayFor(model => item.ACF_Status)
+                                                </td>
+                                                <td style="width:5%;">
+                                                    @Html.DisplayFor(model => item.ACF_Remarks)
+                                                </td>
+                                                <td style="width:5%;">
+                                                    @Html.DisplayFor(model => item.LRACTNO)
+                                                </td>
+                                                <td style="width:5%;">
+                                                    @if (item.Decision_Taken == null)
+                                                    {
+                                                        item.Decision_Taken = "Pending";
+                                                    }
+                                                    @Html.DisplayFor(model => item.Decision_Taken)
+                                                </td>
+
+                                                @if (item.Decision_Date != null)
+                                                {
+                                                    string dt = item.Decision_Date.Value.Day + "/" + item.Decision_Date.Value.Month + "/" + item.Decision_Date.Value.Year;
+                                                    <td style="width:5%;">@dt</td>
+                                                    @*@Html.DisplayFor(model => item.Decision_Date)*@
+                                                }
+                                                else
+                                                {
+                                                    <td style="width:5%;"></td>
+                                                }
+                                                <td style="width:5%;">
+                                                    @if (item.DispatchNo == "")
+                                                    {
+                                                        <p>NA</p>
+                                                    }
+                                                    else if (item.DispatchNo != "")
+                                                    {
+                                                        if (item.FileStatus > 0)
+                                                        {
+                                                            <a class="fa fa-download" href='@Url.Action("ZipDownload", "Encroachment", new { @En_Code = Encryption.encrypt(item.EncroachmentId) })'>
+                                                                Download
+                                                            </a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <p>Download</p>
+                                                        }
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12 edithide">
+                            <div class="form-group">
+                                <label>
+                                    Upload KML/SHP:<span class="mandatory">* All details will be generated automatically by uploading KML file.</span>
+                                </label>
+
+                                <button type="button" class="btn btn-warning btn-block" style="width:auto;" name="" value="" id="btnUploadSHPKML">
+                                    <i class="fa fa-check"></i> Upload
+                                </button>
+                                <div id="errordiv88" style="display:none; position:initial; right:0px;" class="alert-danger1"></div>
+                                @Html.Hidden("hdSSOID", "" + Session["SSOID"] + "", new { @id = "hdSSOID", })
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12">
+                        </div>
+                        <fieldset id="fieldLocation" class="corner" style="margin: 10px; min-height: 300px; width:99%; border: 1px Solid #ccc;">
+                            <label style="font-weight:normal; padding:10px">
+                            </label>
+                            <div class="col-lg-12">
+                                <label>Location Details:</label>
+                                <div class="divider"></div>
+                            </div>
+                            <div class="table-responsive request-id col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <table id="tbldistmapping" class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Division</th>
+                                            <th>District</th>
+                                            <th>Tehsil</th>
+                                            <th>Panchayat Samiti</th>
+                                            <th>Gram Panchayat</th>
+                                            <th>Village</th>
+                                            <th>Name of Area</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodydistmap">
+                                        @foreach (var item in TempData["GISModelLIst"] as IEnumerable<FMDSS.Models.CitizenService.PermissionServices.clsPermission>)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Div_NM)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Dist_NM)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Tehsil_NM)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Block_NM)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Gp_NM)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Village_NM)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.areaName)
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-lg-12 Edithide">
+                                <label>GPS Address:</label>
+                                <div class="divider"></div>
+                            </div>
+                            <div class="col-lg-6 un-bold Edithide">
+                                <div class="form-group">
+                                    <label>Latitude <span class="mandatory">*</span></label>
+
+                                    @Html.TextBox("GPSLat", TempData["GPSLat"], new { @class = "form-control required ", @title = "Enter the GPS latitude in the range of 26° - 27°. E.G. 26.52°", @placeholder = "Latitude", @maxlength = 50, @id = "txt_lat", @readonly = "readonly" })
+                                    <div id="errJFMC" class="alert-danger1"><span class="field-validation-error" data-valmsg-for="GPSLat" data-valmsg-replace="true"><span for="GPSLat" generated="true" class=""></span></span></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 un-bold Edithide">
+                                <div class="form-group">
+                                    <label>Longitude: <span class="mandatory">*</span></label>
+
+                                    @Html.TextBox("GPSLong", TempData["GPSLong"], new { @class = "form-control required ", @title = "Enter the GPS longitude in the range of 69° - 78°. E.G. 75.52°", @placeholder = "Longitude", @maxlength = 50, @id = "txt_long", @readonly = "readonly" })
+
+                                    <div id="errJFMC" class="alert-danger1"><span class="field-validation-error" data-valmsg-for="GPSLong" data-valmsg-replace="true"><span for="GPSLong" generated="true" class=""></span></span></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 un-bold Edithide">
+                                <div class="form-group">
+                                    <label>Encroch Area From GIS (hect): <span class="mandatory">*</span></label>
+                                    
+                                    @Html.TextBox("AreaShape", TempData["shapeArea"], new { @class = "form-control required ", @title = "Enter the Area (In Hectare)", @placeholder = "Area (In Hectare)", @maxlength = 6, @readonly = "readonly" })
+                                    <div id="errordiv9" style="display:none" class="alert-danger1"></div>
+                                    <div id="errJFMC" class="alert-danger1"><span class="field-validation-error" data-valmsg-for="shapeArea" data-valmsg-replace="true"><span for="shapeArea" generated="true" class=""></span></span></div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <div class="col-lg-12 pad">
+                            <h6 class="page-header">Encroachment Registration</h6>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Division: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.DIV_CODE, (IEnumerable<SelectListItem>)ViewBag.Division, "--Select--", new { @class = "form-control", @id = "DIV_CODE", name = "DIV_CODE" })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.DIV_CODE)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Range: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.RANGE_CODE, (IEnumerable<SelectListItem>)ViewBag.RANGE, "--Select--", new { @class = "form-control", @id = "RANGE_CODE", name = "RANGE_CODE" })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.RANGE_CODE)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>LR Act: </label>
+                                @Html.TextBoxFor(x => x.LRACTNO, new { @class = "form-control", @id = "LRACTNO", name = "LRACTNO" })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.LRACTNO)</div>
+                            </div>
+                        </div>
+                        @*<div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Encrocher Name: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.IsKnown, new List<SelectListItem>
+                                    {
+                                        new SelectListItem { Text = "--Select--", Value = ""},
+                                        new SelectListItem { Text = "Known", Value = "True"},
+                                        new SelectListItem { Text = "Unknown", Value = "False"},
+                                    }, new { id = "IsKnown", name = "IsKnown", @class = "form-control" })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.IsKnown)</div>
+                            </div>
+                        </div>*@
+                        @*<div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>KML/KMZ Upload: </label>
+                                    @Html.TextBoxFor(x => x.Files, new { @class = "form-control", @id = "Files", name = "Files", type = "file" })
+                                    <div id="errKML" class="alert-danger1">@Html.ValidationMessageFor(x => x.KMLFile)</div>
+                                </div>
+                            </div>*@
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Actual Encroached Area(hect): <span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(x => x.Area, new { @class = "form-control", @id = "Area", name = "Area" })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Area)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Date of Encroachment Registration: <span class="mandatory">*</span></label>
+                                @Html.TextBoxFor(x => x.DOE, new { @class = "form-control date-picker" })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.DOE)</div>
+                            </div>
+                        </div>
+                        @*<div class="col-lg-12"></div>*@
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Description: <span class="mandatory">*</span></label>
+                                @Html.TextAreaFor(x => x.Description, new { @class = "form-control", @id = "Description", name = "Description" })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.Description)</div>
+                            </div>
+                        </div>
+                          <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Encrocher Type: <span class="mandatory">*</span></label>
+                                @Html.DropDownListFor(x => x.IsKnown, new List<SelectListItem>
+                                    {
+                                        new SelectListItem { Text = "--Select--", Value = ""},
+                                        new SelectListItem { Text = "Known", Value = "True"},
+                                        new SelectListItem { Text = "Unknown", Value = "False"},
+                                    }, new { id = "IsKnown", name = "IsKnown", @class = "form-control" })
+                                <div id="errJFMC" class="alert-danger1">@Html.ValidationMessageFor(x => x.IsKnown)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                            </div>
+                        </div>
+                        <div class="col-lg-12"></div>
+                    </div>
+                    <div id="divEncroachDetails" style="display:none">
+                        <div class="col-lg-12 pad">
+                            <h6 class="page-header" style="margin-left:25px;font-size:18px;">Encroachments Details:</h6>
+                        </div>
+                        @if (TempData["ErrorMsg"] != null)
+                        {
+                            <div class="alert alert-danger1"><i class="fa fa-thumbs-o-up fa-fw"></i>@TempData["ErrorMsg"]</div>
+                        }
+                        <div class="panel-body">
+                            @*@Html.Partial("~/Views/Encroachment/EncroachmentDetails.cshtml")*@
+                            @{Html.RenderAction("EncroachmentDetails", "ViewUpdateEncroachment");}
+
+                            <div class="col-lg-12"></div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Add:</label><br>
+                                                       <button type="button" class="btn btn-success" title="Save" name="Command" value="Submit" id="btnAddEncroach" style="width:auto">
+                                                           <i class="fa fa-plus"></i> Add Encroacher Details
+                                                       </button>
+                                </div>
+                            </div>
+                            <div class="dataTable_wrapper table-responsive scroll-x simplebar horizontal">
+                                <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+                                    <thead>
+                                        <tr role="row">
+                                            <th style="display:none">
+                                                RowId
+                                            </th>
+                                            <th>
+                                                ID Type
+                                            </th>
+                                            <th>
+                                                Name
+                                            </th>
+                                            <th>
+                                                Father name
+                                            </th>
+                                            <th>
+                                                Address
+                                            </th>
+                                            @*<th>
+                                                    Aadhar/Bhamashah
+                                                </th>
+
+                                                <th>
+                                                    Aadhar/Bhamashah Details
+                                                </th>*@
+                                            <th>
+                                                Action
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDetails"></tbody>
+                                </table>
+
+                            </div>
+                        </div>
+
+                        @*<div class="panel-body">
+                                @Html.Partial("~/Views/Encroachment/EncroachmentDetails.cshtml")
+                                <div class="col-lg-12"></div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Add:</label><br>
+                                        <button type="button" class="btn btn-success" title="Save" name="Command" value="Submit" id="btnAddEncroach" style="width:auto">
+                                            <i class="fa fa-plus"></i> Add Encroachment
+                                        </button>
+
+                                    </div>
+                                </div>
+                                <div class="dataTable_wrapper table-responsive scroll-x simplebar horizontal">
+                                    <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+                                        <thead>
+                                            <tr role="row">
+                                                <th style="display:none">
+                                                    RowId
+                                                </th>
+                                                <th>
+                                                    Name
+                                                </th>
+                                                <th>
+                                                    Address
+                                                </th>
+                                               <th>
+                                                        Aadhar/Bhamashah
+                                                    </th>
+
+                                                    <th>
+                                                        Aadhar/Bhamashah Details
+                                                    </th>
+                                                <th>
+                                                    Action
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblDetails"></tbody>
+                                    </table>
+
+                                </div>
+                            </div>*@
+                    </div>
+                    <div class="btn-padd">
+                        <div id="btn" class="col-lg-12">
+                            <button type="Submit" class="btn btn-success confirm-toggle" name="Command" value="submit" id="Savepermission" onclick="return Validation();">
+                                <i class="fa fa-check"></i> Submit
+                            </button>
+
+                            <button type="reset" class="btn btn-warning" onclick="reload(); return false;">
+                                <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                            </button>
+                            <button type="submit" name="Command" value="Cancel" class="btn btn-danger" onclick="reload(); return false;">
+                                <i class="fa fa-times fa-fw"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                                }
+            </div>
+        </div>
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog modal-lg" id="myModalEnchrocment">
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/Controller/Enchroachment/EnchrocmentModule.js"></script>
+<script src="~/Scripts/BhamashaServices.js"></script>
+<script>
+    $(document).ready(function () {
+        var referrer = document.referrer;
+        if (referrer.toLowerCase().indexOf('getrequest.aspx') > -1) {
+            $("#fieldLocation").ready(function () {
+                $("html, body").delay(2000).animate({
+                    scrollTop: $('#fieldLocation').offset().top
+                }, 2000);
+            });
+        }
+        function Validation() {
+            var lat = ('#txt_lat').val();
+            alert(lat);
+        }
+    });
+
+    var RootURl = '@Url.Content("~/")';
+    $("#GetDetails").click(function () {
+        var AadharOrBhamashaNumber = $("#Encroacher_Bhamashah").val();
+        $.ajax({
+            type: 'GET',
+            contentType: 'application/json; charset=utf-8',
+            data: { BhamashaId: AadharOrBhamashaNumber },
+            url: RootURl + "TransitPermitCitizen/GetBhamashaData",
+            success: function (data) {
+
+                if (typeof (data.errorcode) === 'undefined') {
+                    $('#myModalDashboard').modal('show');
+                    $('#tblMemberDetails').html(data);
+                }
+                else {
+                    alert(data.errorDescription);
+                }
+            },
+            error: function (ex) { alert(ex); }
+        });
+    });
+
+    $(function () {
+        $('footer.foot-inn').hide();
+        $('.gridtable').DataTable({
+            responsive: true,
+            "bSort": false
+        });
+        $('#DIV_CODE').change(function (e) {
+            $("#RANGE_CODE").empty();
+            $("#RANGE_CODE").append('<option value="' + '' + '">' +
+                    '--Select--' + '</option>');
+            $.ajax({
+                type: 'POST',
+                url: RootURl + 'Encroachment/GetRange', // we are calling json method
+                dataType: 'json',
+                data: { DIV_CODE: $("#DIV_CODE").val() },
+                success: function (data) {
+                    $.each(data, function (i, range) {
+                        $("#RANGE_CODE").append('<option value="' + range.Value + '">' +
+                         range.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        });
+
+        $('#IsKnown').change(function () {
+            if ($('#IsKnown').val() == "True") {
+                $('#divEncroachDetails').show();
+            }
+            if ($('#IsKnown').val() == "False") {
+                $('#divEncroachDetails').hide();
+            }
+        });
+
+        $("#Files").change(function () {
+            try {
+                var file = getNameFromPath($(this).val());
+                if (file != null) {
+                    var extension = file.substr((file.lastIndexOf('.') + 1));
+                    switch (extension) {
+                        case 'kml':
+                        case 'KML':
+                        case 'KMZ':
+                        case 'kmz':
+                            flag = true;
+                            break;
+                        default:
+                            flag = false;
+                    }
+                }
+                if (flag == false) {
+                    $("#errKML").text("You can upload only kml extension file");
+                    $("#Files").val('');
+                    return false;
+                }
+                else {
+                    var size = GetFileSize('Files');
+                    if (size > 3) {
+                        $("#errKML").text("You can upload file up to 3 MB");
+                        $("#Files").val('');
+                    }
+                    else {
+                        $("#errKML").text("");
+                    }
+                }
+            }
+            catch (err) { alert(err.message); }
+        });
+
+        $('#AadharOrBhamasha').change(function () {
+            if ($('#AadharOrBhamasha').val() == 'Not Applicable') {
+                $('.Bhamashah').hide();
+                $('.Aadhar').hide();
+            }
+            if ($('#AadharOrBhamasha').val() == 'Aadhar') {
+                $('.Bhamashah').hide();
+                $('.Aadhar').show();
+                $('#Encroacher_Aadhar').val('');
+                $('#Encroacher_Bhamashah').val('');
+            }
+            //if ($('#AadharOrBhamasha').val() == 'Bhamasha') {
+                if ($('#AadharOrBhamasha').val() == 'Janaadhar') {
+                $('.Aadhar').hide();
+                $('.Bhamashah').show();
+                $('#Encroacher_Aadhar').val('');
+                $('#Encroacher_Bhamashah').val('');
+            }
+        });
+        $('#btnAddEncroach').click(function () {
+            if ($('option:selected', $('#AadharOrBhamasha')).index() == 0) {
+                $('.Bhamashah').hide();
+                $('.Aadhar').hide();
+                $('#AadharOrBhamasha').focus();
+                return false;
+            }
+            if ($('#AadharOrBhamasha').val()=='Not Applicable') {
+                $('.Bhamashah').hide();
+                $('.Aadhar').hide();
+                //$('#AadharOrBhamasha').focus();
+                //return false;
+            }
+            if ($('#AadharOrBhamasha').val() == 'Aadhar' && $('#Encroacher_Aadhar').val() == '') {
+                $('.Bhamashah').hide();
+                $('.Aadhar').show();
+                $('#Encroacher_Aadhar').focus();
+                return false;
+            }
+            if ($('#AadharOrBhamasha').val() == 'Bhamasha' && $('#Encroacher_Bhamashah').val() == '') {
+                $('.Aadhar').hide();
+                $('.Bhamashah').show();
+                $('#Encroacher_Bhamashah').focus();
+                return false;
+            }
+            if ($('#Encroacher_Name').val() == '') {
+                $('#Encroacher_Name').focus();
+                return false;
+            }
+
+            if ($('#Encroacher_FatherName').val() == '') {
+                $('#Encroacher_FatherName').focus();
+                return false;
+            }
+            if ($('#Encroacher_Address').val() == '') {
+                $('#Encroacher_Address').focus();
+                return false;
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: RootURl + 'Encroachment/AddEncroacherDetails',
+                //data: { Encroacher_Name: $('#Encroacher_Name').val(), Encroacher_Address: $('#Encroacher_Address').val(), AadharOrBhamasha: $('#AadharOrBhamasha').val(), Encroacher_Aadhar: $('#Encroacher_Aadhar').val(), Encroacher_Bhamashah: $('#Encroacher_Bhamashah').val() },
+                data: { Encroacher_Name: $('#Encroacher_Name').val(), Encroacher_FatherName: $('#Encroacher_FatherName').val(), Encroacher_Address: $('#Encroacher_Address').val(), AadharOrBhamasha: $('#AadharOrBhamasha').val(), Encroacher_Aadhar: $('#Encroacher_Aadhar').val(), Encroacher_Bhamashah: $('#Encroacher_Bhamashah').val() },
+                dataType: 'json',
+                success: function (data) {
+                    //var AadharOrBhamashaDetails;
+                    //if (data.AadharOrBhamasha == 'Aadhar') {
+
+                    //    AadharOrBhamashaDetails = data.Encroacher_Aadhar;
+                    //}
+                    //if (data.AadharOrBhamasha == 'Bhamasha') {
+
+                    //    AadharOrBhamashaDetails = data.Encroacher_Bhamashah;
+                    //}
+                    var id = "'" + data.rowid + "'";
+                    var types = "";
+                    if (data.AadharOrBhamasha == "Aadhar") { types = data.AadharOrBhamasha + '/' + data.Encroacher_Aadhar }
+                    else if (data.AadharOrBhamasha == "Janaadhar") { types = data.AadharOrBhamasha + '/' + data.Encroacher_Bhamashah }
+                    else { types = "" }
+
+                    //var rowdata = "<tr><td style=display:none;>" + data.rowid + "</td><td>" + data.Encroacher_Name + "</td><td>" + data.Encroacher_Address + "</td><td>" + data.AadharOrBhamasha + "</td><td>" + AadharOrBhamashaDetails + "</td><td>" + "<button type=button class='btn btn-danger btn-circle' style=cursor:pointer onclick=DeleteEncroachment(" + id + ")><i class='fa fa-times'></i></button>" + "</td></tr>";
+                    var rowdata = "<tr><td style=display:none;>" + data.rowid + "</td><td>" + types + "</td><td>" + data.Encroacher_Name + "</td><td>" + data.Encroacher_FatherName + "</td><td>" + data.Encroacher_Address + "</td><td>" + "<button type=button class='btn btn-danger btn-circle' style=cursor:pointer onclick=DeleteEncroachment(" + id + ")><i class='fa fa-times'></i></button>" + "</td></tr>";
+                    $("#tblDetails").append(rowdata);
+                    $('#Encroacher_Name,#Encroacher_Address,#Encroacher_Bhamashah,#Encroacher_Aadhar,#Encroacher_FatherName').val('');
+                }
+            });
+        });
+
+        //$('#btnAddEncroach').click(function () {
+        //    if ($('#Encroacher_Name').val() == '') {
+        //        $('#Encroacher_Name').focus();
+        //        return false;
+        //    }
+        //    if ($('#Encroacher_Address').val() == '') {
+        //        $('#Encroacher_Address').focus();
+        //        return false;
+        //    }
+        //        //if ($('#AadharOrBhamasha').val() == '0') {
+        //        //    $('#AadharOrBhamasha').focus();
+        //        //    return false;
+        //        //}
+        //        //if ($('#AadharOrBhamasha').val() == 'Aadhar' && $('#Encroacher_Aadhar').val() == '') {
+        //        //        $('.Bhamashah').hide();
+        //        //        $('.Aadhar').show();
+        //        //        $('#Encroacher_Aadhar').focus();
+        //        //        return false;
+        //        //    }
+        //        //if ($('#AadharOrBhamasha').val() == 'Bhamasha' && $('#Encroacher_Bhamashah').val() == '') {
+        //        //        $('.Aadhar').hide();
+        //        //        $('.Bhamashah').show();
+        //        //        $('#Encroacher_Bhamashah').focus();
+        //        //        return false;
+        //        //}
+        //    else {
+        //        $.ajax({
+        //            type: 'POST',
+        //            url: RootURl + 'Encroachment/AddEncroacherDetails',
+        //            //data: { Encroacher_Name: $('#Encroacher_Name').val(), Encroacher_Address: $('#Encroacher_Address').val(), AadharOrBhamasha: $('#AadharOrBhamasha').val(), Encroacher_Aadhar: $('#Encroacher_Aadhar').val(), Encroacher_Bhamashah: $('#Encroacher_Bhamashah').val() },
+        //            data: { Encroacher_Name: $('#Encroacher_Name').val(), Encroacher_Address: $('#Encroacher_Address').val() },
+        //            dataType: 'json',
+        //            success: function (data) {
+        //                //var AadharOrBhamashaDetails;
+        //                //if (data.AadharOrBhamasha == 'Aadhar') {
+        //                //    AadharOrBhamashaDetails = data.Encroacher_Aadhar;
+        //                //}
+        //                //if (data.AadharOrBhamasha == 'Bhamasha') {
+        //                //    AadharOrBhamashaDetails = data.Encroacher_Bhamashah;
+        //                //}
+        //                var id = "'" + data.rowid + "'";
+        //                //var rowdata = "<tr><td style=display:none;>" + data.rowid + "</td><td>" + data.Encroacher_Name + "</td><td>" + data.Encroacher_Address + "</td><td>" + data.AadharOrBhamasha + "</td><td>" + AadharOrBhamashaDetails + "</td><td>" + "<button type=button class='btn btn-danger btn-circle' style=cursor:pointer onclick=DeleteEncroachment(" + id + ")><i class='fa fa-times'></i></button>" + "</td></tr>";
+        //                var rowdata = "<tr><td style=display:none;>" + data.rowid + "</td><td>" + data.Encroacher_Name + "</td><td>" + data.Encroacher_Address + "</td><td>" + "<button type=button class='btn btn-danger btn-circle' style=cursor:pointer onclick=DeleteEncroachment(" + id + ")><i class='fa fa-times'></i></button>" + "</td></tr>";
+        //                $("#tblDetails").append(rowdata);
+        //                $('#Encroacher_Name,#Encroacher_Address,#Encroacher_Aadhar,#Encroacher_Bhamashah').val('')
+        //                $('#AadharOrBhamasha').val(0);
+        //            }
+        //        });
+        //    }
+        //});
+    });
+    //function DeleteEncroachment(ID) {
+    //    $("#tblDetails").empty();
+    //    $.ajax({
+    //        type: 'POST',
+    //        url: RootURl + 'Encroachment/DeleteEncroachment',
+    //        dataType: 'json',
+    //        data: { Id: ID },
+    //        success: function (data) {
+    //            $.each(data, function (i, items) {
+
+    //                var AadharOrBhamashaDetails;
+    //                if (items.AadharOrBhamasha == 'Aadhar') {
+
+    //                    AadharOrBhamashaDetails = items.Encroacher_Aadhar;
+    //                }
+    //                if (items.AadharOrBhamasha == 'Bhamasha') {
+
+    //                    AadharOrBhamashaDetails = items.Encroacher_Bhamashah;
+    //                }
+    //                var id = "'" + items.rowid + "'";
+    //                var count = 1;
+    //                count = count + i;
+    //                var bardata = "<tr class='" + items.rowid + "'><td>" + items.Encroacher_Name + "</td><td>" + items.Encroacher_Address + "</td><td>" + items.AadharOrBhamasha + "</td><td>" + AadharOrBhamashaDetails + "</td><td>" + "<button type=button class='btn btn-danger btn-circle' onclick=DeleteEncroachment(" + id + ")><i class='fa fa-times'></i></button>" + "</td></tr>";
+    //                $("#tblDetails").append(bardata);
+    //            });
+    //        },
+    //        traditional: true,
+    //        error: function (data) { console.log(data) }
+    //    });
+    //}
+
+    function DeleteEncroachment(ID) {
+        $("#tblDetails").empty();
+        $.ajax({
+            type: 'POST',
+            url: RootURl + 'Encroachment/DeleteEncroachment',
+            dataType: 'json',
+            data: { Id: ID },
+            success: function (data) {
+                $.each(data, function (i, items) {
+                    //var AadharOrBhamashaDetails;
+                    //if (items.AadharOrBhamasha == 'Aadhar') {
+
+                    //    AadharOrBhamashaDetails = items.Encroacher_Aadhar;
+                    //}
+                    //if (items.AadharOrBhamasha == 'Bhamasha') {
+
+                    //    AadharOrBhamashaDetails = items.Encroacher_Bhamashah;
+                    //}
+                    //var id = "'" + items.rowid + "'";
+                    //var count = 1;
+                    //count = count + i;
+                    ////var bardata = "<tr class='" + items.rowid + "'><td>" + items.Encroacher_Name + "</td><td>" + items.Encroacher_Address + "</td><td>" + items.AadharOrBhamasha + "</td><td>" + AadharOrBhamashaDetails + "</td><td>" + "<button type=button class='btn btn-danger btn-circle' onclick=DeleteEncroachment(" + id + ")><i class='fa fa-times'></i></button>" + "</td></tr>";
+                    //var bardata = "<tr class='" + items.rowid + "'><td>" + items.Encroacher_Name + "</td><td>" + items.Encroacher_Address + "</td><td>" + "<button type=button class='btn btn-danger btn-circle' onclick=DeleteEncroachment(" + id + ")><i class='fa fa-times'></i></button>" + "</td></tr>";
+                    //$("#tblDetails").append(bardata);
+
+                    var id = "'" + items.rowid + "'";
+                    var types = "";
+                    if (items.AadharOrBhamasha == "Aadhar") { types = items.AadharOrBhamasha + '/' + items.Encroacher_Aadhar }
+                    else if (items.AadharOrBhamasha == "Janaadhar") { types = items.AadharOrBhamasha + '/' + items.Encroacher_Bhamashah }
+                    else { types = "" }
+                    //var rowdata = "<tr><td style=display:none;>" + data.rowid + "</td><td>" + data.Encroacher_Name + "</td><td>" + data.Encroacher_Address + "</td><td>" + data.AadharOrBhamasha + "</td><td>" + AadharOrBhamashaDetails + "</td><td>" + "<button type=button class='btn btn-danger btn-circle' style=cursor:pointer onclick=DeleteEncroachment(" + id + ")><i class='fa fa-times'></i></button>" + "</td></tr>";
+                    var rowdata = "<tr><td style=display:none;>" + items.rowid + "</td><td>" + types + "</td><td>" + items.Encroacher_Name + "</td><td>" + items.Encroacher_FatherName + "</td><td>" + items.Encroacher_Address + "</td><td>" + "<button type=button class='btn btn-danger btn-circle' style=cursor:pointer onclick=DeleteEncroachment(" + id + ")><i class='fa fa-times'></i></button>" + "</td></tr>";
+                    $("#tblDetails").append(rowdata);
+                    $('#Encroacher_Name,#Encroacher_Address').val('');
+                });
+            },
+            traditional: true,
+            error: function (data) { console.log(data) }
+        });
+    }
+    function getNameFromPath(strFilepath) {
+        try {
+            var objRE = new RegExp(/([^\/\\]+)$/);
+            var strName = objRE.exec(strFilepath);
+
+            if (strName == null) {
+                return null;
+            }
+            else {
+                return strName[0];
+            }
+        }
+        catch (err) { alert(err.message); }
+    }
+    function GetFileSize(fileid) {
+        try {
+            var fileSize = 0;
+            fileSize = $("#" + fileid)[0].files[0].size //size in kb
+            fileSize = fileSize / 1048576; //size in mb
+            return fileSize;
+        }
+        catch (e) {
+            alert("Error is :" + e);
+        }
+    }
+    function reload() {
+        location.reload(true);
+    }
+</script>
+ <script type="text/javascript">
+        $(function () {
+            $(".date-picker").datepicker({
+                dateFormat: 'dd-MM-yy' 
+            });
+
+        });
+
+    </script>
+<script type="text/javascript">
+    var origin = document.location.origin;
+    $(document).ready(function () {
+        $("#returnurl").val(origin + "/Encroachment/getGISData");
+    });
+
+    $("#btnUploadSHPKML").click(function () {
+        bootbox.confirm("For KML Mapping select atleat 5 lat-long coordinates...", function (result) {
+            if (result == true)
+            {
+                 if ($("#NOCType").val() != '0') {
+                    var strname = GISPerName();
+                    var ssoid = $("#hdSSOID").val();
+                    $("#ssoId").val(ssoid);
+                    $("#requestFor").val(strname);
+
+                    //var actionUrl = origin + "/FMDSSGIS/permitlocation/GetRequest.aspx";
+                    var actionUrl = "https://gis.rajasthan.gov.in/FMDSSGIS/permitlocation/GetRequest.aspx";
+
+                    document.getElementById("form11").action = actionUrl;
+                    document.getElementById("form11").submit();
+                }
+                else { alert('Kindly select NOC Type first!!'); return; }
+            } else {
+                //alert('Canceled KML Mapping');
+                     console.log('Canceled KML Mapping: ' + result);
+            }
+           
+        });
+       
+    });
+    function GISPerName() {
+        var GisName = "AmritaDevi";
+        return GisName;
+    }
+
+// Added by shaan 23-03-2021
+    $("#Encroacher_Aadhar").on("keypress keyup blur", function (event) {
+        $(this).val($(this).val().replace(/[^\d].+/, ""));
+        if ((event.which < 48 || event.which > 57)) {
+            event.preventDefault();
+        }
+    });
+    $("#Encroacher_Bhamashah").on("keypress keyup blur", function (event) {
+        $(this).val($(this).val().replace(/[^\d].+/, ""));
+        if ((event.which < 48 || event.which > 57)) {
+            event.preventDefault();
+        }
+    });
+
+
+    function ViewKML(kmlpath, MapType, ssoID) {
+        document.getElementById("portalid").value = 'rajcomp123';
+        document.getElementById("ssoid").value = ssoID; //'KAVITA.IFS.FOREST'
+        document.getElementById("requestFor").value = MapType;
+        document.getElementById("fileName").value = kmlpath;
+        document.getElementById("postData").action = "https://gis.rajasthan.gov.in/fmdssgis/gisview/viewongis.aspx";//'http://10.68.128.179/fmdssgis/gisview/viewongis.aspx';
+        document.getElementById("postData").submit();
+    }
+   // end Added by shaan 23-03-2021
+</script>

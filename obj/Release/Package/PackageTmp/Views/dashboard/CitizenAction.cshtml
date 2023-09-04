@@ -1,0 +1,96 @@
+﻿@{
+    ViewBag.Title = "CitizenAction";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); // "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+
+    if ('@ViewData["Message"]' != '') {
+        alert('@ViewData["Message"]');
+    }
+
+</script>
+
+<div class="row">
+    <!-- Tab1 -->
+    <div class="col-md-6" style="padding-right:0">
+        <div class="panel with-nav-tabs panel-default">
+            <div class="panel-heading">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#tab1default" data-toggle="tab"><i class="fa fa-star fa-fw"></i> My Transactions</a></li>
+
+
+                </ul>
+            </div>
+            <div class="panel-body">
+                <div class="tab-content">
+                    <div class="tab-pane fade active in tbl-scroll" id="tab1default">
+                        <div class="panel-body">
+                            <div class="table-responsive request-id">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Request Id</th>
+                                            <th>Request Type</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in ViewData["citizenList1"] as IEnumerable<FMDSS.Models.CitizenDashboard>)
+                                        {
+
+                                            <tr>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.RequstedID)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.RequestType)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Date)
+                                                </td>
+                                                <td>
+                                                    @item.StatusDesc
+
+                                                </td>
+                                                <td>
+                                                    @if (@item.PermissionID == "1" && item.Status == "6")
+                                                    {
+                                                        <a href='@Url.Action("UpdateFixedPermission", "FixedPermission", new { id = item.RequstedID })'>
+                                                            Edit
+                                                        </a>
+                                                    }
+                                                    
+                                                    else
+                                                    {
+                                                        <a href='javascript:void(0);' style="cursor:not-allowed">
+                                                            Edit
+                                                        </a> }
+                                                </td>
+
+                                                <td></td>
+                                            </tr>
+                                        }
+
+
+                                    </tbody>
+                                </table>
+
+                            </div>
+                            <!-- /.table-responsive -->
+                        </div>
+                    </div>
+
+
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,889 @@
+﻿@{
+    ViewBag.Title = "AddScheme";
+    Layout = Convert.ToString(HttpContext.Current.Session["CurrentLayout"].ToString()); //  "~/Views/Shared/Forestlayout.cshtml";
+} 
+@using FMDSS.Models
+@*@model FMDSS.Models.ForestDevelopment.FdmScheme*@
+@model IEnumerable<FMDSS.Models.ForestDevelopment.FdmScheme>
+<script src="~/js/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+@*<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">*@
+@*<script src="~/js/RJ.js"> </script>*@
+
+<style>
+    input[type="file"] {
+        height: 34px;
+    }
+
+    .auto-scrol {
+        height: 585px;
+        overflow-y: auto;
+    }
+</style>
+    <script type="text/javascript">
+    var RootUrl = '@Url.Content("~/")';
+    </script>
+
+    <script type="text/javascript">
+        $(function () {
+            $(".datefield").datepicker({ minDate: new Date(1999, 10 - 1, 25), dateFormat: 'dd/mm/yy', changeYear: true, onClose: function (dateText, inst) { $("[id$=auto]").focus(); } });
+        });
+        
+        $(function (e) {
+
+          
+            $('#tblScheme').DataTable({
+                responsive: true
+            });
+            $('.AddNewScheme').on('click', function () {
+                $("#NewSchemeForm").show();
+                $('html, body').animate({ scrollTop: $("#NewSchemeForm").offset().top - 120 }, 'slow');
+            });
+                                                       
+        
+            $('#Dropdistrict').blur(function (e) {
+                if ($("#Dropdistrict option:selected").length != 0) {
+                    $('#SDistrict').hide();
+                    $('#SchemeName').focus();
+                    e.preventDefault();
+                }
+               
+            });
+
+            $('#SchemeName').blur(function (e) {
+                if ($('#SchemeName').val() != '') {
+                    $('#SScheme').hide();
+                    $('#Dropmodel').focus();
+                    e.preventDefault();
+                }
+                
+            });
+
+            $('#Dropprogram').bind('blur change',function (e) {
+                if ($('#Dropprogram option:selected').text() != '--Select--') {
+                    $('#SProgram').hide();
+                    $('#SchemeName').focus();
+                    e.preventDefault();
+                }              
+            });
+            $('#Dropmodel').blur(function (e) {
+                if ($("#Dropmodel option:selected").length != 0) {
+                    $('#SModel').hide();
+                    $('#RefNodoc').focus();
+                    e.preventDefault();
+                }                
+            });
+
+            $('#Startdate').blur(function (e) {                                               
+               $('#SStartdate').hide();              
+            });
+
+            $('#Enddate').blur(function (e) {                                  
+               $('#SEnddate').hide();               
+            });
+
+            $('#RefNodoc').blur(function (e) {
+                if ($('#RefNodoc').val() != '') {
+                    $('#SRefno').hide();
+                    $('#Upload_Button').focus();
+                    e.preventDefault();
+                }
+               
+            });
+           
+            $('#Upload_Button').blur(function (e) {               
+                if ($('#Upload_Button').val().length != 0 && $('#Upload_Button').val().split('.').pop().toUpperCase() == 'PDF' && ($("#Upload_Button")[0].files[0].size / 1048576) <= 2) {
+                    $('#SDoc').hide();
+                    $('#Startdate').focus();
+                    e.preventDefault();
+                }               
+            });
+
+            $('#ArRollout').blur(function (e) {
+                if ($('#ArRollout').val() != '') {
+                    $('#SArea').hide();
+                    $('#dropImpAgency').focus();
+                    e.preventDefault();
+                }               
+            });
+            $('#dropImpAgency').bind('blur change',function (e) {
+                if ($('#dropImpAgency option:selected').text() != '--Select--') {
+                    $('#IAgency').hide();
+                    $('#Budgethead').focus();
+                    e.preventDefault();
+                }              
+            });
+            
+            $('#DropBudgethead').blur(function (e) {
+                if ($('#DropBudgethead option:selected').text() != '--Select--') {
+                    $('#SBudget').hide();
+                    $('#txtBudget').focus();
+                    e.preventDefault();
+                }               
+            });
+            $('#txtBudget').blur(function (e) {
+                if ($('#txtBudget').val() != '') {
+                    $('#STBudget').hide();
+                    $('#AdminApproval').focus();
+                    e.preventDefault();
+                }
+            });
+
+            $('#AdminApproval').blur(function (e) {
+                if ($('#AdminApproval option:selected').val() != '--Select--') {
+                    $('#SAapproval').hide();
+                    $('#Aapprovaldate').focus();
+                    e.preventDefault();
+                }
+            });
+            $('#Aapprovaldate').blur(function (e) {              
+                    $('#SAapprovaldate').hide();                  
+            });
+            $('#FinancialApproval').blur(function (e) {
+                if ($('#FinancialApproval option:selected').val() != '--Select--') {
+                    $('#Fapproval').hide();
+                    $('#Fapprovaldate').focus();
+                    e.preventDefault();
+                }
+            });
+            $('#Fapprovaldate').blur(function (e) {               
+                    $('#SFinancialdate').hide();                 
+            });
+
+            $('#AdminApproval_doc').blur(function (e) {                
+                if ($('#AdminApproval_doc').val().length != 0) {
+                    $('#AADoc').hide();
+                    $('#FinancialApproval').focus();
+                    e.preventDefault();
+                }
+            });
+
+            $('#FApproval_doc').blur(function (e) {              
+                if ($('#FApproval_doc').val().length != 0) {
+                    $('#FADoc').hide();
+                    $('#btn_submit1').focus();
+                    e.preventDefault();
+                }
+            });
+
+            $("#Aapprovaldate").change(function () {               
+                var L = 3, d1 = $("#Enddate").val().split('/'), d2 = $("#Aapprovaldate").val().split('/');
+                d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+                d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+                if (new Date(d1) >= new Date(d2)) {
+                    // parseDate(str1, str2);
+                }
+                else {
+                    $("#Aapprovaldate").val('');
+                    alert('Administrative approval date must be less than end date');
+                }
+            });
+
+            $("#Fapprovaldate").change(function () {
+                var L = 3, d1 = $("#Enddate").val().split('/'), d2 = $("#Fapprovaldate").val().split('/');
+                d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+                d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+                if (new Date(d1) >= new Date(d2)) {
+                    // parseDate(str1, str2);
+                }
+                else {
+                    $("#Fapprovaldate").val('');
+                    alert('Financial approval date must be less than end date');
+                }
+            });
+
+            $("#Startdate").change(function () {
+                $("#Enddate").val('');
+            });
+            $("#Enddate").change(function () {
+                var L = 3, d1 = $("#Enddate").val().split('/'), d2 = $("#Startdate").val().split('/');
+                d1 = new Date(+d1[2], parseInt(d1[1], 10) - 1, parseInt(d1[0], 10));
+                d2 = new Date(+d2[2], parseInt(d2[1], 10) - 1, parseInt(d2[0], 10));
+
+                if (new Date(d1) >= new Date(d2)) {
+                    // parseDate(str1, str2);
+                }
+                else {
+                    $("#Enddate").val('');
+                    alert('End date must be greater than start date');
+                }
+            });
+
+            $('#Dropmodel').bind('click', function (e) {
+                var ModelId = { ModelId: $('#Dropmodel option:selected').val() };
+                $.ajax({
+                    type: 'POST',
+                    url: RootUrl + 'FdmAddProject/ToolTip',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(ModelId),
+                    success: function (data) {
+                        $('#txtActivity').show();
+                        var txt = "Activity:" + data.ActivityName + ",  ActivityType:" + data.ActivityType + '  ActivityTotalCost:' + data.ActivityTotalCost
+                        $('#txtActivitydetail').text(txt);
+                        $('#txtActivitydetail').attr('disabled', 'disabled').css('color', 'green');
+
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve states.' + ex);
+                    }
+                });
+            });
+
+              $('#AdminApproval').change(function (e) {
+
+                if ($('#AdminApproval option:selected').val() == 'No') {
+                    $('.admin').hide();                                        
+                }
+                if ($('#AdminApproval option:selected').text() == 'Yes') {
+                    $('.admin').show();
+                }
+            });
+
+           $('#FinancialApproval').change(function (e) {                                
+                if ($('#FinancialApproval option:selected').val() == 'No') {
+                    $('.finance').hide();
+                }
+                if ($('#FinancialApproval option:selected').text() == 'Yes') {
+                    $('.finance').show();
+                }
+            });
+            
+             @*Defect log Id-273 Done by Rajkumar*@
+            $('#btn_submit1').click(function (e) {              
+               if ($("#Dropdistrict option:selected").length == 0) {                  
+                        $('#SDistrict').show();
+                        $('#Dropdistrict').focus();
+                        e.preventDefault();                        
+                }
+              
+               else if ($('#Dropprogram option:selected').text() == '--Select--') {
+                    $('#SProgram').show();
+                    $('#Dropprogram').focus();
+                    e.preventDefault();
+               }
+               else if ($('#SchemeName').val() == '') {
+                   $('#SScheme').show();
+                   $('#SchemeName').focus();
+                   e.preventDefault();
+               }
+               else if ($("#Dropmodel option:selected").length == 0) {
+                   $('#SModel').show();
+                   $('#Dropmodel').focus();
+                   e.preventDefault();
+               }
+               else if ($('#RefNodoc').val() == '') {
+                   $('#SRefno').show();
+                   $('#RefNodoc').focus();
+                   e.preventDefault();
+               }
+               else if ($('#Upload_Button').val().length == 0 && $('#hd_EnteryType').val() == 'Entry') {
+                   $('#SDoc').show();
+                   $('#Upload_Button').focus();
+                   e.preventDefault();
+               }
+               else if ($('#Upload_Button').val().length != 0 && $('#Upload_Button').val().split('.').pop() != 'pdf' && $('#Upload_Button').val().split('.').pop() != 'PDF') {
+                   alert('Upload Pdf file only!!!');
+                   $('#Upload_Button').focus();
+                   e.preventDefault();
+               }
+               else if ($('#Upload_Button').val().length != 0 && ($("#Upload_Button")[0].files[0].size / 1048576) > 2) {
+                   alert('File size can not be more than 2 MB!!');
+                   $('#Upload_Button').focus();
+                   e.preventDefault();
+               }
+               else if ($('#Startdate').val() == '') {
+                   $('#SStartdate').show();
+                   $('#Startdate').focus();
+                   e.preventDefault();
+               }
+               else if ($('#Enddate').val() == '') {
+                   $('#SEnddate').show();
+                   $('#Enddate').focus();
+                   e.preventDefault();
+               }      
+               else if ($('#ArRollout').val() == '' || parseInt($('#ArRollout').val()) < 1 || $('#ArRollout').val().indexOf('.') == 0) {
+                   $('#SArea').show();
+                   $('#ArRollout').focus();
+                   e.preventDefault();
+               }
+               else if ($('#dropImpAgency option:selected').text() == '--Select--') {
+                   $('#IAgency').show();
+                   $('#dropImpAgency').focus();
+                    e.preventDefault();
+                }
+               else if ($('#DropBudgethead option:selected').text() == '--Select--') {
+                   $('#SBudget').show();
+                   $('#DropBudgethead').focus();
+                    e.preventDefault();
+               }
+               else if ($('#txtBudget').val() == '' || parseInt($('#txtBudget').val()) < 1 || $('#txtBudget').val().indexOf('.') == 0) {
+                   $('#STBudget').show();
+                   $('#txtBudget').focus();
+                   e.preventDefault();
+               }              
+               else if ($('#AdminApproval option:selected').val() == '--Select--') {
+                   $('#SAapproval').show();
+                   $('#AdminApproval').focus();
+                   e.preventDefault();
+               }
+               else if ($('#Aapprovaldate').val() == '' && $('#AdminApproval option:selected').val() == 'Yes') {
+                   $('#SAapprovaldate').show();
+                   $('#Aapprovaldate').focus();
+                   e.preventDefault();
+               }
+               else if ($('#AdminApproval_doc').val().length == 0 && $('#hd_EnteryType').val() == 'Entry' && $('#AdminApproval option:selected').val() == 'Yes') {
+                   $('#AADoc').show();
+                   $('#AdminApproval_doc').focus();
+                   e.preventDefault();
+               }
+               else if ($('#AdminApproval_doc').val().length != 0 && $('#AdminApproval option:selected').val() == 'Yes' && $('#AdminApproval_doc').val().split('.').pop().toString() != 'pdf' && $('#AdminApproval_doc').val().split('.').pop().toString() != 'PDF') {
+                   alert('Upload Pdf file only!!!');
+                   $('#AdminApproval_doc').focus();
+                   e.preventDefault();
+               }
+               else if ($('#AdminApproval_doc').val().length != 0 && $('#AdminApproval option:selected').val() == 'Yes' && ($("#AdminApproval_doc")[0].files[0].size / 1048576) > 2) {
+                   alert('File size can not be more than 2 MB!!');
+                   $('#AdminApproval_doc').focus();
+                   e.preventDefault();
+               }
+               else if ($('#FinancialApproval option:selected').val() == '--Select--') {
+                   $('#Fapproval').show();
+                   $('#FinancialApproval').focus();
+                   e.preventDefault();
+               }
+               else if ($('#Fapprovaldate').val() == '' && $('#FinancialApproval option:selected').val() == 'Yes') {
+                   $('#SFinancialdate').show();
+                   $('#Fapprovaldate').focus();
+                   e.preventDefault();
+               }
+               else if ($('#FApproval_doc').val().length == 0 && $('#hd_EnteryType').val() == 'Entry' && $('#FinancialApproval option:selected').val() == 'Yes') {
+                   $('#FADoc').show();
+                   $('#FApproval_doc').focus();
+                   e.preventDefault();
+               }
+               else if ($('#FApproval_doc').val().length != 0 && $('#FinancialApproval option:selected').val() == 'Yes' && $('#FApproval_doc').val().split('.').pop() != 'pdf' && $('#FApproval_doc').val().split('.').pop() != 'PDF') {
+                   alert('Upload Pdf file only!!!');
+                   $('#FApproval_doc').focus();
+                   e.preventDefault();
+               }
+               else if ($('#FApproval_doc').val().length != 0 && $('#FinancialApproval option:selected').val() == 'Yes' && ($("#FApproval_doc")[0].files[0].size / 1048576) > 2) {
+                   alert('File size can not be more than 2 MB!!');
+                   $('#FApproval_doc').focus();
+                   e.preventDefault();
+               }
+               else {                  
+               }                             
+            });
+
+            $('#btnReset').on('click', function () {
+                $('form').find('input').val('');
+                $('#txtActivitydetail').text('');
+            });
+            $('#btnAddScheme').on('click', function () {
+                $('#hdn_id').val('0');               
+                $('#SchemeName,#RefNodoc,#Startdate,#Enddate,#ArRollout').val('');               
+                $("#Dropdistrict").val(0);
+                $('#Dropprogram option').filter(function () { return $(this).text() == '--Select--' }).attr('selected', true);
+            });
+            
+          
+
+            $('#SchemeName,#RefNodoc').keypress(function (e) {
+                var kc = e.which;
+
+                if ((kc >= 97 && kc <= 122) || (kc >= 65 && kc <= 90) || (kc == 0 || kc == 8 || kc == 13 || kc == 95) || (kc >= 47 && kc <= 57) || (kc >= 40 && kc < 42) || (kc >= 44 && kc < 46) || (kc >= 96 && kc <= 105) || (kc == 32)) {
+
+                }
+                else {
+                    e.preventDefault();
+                }
+            });
+
+            //$('#SchemeName,#RefNodoc').keypress(function (e) {
+            //    var regex = new RegExp("^[a-zA-Z0-9]*$");
+            //    var str = String.fromCharCode(!e.charCode ? e.which : e.charCode);
+            //    if (regex.test(str)) {
+            //        return true;
+            //    }
+            //    else {
+            //        e.preventDefault();
+            //        //alert('Please Enter Alphabate');
+            //        return false;
+            //    }
+            //});
+
+            $('#ArRollout,#txtBudget').bind('keypress', function (evt) {
+               var charCode = (evt.which) ? evt.which : evt.keyCode
+               // var charCode = evt.which;
+              
+                if ((charCode == 46 && this.value.split('.').length > 1) || (charCode >= 97 && charCode <= 122) || (charCode >= 65 && charCode <= 90)) {
+                        return false;
+                }               
+                else {                   
+                    if (charCode>=48 && charCode<=57 || charCode==46) {
+                        return true;
+                    }
+                    else {                        
+                        evt.preventDefault();
+                    }                                           
+                 }                                   
+            }); 
+            $('#btnAddSchem').click(function (e) { location.reload(true); });
+        });
+        
+
+        function EditScheme(SchemeId) {
+            $('#hdn_id').val(SchemeId);
+            var SchemeId = {
+                SchemeId: $.trim(SchemeId)
+            }        
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'FdmScheme/Edit',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(SchemeId),
+                success: function (data) {                  
+                        var dist = data.District;
+                        var dcode = dist.split(',');
+                        if (dist.length > 0) {
+                            $("#Dropdistrict").val(dcode);
+                            //$("#Dropdistrict").multiselect('refresh');    
+                            $("#Dropdistrict").attr('disabled', 'disabled');
+                        }
+                        var model = data.Model_Code;
+                        var dcodemodel = model.split(',');
+                        if (dcodemodel.length > 0) {
+                            $("#Dropmodel").val(dcodemodel);
+                            //$("#Dropdistrict").multiselect('refresh');                           
+                            $("#Dropmodel").attr('disabled', 'disabled');
+                        }
+                        $('#SchemeName').val(data.Scheme_Name);
+                        $('#Startdate').val(data.StartDate);
+                        $('#Enddate').val(data.EndDate);
+                        $('#ArRollout').val(data.AreaofRolloutinSQKM);
+                        $('#Dropprogram option').filter(function () { return $(this).text() == data.ProgramName }).attr('selected', true);
+                        $('#RefNodoc').val(data.RefNoRelatedDocument);
+                        var filename = data.RefDocument;
+                        
+                        if (data.RefDocument != '') {
+                            var str = filename.split('/');
+                            $('#viewimg').show();
+                            $('#viewimg').attr('href', '../FixedLandDocument/' + str[2]);
+                            $('#viewimg').attr('target', '_blank');
+                        }
+                        $('#dropImpAgency option').filter(function () { return $(this).val() == data.ImpAgency }).attr('selected', true);
+                        $('#DropBudgethead option').filter(function () { return $(this).text() == data.Budget_Head }).attr('selected', true);
+                        $('#AdminApproval option').filter(function () { return $(this).val() == data.Administrative_Approval }).attr('selected', true);                       
+                        $('#FinancialApproval option').filter(function () { return $(this).val() == data.Financial_Approval }).attr('selected', true);                       
+                        $('#txtBudget').val(data.Budget);
+
+                        if (data.Administrative_Approval == 'No') {
+                            $('.admin').hide();
+                        }
+                        else {
+                            $('.admin').show();
+                        }
+                        if (data.Financial_Approval == 'No') {
+                            $('.finance').hide();
+                        }
+                        else {
+                            $('.finance').show();
+                        }
+
+                        if (data.Financial_Approval_Date1 != '' && data.Financial_Approval_Date1 != null) {
+                            $('#Fapprovaldate').val(data.Financial_Approval_Date1);
+                        }
+                        if (data.Administrative_Approval_Date1 != '' && data.Administrative_Approval_Date1 != null) {
+                            $('#Aapprovaldate').val(data.Administrative_Approval_Date1);
+                        }                        
+                        var AAdocfilename = data.Administrative_Approval_Document;                      
+                        if (data.Administrative_Approval_Document != '' && data.Administrative_Approval_Document !=null) {
+                            var AdminApprovalstr = AAdocfilename.split('/');
+                            $('#AAviewimg').show();
+                            $('#AAviewimg').attr('href', '../FixedLandDocument/' + str[2]);
+                            $('#AAviewimg').attr('target', '_blank');
+                        }
+                        var FAdocfilename = data.Financial_Approval_Document;                      
+                        if (data.Financial_Approval_Document != '' && data.Financial_Approval_Document !=null) {
+                            var FApprovalstr = FAdocfilename.split('/');
+                            $('#FAviewimg').show();
+                            $('#FAviewimg').attr('href', '../FixedLandDocument/' + str[2]);
+                            $('#FAviewimg').attr('target', '_blank');
+                        }
+                        $('#hd_EnteryType').val('Edit');
+                        $('#btn_submit1').text('Update');
+                        $('.btn-padd').show();
+                    
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        }
+
+
+        function ViewScheme(SchemeId) {
+            $('#hdn_id').val(SchemeId);
+            var SchemeId = {
+                SchemeId: $.trim(SchemeId)
+            }
+            $.ajax({
+                type: 'POST',
+                url: RootUrl + 'FdmScheme/Edit',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(SchemeId),
+                success: function (data) {
+
+                    var dist = data.District;
+                    var dcode = dist.split(',');
+                    if (dist.length > 0) {
+                        $("#Dropdistrict").val(dcode);
+                        //$("#Dropdistrict").multiselect('refresh');    
+                        $("#Dropdistrict").attr('disabled', 'disabled');
+                    }
+                    var model = data.Model_Code;
+                    var dcodemodel = model.split(',');
+                    if (dcodemodel.length > 0) {
+                        $("#Dropmodel").val(dcodemodel);
+                        //$("#Dropdistrict").multiselect('refresh');                           
+                        $("#Dropmodel").attr('disabled', 'disabled');
+                    }
+                    $('#SchemeName').val(data.Scheme_Name);
+                    $('#Startdate').val(data.StartDate);
+                    $('#Enddate').val(data.EndDate);
+                    $('#ArRollout').val(data.AreaofRolloutinSQKM);
+                    $('#Dropprogram option').filter(function () { return $(this).text() == data.ProgramName }).attr('selected', true);
+                    $('#RefNodoc').val(data.RefNoRelatedDocument);
+                    var filename = data.RefDocument;
+                    var str = filename.split('/');
+                    if (data.RefDocument != '') {
+                        $('#viewimg').show();
+                        $('#viewimg').attr('href', '../FixedLandDocument/' + str[2]);
+                        $('#viewimg').attr('target', '_blank');
+                    }
+                    $('#dropImpAgency option').filter(function () { return $(this).val() == data.ImpAgency }).attr('selected', true);
+                    $('#DropBudgethead option').filter(function () { return $(this).text() == data.Budget_Head }).attr('selected', true);
+                    $('#AdminApproval option').filter(function () { return $(this).val() == data.Administrative_Approval }).attr('selected', true);                  
+                    $('#FinancialApproval option').filter(function () { return $(this).val() == data.Financial_Approval }).attr('selected', true);                   
+                    if (data.Financial_Approval_Date1 != '' && data.Financial_Approval_Date1 != null) {
+                        $('#Fapprovaldate').val(data.Financial_Approval_Date1);
+                    }
+                    if (data.Administrative_Approval_Date1 != '' && data.Administrative_Approval_Date1 != null) {
+                        $('#Aapprovaldate').val(data.Administrative_Approval_Date1);
+                    }
+                    $('#txtBudget').val(data.Budget);
+                    if (data.Administrative_Approval == 'No') {
+                        $('.admin').hide();
+                    }
+                    else {
+                        $('.admin').show();
+                    }
+                    if (data.Financial_Approval == 'No') {
+                        $('.finance').hide();
+                    }
+                    else {
+                        $('.finance').show();
+                    }
+                    var AAdocfilename = data.Administrative_Approval_Document;                   
+                    if (data.Administrative_Approval_Document != '' && data.Administrative_Approval_Document !=null) {
+                        var AdminApprovalstr = AAdocfilename.split('/');
+                        $('#AAviewimg').show();
+                        $('#AAviewimg').attr('href', '../FixedLandDocument/' + str[2]);
+                        $('#AAviewimg').attr('target', '_blank');
+                    }
+                    var FAdocfilename = data.Financial_Approval_Document;                  
+                    if (data.Financial_Approval_Document != '' && data.Financial_Approval_Document !=null) {
+                        var FApprovalstr = FAdocfilename.split('/');
+                        $('#FAviewimg').show();
+                        $('#FAviewimg').attr('href', '../FixedLandDocument/' + str[2]);
+                        $('#FAviewimg').attr('target', '_blank');
+                    }
+                    $('#SchemeName,#Startdate,#Enddate,#ArRollout,#Dropprogram,#RefNodoc,#dropImpAgency,#DropBudgethead,#AdminApproval,#Aapprovaldate,#FinancialApproval,#Fapprovaldate,#txtBudget,#Upload_Button,#AdminApproval_doc,#FApproval_doc').attr('disabled', 'disabled');
+                    $('#hd_EnteryType').val('Edit');
+                    $('#btn_submit1').text('Update');
+                    $('.btn-padd').hide();
+                },
+                error: function (ex) {
+                    alert('Failed to retrieve states.' + ex);
+                }
+            });
+        }
+    </script>
+
+    <div id="page-wrapper-inn">
+        <input type="hidden" id="hd_EnteryType" value="Entry" />
+        <div class="col-lg-12 pad">
+            <h1 class="page-header">Add Scheme</h1>
+        </div>
+     @using (Html.BeginForm("submit", "fdmScheme", FormMethod.Post, new { enctype = "multipart/form-data" }))
+     {           
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <!--Search-->
+                     
+                        <!--./Search-->
+                        <!--Add New Btn-->
+                        <div class="col-lg-3 pull-right">
+                            <button id="btnAddScheme" type="button" style="width: auto; margin: 0 0 10px" class="btn btn-success AddNewScheme pull-right" name="" value="" title="Add New Scheme" data-toggle="modal" data-target="#NewSchemeForm">
+                                <i class="fa fa-plus"></i> Add New Scheme
+                            </button>
+                        </div>
+                        <!--./Add New Btn-->
+                        <!--Table-->
+                      
+                        <div class="dataTable_wrapper">
+                            <table id="tblScheme" class="table table-striped table-bordered table-hover table-responsive">
+
+                                <thead>
+                                    <tr>
+                                        <th style="width:6%;">S. No</th>
+                                        <th>Scheme Name</th>
+                                        <th>Program Name</th>
+                                        <th>Budget Head</th>                                      
+                                        <th>Budget</th>                                      
+                                        <th style="width:9%;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr class="reqid" data-toggle="modal" data-target="#myModalDashboard" style="cursor:pointer">
+                                            <td>@Html.DisplayFor(model => item.ID)</td>
+                                            <td class="name">
+                                                @Html.DisplayFor(model => item.Scheme_Name)
+                                            </td>
+                                            <td class="name">
+                                                @Html.DisplayFor(model => item.ProgramName)
+                                            </td>
+                                            <td class="name">
+                                                @Html.DisplayFor(model => item.Budget_Head)
+                                            </td>
+                                            <td class="name">
+                                                @Html.DisplayFor(model => item.Budget)
+                                            </td>                                            
+                                            <td>
+                                                @if (item.StatusDesc == "Edit")
+                                                {
+                                                    <button id="btnEdit" type="button" class="btn btn-warning btn-circle edit" title="Edit" data-toggle="modal" data-target="#NewSchemeForm" onclick="EditScheme('@Html.DisplayFor(model => item.ID)')"><i class="fa fa-edit"></i></button>
+                                                }
+                                                else
+                                                {
+                                                    <button id="btnEdit" type="button" disabled="disabled" class="btn btn-warning btn-circle edit" title="Edit" data-toggle="modal" data-target="#NewSchemeForm" onclick="EditScheme('@Html.DisplayFor(model => item.ID)')"><i class="fa fa-edit"></i></button>
+                                                }
+                                                <button type="button" class="btn btn-success btn-circle" title="View" data-toggle="modal" data-target="#NewSchemeForm" onclick="ViewScheme('@Html.DisplayFor(model => item.ID)')">
+                                                    <i class="fa fa-eye"></i>
+                                                </button>
+                                            </td>
+                                          
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                        </div>                     
+                    </div>
+                    <!-- /.panel-body -->
+
+                    <div class="modal fade" id="NewSchemeForm" role="dialog">
+                        <div class="modal-dialog modal-lg">
+                            <!-- Modal content-->
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button id="btnAddSchem" type="button" class="close" data-dismiss="modal">
+                                        &times;
+                                    </button>
+                                    <h4 class="modal-title">
+                                        Add Scheme
+                                    </h4>
+                                </div>
+                                @*Defect log Id-273 Done by Rajkumar*@
+                                <div class="modal-body auto-scrol">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="panel panel-default">
+                                                <!--<div class="panel-heading">Apply for auction based on the notice with encryption of field</div>-->
+                                                <!-- /.panel-heading -->
+                                                <div class="panel-body">
+                                                    <input type="hidden" id="hdn_id" name="hdn_id" value="0" />
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Select Programme:<span class="mandatory">*</span> <span id="SProgram" style="display:none;" class="mandatory">*Program Required</span></label>
+                                                            @Html.DropDownList("Dropprogram", (IEnumerable<SelectListItem>)ViewBag.Program, "--Select--", new { @class = "form-control", id = "Dropprogram", name = "Dropprogram" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Name of Scheme:<span class="mandatory">*</span> <span id="SScheme" style="display:none;" class="mandatory">*Scheme Required</span></label>
+                                                            <input type="text" id="SchemeName" name="SchemeName" class="form-control" maxlength="100">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6" id="DistrictLabel">
+                                                        <div class="form-group">
+                                                            <label>District:(multiple selection using ctrl+select)<span class="mandatory">*</span><span id="SDistrict" style="display:none;" class="mandatory">* Select District</span></label>
+                                                            @Html.DropDownList("Dropdistrict", (IEnumerable<SelectListItem>)ViewBag.district, new { @class = "form-control", id = "Dropdistrict", name = "Dropdistrict", multiple = "multiple" })
+                                                        </div>
+                                                    </div>
+
+
+
+                                                    @*Defect log Id-237 Done by Rajkumar*@
+                                                    <div class="col-lg-6" id="DistrictLabel">
+                                                        <div class="form-group">
+                                                            <label>Select Model:(multiple selection using ctrl+select)<span class="mandatory">*</span><span class="mandatory">*</span> <span id="SModel" style="display:none;" class="mandatory">Model Required</span></label>
+                                                            @Html.DropDownList("Dropmodel", (IEnumerable<SelectListItem>)ViewBag.Model, new { @class = "form-control", id = "Dropmodel", name = "Dropmodel", multiple = "multiple" })
+                                                        </div>
+                                                        @*<div class="form-group" id="txtActivity" style="display:none;">
+                                    <label>Model Detail:</label>
+                                    @Html.TextArea("txtActivitydetail", new { @class = "form-control", id = "txtActivitydetail", name = "txtActivitydetail" })
+                                </div>*@
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group" id="txtActivity" style="display:none;">
+                                                            <label>Model Detail:</label>
+                                                            @Html.TextArea("txtActivitydetail", new { @class = "form-control", id = "txtActivitydetail", name = "txtActivitydetail" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Reference No. of Related Document:<span class="mandatory">*</span><span id="SRefno" style="display:none;" class="mandatory">*Required</span></label>
+                                                            <input type="text" id="RefNodoc" name="RefNodoc" class="form-control" maxlength="50">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Ref Document:(pdf file 2 MB)<span class="mandatory">*</span><span id="SDoc" style="display:none;" class="mandatory">*Documment Required</span><a style="display:none;" id="viewimg">view document</a></label>
+                                                            <input class="form-control" id="Upload_Button" name="Upload_Button" type="file">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>From Date:<span class="mandatory">*</span><span id="SStartdate" style="display:none;" class="mandatory">*From date Required</span></label>
+                                                            <input type="text" class="form-control datefield" id="Startdate" name="Startdate" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>To Date:<span class="mandatory">*</span><span id="SEnddate" style="display:none;" class="mandatory">*To date Required</span></label>
+                                                            <input type="text" class="form-control datefield" id="Enddate" name="Enddate" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Area of Roll-out (SQ KM):<span class="mandatory">*</span> <span id="SArea" style="display:none;" class="mandatory">*Area Of Roll Out Is Required</span></label>
+                                                            <input type="text" id="ArRollout" name="ArRollout" class="form-control" maxlength="50">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Implementing Agency:<span class="mandatory">*</span><span id="IAgency" style="display:none;" class="mandatory">Implementing Agency Required</span></label>
+                                                            @Html.DropDownList("dropImpAgency", (IEnumerable<SelectListItem>)ViewBag.Agency, "--Select--", new { @class = "form-control", id = "dropImpAgency", name = "dropImpAgency" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+
+                                                        @*Defect log Id-225 Done by Rajkumar*@
+                                                        <div class="form-group">
+                                                            <label>Budget Head:<span class="mandatory">*</span> <span id="SBudget" style="display:none;" class="mandatory">*Budget head required</span></label>
+                                                            @Html.DropDownList("DropBudgethead", (IEnumerable<SelectListItem>)ViewBag.Budget, "--Select--", new { @class = "form-control", id = "DropBudgethead", name = "DropBudgethead" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Budget:<span class="mandatory">*</span> <span id="STBudget" style="display:none;" class="mandatory">*Budget is Required</span></label>
+                                                            <input type="text" id="txtBudget" name="txtBudget" class="form-control" maxlength="15">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Administrative Approval:<span class="mandatory">*</span> <span id="SAapproval" style="display:none;" class="mandatory">*Approval is required</span></label>
+                                                            <select class="form-control" id="AdminApproval" name="AdminApproval">
+                                                                <option value="--Select--">--Select--</option>
+                                                                <option value="Yes">Yes</option>
+                                                                <option value="No">No</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group admin">
+                                                            <label>Administrative Approval date:<span class="mandatory">*</span><span id="SAapprovaldate" style="display:none;" class="mandatory">*date Required</span></label>
+                                                            <input type="text" class="form-control datefield" id="Aapprovaldate" name="Aapprovaldate" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6 admin">
+                                                        <div class="form-group">
+                                                            <label>Administrative Approval Document:(pdf file 2 MB)<span class="mandatory">*</span><span id="AADoc" style="display:none;" class="mandatory">*Documment Required</span><a style="display:none;" id="AAviewimg">view document</a></label>
+                                                            <input class="form-control" id="AdminApproval_doc" name="AdminApproval_doc" type="file">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label>Financial Approval:<span class="mandatory">*</span> <span id="Fapproval" style="display:none;" class="mandatory">*Approval is required</span></label>
+                                                            <select class="form-control" id="FinancialApproval" name="FinancialApproval">
+                                                                <option value="--Select--">--Select--</option>
+                                                                <option value="Yes">Yes</option>
+                                                                <option value="No">No</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group finance">
+                                                            <label>Financial Approval date:<span class="mandatory">*</span><span id="SFinancialdate" style="display:none;" class="mandatory">*date Required</span></label>
+                                                            <input type="text" class="form-control datefield" id="Fapprovaldate" name="Fapprovaldate" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group finance">
+                                                            <label>Financial Approval document:(pdf file 2 MB)<span class="mandatory">*</span><span id="FADoc" style="display:none;" class="mandatory">*Documment Required</span><a style="display:none;" id="FAviewimg">view document</a></label>
+                                                            <input class="form-control" id="FApproval_doc" name="FApproval_doc" type="file">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-12"></div>
+                                                    <!-- Btn Groping -->
+                                                    <div class="btn-padd">
+                                                        <div id="btn" class="col-lg-12">
+                                                            <button type="submit" class="btn btn-success" name="Command" value="submit" id="btn_submit1">
+                                                                <i class="fa fa-check"></i> Submit
+                                                            </button>
+                                                            <button type="reset" class="btn btn-warning" id="btnReset">
+                                                                <i class="fa fa-circle-o-notch fa-fw"></i> Reset
+                                                            </button>
+                                                            <button type="submit" class="btn btn-danger">
+                                                                <i class="fa fa-times fa-fw"></i> Cancel
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <!-- /.Btn Groping -->
+
+                                                </div>
+                                                <!-- /.panel-body -->
+
+                                            </div>
+                                            <!-- /.panel -->
+
+                                        </div>
+                                        <!-- /.col-lg-12 -->
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                   
+                </div>
+                <!-- /.panel -->
+
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+     }
+    </div>
+    <!-- /.Row -->

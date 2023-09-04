@@ -1,0 +1,323 @@
+﻿@model FMDSS.Models.CitizenRefunds.CitizenRefundViews
+@{
+                /**/
+
+                /**/
+
+                ViewBag.Title = "Partial Refund Request List";
+                Layout = "~/Views/Shared/_LayoutBookingRoaster.cshtml";
+}
+@section PageCss{
+    <link href="~/css/bootstrap/jquery-ui.css" rel="stylesheet" />
+    <link href="~/Select2DropdownJSCSS/css/select2.min.css" rel="stylesheet" />
+
+    <style>
+        .capt {
+            background-color: #f8f8f8;
+            border-color: #e7e7e7;
+            border: 1px solid #e7e7e7;
+            width: 240px;
+            height: 110px;
+        }
+
+        #mainCaptcha {
+            position: relative;
+            padding-left: 15px;
+        }
+
+        #refresh {
+            width: 42px;
+            height: 26px;
+        }
+
+        #txtInput, #Button1 {
+            position: relative;
+            left: 15px;
+        }
+
+        .refrs {
+            left: 5px;
+            position: relative;
+        }
+
+        .capt h1 {
+            font-size: 14px;
+            padding: 10px 0 5px 15px;
+            margin: 0;
+        }
+
+        #mainCaptcha {
+            margin: 0;
+        }
+
+        .sorting {
+            padding-left: 2px !important;
+            padding-right: 10px !important;
+        }
+    </style>
+
+    <style>
+        #myModal .modal-header {
+            background-color: #5cb85c;
+        }
+
+            #myModal .modal-header h4, .close {
+                color: #ffffff;
+                text-align: center;
+                font-size: 30px;
+            }
+
+        #myModal .modal-footer {
+            background-color: #f9f9f9;
+        }
+
+        #myModal .btn-success {
+            width: 100%;
+            padding: 10px;
+        }
+
+        ul.a {
+            list-style-type: circle;
+        }
+        /*Create by sunny */
+        #myModal_TicketCancel .modal-header {
+            background-color: #5cb85c;
+        }
+
+            #myModal_TicketCancel .modal-header h4, .close {
+                color: #ffffff;
+                text-align: center;
+                font-size: 30px;
+            }
+
+        #myModal_TicketCancel .modal-footer {
+            background-color: #f9f9f9;
+        }
+
+        #myModal_TicketRefund .modal-header {
+            background-color: #86cc86;
+        }
+
+            #myModal_TicketRefund .modal-header h4, .close {
+                color: #ffffff;
+                text-align: center;
+                font-size: 30px;
+            }
+
+        #myModal_TicketRefund .modal-footer {
+            background-color: #b1e2e4;
+        }
+
+
+        #myModal_TicketRefundCancel .modal-header {
+            background-color: #78c1b1;
+        }
+
+            #myModal_TicketRefundCancel .modal-header h4, .close {
+                color: #ffffff;
+                text-align: center;
+                font-size: 30px;
+            }
+
+        #myModal_TicketRefundCancel .modal-footer {
+            background-color: #f75209;
+        }
+
+        #myModal_TicketRefundCancel .modal-header {
+            background-color: #4abab3;
+        }
+
+            #myModal_TicketRefundCancel .modal-header h4, .close {
+                color: #ffffff;
+                text-align: center;
+                font-size: 30px;
+            }
+
+        #myModal_TicketRefundCancel .modal-footer {
+            background-color: #44a8a5;
+        }
+        /*END*/
+    </style>
+}
+
+   
+    <div class="row">
+        <div class="overlay-box" id="loadingreg" style="display:none"><span>Please wait...</span></div>
+
+        <div class="col-lg-9 pad">
+            <h1 class="page-header"><span>Partial Refund Request List</span></h1>
+        </div>
+        <div class="col-lg-9 pad">
+            <div class="alert alert-success text-success" id="spanSuccess" style="display: none;">
+                <strong>@ViewBag.Msg</strong>
+            </div>
+            <div class="alert alert-warning" id="spanFail" style="display: none;">
+                <strong>@ViewBag.Msg</strong>
+            </div>
+        </div>
+        <div class="col-lg-9">
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="dataTable_wrapper">
+                        <table class="table-responsive" style="width:100%" id="tblDetail">
+                            <thead>
+                                <tr>
+                                    <td>SNo.</td>
+                                    <td>Request ID</td>
+                                    <td>Place Name</td>
+                                    <td>Members</td>
+                                    <td>Visit Date</td>
+                                    <td>Booking Date</td>
+                                    <td>Status</td>
+                                    <td>Total Refundable Amount</td>
+                                    <td>#</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var itm in Model.citizenRefundDetails)
+                                {
+                                    <tr>
+                                        <td>@itm.SNo</td>
+                                        <td>@itm.RequestID</td>
+                                        <td>@itm.PlaceName</td>
+                                        <td>@itm.TotalMembers</td>
+                                        <td>@itm.DateOfArrival</td>
+                                        <td>@itm.BookingDate</td>
+                                        <td>@itm.AppliedStatus</td>
+                                        <td>@itm.RefundableAmt</td>
+                                        <td>
+                                            @{
+                                                string id = FMDSS.Models.MySecurity.SecurityCode.EncodeUrl(itm.TICKETID.ToString() + "|" + itm.RefundableAmt.ToString() + "|" + itm.RequestID);
+                                                if (itm.AppliedTicketId == 0)
+                                                {
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                                                            <i class="fa fa-bars"></i>
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            <li>
+                                                                <a class="dropdown-item" title="Apply E-Mitra Refund" style="padding: 5px;cursor:pointer" onclick="AddBankDetails('@id');">
+                                                                    <i class="fa fa-forward"></i>Add Bank Detail
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">
+                                                            <i class="fa fa-bars"></i>
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            <li>
+                                                                <a class="dropdown-item" title="Apply E-Mitra Refund" style="padding: 5px;cursor:pointer" onclick="ViewBankDetails('@id');">
+                                                                    <i class="fa fa-forward"></i>View Bank Detail
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                }
+                                            }
+
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <div id="btn" class="col-lg-12">           
+                            <a id="btn_Previous" style="float:none" class="btn btn-warning" href='@Url.Action("WildlifeBookingFD", "BookOnlineTicket",new {CT="QWR2YW5jZQ=="})'>
+                                Back
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+@section PageScript{
+
+    <script src="~/Select2DropdownJSCSS/js/select2.min.js"></script>
+
+    <script src="~/Scripts/jquery.blockUI.js"></script>
+    <script>
+        $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
+    </script>
+
+    <script type="text/javascript">
+         $(".myselect").select2();
+    var RootUrl = '@Url.Content("~/")';
+    $(document).ready(function () {
+        
+        var msgstatus = '@ViewBag.msgStatus';
+      
+        if (msgstatus != '-1') {
+            if (msgstatus == '0') {
+                $('#spanFail').show();
+                $('#spanFail').delay(10000).fadeOut('slow');
+            }
+            if (msgstatus == '1' ) {
+                $('#spanSuccess').show();
+                $('#spanSuccess').delay(10000).fadeOut('slow');                
+            }
+        }
+            InitDataTable();
+    });
+     
+        function InitDataTable() {
+            $('#tblDetail').dataTable({
+                //"destroy": true,
+                "paging": true,
+                "ordering": true,
+                "filter": true,
+                //"orderMulti": false,
+                //"serverSide": true,
+                //"Processing": true,
+
+                "columnDefs": [
+                    { "width": "5px;", "targets": [0] },
+                    { "width": "25px;", "targets": [1] },
+                    { "width": "20px;", "targets": [2] },
+                    { "width": "25px;", "targets": [3] },
+                    { "width": "25px;", "targets": [4] },
+                    { "width": "50px;", "targets": [5] },
+                    { "width": "25px;", "targets": [6] },
+                ],
+                "columnDefs": [
+                    { "title": "S.No.", "targets": 0 },
+                    { "title": "Request ID", "targets": 1 },
+                    { "title": "Place Name", "targets": 2 },
+                    { "title": "Members", "targets": 3 },
+                    { "title": "Visit Date", "targets": 4 },
+                    { "title": "Booking Date", "targets": 5 },
+                    { "title": "Status", "targets": 6 },
+                    { "title": "Total Refundable Amount", "targets": 7 },
+                    { "title": "#", "targets": 8 },
+                    {
+                        //"targets": [1],
+                        //"visible": false,
+                        //"searchable": false
+                    },
+                ]
+            });
+            var table = $('#tblDetail').dataTable();
+            table.addClass("table table-bordered table-responsive sorting");
+        }
+        function AddBankDetails(id) {
+            window.open('/RefundPayment/ApplyPartialRefundRequest?Id=' + id, '_self');
+        }
+        function ViewBankDetails(id) {
+            window.open('/RefundPayment/ViewBankDetails?Id=' + id, '_self');
+        }
+    </script>
+}
+
+
+
+
+

@@ -1,0 +1,386 @@
+﻿@{
+    ViewBag.Title = "Payment";
+}
+
+@*<style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 5px;
+            text-align: left;
+        }
+
+        table#tblScart tr:nth-child(even) {
+            background-color: #eee;
+        }
+
+        table#tblScart tr:nth-child(odd) {
+            background-color: #fff;
+        }
+
+        table th {
+            background-color: dimgrey;
+            color: white;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #eee;
+        }
+
+        table tr:nth-child(odd) {
+            background-color: #fff;
+        }
+
+        table th {
+            background-color: dimgrey;
+            color: white;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #eee;
+        }
+
+        table tr:nth-child(odd) {
+            background-color: #fff;
+        }
+
+        table th {
+            background-color: dimgrey;
+            color: white;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #eee;
+        }
+
+        table tr:nth-child(odd) {
+            background-color: #fff;
+        }
+
+        table th {
+            background-color: dimgrey;
+            color: white;
+        }
+    </style>*@
+<style>
+    .font-size {
+        font-size: 11px;
+    }
+</style>
+<script type="text/javascript" src="~/js/jquery.min.js"></script>
+<script type="text/javascript" language="javascript">
+
+    var RootURl = '@Url.Content("~/")';
+    $(document).ready(function () {
+
+        function disableBack() { window.history.forward() }
+
+        window.onload = disableBack();
+        window.onpageshow = function (evt) {
+            if (evt.persisted) disableBack()
+        }
+        $('.PrintTicketclass').click(function (e) {
+
+
+            var id = $("#TRANSACTIONID").val();
+            var BookingTypes = $("#BookingType").val();
+            var ticket;
+            $.ajax({
+                type: 'POST',
+                url: RootURl + 'BookOnlineTicket/PrintTicket',
+                data: { ticketid: id },
+                success: function (data) {
+
+                    $("#dvContainer").html(data);
+
+                    var contents = $("#dvContainer").html();
+                    var frame1 = $('<iframe />');
+                    frame1[0].name = "frame1";
+                    //frame1.css({ "position": "absolute", "top": "-1000000px" });
+                    $("body").append(frame1);
+                    var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+                    frameDoc.document.open();
+                    //Create a new HTML document.
+                    frameDoc.document.write('<html><head><title>E-Auction - Forest Department Rajasthan </title>');
+                    //Append the external CSS file.
+                    frameDoc.document.write('<link href="../css/bootstrap.min.css" rel="stylesheet" />');
+                    frameDoc.document.write('<link href="../css/mobile.css" rel="stylesheet" />');
+                    frameDoc.document.write('<link href="../css/dashboard/main.css" rel="stylesheet" />');
+                    frameDoc.document.write('<link href="../css/dashboard/dashboard.css" rel="stylesheet" />');
+                    frameDoc.document.write('<link href="../css/dashboard/font-awesome.min.css" rel="stylesheet" />');
+                    frameDoc.document.write('</head><body>');
+                    //Append the DIV contents.
+                    frameDoc.document.write(contents);
+                    frameDoc.document.write('</body></html>');
+                    frameDoc.document.close();
+                    setTimeout(function () {
+                        window.frames["frame1"].focus();
+                        window.frames["frame1"].print();
+                        frame1.remove();
+                    }, 500);
+                },
+                traditional: true,
+                error: function (data) { console.log(data) }
+            });
+
+            //var aa = "<div class='wrapper'><section class='print-invoice'> <div class='row border-divider'><div class='col-sm-2'>" +
+            //           "<a href='#' id='myLogo'><img src='../images/logo.png' width='100' alt='Forest Department, Government of Rajasthan' title='Logo' class=''></a></div>" +
+            //          "<div class='col-sm-4 centr'><span class='pdate'>E-Ticket - Rajasthan Wildlife</span></div>" +
+            //    	  "<div class='col-sm-4'><span class='pull-right pdate'>Space of QR BAR Code</span></div>" +
+            //          "<div class='divider'></div></div> </section></div>";
+            e.preventDefault();
+        });
+
+
+
+    });
+    function printDiv(divID) {
+        //Get the HTML of div
+        var divElements = document.getElementById(divID).innerHTML;
+        //Get the HTML of whole page
+        var oldPage = document.body.innerHTML;
+
+        //Reset the page's HTML with div's HTML only
+        document.body.innerHTML =
+          "<html><head><title>Transaction Status</title></head><body>" +
+          divElements + "</body>";
+
+        //Print Page
+        window.print();
+
+        //Restore orignal HTML
+        document.body.innerHTML = oldPage;
+
+
+    }
+
+
+</script>
+
+<div style="display:none" id="dvContainer">
+
+</div>
+
+@*<div id="page-wrapper-inn">
+
+        <div class="col-lg-12 pad">
+            <h1 class="page-header">Transaction Status</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <br /><br /><br /><br />
+                    <div id="Print_table">
+                        <table style="text-align: right; border-width: 1px; height: 350px; width: 70%; margin: auto;" bordercolor="blue" cellpadding="2" cellspacing="5">
+                            @foreach (var item in ViewData.Model)
+                            {
+                                <tr>
+                                    <td>Transaction Status:</td>
+                                    <td>@item["TRANSACTION STATUS"] </td>
+                                </tr>
+                                <tr>
+                                    <td>Request Id:</td>
+                                    <td>@item["REQUEST ID"] </td>
+                                </tr>
+                                <tr>
+                                    <td>Emitra Transaction Id:</td>
+                                    <td>@item["EMITRA TRANSACTION ID"] </td>
+                                </tr>
+                                <tr>
+                                    <td>Transaction Time:</td>
+                                    <td>@item["TRANSACTION TIME"]</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Transaction Amount:</td>
+                                    <td>@item["TRANSACTION AMOUNT"]</td>
+                                </tr>
+                                <tr>
+                                    <td>User Name:</td>
+                                    <td>@item["USER NAME"]</td>
+                                </tr>
+                                <tr>
+                                    <td>Transaction Bank Details:</td>
+                                    <td>@item["TRANSACTION BANK DETAILS"]</td>
+                                </tr>
+                            }
+
+                        </table>
+                    </div>
+                    <br />
+                    <div style="text-align:center;" class="form-horizontal" role="form">
+                        <button id="btnPrint" type="button" name="Command" class="btn btn-success" value=" print" onclick="javascript: printDiv('Print_table'); return false;">Print</button>
+                    </div>
+
+                </div>
+            </div>
+    </div>
+        </div>*@
+
+
+
+
+
+
+
+<div id="page-wrapper-inn">
+    <div class="col-lg-12 pad">
+        <h1 class="page-header">
+            Transaction Status
+        </h1>
+    </div>
+    <!-- /.col-lg-12 -->
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <section class="payment">
+
+                        <!-- Table row -->
+                        <div class="row">
+                            <div class="col-xs-12 table-responsive">
+                                <div id="Print_table">
+                                    <b> Transaction Details </b>
+                                    <table class="table table-striped table-bordered table-hover font-size">
+                                        <thead>
+                                            <tr>
+                                                <th>Transaction Status</th>
+                                                <th>Request No</th>
+                                                <th>Emitra Transaction Id</th>
+                                                @*<th>Amount To be Paid</th>*@
+                                                <th>Amount</th> @*Transaction*@
+                                                <th>Emitra Amount</th>
+                                                <th>Transaction Time</th>
+                                                <th>User Name</th>
+                                                <th>Bank Details</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            @foreach (var item in ViewData.Model)
+                                            {
+                                                <tr>
+                                                    @if (ViewBag.TicketStatus == "SUCCESS")
+                                                    {
+                                                        <td style="color:green; font-size:12px; font-weight:bold">@item["TRANSACTION STATUS"] </td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td style="color: red; font-size: 12px; font-weight: bold">@item["TRANSACTION STATUS"] </td>
+                                                    }
+
+                                                    <td>@item["REQUEST ID"] </td>
+                                                    <td>@item["EMITRA TRANSACTION ID"]</td>
+                                                    @*<td>@item["AMOUNT TO BE PAYED"]</td>*@
+                                                    <td>@item["TRANSACTION AMOUNT"]</td>
+                                                    <td>@item["EMITRA AMOUNT"]</td>
+
+                                                    <td>@item["TRANSACTION TIME"]</td>
+                                                    <td>@item["USER NAME"]</td>
+                                                    <td>@item["TRANSACTION BANK DETAILS"]</td>
+                                                </tr>
+                                            }
+
+                                        </tbody>
+                                    </table>
+                                    @if (ViewBag.TicketStatus == "SUCCESS")
+                                    {
+                                        <b> Ticket Summary </b>
+                                        <table class="table table-striped table-bordered table-hover font-size">
+                                            @foreach (var item in ViewData["TicketSummary"] as IEnumerable<FMDSS.Models.OnlineBooking.CS_BoardingDetails>)
+                                            {
+                                                <tbody>
+                                                    <tr>
+                                                        <th>Booking No:</th>
+                                                        <td>
+                                                            @Html.DisplayFor(model => item.RequestID)
+                                                            <input type="hidden" id="TRANSACTIONID" name="TRANSACTIONID" value='@item.PrintID'>
+                                                            <input type="hidden" id="BookingType" name="BookingType" value='@item.ModeOfBooking'>
+
+                                                        </td>
+
+                                                        @if (item.Vehicle != "")
+                                                        {
+
+                                                            <th>Reserve :</th>
+                                                            <td>@Html.DisplayFor(model => item.PlaceName)   </td>
+                                                            <th>Vehicle:</th>
+                                                            <td>@Html.DisplayFor(model => item.Vehicle) </td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <th>Reserve :</th>
+                                                            <td colspan="3">@Html.DisplayFor(model => item.PlaceName)   </td>
+                                                        }
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Booked Seats :</th>
+                                                        <th>@Html.DisplayFor(model => item.TotalMembers)</th>
+                                                        <th>Date/Time of Booking :</th>
+                                                        <td>@Html.DisplayFor(model => item.DateofBooking) </td>
+                                                        <th>Date of Visit :</th>
+                                                        <td>@Html.DisplayFor(model => item.DateofVisit)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Total Amount Incl. of Service Charges: Rs.</th>
+                                                        <th colspan="5"> @Html.DisplayFor(model => item.AmountTobePaid) </th>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Boarding Point :</th>
+                                                        <td colspan="5"> @Html.DisplayFor(model => item.BoardingPointName) </td>
+                                                    </tr>
+                                                </tbody>
+                                            }
+                                        </table>
+                                    }
+
+                                </div>
+                            </div><!-- /.col -->
+                        </div><!-- /.row -->
+                        <!-- this row will not appear when printing -->
+                        <div class="row no-print">
+                            <div class="col-xs-12">
+                                <span style="color:red;">Payment aggregator and bank charges will be extra as per their policy.</span>
+                                <br />
+                                <label>The Payment does not guarantee E-auction.</label>
+                            </div>
+                            <div class="col-xs-12">
+                                @*@if (HttpContext.Current.Session["MemberInfo"] != null)
+                                    {
+                                        <a id="btn_Previous" style="float:none" class="btn btn-warning" href='@Url.Action("BookTicket", "TicketBooking")'>
+                                            Book More
+                                        </a>
+                                    }*@
+                                <a id="btn_Previous" style="float:none" class="btn btn-warning" href='@Url.Action("ApplyNewAuction", "AuctionRequest")'>
+                                    Auction More
+                                </a>
+                                @if (ViewBag.TicketStatus == "SUCCESS")
+                                {
+                                    @*<a class="PrintTicketclass btn btn-success" id="PrintTicket" style="float:none">
+                                            Print Ticket
+                                        </a>*@
+
+                                    <a class="btn btn-info" href='@Url.Action("PrintWildLifeTicket", "BookOnlineTicket", new { ticketid = Encryption.encrypt(Convert.ToString(ViewBag.PrintID)) })' target="_blank">
+                                        Download Ticket
+                                    </a>
+
+                                }
+
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>

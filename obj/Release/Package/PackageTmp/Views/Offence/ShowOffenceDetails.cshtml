@@ -1,0 +1,544 @@
+﻿@model IEnumerable<FMDSS.Entity.Protection.ViewModel.ViewOffenceDetails> 
+@{
+    ViewBag.Title = "ShowOffenceDetails";
+}
+
+@*<style>
+    div.dataTables_wrapper {
+        width: 100%;
+        margin: 0 auto;
+    }
+</style>*@
+
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script>
+    //$(document).ready(function () {
+        //var date2 = new Date();
+        //var d = date2.setDate(date2.getDate() - 2);
+      
+        //$("#txtFromDate").datepicker({
+        //    changeMonth: true,
+        //    changeYear: true,
+        //    format: "dd-mm-yy",
+        //    dateFormat: 'dd/mm/yy',
+        //    //minDate: new Date(prevYear + '-04-01'),
+        //    //maxDate: new Date(finacialyear + '-03-31'),
+        //}).datepicker('setDate', date2);
+
+        //$("#txtToDate").datepicker({
+        //    changeMonth: true,
+        //    changeYear: true,
+        //    format: "dd-mm-yy",
+        //    dateFormat: 'dd/mm/yy'
+        //}).datepicker('setDate', new Date());
+
+        //$('#txtFromDate').datepicker().datepicker('setDate', date2);
+        //$('#txtToDate').datepicker().datepicker('setDate', new Date());
+        ////ShowOffenceData();
+    
+
+    //});
+    //$(function () {
+    //    $("#FinacialYear").change(function () {
+    //        setDateRangeBasedOnFinacialYear();
+    //    });
+    //});
+
+</script>
+
+
+
+<div id="page-wrapper-inn">
+    <!-- /.col-lg-12 -->
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="">
+                <div class="panel-body">
+                    @Html.Partial("_ErrorMsg")
+                    <div class="col-lg-7 pull-right">
+                        <button type="button" class="btn btn-success btn_pp">
+                            <a href="~/apk/offenseApk.zip">Download Mobile APK for Android </a>
+                        </button>                      
+                            <button type="button" class="btn btn-success btn_pp " name="btn_addpopip" value="" title="Add New FIR" onclick="location.href='@Url.Action("AddOffenceDetails", "Offence")'">
+                                <i class=" fa fa-plus">
+                                </i> Add New FIR
+                            </button>
+                            @if (ViewBag.IsUploadRequired == "1")
+                            {
+                                <button type="button" class="btn btn-success btn_pp" name="btn_addpopip" value="" title="Import From Excel" onclick="location.href='@Url.Action("UploadOffenceDetails", "Offence")'">
+                                    <i class=" fa fa-plus">
+                                    </i> Import From Excel
+                                </button>
+                            }
+                        </div>
+                    <div class="row"><br /><br /><br />
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label>FIR From Date:</label>
+                            @Html.TextBox("txtFromDate",null,new { @class = "form-control",Autocomplete="off",Readonly="true" })
+                            </div>
+
+                        </div>
+                   
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label>FIR To Date:</label>
+                            @Html.TextBox("txtToDate", null, new { @class = "form-control", Autocomplete = "off",Readonly = "true" })
+                        </div>
+                    </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <br />
+                                    <input type="button" value="Search" class="btn btn-success" onclick="ShowOffenceData();" />
+                            </div>
+                        </div>
+                    </div>
+                        @*<div class="dataTable_wrapper scrollGrid">*@
+                        <div class="col-lg-12 scrollGrid">
+                            <div id="tbl" class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover table-responsive" id="tblOffenceDetails">
+                                    <thead>
+                                        <tr>
+                                            <th class="nosort">SNO</th>
+                                            <th class="nosort">Range Name</th>
+                                            <th class="nosort">Naka Name</th>
+                                            <th class="nosort">FIR Number</th>
+                                            <th class="nosort">FIR Date</th>
+                                            <th class="nosort">Case Id</th>
+                                            <th class="nosort">Offender Name</th>
+                                            <th class="nosort">Offender Address</th>
+                                            <th class="nosort">Offence Description</th>
+                                            <th class="nosort">Investigator Officer</th>
+                                            <th class="nosort">Total Item Seized</th>
+                                            <th class="nosort">Compound Amount</th>
+                                            <th class="nosort">Court Name</th>
+                                            <th class="nosort">Court Case No</th>
+                                            <th class="nosort">Next Hearing Date</th>
+                                            <th class="nosort">Date Of Final Report</th>
+                                            <th class="nosort">Special Remarks</th>
+                                            <th class="nosort">Added Via</th>
+                                            <th class="nosort">Is Duplicate.</th>
+                                            <th class="nosort">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <!-- /.panel -->
+        </div>
+        @Html.Hidden("hdnRootURL", Url.Content("~/"))
+        <div class="modal fade in" data-backdrop="static" id="modalAEvidence" tabindex="1" role="dialog" aria-hidden="false"></div>
+    </div>
+</div>
+<div class="modal fade" id="myModalSetDuplicateFIR" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;"  data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog mdw">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="myModalLabel">Set Dupliate FIR</h4>
+            </div>
+
+            <div class="modal-body">
+                <!-- From URL Get -->
+
+                <div class="form-group">
+                    <label>Current Case Request Id:</label>
+                    <span id="currentRequestId" style="font-weight:800;font-size:medium"></span>
+                    <span id="errordiv0" class="alert-danger1"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>Enter Original Case RequestId:</label>
+                    <input type="number" class="form-control" id="requestId" name="requestId" maxlength="50" placeholder="Enter Request Id"
+                           onkeypress = "AllowNumericOnly(event)" onchange = "AllowNumericOnly(event)" maxlength = "20"  >
+                    <span id="errMsg1"></span>
+                </div>
+                <div class="form-group">
+                    <label>Remarks:</label>
+                    <input type="text" class="form-control" id="firStatus" name="firStatus" maxlength="50" placeholder="Enter FIR Status as Duplicate" onkeypress = "RestrictSpecialChar(event)" onchange = "RestrictSpecialChar(event)">
+                    <span id="errordiv2" class="alert-danger1"></span>
+                </div>
+            </div>
+            <!-- /.modal-body -->
+            <div class="modal-footer">
+                <button name="submit" class="btn btn-success" id="btnSaveFavourite" type="button" value="Submit" onclick="return SetDuplicateRequest();">
+                    <i class="fa fa-check"></i> Update
+                </button>
+
+                <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Cancel
+                </button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<div class="modal fade" id="myEdit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;"  data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog mdw">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="myModalLabel">Edit Offence</h4>
+            </div>
+            <!-- /.modal-body -->
+            @*<div class="modal-body"></div>*@
+            <div class="modal-footer">
+                <span id="spUrl" hidden></span>
+                <button name="submit" class="btn btn-success" id="btnSaveFavourite" type="button" value="Edit" onclick="return GetEditDetail();">
+                    <i class="fa fa-edit"></i> Edit
+                </button>
+                <button name="editHistory" class="btn btn-warning" id="btnUpdateHistory" type="button" value="Update History" onclick="return GetUpdateHistory();">
+                    <i class="fa fa-history"></i> Show Update History <span id="spanUpdateCounts"></span> 
+                </button>
+                <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Cancel
+                </button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+</div>
+<div class="modal fade" id="myEditHistory" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"  data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog mdw" style="width:1250px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="myModalLabel">Edit Offence History</h4>
+            </div>
+            <!-- /.modal-body -->
+            <div class="modal-body">
+                <div class="panel-body">
+                    <div id="tblEditHistoryLog" class="table-responsive">
+                       
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button name="button" class="btn btn-danger" type="submit" value="Cancel" data-dismiss="modal">
+                    <i class="fa fa-times fa-fw"></i> Cancel
+                </button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+</div>
+<script src="~/Scripts/Controller/Common.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#tblOffenceDetails').DataTable({
+            responsive: true,
+            'aoColumnDefs': [{
+                'bSortable': false,
+                'aTargets': ['nosort']
+            }]
+        });
+
+        var date2 = new Date();
+        var d = date2.setDate(date2.getDate() - 2);
+        //$('#txtFromDate').datepicker().datepicker('setDate', date2);
+        //$('#txtToDate').datepicker().datepicker('setDate', new Date());
+        $("#txtFromDate").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            format: "dd-mm-yy",
+            dateFormat: 'dd/mm/yy',
+            //minDate: new Date(prevYear + '-04-01'),
+            //maxDate: new Date(finacialyear + '-03-31'),
+        }).datepicker('setDate', date2);
+
+        $("#txtToDate").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            format: "dd-mm-yy",
+            dateFormat: 'dd/mm/yy'
+        }).datepicker('setDate', new Date());
+
+      
+        //ShowOffenceData();
+    });
+    function GetEditDetail() {
+        //alert(requestId);
+        var id = $("#spUrl").text();
+        $('#myEdit').modal('toggle');
+        location.href = '../Offence/EditOffenceDetails?offenceID=' + id;
+
+    }
+
+    function GetUpdateHistory() {
+        //alert(requestId);
+        var requestId = $("#spUrl").text();
+
+        var editCount = $("#spanUpdateCounts").text().substring(2,1);
+        if (requestId == 0 || editCount == '0') {
+            alert('No Record found in edit history');
+            return false;
+        }
+        var i = 0;
+        //alert(requestId);
+        $('#myEdit').modal('toggle');
+        var spUrl = '@Url.Action("ShowOffenceEidtHistory", "Offence")';// '/Offence/ShowOffenceEidtHistory';
+        //alert(spUrl);
+        $.ajax({
+            url: spUrl,
+            type: 'get',
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            data: { 'RequestId': requestId },
+            success: function (data) {
+
+                var html = '<table class="table table-striped table-bordered table-hover " style="width:100%" id="tblOffenceReport">' +
+                    '<thead >' +
+                        '<tr>' +
+                            '<th>SNO</th>' +
+                            '<th hidden="hidden">Id</th>' +
+                            '<th>Offence DetailId</th>' +
+                            '<th>Offender Name</th>' +
+                            '<th>FIR No</th>' +
+                            '<th>FIR Date</th>' +
+                            '<th>Investigator Officer</th>' +
+                            '<th>Modified Date</th>' +
+                            '<th>Modified Time</th>' +
+                            '<th>#</th>' +
+                        '</tr>' +
+                    '</thead >'+
+                    '<tbody>';
+                $.each(data, function (key, value) {
+                    html += '<tr id=' + "rowId_" + i+'>';
+                    html += '<td>' + value.RowID + '</td>';
+                    html += '<td hidden="hidden" id=' + "logId_" + i + '>' + value.Id + '</td>';
+                    html += '<td >' + value.OffenceDetailsID + '</td>';
+                    html += '<td>' + value.OffenderName + '</td>';
+                    html += '<td>' + value.FIRNumber + '</td>';
+                    html += '<td>' + value.FIRDate + '</td>';
+                    html += '<td>' + value.InvestigatorOfficer + '</td>';
+                    html += '<td>' + value.logDate + '</td>';
+                    html += '<td>' + value.logTime + '</td>';
+   html += '<td><input type="button" id=' + "btnHistory_" + i + ' value="#" data-toggle="tooltip" data-placement="right"  title = "Show History"></td>';
+                    html += '</tr>';
+                    i++;
+                });
+                html += '</tbody > </table >';
+                $('#tblEditHistoryLog').html(html);
+                $('#myEditHistory').modal().show();
+                $('#tblOffenceReport').DataTable({
+                    "scrollY": 200,
+                    "scrollX": true
+                });
+            },
+            error: function (xhr) {
+                //Do Something to handle error
+            }
+        });
+
+        $(document).on('dblclick', '[id^="rowId_"]', function (event) {
+            var id = $(this).attr('id').split('_')[1];
+            var logId = $('#logId_' + id).text();
+            DisplayHistory(logId);
+            //alert(logId);
+        });
+        $(document).on('click', '[id^="btnHistory_"]', function (event) {
+            var id = $(this).attr('id').split('_')[1];
+            var logId = $('#logId_' + id).text();
+            DisplayHistory(logId);
+            //alert(logId);
+        });
+        function DisplayHistory(logId) {
+            var url = '../Offence/GetOffenceHistory?logID=' + logId;
+            window.open(url, '_blank');
+        }
+    }
+    function DisplayEditModal(id,editcount) {
+        //alert(requestId);
+        if (editcount != '' && editcount!=null)
+            $("#spanUpdateCounts").text(' ('+editcount+')');
+        else
+            $("#spanUpdateCounts").text('(0)');
+
+
+        $("#spUrl").text(id);
+        $('#myEdit').modal().show();
+    }
+   
+    function ShowOffenceData() {
+        debugger;
+            var rootURl = $('#hdnRootURL').val();
+            var pageUrl = "";
+            var IsEditReq = '@ViewBag.IsEditReq';
+            var IsDeleteRequired = '@ViewBag.IsDeleteRequired';
+            var isEditForNE = '@ViewBag.IsEditForNE';
+            var FDate = $("#txtFromDate").val();
+            var TDate = $("#txtToDate").val();
+            //alert(FDate + '---'+TDate);
+            $('#tblOffenceDetails').DataTable({
+                "bDestroy": true,
+                responsive: true,
+                "searching": false,
+                "bServerSide": true,
+                "sAjaxSource": rootURl + "Offence/ShowOffenceDetails_Pager?FDate=" + FDate + "&TDate=" + TDate,
+                "sServerMethod": "POST",
+                "aoColumns": [
+                    { "mData": "RowID" }, { "mData": "RANGE_NAME" }, { "mData": "NakaName" }, { "mData": "FIRNumber" },
+                    { "mData": "FIRDate" }, { "mData": "OffenceDetailsID" }, { "mData": "OffenderName" }, { "mData": "OffenderAddress" },
+                    { "mData": "OffenceDescription" }, { "mData": "InvestigatorOfficer" }, { "mData": "TotalItemSeized" },
+                    { "mData": "CompoundAmount" }, { "mData": "CourtName" }, { "mData": "CourtCaseNumber" }, { "mData": "NextHearingDate" },
+                    { "mData": "DateOfFinalReport" }, { "mData": "SpecialRemarks" }, { "mData": "RequestType" }, { "mData": "RefRequestCaseStatus" },
+                    {
+                        "mData": function (response) {
+                            var actionData = '<input type="button" class="btn btn-info" value="View Attachment" data-toggle="modal" data-target="#modalAEvidence" onclick="GetAttachedEvidence(' + response.OffenceDetailsID + ',1)" />';
+                            var editCnt = '';
+                            if (parseInt(response.EditCnt) > 0)
+                                editCnt = response.EditCnt; //DisplayEditModal
+
+                            //if (response.StatusID != 17) {
+                            //if (IsEditReq == 1 && response.RefRequestCaseStatus=='Original') {
+                            //        pageUrl = rootURl + "Offence/EditOffenceDetails?offenceID=" + response.OffenceDetailsID;
+                            //        actionData += '&nbsp;<a class="btn btn-warning" value="Edit" href="javascript:location.href=\'' + pageUrl + '\'">Edit' + editCnt +'</a>'
+                            //} else {
+                            //    actionData += '&nbsp;<a class="btn btn-danger" value="Edit" href="javascript:location.href="#">N.E.' + editCnt+'</a>'
+                            //}
+                            if (IsEditReq == 1 && response.RefRequestCaseStatus == 'Original') {
+                                pageUrl = rootURl + "Offence/EditOffenceDetails?offenceID=" + response.OffenceDetailsID;
+                                actionData += '&nbsp;<button class="btn btn-warning" value="Edit" onclick="return DisplayEditModal(' + response.OffenceDetailsID + ',' + editCnt + ')">Edit</button>'
+                            } else {
+                                if (isEditForNE == 1) {
+                                    actionData += '&nbsp;<a class="btn btn-danger" value="Edit" href="javascript:location.href="#">N.E.' + editCnt + '</a>';
+                                }
+                                else {
+                                    actionData += '&nbsp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+                                }
+
+                            }
+
+                            //}
+
+                            actionData += '&nbsp;<input type="button" class="btn" value="Update Status" data-toggle="modal" data-target="#modalAEvidence" onclick="GetLogDetails(' + response.OffenceDetailsID + ')" />'
+                            if (IsDeleteRequired == "1") {
+                                actionData += '&nbsp;<input type="button" class="btn btn-danger" value="Delete" onclick="DeleteOffence(' + response.OffenceDetailsID + ')" />'
+
+                            }
+                            if (IsEditReq == 1) {
+                                actionData += '&nbsp;<input type="button" class="btn btn--primary" value="Set Duplicate" onclick="ShowDuplicateRequestForm(' + response.OffenceDetailsID + ')" />'
+                            }
+                            return actionData;
+                        }
+                    }
+                ],
+                'aoColumnDefs': [{
+                    'bSortable': false,
+                    'aTargets': ['nosort']
+                }]
+            });
+
+            //if ($(window).width() < 960) {
+            var leftMargin = $(window).width() * 20 / 100;
+            $(".scrollGrid").css("width", $(window).width() - leftMargin);
+            //}
+            //else {
+            //    alert('More than 960');
+            //}
+        }
+
+    $(window).on('resize', function () {
+        var leftMargin = $(window).width() * 20 / 100;
+        $(".scrollGrid").css("width", $(window).width() - leftMargin);
+    });
+    function ShowDuplicateRequestForm(requestId) {
+        //alert(requestId);
+        $("#currentRequestId").text(requestId);
+        $("#requestId").val(null);
+        $("#firStatus").val(null);
+        $('#myModalSetDuplicateFIR').modal().show();
+    }
+
+    function SetDuplicateRequest() {
+
+        var isValid = 1;
+
+        var currentRequestId = $("#currentRequestId").text() | 0;
+        if (currentRequestId == 0) {
+            isValid = 0;
+            $("#errordiv0").text('No Record Found for Duplicate');
+        }
+
+        var ref_requestId = $("#requestId").val() | 0;
+
+        if (ref_requestId == 0 || ref_requestId == null || ref_requestId == 'undefined') {
+            isValid = 0;
+
+        }
+        if (currentRequestId == ref_requestId ) {
+            isValid = 0;
+            $("#errordiv2").text('Same FIR Request Id not allowed to duplicate');
+        }
+        var remarks = $("#firStatus").val();
+        if (remarks == '' || remarks == null || remarks == 'undefined') {
+            isValid = 0;
+            $("#errordiv2").text('Enter Remark for Duplicate');
+        }
+
+        if (isValid == 0) {
+            return false;
+        } else {
+            var spUrl = '/Offence/SetDuplicateFIR';
+            //alert(spUrl);
+            $.ajax({
+                url: spUrl,
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    'CurrentRequestId': currentRequestId, 'RefRequestCaseId': ref_requestId, 'Remarks': remarks
+                }),
+                //data: userAuthArr,
+                success: function (data) {
+                    alert(data.ReturnMsg);
+
+                    if (data.IsError == false)
+                        $('#myModalSetDuplicateFIR').modal('toggle');
+                }, complete: function () {
+                    //Call_FillTableController();
+                },
+                error: function (data) {
+
+                }
+            });
+        }
+    }
+    function GetLogDetails(id) {
+        var rootURl = $('#hdnRootURL').val();
+        $.ajax({
+            type: 'GET',
+            url: rootURl + "Offence/GetLogDetails?odID=" + id,
+            dataType: 'html',
+            success: function (data) {
+                $('#modalAEvidence').html(data);
+            },
+            error: function (ex) {
+                console.log(ex.error);
+            }
+        });
+    }
+
+    function DeleteOffence(objectID) {
+        var rootURl = $('#hdnRootURL').val();
+        if (confirm('@FMDSS.Globals.Constant.ConfirmMsgDelete')) {
+            location.href = rootURl + "Offence/DeleteOffence?offenceID=" + objectID
+        }
+    }
+</script>
+<style>
+    .scrollGrid {
+        width: 1099px;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    #page-wrapper-inn .btn{
+        width:auto;
+    }
+</style>
